@@ -1,0 +1,41 @@
+[project]
+name = "padel-scouter"
+version = "0.1.0"
+description = "Sistema de análisis inteligente de jugadores de pádel con IA"
+authors = [
+    {name = "Rubenet",email = "Ruben829@msn.com"}
+]
+readme = "README.md"
+requires-python = "^3.14.6"
+dependencies = [
+    "fastapi (>=0.138.0,<0.139.0)",
+    "uvicorn[standard] (>=0.49.0,<0.50.0)",
+    "sqlalchemy (>=2.0.51,<3.0.0)",
+    "psycopg2-binary (>=2.9.12,<3.0.0)",
+    "alembic (>=1.18.4,<2.0.0)",
+    "redis (>=8.0.1,<9.0.0)",
+    "pydantic (>=2.13.4,<3.0.0)",
+    "pydantic-settings (>=2.14.2,<3.0.0)",
+    "python-jose[cryptography] (>=3.5.0,<4.0.0)",
+    "bcrypt (>=5.0.0,<6.0.0)",
+    "reportlab (>=5.0.0,<6.0.0)",
+    "slowapi (>=0.1.10,<0.2.0)",
+    "python-multipart (>=0.0.32,<0.0.33)",
+    "google-generativeai (>=0.8.6,<0.9.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-asyncio (>=1.4.0,<2.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "faker (>=40.23.0,<41.0.0)",
+    "ruff (>=0.15.18,<0.16.0)",
+    "black (>=26.5.1,<27.0.0)"
+]
