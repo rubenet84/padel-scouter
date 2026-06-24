@@ -1,0 +1,31 @@
+/* Fix emojis en todos los navegadores */
+* {
+    font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji',
+                 'Noto Color Emoji', sans-serif;
+}
+
+/* Power level glow effect */
+.power-glow {
+    text-shadow: 0 0 30px rgba(16, 185, 129, 0.6),
+                 0 0 60px rgba(16, 185, 129, 0.3);
+}
+
+/* Active tab */
+.tab-active {
+    background: #059669;
+    color: white;
+}
+
+/* Scrollbar oscuro */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #111827; }
+::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+
+/* Cards hover */
+.card-hover {
+    transition: border-color 0.2s, transform 0.2s;
+}
+.card-hover:hover {
+    transform: translateY(-2px);
+}

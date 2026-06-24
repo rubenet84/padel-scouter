@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Acceder — Padel Scouter{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-16">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8">
+        <div class="text-center mb-8">
+            <div class="text-4xl mb-3">🔮</div>
+            <h2 class="text-2xl font-bold">Acceder</h2>
+            <p class="text-gray-400 text-sm mt-1">Entra a tu cuenta de Padel Scouter</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex bg-gray-800 rounded-lg p-1 mb-6">
+            <button onclick="showTab('login')" id="tab-login"
+                    class="flex-1 py-2 rounded-md text-sm font-medium transition tab-active">
+                Iniciar sesión
+            </button>
+            <button onclick="showTab('register')" id="tab-register"
+                    class="flex-1 py-2 rounded-md text-sm font-medium transition text-gray-400">
+                Registrarse
+            </button>
+        </div>
+
+        <!-- Login form -->
+        <div id="form-login">
+            <div class="space-y-4">
+                <input id="login-email" type="email" placeholder="Email"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
+                <input id="login-password" type="password" placeholder="Contraseña"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
+                <button onclick="doLogin()"
+                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition">
+                    Entrar
+                </button>
+            </div>
+        </div>
+
+        <!-- Register form -->
+        <div id="form-register" class="hidden">
+            <div class="space-y-4">
+                <input id="reg-username" type="text" placeholder="Nombre de usuario"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
+                <input id="reg-email" type="email" placeholder="Email"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
+                <input id="reg-password" type="password" placeholder="Contraseña (mín. 8 caracteres)"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
+                <button onclick="doRegister()"
+                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition">
+                    Crear cuenta
+                </button>
+            </div>
+        </div>
+
+        <div id="auth-error" class="hidden mt-4 text-red-400 text-sm text-center"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showTab(tab) {
+    document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+    document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
+    document.getElementById('tab-login').className =
+        'flex-1 py-2 rounded-md text-sm font-medium transition ' +
+        (tab === 'login' ? 'tab-active' : 'text-gray-400');
+    document.getElementById('tab-register').className =
+        'flex-1 py-2 rounded-md text-sm font-medium transition ' +
+        (tab === 'register' ? 'tab-active' : 'text-gray-400');
+}
+
+async function doLogin() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const res = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email, password})
+    });
+    if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+        window.location.href = '/dashboard';
+    } else {
+        showError('Credenciales incorrectas');
+    }
+}
+
+async function doRegister() {
+    const username = document.getElementById('reg-username').value;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    const res = await fetch('/api/v1/auth/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, email, password})
+    });
+    if (res.ok) {
+        showTab('login');
+        document.getElementById('login-email').value = email;
+    } else {
+        const err = await res.json();
+        showError(err.detail || 'Error al registrarse');
+    }
+}
+
+function showError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}{{ player.name }} — Padel Scouter{% endblock %}
+
+{% block content %}
+<a href="/dashboard" class="text-emerald-400 hover:text-emerald-300 text-sm mb-6 inline-block">
+    ← Volver al dashboard
+</a>
+
+<div id="player-content" class="text-center py-20 text-gray-500">
+    <div class="text-4xl mb-3">⏳</div>
+    <p>Cargando jugador...</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const token = localStorage.getItem('access_token');
+if (!token) window.location.href = '/login';
+
+const playerId = window.location.pathname.split('/').pop();
+
+const TECH_STATS = ['derecha','reves','volea','bandeja','vibora','smash','lob','saque','bajada_pared'];
+const LABELS = {
+    derecha:'Derecha', reves:'Revés', volea:'Volea', bandeja:'Bandeja',
+    vibora:'Víbora', smash:'Smash', lob:'Lob', saque:'Saque', bajada_pared:'Bajada Pared'
+};
+
+const THREAT_COLORS = {
+    'BAJO': '#6b7280', 'MEDIO': '#f59e0b',
+    'ALTO': '#ef4444', 'EXTREMO': '#fbbf24'
+};
+
+async function loadPlayer() {
+    const [pRes, aRes] = await Promise.all([
+        fetch(`/api/v1/players/${playerId}`, {headers:{'Authorization':`Bearer ${token}`}}),
+        fetch(`/api/v1/analysis/${playerId}`, {headers:{'Authorization':`Bearer ${token}`}})
+    ]);
+
+    if (!pRes.ok) { window.location.href = '/dashboard'; return; }
+    const player = await pRes.json();
+    const analyses = aRes.ok ? await aRes.json() : [];
+    const latest = analyses[analyses.length - 1] || null;
+
+    renderPlayer(player, latest);
+}
+
+function renderPlayer(player, analysis) {
+    const el = document.getElementById('player-content');
+
+    const powerHtml = analysis ? `
+        <div class="text-center">
+            <div class="text-7xl font-black text-emerald-400 power-glow">
+                ${analysis.power_level.toLocaleString()}
+            </div>
+            <div class="text-gray-400 text-sm mt-1">PODER DE COMBATE</div>
+            <div class="inline-block mt-3 px-4 py-1 rounded-full text-sm font-bold"
+                 style="background:${THREAT_COLORS[analysis.nivel_amenaza] || '#6b7280'}22;
+                        color:${THREAT_COLORS[analysis.nivel_amenaza] || '#6b7280'}">
+                Nivel de amenaza: ${analysis.nivel_amenaza || 'N/A'}
+            </div>
+        </div>` : `
+        <div class="text-center text-gray-500">
+            <p class="mb-3">Sin análisis aún</p>
+            <button onclick="analyzeNow()"
+                    class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg">
+                🔮 Analizar ahora
+            </button>
+        </div>`;
+
+    const aiHtml = analysis ? `
+        <div class="bg-gray-900 border border-emerald-500/30 rounded-xl p-6 mt-6">
+            <h3 class="text-emerald-400 font-bold mb-3">🤖 Análisis IA</h3>
+            <p class="text-gray-300 italic">"${analysis.ai_description}"</p>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                    <p class="text-green-400 font-semibold text-sm mb-2">✅ Fortalezas</p>
+                    <ul class="space-y-1">
+                        ${analysis.strengths.map(s => `<li class="text-gray-300 text-sm">• ${s}</li>`).join('')}
+                    </ul>
+                </div>
+                <div>
+                    <p class="text-red-400 font-semibold text-sm mb-2">⚠️ Debilidades</p>
+                    <ul class="space-y-1">
+                        ${analysis.weaknesses.map(w => `<li class="text-gray-300 text-sm">• ${w}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <p class="text-blue-400 font-semibold text-sm mb-1">📋 Plan de mejora</p>
+                <p class="text-gray-300 text-sm">${analysis.improvement_plan}</p>
+            </div>
+        </div>` : '';
+
+    el.innerHTML = `
+        <div>
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h1 class="text-4xl font-black">${player.name}</h1>
+                    <span class="text-emerald-400 text-lg">${player.category}</span>
+                </div>
+                <button onclick="analyzeNow()"
+                        class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-lg">
+                    🔮 Nuevo análisis
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Power level -->
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-8 flex items-center justify-center">
+                    ${powerHtml}
+                </div>
+
+                <!-- Radar chart -->
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                    <h3 class="text-gray-400 text-sm font-semibold mb-4">ESTADÍSTICAS TÉCNICAS</h3>
+                    <canvas id="radar-chart" height="250"></canvas>
+                </div>
+            </div>
+
+            ${aiHtml}
+        </div>`;
+
+    renderRadar(player);
+}
+
+function renderRadar(player) {
+    const ctx = document.getElementById('radar-chart');
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: TECH_STATS.map(s => LABELS[s]),
+            datasets: [{
+                label: player.name,
+                data: TECH_STATS.map(s => player[s] || 50),
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                borderColor: 'rgba(16, 185, 129, 0.8)',
+                pointBackgroundColor: '#10b981',
+                pointRadius: 4,
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    min: 0, max: 100,
+                    ticks: { color: '#6b7280', stepSize: 20 },
+                    grid: { color: '#374151' },
+                    pointLabels: { color: '#9ca3af', font: { size: 11 } }
+                }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+async function analyzeNow() {
+    const res = await fetch(`/api/v1/analysis/${playerId}`, {
+        method: 'POST',
+        headers: {'Authorization': `Bearer ${token}`}
+    });
+    if (res.ok) loadPlayer();
+    else alert('Error al analizar. Comprueba tu API key de Google.');
+}
+
+loadPlayer();
+</script>
+{% endblock %}

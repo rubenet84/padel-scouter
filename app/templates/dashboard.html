@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Padel Scouter{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <div>
+        <h1 class="text-3xl font-black">Mi <span class="text-emerald-400">Dashboard</span></h1>
+        <p class="text-gray-400 text-sm mt-1">Gestiona y analiza tus jugadores</p>
+    </div>
+    <button onclick="document.getElementById('modal-nuevo').classList.remove('hidden')"
+            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-lg flex items-center gap-2">
+        <span>+</span> Nuevo jugador
+    </button>
+</div>
+
+<!-- Lista de jugadores -->
+<div id="players-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="text-gray-500 text-center py-20 col-span-3">
+        <div class="text-4xl mb-3">🎾</div>
+        <p>Cargando jugadores...</p>
+    </div>
+</div>
+
+<!-- Modal nuevo jugador -->
+<div id="modal-nuevo" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+    <div class="bg-gray-900 border border-gray-700 rounded-2xl p-8 w-full max-w-2xl max-h-screen overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold">Nuevo Jugador</h2>
+            <button onclick="document.getElementById('modal-nuevo').classList.add('hidden')"
+                    class="text-gray-400 hover:text-white text-2xl">&times;</button>
+        </div>
+
+        <div class="space-y-4">
+            <input id="p-name" type="text" placeholder="Nombre del jugador"
+                   class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
+
+            <select id="p-category"
+                    class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-emerald-500 focus:outline-none">
+                <option value="Iniciación">Iniciación</option>
+                <option value="5ª Categoría">5ª Categoría</option>
+                <option value="4ª Categoría">4ª Categoría</option>
+                <option value="3ª Categoría" selected>3ª Categoría</option>
+                <option value="2ª Categoría">2ª Categoría</option>
+                <option value="1ª Categoría">1ª Categoría</option>
+                <option value="Profesional">Profesional</option>
+            </select>
+
+            <p class="text-emerald-400 font-semibold text-sm mt-4">Estadísticas Técnicas</p>
+            <div class="grid grid-cols-2 gap-3">
+                {% for stat in ['derecha','reves','volea','bandeja','vibora','smash','lob','saque','bajada_pared'] %}
+                <div>
+                    <label class="text-gray-400 text-xs capitalize">{{ stat.replace('_',' ') }}</label>
+                    <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
+                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
+                </div>
+                {% endfor %}
+            </div>
+
+            <p class="text-emerald-400 font-semibold text-sm mt-4">Físico & Mental</p>
+            <div class="grid grid-cols-2 gap-3">
+                {% for stat in ['velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja'] %}
+                <div>
+                    <label class="text-gray-400 text-xs capitalize">{{ stat.replace('_',' ') }}</label>
+                    <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
+                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
+                </div>
+                {% endfor %}
+            </div>
+
+            <p class="text-emerald-400 font-semibold text-sm mt-4">Historial Competitivo</p>
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="text-gray-400 text-xs">Torneos</label>
+                    <input id="s-torneos_jugados" type="number" value="0" min="0"
+                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
+                </div>
+                <div>
+                    <label class="text-gray-400 text-xs">Victorias</label>
+                    <input id="s-victorias" type="number" value="0" min="0"
+                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
+                </div>
+                <div>
+                    <label class="text-gray-400 text-xs">Puntos FEP</label>
+                    <input id="s-puntos_ranking_fep" type="number" value="0" min="0"
+                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
+                </div>
+            </div>
+
+            <button onclick="createPlayer()"
+                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg mt-4 transition">
+                Crear Jugador
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const token = localStorage.getItem('access_token');
+if (!token) window.location.href = '/login';
+
+const STATS = [
+    'derecha','reves','volea','bandeja','vibora','smash','lob','saque','bajada_pared',
+    'velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja',
+    'torneos_jugados','victorias','puntos_ranking_fep'
+];
+
+const CATEGORY_COLORS = {
+    'Iniciación': '#6b7280',
+    '5ª Categoría': '#3b82f6',
+    '4ª Categoría': '#8b5cf6',
+    '3ª Categoría': '#10b981',
+    '2ª Categoría': '#f59e0b',
+    '1ª Categoría': '#ef4444',
+    'Profesional': '#fbbf24',
+};
+
+async function loadPlayers() {
+    const res = await fetch('/api/v1/players/', {
+        headers: {'Authorization': `Bearer ${token}`}
+    });
+    if (res.status === 401) { window.location.href = '/login'; return; }
+    const players = await res.json();
+    renderPlayers(players);
+}
+
+function renderPlayers(players) {
+    const grid = document.getElementById('players-grid');
+    if (players.length === 0) {
+        grid.innerHTML = `
+            <div class="text-gray-500 text-center py-20 col-span-3">
+                <div class="text-4xl mb-3">🎾</div>
+                <p>No tienes jugadores aún.</p>
+                <p class="text-sm mt-1">Crea el primero con el botón de arriba.</p>
+            </div>`;
+        return;
+    }
+    grid.innerHTML = players.map(p => `
+        <div class="bg-gray-900 border border-gray-800 hover:border-emerald-500/50
+                    rounded-xl p-6 cursor-pointer transition"
+             onclick="window.location.href='/player/${p.id}'">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="font-bold text-lg">${p.name}</h3>
+                    <span class="text-xs px-2 py-1 rounded-full mt-1 inline-block"
+                          style="background:${CATEGORY_COLORS[p.category]}22;
+                                 color:${CATEGORY_COLORS[p.category]}">
+                        ${p.category}
+                    </span>
+                </div>
+                <span class="text-2xl">🎾</span>
+            </div>
+            <button onclick="event.stopPropagation(); analyzePlayer('${p.id}')"
+                    class="w-full bg-emerald-600/20 hover:bg-emerald-600/40 border
+                           border-emerald-500/30 text-emerald-400 text-sm py-2 rounded-lg transition mt-2">
+                🔮 Analizar con IA
+            </button>
+        </div>
+    `).join('');
+}
+
+async function createPlayer() {
+    const stats = {};
+    STATS.forEach(s => {
+        stats[s] = parseInt(document.getElementById(`s-${s}`)?.value || 50);
+    });
+    const body = {
+        name: document.getElementById('p-name').value,
+        category: document.getElementById('p-category').value,
+        stats
+    };
+    const res = await fetch('/api/v1/players/', {
+        method: 'POST',
+        headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    });
+    if (res.ok) {
+        document.getElementById('modal-nuevo').classList.add('hidden');
+        loadPlayers();
+    } else {
+        const err = await res.json();
+        alert('Error: ' + JSON.stringify(err.detail));
+    }
+}
+
+async function analyzePlayer(playerId) {
+    const btn = event.target;
+    btn.textContent = '⏳ Analizando...';
+    btn.disabled = true;
+    const res = await fetch(`/api/v1/analysis/${playerId}`, {
+        method: 'POST',
+        headers: {'Authorization': `Bearer ${token}`}
+    });
+    if (res.ok) {
+        window.location.href = `/player/${playerId}`;
+    } else {
+        btn.textContent = '🔮 Analizar con IA';
+        btn.disabled = false;
+        alert('Error al analizar. Comprueba tu API key de Google.');
+    }
+}
+
+loadPlayers();
+</script>
+{% endblock %}

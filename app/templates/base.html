@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Padel Scouter{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/scouter.css">
+</head>
+<body class="bg-gray-950 text-white min-h-screen font-sans">
+
+    <nav class="bg-gray-900 border-b border-emerald-500/30 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="flex items-center gap-3">
+                <span class="text-2xl" style="font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;">🔮</span>
+                <span class="text-xl font-bold text-emerald-400">Padel Scouter</span>
+            </a>
+            <div class="flex items-center gap-4">
+                {% if user %}
+                    <span class="text-gray-400 text-sm">{{ user.username }}</span>
+                    <a href="/dashboard" class="text-emerald-400 hover:text-emerald-300 text-sm">Dashboard</a>
+                    <button onclick="logout()"
+                            class="bg-red-600 hover:bg-red-500 text-white text-sm px-3 py-1 rounded">
+                        Salir
+                    </button>
+                {% else %}
+                    <a href="/login"
+                       class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm px-4 py-2 rounded">
+                        Acceder
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="/static/js/main.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
