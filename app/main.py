@@ -2,11 +2,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.auth import router as auth_router
+from app.api.v1.players import router as players_router
+from app.api.v1.analysis import router as analysis_router
 
 app = FastAPI(
     title="Padel Scouter API",
     description="Sistema de análisis inteligente de jugadores de pádel con IA",
     version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 app.add_middleware(
@@ -18,6 +22,8 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(players_router, prefix="/api/v1")
+app.include_router(analysis_router, prefix="/api/v1")
 
 
 @app.get("/health")

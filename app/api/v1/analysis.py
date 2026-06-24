@@ -1,0 +1,112 @@
+import json
+from uuid import UUID
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.core.dependencies import get_current_user
+from app.infrastructure.database.session import get_db
+from app.infrastructure.database.models import PlayerModel, AnalysisModel, UserModel
+from app.infrastructure.ai.gemini_client import analyze_player_with_ai
+from app.infrastructure.cache.redis_client import redis_cache
+from app.domain.entities.player import Player, PlayerStats
+from app.domain.use_cases.analyze_player import AnalyzePlayerUseCase
+from app.schemas.player import AnalysisPublicSchema
+
+router = APIRouter(prefix="/analysis", tags=["analysis"])
+
+
+class GeminiClientWrapper:
+    def analyze_player_with_ai(self, data: dict) -> dict:
+        return analyze_player_with_ai(data)
+
+
+@router.post("/{player_id}", response_model=AnalysisPublicSchema, status_code=201)
+def analyze_player(
+    player_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    player_model = db.query(PlayerModel).filter(
+        PlayerModel.id == player_id,
+        PlayerModel.owner_id == current_user.id,
+    ).first()
+    if not player_model:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
+    # Construir entidad de dominio
+    stats = PlayerStats(
+        derecha=player_model.derecha, reves=player_model.reves,
+        volea=player_model.volea, bandeja=player_model.bandeja,
+        vibora=player_model.vibora, smash=player_model.smash,
+        lob=player_model.lob, saque=player_model.saque,
+        bajada_pared=player_model.bajada_pared,
+        velocidad=player_model.velocidad, resistencia=player_model.resistencia,
+        reflejos=player_model.reflejos, tactica=player_model.tactica,
+        presion=player_model.presion,
+        trabajo_en_pareja=player_model.trabajo_en_pareja,
+        torneos_jugados=player_model.torneos_jugados,
+        victorias=player_model.victorias,
+        puntos_ranking_fep=player_model.puntos_ranking_fep,
+    )
+    player = Player(
+        id=player_model.id,
+        name=player_model.name,
+        category=player_model.category,
+        stats=stats,
+    )
+
+    # Ejecutar caso de uso
+    use_case = AnalyzePlayerUseCase(
+        ai_client=GeminiClientWrapper(),
+        cache=redis_cache,
+    )
+    result = use_case.execute(player)
+
+    # Persistir análisis
+    analysis = AnalysisModel(
+        player_id=player.id,
+        power_level=result.power_level,
+        category=result.category,
+        ai_description=result.ai_description,
+        strengths=json.dumps(result.strengths),
+        weaknesses=json.dumps(result.weaknesses),
+        improvement_plan=result.improvement_plan,
+    )
+    db.add(analysis)
+    db.commit()
+    db.refresh(analysis)
+
+    return AnalysisPublicSchema(
+        id=analysis.id,
+        player_id=analysis.player_id,
+        power_level=analysis.power_level,
+        category=analysis.category,
+        ai_description=analysis.ai_description,
+        strengths=json.loads(analysis.strengths),
+        weaknesses=json.loads(analysis.weaknesses),
+        improvement_plan=analysis.improvement_plan,
+    )
+
+
+@router.get("/{player_id}", response_model=list[AnalysisPublicSchema])
+def get_player_analyses(
+    player_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    analyses = db.query(AnalysisModel).filter(
+        AnalysisModel.player_id == player_id
+    ).all()
+    return [
+        AnalysisPublicSchema(
+            id=a.id,
+            player_id=a.player_id,
+            power_level=a.power_level,
+            category=a.category,
+            ai_description=a.ai_description,
+            strengths=json.loads(a.strengths),
+            weaknesses=json.loads(a.weaknesses),
+            improvement_plan=a.improvement_plan,
+        )
+        for a in analyses
+    ]
