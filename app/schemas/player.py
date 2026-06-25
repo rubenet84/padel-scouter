@@ -1,5 +1,6 @@
+import re
 from uuid import UUID
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.domain.value_objects.category import PlayerCategory, ScoringMethod
 
 
@@ -8,12 +9,48 @@ from app.domain.value_objects.category import PlayerCategory, ScoringMethod
 class UserRegisterSchema(BaseModel):
     email: EmailStr
     username: str = Field(min_length=3, max_length=100)
-    password: str = Field(min_length=8, max_length=100)
+    password: str = Field(min_length=12, max_length=128)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """
+        OWASP A07 — contraseña fuerte obligatoria:
+        - Mínimo 12 caracteres
+        - Al menos una mayúscula
+        - Al menos una minúscula
+        - Al menos un número
+        - Al menos un carácter especial
+        """
+        errors = []
+        if len(v) < 12:
+            errors.append("mínimo 12 caracteres")
+        if not re.search(r"[A-Z]", v):
+            errors.append("al menos una mayúscula")
+        if not re.search(r"[a-z]", v):
+            errors.append("al menos una minúscula")
+        if not re.search(r"\d", v):
+            errors.append("al menos un número")
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>_\-]", v):
+            errors.append("al menos un carácter especial (!@#$%...)")
+        if errors:
+            raise ValueError(f"Contraseña débil: {', '.join(errors)}")
+        return v
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, v: str) -> str:
+        return v.lower().strip()
 
 
 class UserLoginSchema(BaseModel):
     email: EmailStr
     password: str
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, v: str) -> str:
+        return v.lower().strip()
 
 
 class TokenSchema(BaseModel):
@@ -90,7 +127,7 @@ class MatchCreateSchema(BaseModel):
     player1_id: UUID
     player2_id: UUID
     scoring_method: ScoringMethod = ScoringMethod.CON_VENTAJA
-    result: str = Field(min_length=3, max_length=50)  # "6-3 6-4"
+    result: str = Field(min_length=3, max_length=50)
     winner_id: UUID | None = None
     notes: str | None = None
 

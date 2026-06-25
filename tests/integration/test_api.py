@@ -23,26 +23,25 @@ def override_get_db():
 
 
 app.dependency_overrides[get_db] = override_get_db
-
-# ── Crear tablas ANTES de cualquier test ──────────────────────
 Base.metadata.create_all(bind=engine)
-
 client = TestClient(app)
 
+# Contraseña fuerte que cumple OWASP
+STRONG_PASSWORD = "PadelScouter2026!"
 
-# ── Fixtures ──────────────────────────────────────────────────
 
 @pytest.fixture(scope="module")
 def auth_headers():
     client.post("/api/v1/auth/register", json={
         "email": "api_test@padel.com",
         "username": "api_tester",
-        "password": "password123",
+        "password": STRONG_PASSWORD,
     })
     response = client.post("/api/v1/auth/login", json={
         "email": "api_test@padel.com",
-        "password": "password123",
+        "password": STRONG_PASSWORD,
     })
+    assert response.status_code == 200, f"Login falló: {response.json()}"
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
 
@@ -66,8 +65,6 @@ def created_player(auth_headers):
     return response.json()
 
 
-# ── Auth tests ────────────────────────────────────────────────
-
 class TestAuthEndpoints:
 
     def test_health_check(self):
@@ -81,20 +78,41 @@ class TestAuthEndpoints:
         response = client.post("/api/v1/auth/register", json={
             "email": email_unico,
             "username": username_unico,
-            "password": "password123",
+            "password": STRONG_PASSWORD,
         })
         assert response.status_code == 201
         assert "id" in response.json()
 
+    def test_register_password_debil_rechazada(self):
+        """OWASP A07 — contraseña débil debe ser rechazada"""
+        response = client.post("/api/v1/auth/register", json={
+            "email": "weak@padel.com",
+            "username": "weakuser",
+            "password": "password123",  # sin mayúscula ni especial
+        })
+        assert response.status_code == 422
+
+    def test_email_case_insensitive(self):
+        """OWASP A07 — email normalizado a minúsculas"""
+        email_unico = f"CaseTEST_{uuid.uuid4().hex[:6]}@PADEL.COM"
+        response = client.post("/api/v1/auth/register", json={
+            "email": email_unico,
+            "username": f"caseuser_{uuid.uuid4().hex[:6]}",
+            "password": STRONG_PASSWORD,
+        })
+        assert response.status_code == 201
+        assert response.json()["email"] == email_unico.lower()
+
     def test_login_correcto(self):
+        email = f"login_{uuid.uuid4().hex[:6]}@padel.com"
         client.post("/api/v1/auth/register", json={
-            "email": "login_test@padel.com",
-            "username": "login_user",
-            "password": "password123",
+            "email": email,
+            "username": f"login_{uuid.uuid4().hex[:6]}",
+            "password": STRONG_PASSWORD,
         })
         response = client.post("/api/v1/auth/login", json={
-            "email": "login_test@padel.com",
-            "password": "password123",
+            "email": email,
+            "password": STRONG_PASSWORD,
         })
         assert response.status_code == 200
         assert "access_token" in response.json()
@@ -102,8 +120,8 @@ class TestAuthEndpoints:
 
     def test_login_password_incorrecto(self):
         response = client.post("/api/v1/auth/login", json={
-            "email": "login_test@padel.com",
-            "password": "password_malo",
+            "email": "api_test@padel.com",
+            "password": "WrongPassword999!",
         })
         assert response.status_code == 401
 
@@ -116,8 +134,6 @@ class TestAuthEndpoints:
         assert response.status_code == 200
         assert response.json()["email"] == "api_test@padel.com"
 
-
-# ── Players tests ─────────────────────────────────────────────
 
 class TestPlayersEndpoints:
 
@@ -153,3 +169,36 @@ class TestPlayersEndpoints:
             "category": "Iniciación",
         })
         assert response.status_code == 401
+
+
+class TestPasswordResetFlow:
+
+    def test_forgot_password_email_existente(self):
+        """OWASP A07 — siempre 200 aunque el email no exista"""
+        response = client.post(
+            "/api/v1/auth/forgot-password?email=api_test@padel.com"
+        )
+        assert response.status_code == 200
+        assert "mensaje" in response.json()["message"].lower() or \
+               "recibirás" in response.json()["message"]
+
+    def test_forgot_password_email_no_existente(self):
+        """OWASP A07 — mismo mensaje aunque el email no exista"""
+        response = client.post(
+            "/api/v1/auth/forgot-password?email=noexiste@padel.com"
+        )
+        assert response.status_code == 200
+
+    def test_reset_password_token_invalido(self):
+        response = client.post(
+            "/api/v1/auth/reset-password?token=token_falso&new_password=NuevaPass2026!"
+        )
+        assert response.status_code == 400
+
+    def test_reset_password_nueva_pass_debil(self):
+        from app.core.security import create_reset_token
+        token = create_reset_token("api_test@padel.com")
+        response = client.post(
+            f"/api/v1/auth/reset-password?token={token}&new_password=debil"
+        )
+        assert response.status_code == 422

@@ -66,3 +66,33 @@ def decode_token(token: str) -> dict[str, Any]:
         settings.secret_key.get_secret_value(),
         algorithms=[settings.algorithm],
     )
+
+def create_reset_token(email: str) -> str:
+    """
+    OWASP A07 — token de reset de contraseña.
+    Firmado con JWT, expira en 15 minutos, tipo 'reset'.
+    """
+    from datetime import datetime, timedelta, timezone
+    from app.core.config import settings
+    expire = datetime.now(timezone.utc) + timedelta(
+        minutes=settings.reset_token_expire_minutes
+    )
+    return jwt.encode(
+        {"sub": email, "exp": expire, "type": "reset"},
+        settings.secret_key.get_secret_value(),
+        algorithm=settings.algorithm,
+    )
+
+
+def verify_reset_token(token: str) -> str | None:
+    """
+    Verifica el token de reset y devuelve el email si es válido.
+    Devuelve None si expiró o es inválido.
+    """
+    try:
+        payload = decode_token(token)
+        if payload.get("type") != "reset":
+            return None
+        return payload.get("sub")
+    except JWTError:
+        return None

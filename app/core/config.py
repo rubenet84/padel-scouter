@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import SecretStr
-from typing import Any
 
 
 class Settings(BaseSettings):
@@ -12,7 +11,15 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
 
+    # Reset password token — corta duración (15 min)
+    reset_token_expire_minutes: int = 15
+
     google_api_key: SecretStr = SecretStr("")
+
+    # Email
+    resend_api_key: SecretStr = SecretStr("")
+    app_url: str = "http://localhost:8000"
+    emails_from: str = "Padel Scouter <onboarding@resend.dev>"
 
     app_env: str = "development"
     allowed_origins: str = "http://localhost:3000,http://localhost:8000"

@@ -47,3 +47,20 @@ def player_detail(request: Request, player_id: str):
         name="player_detail.html",
         context={"user": {}, "player": {"id": player_id, "name": ""}}
     )
+
+@router.get("/forgot-password", response_class=HTMLResponse)
+def forgot_password_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="forgot_password.html",
+        context={"user": None}
+    )
+
+
+@router.get("/reset-password", response_class=HTMLResponse)
+def reset_password_page(request: Request, token: str = ""):
+    return templates.TemplateResponse(
+        request=request,
+        name="reset_password.html",
+        context={"user": None, "token": token}
+    )
