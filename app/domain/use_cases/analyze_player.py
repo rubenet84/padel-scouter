@@ -65,4 +65,6 @@ class AnalyzePlayerUseCase:
             strengths=ai_result.get("fortalezas", []),
             weaknesses=ai_result.get("debilidades", []),
             improvement_plan=ai_result.get("plan_mejora", ""),
+            golpe_definitivo=ai_result.get("golpe_definitivo", "Por determinar"),
+            nivel_amenaza=ai_result.get("nivel_amenaza", "MEDIO"),
         )

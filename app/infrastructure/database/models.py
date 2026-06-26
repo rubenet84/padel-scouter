@@ -83,6 +83,8 @@ class AnalysisModel(Base):
     strengths        = Column(Text, nullable=False)   # JSON string
     weaknesses       = Column(Text, nullable=False)   # JSON string
     improvement_plan = Column(Text, nullable=False)
+    golpe_definitivo = Column(Text, nullable=True)
+    nivel_amenaza    = Column(String(20), nullable=True)
     created_at       = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
 
     player = relationship("PlayerModel", back_populates="analyses")
@@ -94,9 +96,13 @@ class MatchModel(Base):
     id             = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     player1_id     = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=False)
     player2_id     = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=False)
+    rival_nombre   = Column(String(150), nullable=True)
+    torneo         = Column(String(150), nullable=True)
+    resultado      = Column(String(50),  nullable=True)
+    ganado         = Column(Boolean,     default=True, nullable=False)
     scoring_method = Column(SAEnum(ScoringMethod), nullable=False,
                             default=ScoringMethod.CON_VENTAJA)
-    result         = Column(String(50), nullable=False)   # "6-3 6-4"
+    result         = Column(String(50),  nullable=False)
     winner_id      = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=True)
     played_at      = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     notes          = Column(Text, nullable=True)

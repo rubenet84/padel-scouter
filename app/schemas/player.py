@@ -2,6 +2,7 @@ import re
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.domain.value_objects.category import PlayerCategory, ScoringMethod
+from datetime import datetime
 
 
 # ── Auth ──────────────────────────────────────────────────────
@@ -14,14 +15,6 @@ class UserRegisterSchema(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, v: str) -> str:
-        """
-        OWASP A07 — contraseña fuerte obligatoria:
-        - Mínimo 12 caracteres
-        - Al menos una mayúscula
-        - Al menos una minúscula
-        - Al menos un número
-        - Al menos un carácter especial
-        """
         errors = []
         if len(v) < 12:
             errors.append("mínimo 12 caracteres")
@@ -83,25 +76,44 @@ class PlayerStatsSchema(BaseModel):
     velocidad:    int = Field(default=50, ge=0, le=100)
     resistencia:  int = Field(default=50, ge=0, le=100)
     reflejos:     int = Field(default=50, ge=0, le=100)
-    tactica:           int = Field(default=50, ge=0, le=100)
-    presion:           int = Field(default=50, ge=0, le=100)
-    trabajo_en_pareja: int = Field(default=50, ge=0, le=100)
-    torneos_jugados:   int = Field(default=0, ge=0)
-    victorias:         int = Field(default=0, ge=0)
+    tactica:            int = Field(default=50, ge=0, le=100)
+    presion:            int = Field(default=50, ge=0, le=100)
+    trabajo_en_pareja:  int = Field(default=50, ge=0, le=100)
+    torneos_jugados:    int = Field(default=0, ge=0)
+    victorias:          int = Field(default=0, ge=0)
     puntos_ranking_fep: int = Field(default=0, ge=0)
 
 
 class PlayerCreateSchema(BaseModel):
-    name: str = Field(min_length=2, max_length=150)
+    name:     str = Field(min_length=2, max_length=150)
     category: PlayerCategory
-    stats: PlayerStatsSchema = PlayerStatsSchema()
+    stats:    PlayerStatsSchema = PlayerStatsSchema()
 
 
 class PlayerPublicSchema(BaseModel):
-    id: UUID
-    name: str
+    id:       UUID
+    name:     str
     category: PlayerCategory
     owner_id: UUID
+
+    derecha:      int = 50
+    reves:        int = 50
+    volea:        int = 50
+    bandeja:      int = 50
+    vibora:       int = 50
+    smash:        int = 50
+    lob:          int = 50
+    saque:        int = 50
+    bajada_pared: int = 50
+    velocidad:    int = 50
+    resistencia:  int = 50
+    reflejos:     int = 50
+    tactica:            int = 50
+    presion:            int = 50
+    trabajo_en_pareja:  int = 50
+    torneos_jugados:    int = 0
+    victorias:          int = 0
+    puntos_ranking_fep: int = 0
 
     model_config = {"from_attributes": True}
 
@@ -109,35 +121,74 @@ class PlayerPublicSchema(BaseModel):
 # ── Analysis ──────────────────────────────────────────────────
 
 class AnalysisPublicSchema(BaseModel):
-    id: UUID
-    player_id: UUID
-    power_level: int
-    category: PlayerCategory
-    ai_description: str
-    strengths: list[str]
-    weaknesses: list[str]
+    id:               UUID
+    player_id:        UUID
+    power_level:      int
+    category:         PlayerCategory
+    ai_description:   str
+    strengths:        list[str]
+    weaknesses:       list[str]
     improvement_plan: str
+    golpe_definitivo: str | None = None
+    nivel_amenaza:    str | None = None
 
     model_config = {"from_attributes": True}
 
 
 # ── Matches ───────────────────────────────────────────────────
 
+def _is_valid_set_score(a: int, b: int) -> bool:
+    """Valida un set según reglamento FIP 2026."""
+    high, low = max(a, b), min(a, b)
+    if high == 7 and low == 5: return True   # 7-5
+    if high == 7 and low == 6: return True   # 7-6 tie-break
+    if high == 6 and low <= 4: return True   # 6-0 a 6-4
+    return False                              # 6-5 necesita tie-break
+
+
 class MatchCreateSchema(BaseModel):
-    player1_id: UUID
-    player2_id: UUID
+    rival_nombre:   str = Field(min_length=2, max_length=150)
+    resultado:      str = Field(min_length=3, max_length=50)
+    ganado:         bool
+    torneo:         str | None = Field(default=None, max_length=150)
     scoring_method: ScoringMethod = ScoringMethod.CON_VENTAJA
-    result: str = Field(min_length=3, max_length=50)
-    winner_id: UUID | None = None
-    notes: str | None = None
+    notes:          str | None = None
+
+    @field_validator("resultado")
+    @classmethod
+    def validate_resultado(cls, v: str) -> str:
+        """
+        FIP 2026 — formato: '6-4 6-3' o '6-4 3-6 7-5'
+        Sets separados por espacios. Tie-break: 7-6.
+        """
+        sets = v.strip().split()
+        if len(sets) < 2 or len(sets) > 3:
+            raise ValueError("Debe tener 2 o 3 sets (ej: '6-4 6-3' o '6-4 3-6 7-5')")
+        for s in sets:
+            parts = s.split('-')
+            if len(parts) != 2:
+                raise ValueError(f"Formato incorrecto en set: {s}")
+            try:
+                a, b = int(parts[0]), int(parts[1])
+            except ValueError:
+                raise ValueError(f"Puntuación no numérica: {s}")
+            if not _is_valid_set_score(a, b):
+                raise ValueError(
+                    f"Set inválido según FIP 2026: {s}. "
+                    f"Valores válidos: 6-0 a 6-4, 7-5, 7-6"
+                )
+        return v.strip()
 
 
 class MatchPublicSchema(BaseModel):
-    id: UUID
-    player1_id: UUID
-    player2_id: UUID
+    id:             UUID
+    player1_id:     UUID
+    rival_nombre:   str | None = None
+    torneo:         str | None = None
+    resultado:      str
+    ganado:         bool
     scoring_method: ScoringMethod
-    result: str
-    winner_id: UUID | None
+    played_at:      datetime
+    notes:          str | None = None
 
     model_config = {"from_attributes": True}

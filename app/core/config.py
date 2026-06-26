@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     resend_api_key: SecretStr = SecretStr("")
     app_url: str = "http://localhost:8000"
     emails_from: str = "Padel Scouter <onboarding@resend.dev>"
+    resend_owner_email: str = "rubenet1984@gmail.com"
 
     app_env: str = "development"
     allowed_origins: str = "http://localhost:3000,http://localhost:8000"

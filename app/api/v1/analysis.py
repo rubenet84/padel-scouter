@@ -71,6 +71,8 @@ def analyze_player(
         strengths=json.dumps(result.strengths),
         weaknesses=json.dumps(result.weaknesses),
         improvement_plan=result.improvement_plan,
+        golpe_definitivo=result.golpe_definitivo,
+        nivel_amenaza=result.nivel_amenaza,
     )
     db.add(analysis)
     db.commit()

@@ -12,3 +12,5 @@ class AnalysisResult:
     strengths:        list[str]
     weaknesses:       list[str]
     improvement_plan: str
+    golpe_definitivo: str = "Por determinar"
+    nivel_amenaza:    str = "MEDIO"

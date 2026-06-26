@@ -7,7 +7,7 @@
         <h1 class="text-3xl font-black">Mi <span class="text-emerald-400">Dashboard</span></h1>
         <p class="text-gray-400 text-sm mt-1">Gestiona y analiza tus jugadores</p>
     </div>
-    <button onclick="document.getElementById('modal-nuevo').classList.remove('hidden')"
+    <button onclick="openNewPlayerModal()"
             class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-lg flex items-center gap-2">
         <span>+</span> Nuevo jugador
     </button>
@@ -22,11 +22,12 @@
 </div>
 
 <!-- Modal nuevo jugador -->
-<div id="modal-nuevo" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+<div id="modal-nuevo" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+     onclick="if (event.target === event.currentTarget) closeNewPlayerModal()">
     <div class="bg-gray-900 border border-gray-700 rounded-2xl p-8 w-full max-w-2xl max-h-screen overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold">Nuevo Jugador</h2>
-            <button onclick="document.getElementById('modal-nuevo').classList.add('hidden')"
+            <button onclick="closeNewPlayerModal()"
                     class="text-gray-400 hover:text-white text-2xl">&times;</button>
         </div>
 
@@ -44,6 +45,7 @@
                 <option value="1ª Categoría">1ª Categoría</option>
                 <option value="Profesional">Profesional</option>
             </select>
+            <div id="create-error" class="hidden mt-3 text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
 
             <p class="text-emerald-400 font-semibold text-sm mt-4">Estadísticas Técnicas</p>
             <div class="grid grid-cols-2 gap-3">
@@ -71,25 +73,31 @@
             <div class="grid grid-cols-3 gap-3">
                 <div>
                     <label class="text-gray-400 text-xs">Torneos</label>
-                    <input id="s-torneos_jugados" type="number" value="0" min="0"
+                    <input id="s-torneos_jugados" type="number" value="0" min="0" inputmode="numeric" pattern="[0-9]*"
                            class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
                 </div>
                 <div>
                     <label class="text-gray-400 text-xs">Victorias</label>
-                    <input id="s-victorias" type="number" value="0" min="0"
+                    <input id="s-victorias" type="number" value="0" min="0" inputmode="numeric" pattern="[0-9]*"
                            class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
                 </div>
                 <div>
                     <label class="text-gray-400 text-xs">Puntos FEP</label>
-                    <input id="s-puntos_ranking_fep" type="number" value="0" min="0"
+                    <input id="s-puntos_ranking_fep" type="number" value="0" min="0" inputmode="numeric" pattern="[0-9]*"
                            class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
                 </div>
             </div>
 
-            <button onclick="createPlayer()"
-                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg mt-4 transition">
-                Crear Jugador
-            </button>
+            <div class="flex gap-3 mt-4">
+                <button onclick="createPlayer()"
+                        class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition">
+                    Crear Jugador
+                </button>
+                <button onclick="closeNewPlayerModal()"
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition">
+                    Cancelar
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -127,6 +135,36 @@ const CATEGORY_COLORS = {
     '1ª Categoría': '#ef4444',
     'Profesional': '#fbbf24',
 };
+
+function openNewPlayerModal() {
+    resetNewPlayerForm();
+    document.getElementById('modal-nuevo').classList.remove('hidden');
+}
+
+function closeNewPlayerModal() {
+    document.getElementById('modal-nuevo').classList.add('hidden');
+}
+
+function resetNewPlayerForm() {
+    document.getElementById('p-name').value = '';
+    document.getElementById('p-category').value = '3ª Categoría';
+    STATS.forEach(s => {
+        document.getElementById(`s-${s}`).value = s === 'torneos_jugados' || s === 'victorias' || s === 'puntos_ranking_fep' ? '0' : '50';
+    });
+    const errEl = document.getElementById('create-error');
+    errEl.classList.add('hidden');
+    errEl.textContent = '';
+}
+
+function sanitizeNewPlayerNumbers() {
+    document.querySelectorAll('#modal-nuevo input[type="number"]').forEach(el => {
+        el.addEventListener('input', () => {
+            el.value = el.value.replace(/[^0-9]/g, '');
+        });
+    });
+}
+
+sanitizeNewPlayerNumbers();
 
 async function loadPlayers() {
     const res = await fetch('/api/v1/players/', {
@@ -173,12 +211,47 @@ function renderPlayers(players) {
 }
 
 async function createPlayer() {
+    const errEl = document.getElementById('create-error');
+    errEl.classList.add('hidden');
+    errEl.textContent = '';
+
+    const name = document.getElementById('p-name').value.trim();
+    if (!name) {
+        errEl.textContent = 'El nombre del jugador es obligatorio.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+
     const stats = {};
-    STATS.forEach(s => {
-        stats[s] = parseInt(document.getElementById(`s-${s}`)?.value || 50);
-    });
+    for (const s of STATS) {
+        const raw = document.getElementById(`s-${s}`)?.value ?? '';
+        const value = Number(raw);
+
+        if (!Number.isFinite(value) || raw.trim() === '' || !Number.isInteger(value)) {
+            errEl.textContent = `El valor de ${s.replace('_', ' ')} debe ser un número entero válido.`;
+            errEl.classList.remove('hidden');
+            return;
+        }
+
+        if (s === 'torneos_jugados' || s === 'victorias' || s === 'puntos_ranking_fep') {
+            if (value < 0) {
+                errEl.textContent = `El valor de ${s.replace('_', ' ')} no puede ser negativo.`;
+                errEl.classList.remove('hidden');
+                return;
+            }
+        } else {
+            if (value < 0 || value > 100) {
+                errEl.textContent = `El valor de ${s.replace('_', ' ')} debe estar entre 0 y 100.`;
+                errEl.classList.remove('hidden');
+                return;
+            }
+        }
+
+        stats[s] = value;
+    }
+
     const body = {
-        name: document.getElementById('p-name').value,
+        name,
         category: document.getElementById('p-category').value,
         stats
     };
@@ -188,11 +261,12 @@ async function createPlayer() {
         body: JSON.stringify(body)
     });
     if (res.ok) {
-        document.getElementById('modal-nuevo').classList.add('hidden');
+        closeNewPlayerModal();
         loadPlayers();
     } else {
         const err = await res.json();
-        alert('Error: ' + JSON.stringify(err.detail));
+        errEl.textContent = typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail);
+        errEl.classList.remove('hidden');
     }
 }
 

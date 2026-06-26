@@ -55,6 +55,15 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:
 }}
 """
 
+FALLBACK_RESPONSE = {
+    "descripcion_epica": "Jugador con potencial detectado. Análisis IA temporalmente no disponible.",
+    "fortalezas": ["Técnica en desarrollo", "Actitud competitiva", "Potencial de mejora"],
+    "debilidades": ["Análisis IA no disponible temporalmente"],
+    "plan_mejora": "El servicio de IA está saturado o no disponible. Inténtalo de nuevo en unos minutos.",
+    "golpe_definitivo": "Por determinar",
+    "nivel_amenaza": "MEDIO",
+}
+
 
 def analyze_player_with_ai(player_data: dict) -> dict:
     """
@@ -80,14 +89,14 @@ def analyze_player_with_ai(player_data: dict) -> dict:
 
         return json.loads(raw_text)
 
-    except json.JSONDecodeError:
-        return {
-            "descripcion_epica": f"Jugador de categoría {player_data['category']} con gran potencial.",
-            "fortalezas": ["Técnica sólida", "Buen físico", "Mentalidad competitiva"],
-            "debilidades": ["Necesita más experiencia competitiva"],
-            "plan_mejora": "Participar en más torneos y trabajar los golpes defensivos.",
-            "golpe_definitivo": "Por determinar",
-            "nivel_amenaza": "MEDIO",
-        }
+    except json.JSONDecodeError as e:
+        print(f"Gemini JSON parse error: {e}")
+        return FALLBACK_RESPONSE
+
     except Exception as e:
+        error_str = str(e)
+        print(f"Gemini API error ({type(e).__name__}): {error_str[:200]}")
+        # Errores temporales — devolver fallback en lugar de crashear
+        if any(code in error_str for code in ["503", "429", "UNAVAILABLE", "EXHAUSTED", "ServerError", "ClientError"]):
+            return FALLBACK_RESPONSE
         raise RuntimeError(f"Error llamando a Gemini API: {e}")

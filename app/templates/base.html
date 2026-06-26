@@ -5,13 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Padel Scouter{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        db: {
+                            orange: '#FF6B00', gold: '#FFD700',
+                            green: '#00FF87', blue: '#00B4D8',
+                            red: '#FF2D2D', bg: '#0A0A0F',
+                            card: '#12121A', border: '#2A2A3A',
+                        }
+                    }
                 }
             }
         }
@@ -19,26 +27,49 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/static/css/scouter.css">
 </head>
-<body class="bg-gray-950 text-white min-h-screen font-sans">
+<body style="background:#0A0A0F;color:#E2E8F0;min-height:100vh;font-family:'Inter',sans-serif;">
 
-    <nav class="bg-gray-900 border-b border-emerald-500/30 px-6 py-4">
+    <!-- Fixed background effects -->
+    <div class="fixed inset-0 pointer-events-none" style="z-index:0;background:radial-gradient(ellipse at 20% 10%, #FF6B0008 0%, transparent 50%),radial-gradient(ellipse at 80% 90%, #3B82F606 0%, transparent 50%);"></div>
+    <div class="fixed inset-0 pointer-events-none opacity-[0.025]" style="z-index:0;background-image:linear-gradient(#FF6B00 1px,transparent 1px),linear-gradient(90deg,#FF6B00 1px,transparent 1px);background-size:60px 60px;"></div>
+
+    <!-- Navbar -->
+    <nav class="relative border-b px-6 py-4 backdrop-blur-md" style="z-index:50;background:rgba(10,10,15,0.85);border-color:rgba(255,107,0,0.15);">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <a href="/" class="flex items-center gap-3">
-                <span class="text-2xl" style="font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;">🔮</span>
-                <span class="text-xl font-bold text-emerald-400">Padel Scouter</span>
+                <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-black text-xs"
+                     style="background:linear-gradient(135deg,#FF6B00,#FFD700);">PS</div>
+                <div>
+                    <span class="text-lg font-bold text-white">PADEL</span>
+                    <span class="text-lg font-light" style="color:#FF6B00;"> SCOUTER</span>
+                </div>
             </a>
+
+            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full" style="border:1px solid rgba(0,255,135,0.2);background:rgba(0,255,135,0.05);">
+                <div class="w-2 h-2 rounded-full animate-pulse" style="background:#00FF87;"></div>
+                <span class="text-xs font-medium" style="color:#00FF87;">SCOUTER ACTIVE</span>
+            </div>
+
             <div class="flex items-center gap-4" id="nav-right">
                 <a href="/login"
-                   class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm px-4 py-2 rounded">
+                   class="px-4 py-2 rounded-xl text-sm font-bold transition-all"
+                   style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
                     Acceder
                 </a>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-6 py-8">
+    <main class="relative max-w-7xl mx-auto px-6 py-8" style="z-index:10;">
         {% block content %}{% endblock %}
     </main>
+
+    <footer class="relative border-t mt-16 py-6" style="z-index:10;border-color:rgba(255,107,0,0.1);">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <span class="text-xs" style="color:#334155;">© 2026 Padel Scouter · Reglamento FIP 2026</span>
+            <span class="text-xs" style="color:rgba(255,107,0,0.4);">Powered by Saiyan Tech 🔮</span>
+        </div>
+    </footer>
 
     <script src="/static/js/main.js"></script>
     <script>
@@ -51,17 +82,17 @@
         }).then(r => r.ok ? r.json() : null).then(user => {
             if (user) {
                 navRight.innerHTML = `
-                    <span class="text-gray-400 text-sm">👤 ${user.username}</span>
-                    <a href="/dashboard" class="text-emerald-400 hover:text-emerald-300 text-sm">Dashboard</a>
+                    <span class="text-sm" style="color:#64748b;">👤 ${user.username}</span>
+                    <a href="/dashboard" class="text-sm font-medium transition-colors" style="color:#00FF87;">Dashboard</a>
                     <button onclick="logout()"
-                            class="bg-red-600 hover:bg-red-500 text-white text-sm px-3 py-1 rounded">
+                            class="px-3 py-1.5 rounded-lg text-sm font-bold transition-all"
+                            style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;">
                         Salir
                     </button>`;
             }
         }).catch(() => {});
     })();
     </script>
-
     {% block scripts %}{% endblock %}
 </body>
 </html>
