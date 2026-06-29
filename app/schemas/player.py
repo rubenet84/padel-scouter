@@ -80,9 +80,6 @@ class PlayerStatsSchema(BaseModel):
     tactica:            int = Field(default=50, ge=0, le=100)
     presion:            int = Field(default=50, ge=0, le=100)
     trabajo_en_pareja:  int = Field(default=50, ge=0, le=100)
-    torneos_jugados:    int = Field(default=0, ge=0)
-    victorias:          int = Field(default=0, ge=0)
-    puntos_ranking_fep: int = Field(default=0, ge=0)
 
 
 class PlayerCreateSchema(BaseModel):
@@ -121,6 +118,18 @@ class PlayerPublicSchema(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# ── Computed Stats ────────────────────────────────────────────
+
+class ComputedStatsSchema(BaseModel):
+    """Competitive stats computed from matches + tournaments."""
+
+    torneos:   int
+    win_rate:  float  # 0.0 – 100.0 percentage
+    fep_points: int
+
+    model_config = {"from_attributes": True}
+
+
 # ── Analysis ──────────────────────────────────────────────────
 
 class AnalysisPublicSchema(BaseModel):
@@ -155,7 +164,8 @@ class MatchCreateSchema(BaseModel):
     rival_nombre:   str = Field(min_length=2, max_length=150)
     resultado:      str = Field(min_length=3, max_length=50)
     ganado:         bool
-    torneo:         str | None = Field(default=None, max_length=150)
+    tournament_id:  UUID | None = Field(default=None, description="FK → tournaments.id. null = amistoso")
+    ronda:          str | None = Field(default=None, max_length=100, description="Fase de grupos, Octavos, Cuartos, Semifinal, Final, etc.")
     scoring_method: ScoringMethod = ScoringMethod.CON_VENTAJA
     notes:          str | None = None
 
@@ -189,7 +199,8 @@ class MatchPublicSchema(BaseModel):
     id:             UUID
     player1_id:     UUID
     rival_nombre:   str | None = None
-    torneo:         str | None = None
+    tournament_id:  UUID | None = None
+    ronda:          str | None = None
     resultado:      str
     ganado:         bool
     scoring_method: ScoringMethod

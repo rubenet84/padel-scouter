@@ -7,11 +7,13 @@ from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
 from app.infrastructure.database.session import get_db
-from app.infrastructure.database.models import PlayerModel, UserModel, MatchModel
+from app.infrastructure.database.models import PlayerModel, UserModel, MatchModel, TournamentModel
 from app.schemas.player import (
     PlayerCreateSchema, PlayerPublicSchema,
     MatchCreateSchema, MatchPublicSchema,
+    ComputedStatsSchema,
 )
+from app.domain.value_objects.computed_stats import get_computed_stats
 
 from PIL import Image, UnidentifiedImageError
 import io
@@ -91,6 +93,32 @@ def update_player(
     db.commit()
     db.refresh(player)
     return player
+
+
+# ── Computed Stats ─────────────────────────────────────────────
+
+@router.get("/{player_id}/stats", response_model=ComputedStatsSchema)
+def get_player_stats(
+    player_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    """
+    Devuelve estadísticas competitivas computadas desde partidos y torneos reales.
+
+    OWASP:
+      - A01: Ownership check — el usuario solo ve stats de sus jugadores
+      - A07: JWT requerido
+      - A03: player_id validado como UUID por FastAPI; query parametrizada
+    """
+    player = db.query(PlayerModel).filter(
+        PlayerModel.id == player_id,
+        PlayerModel.owner_id == current_user.id,
+    ).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
+    return get_computed_stats(db, player_id)
 
 
 # ── Avatar ──────────────────────────────────────────────────────
@@ -210,11 +238,24 @@ def add_match(
     if not player:
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
 
+    # Verify tournament ownership if provided
+    legacy_torneo = None
+    if data.tournament_id is not None:
+        tournament = db.query(TournamentModel).filter(
+            TournamentModel.id == data.tournament_id,
+            TournamentModel.owner_id == current_user.id,
+        ).first()
+        if not tournament:
+            raise HTTPException(status_code=404, detail="Torneo no encontrado")
+        legacy_torneo = tournament.name  # set legacy torneo field for backward compat
+
     match = MatchModel(
         player1_id=player_id,
         player2_id=player_id,       # self-reference OK para partidos individuales
         rival_nombre=data.rival_nombre,
-        torneo=data.torneo,
+        tournament_id=data.tournament_id,
+        ronda=data.ronda,
+        torneo=legacy_torneo,
         resultado=data.resultado,
         ganado=data.ganado,
         scoring_method=data.scoring_method,
@@ -231,6 +272,7 @@ def add_match(
 @router.get("/{player_id}/matches", response_model=list[MatchPublicSchema])
 def get_matches(
     player_id: UUID,
+    tournament_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
@@ -241,12 +283,26 @@ def get_matches(
     if not player:
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
 
-    matches = db.query(MatchModel).filter(
+    query = db.query(MatchModel).filter(
         or_(
             MatchModel.player1_id == player_id,
             MatchModel.player2_id == player_id,
         )
-    ).order_by(MatchModel.played_at.desc()).limit(20).all()
+    )
+
+    if tournament_id is not None:
+        if tournament_id == "none":
+            # Filter amistosos only (no tournament)
+            query = query.filter(MatchModel.tournament_id.is_(None))
+        else:
+            # Filter by specific tournament UUID
+            try:
+                tid = UUID(tournament_id)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="tournament_id inválido")
+            query = query.filter(MatchModel.tournament_id == tid)
+
+    matches = query.order_by(MatchModel.played_at.desc()).limit(20).all()
     return matches
 
 
@@ -276,9 +332,22 @@ def update_match(
     if not match:
         raise HTTPException(status_code=404, detail="Partido no encontrado")
 
+    # Verify tournament ownership if provided
+    legacy_torneo = None
+    if data.tournament_id is not None:
+        tournament = db.query(TournamentModel).filter(
+            TournamentModel.id == data.tournament_id,
+            TournamentModel.owner_id == current_user.id,
+        ).first()
+        if not tournament:
+            raise HTTPException(status_code=404, detail="Torneo no encontrado")
+        legacy_torneo = tournament.name
+
     # Update fields
     match.rival_nombre = data.rival_nombre
-    match.torneo = data.torneo
+    match.tournament_id = data.tournament_id
+    match.ronda = data.ronda
+    match.torneo = legacy_torneo  # may be None for amistosos
     match.resultado = data.resultado
     match.result = data.resultado  # keep legacy field in sync
     match.ganado = data.ganado
