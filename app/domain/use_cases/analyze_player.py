@@ -6,6 +6,10 @@ from app.domain.entities.player import Player
 from app.domain.entities.analysis import AnalysisResult
 from app.domain.value_objects.power_level import calculate_power_level
 from app.domain.value_objects.category import PlayerCategory
+from app.domain.value_objects.golpe_definitivo import (
+    find_strongest_stat,
+    nivel_amenaza_from_score,
+)
 
 
 @dataclass
@@ -20,8 +24,10 @@ class AnalyzePlayerUseCase:
     cache: object        # redis_cache o mock en tests
 
     def execute(self, player: Player) -> AnalysisResult:
-        # 1. Calcular poder de combate
+        # 1. Calcular poder de combate y golpe definitivo base
         power_level = calculate_power_level(player.stats, player.category)
+        stat_key, stat_label, stat_cat, stat_value = find_strongest_stat(player.stats)
+        nivel_amenaza = nivel_amenaza_from_score(stat_value)
 
         # 2. Preparar datos para IA
         player_data = {
@@ -46,6 +52,11 @@ class AnalyzePlayerUseCase:
             "torneos_jugados": player.stats.torneos_jugados,
             "victorias": player.stats.victorias,
             "puntos_ranking_fep": player.stats.puntos_ranking_fep,
+            "golpe_stat_key": stat_key,
+            "golpe_stat_label": stat_label,
+            "golpe_stat_categoria": stat_cat,
+            "golpe_puntuacion": stat_value,
+            "nivel_amenaza": nivel_amenaza,
         }
 
         # 3. Intentar cache primero
@@ -56,6 +67,12 @@ class AnalyzePlayerUseCase:
             ai_result = self.ai_client.analyze_player_with_ai(player_data)
             self.cache.set("analysis", player_data, ai_result)
 
+        golpe_nombre = ai_result.get("golpe_definitivo") or f"{stat_label} Definitivo"
+        golpe_descripcion = ai_result.get("descripcion_golpe") or (
+            f"Su {stat_label.lower()} alcanza un poder de {stat_value}/100. "
+            f"Una técnica {stat_cat} que desata energía pura sobre la pista."
+        )
+
         # 4. Construir resultado
         return AnalysisResult(
             player_id=player.id,
@@ -65,6 +82,8 @@ class AnalyzePlayerUseCase:
             strengths=ai_result.get("fortalezas", []),
             weaknesses=ai_result.get("debilidades", []),
             improvement_plan=ai_result.get("plan_mejora", ""),
-            golpe_definitivo=ai_result.get("golpe_definitivo", "Por determinar"),
-            nivel_amenaza=ai_result.get("nivel_amenaza", "MEDIO"),
+            golpe_definitivo=golpe_nombre,
+            golpe_descripcion=golpe_descripcion,
+            golpe_puntuacion=stat_value,
+            nivel_amenaza=nivel_amenaza,
         )

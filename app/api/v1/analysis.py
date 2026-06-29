@@ -72,6 +72,8 @@ def analyze_player(
         weaknesses=json.dumps(result.weaknesses),
         improvement_plan=result.improvement_plan,
         golpe_definitivo=result.golpe_definitivo,
+        golpe_descripcion=result.golpe_descripcion,
+        golpe_puntuacion=result.golpe_puntuacion,
         nivel_amenaza=result.nivel_amenaza,
     )
     db.add(analysis)
@@ -87,6 +89,10 @@ def analyze_player(
         strengths=json.loads(analysis.strengths),
         weaknesses=json.loads(analysis.weaknesses),
         improvement_plan=analysis.improvement_plan,
+        golpe_definitivo=analysis.golpe_definitivo,
+        golpe_descripcion=analysis.golpe_descripcion,
+        golpe_puntuacion=analysis.golpe_puntuacion,
+        nivel_amenaza=analysis.nivel_amenaza,
     )
 
 
@@ -109,6 +115,10 @@ def get_player_analyses(
             strengths=json.loads(a.strengths),
             weaknesses=json.loads(a.weaknesses),
             improvement_plan=a.improvement_plan,
+            golpe_definitivo=a.golpe_definitivo,
+            golpe_descripcion=a.golpe_descripcion,
+            golpe_puntuacion=a.golpe_puntuacion,
+            nivel_amenaza=a.nivel_amenaza,
         )
         for a in analyses
     ]

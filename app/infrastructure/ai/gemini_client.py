@@ -44,14 +44,19 @@ HISTORIAL COMPETITIVO:
 - Victorias: {victorias}
 - Puntos ranking FEP: {puntos_ranking_fep}
 
+GOLPE DEFINITIVO DETECTADO POR EL SCOUTER:
+- Habilidad más potente: {golpe_stat_label} ({golpe_stat_categoria})
+- Puntuación: {golpe_puntuacion}/100
+- Nivel de amenaza calculado: {nivel_amenaza}
+
 Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:
 {{
   "descripcion_epica": "Descripción narrativa épica del jugador (2-3 frases emocionantes)",
   "fortalezas": ["fortaleza 1", "fortaleza 2", "fortaleza 3"],
   "debilidades": ["debilidad 1", "debilidad 2"],
   "plan_mejora": "Plan de mejora específico y detallado para subir al siguiente nivel",
-  "golpe_definitivo": "El golpe más característico y peligroso de este jugador",
-  "nivel_amenaza": "BAJO | MEDIO | ALTO | EXTREMO"
+  "golpe_definitivo": "Nombre épico estilo Dragon Ball para el golpe basado en {golpe_stat_label} (ej: 'Kamehameha de Bandeja', 'Smash del Infinito')",
+  "descripcion_golpe": "Descripción cinematográfica de 2-3 frases estilo Dragon Ball del golpe {golpe_stat_label}, mencionando su poder destructivo, aura de energía y sensación de amenaza nivel {nivel_amenaza}. Sé espectacular y dramático."
 }}
 """
 
@@ -60,8 +65,8 @@ FALLBACK_RESPONSE = {
     "fortalezas": ["Técnica en desarrollo", "Actitud competitiva", "Potencial de mejora"],
     "debilidades": ["Análisis IA no disponible temporalmente"],
     "plan_mejora": "El servicio de IA está saturado o no disponible. Inténtalo de nuevo en unos minutos.",
-    "golpe_definitivo": "Por determinar",
-    "nivel_amenaza": "MEDIO",
+    "golpe_definitivo": "Golpe en análisis",
+    "descripcion_golpe": "El Scouter detecta un golpe definitivo en desarrollo. Análisis IA temporalmente no disponible.",
 }
 
 

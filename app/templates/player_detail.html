@@ -41,6 +41,34 @@
     }
     .sss-glow { animation: sssGlow 2s ease-in-out infinite; }
 
+
+    .dragon-ball {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+    .dragon-ball svg { width: 100%; height: 100%; }
+
+    @keyframes starTwinkle {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.1; }
+    }
+    .db-balls-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        flex-wrap: nowrap;
+        padding: 4px 0;
+        min-height: 38px;
+    }
+    .db-separator {
+        height: 1px;
+        background: rgba(42,42,58,0.7);
+        margin: 0 0 18px;
+    }
+
     @keyframes pulseRing {
         0% { transform: scale(0.85); opacity: 1; }
         100% { transform: scale(1.6); opacity: 0; }
@@ -90,6 +118,99 @@
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: #0A0A0F; }
     ::-webkit-scrollbar-thumb { background: #FF6B0044; border-radius: 3px; }
+
+    /* Shenron */
+    #shenron-section {
+        padding-top: 14px;
+        padding-bottom: 4px;
+    }
+    #shenron-section > * + * {
+        margin-top: 18px;
+    }
+    .shenron-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 0;
+        overflow: hidden;
+    }
+    .shenron-svg {
+        width: 180px;
+        height: auto;
+        max-height: 100px;
+        flex-shrink: 0;
+        object-fit: contain;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(46,125,50,0.25);
+    }
+    @keyframes shenronAppear {
+        0% { opacity: 0; transform: scale(0.7); }
+        60% { transform: scale(1.05); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes shenronBreath {
+        0%, 100% { filter: drop-shadow(0 0 10px rgba(46,125,50,0.5)) drop-shadow(0 0 25px rgba(46,125,50,0.25)) drop-shadow(0 0 50px rgba(46,125,50,0.08)); }
+        50% { filter: drop-shadow(0 0 20px rgba(46,125,50,0.85)) drop-shadow(0 0 45px rgba(46,125,50,0.5)) drop-shadow(0 0 80px rgba(46,125,50,0.2)); }
+    }
+    .shenron-visible {
+        animation: shenronAppear 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    .shenron-visible .shenron-svg {
+        animation: shenronBreath 4s ease-in-out infinite;
+    }
+
+    .shenron-gif {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        display: block;
+        animation: gokuGlow 3s ease-in-out infinite;
+    }
+    @keyframes gokuGlow {
+        0%, 100% { filter: drop-shadow(0 0 8px rgba(255,255,255,0.3)) drop-shadow(0 0 20px rgba(255,255,255,0.1)); }
+        50% { filter: drop-shadow(0 0 16px rgba(255,255,255,0.6)) drop-shadow(0 0 35px rgba(255,255,255,0.3)) drop-shadow(0 0 60px rgba(255,255,255,0.1)); }
+    }
+    .mrsatan-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        display: block;
+        animation: satanGlow 3s ease-in-out infinite;
+    }
+    @keyframes satanGlow {
+        0%, 100% { filter: drop-shadow(0 0 8px rgba(59,130,246,0.3)) drop-shadow(0 0 20px rgba(59,130,246,0.1)); }
+        50% { filter: drop-shadow(0 0 16px rgba(59,130,246,0.6)) drop-shadow(0 0 35px rgba(59,130,246,0.3)) drop-shadow(0 0 60px rgba(59,130,246,0.1)); }
+    }
+    .gohan-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        display: block;
+        animation: gohanGlow 3s ease-in-out infinite;
+    }
+    @keyframes gohanGlow {
+        0%, 100% { filter: drop-shadow(0 0 8px rgba(234,179,8,0.3)) drop-shadow(0 0 20px rgba(234,179,8,0.1)); }
+        50% { filter: drop-shadow(0 0 16px rgba(234,179,8,0.6)) drop-shadow(0 0 35px rgba(234,179,8,0.3)) drop-shadow(0 0 60px rgba(234,179,8,0.1)); }
+    }
+    .goku4-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        display: block;
+        animation: goku4Glow 3s ease-in-out infinite;
+    }
+    @keyframes goku4Glow {
+        0%, 100% { filter: drop-shadow(0 0 8px rgba(220,38,38,0.3)) drop-shadow(0 0 20px rgba(220,38,38,0.1)); }
+        50% { filter: drop-shadow(0 0 16px rgba(220,38,38,0.6)) drop-shadow(0 0 35px rgba(220,38,38,0.3)) drop-shadow(0 0 60px rgba(220,38,38,0.1)); }
+    }
+    /* Block Pinterest extension overlay completely */
+    #shenron-section [class*="PIN"] { display: none !important; }
+    #shenron-section [class*="pin"] { display: none !important; }
+    #shenron-section a[data-pin-log] { display: none !important; }
+    #shenron-section a[data-pin-hover] { display: none !important; }
+    #shenron-section div[data-test-id="pin"] { display: none !important; }
+    #shenron-section button[class*="save"] { display: none !important; }
+    #shenron-section button[class*="Save"] { display: none !important; }
 </style>
 
 <!-- Fixed background -->
@@ -132,22 +253,31 @@
                     <div class="gradient-border rounded-2xl card-hover" style="background:#12121A;overflow:visible;">
                         <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#FF6B00,transparent);"></div>
                         <div class="p-6">
-                            <!-- Avatar -->
-                            <div class="flex justify-center mb-5">
-                                <div class="pulse-ring">
-                                    <div class="w-24 h-24 rounded-full ki-charge flex items-center justify-center text-4xl" style="border:2px solid rgba(255,107,0,0.5);background:#1A1A25;">
-                                        🎾
+                            <!-- Avatar (click to upload) -->
+                            <div class="flex justify-center mb-3">
+                                <div class="pulse-ring cursor-pointer group" onclick="document.getElementById('avatar-input').click();" title="Hacé clic para subir foto">
+                                    <div id="avatar-container" class="w-24 h-24 rounded-full ki-charge flex items-center justify-center text-4xl overflow-hidden relative" style="border:2px solid rgba(255,107,0,0.5);background:#1A1A25;">
+                                        <img id="avatar-img" src="" class="hidden w-full h-full object-cover" alt="Avatar" style="display:none;">
+                                        <span id="avatar-placeholder" class="text-4xl">🎾</span>
+                                        <div id="avatar-spinner" class="absolute inset-0 rounded-full bg-black/80 hidden flex items-center justify-center" style="z-index:5;">
+                                            <div class="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        </div>
                                     </div>
-                                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full" style="background:linear-gradient(90deg,#FF6B00,#FFD700);">
-                                        <span id="badge-category" class="text-black font-black text-xs tracking-wider">—</span>
+                                    <div class="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                                        <span class="text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">✏️</span>
                                     </div>
                                 </div>
                             </div>
+                            <input id="avatar-input" type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden" onchange="uploadAvatar(event)">
 
                             <!-- Name -->
-                            <div class="text-center mb-5 mt-4">
+                            <div class="text-center mb-2">
                                 <h1 id="player-name" class="text-xl font-bold text-white"></h1>
-                                <p id="player-cat-label" class="text-sm font-semibold mt-1" style="color:#FF6B00;"></p>
+                            </div>
+
+                            <!-- Category badge (debajo del nombre) -->
+                            <div class="text-center mb-5">
+                                <span id="badge-category" class="inline-block px-4 py-0.5 rounded-full text-black font-black text-xs tracking-wider" style="background:linear-gradient(90deg,#FF6B00,#FFD700);">—</span>
                             </div>
 
                             <!-- Power Level -->
@@ -194,32 +324,52 @@
                             <div class="flex items-center gap-2 mb-4">
                                 <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(255,215,0,0.6);">⚡ Golpe Definitivo</span>
                             </div>
-                            <div class="flex items-center justify-between mb-3">
-                                <h3 id="golpe-nombre" class="text-base font-bold text-white">—</h3>
-                                <span id="nivel-amenaza-badge" class="text-xl font-black sss-glow" style="color:#FFD700;">—</span>
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex-1">
+                                    <h3 id="golpe-nombre" class="text-xl font-bold text-white" style="font-family:'Rajdhani','Inter',sans-serif;letter-spacing:0.02em;">—</h3>
+                                    <div id="golpe-stat-sub" class="text-xs font-semibold mt-1" style="color:rgba(255,107,0,0.65);letter-spacing:0.05em;">—</div>
+                                </div>
+                                <span id="nivel-amenaza-badge" class="text-lg font-black sss-glow" style="font-family:'Rajdhani','Inter',sans-serif;color:#FFD700;white-space:nowrap;text-align:right;line-height:1.15;">—</span>
                             </div>
-                            <div class="mb-3">
-                                <div class="flex justify-between items-center mb-1.5">
-                                    <span class="text-xs" style="color:#94a3b8;">Nivel de amenaza</span>
-                                    <span id="nivel-amenaza-text" class="text-sm font-bold" style="color:#FFD700;">—</span>
+                            <p id="golpe-descripcion" class="hidden text-sm leading-relaxed mb-4 italic" style="color:rgba(203,213,225,0.82);line-height:1.65;"></p>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="text-xs" style="color:rgba(148,163,184,0.55);letter-spacing:0.05em;">Nivel de amenaza</span>
+                                <span id="nivel-amenaza-text" class="text-sm font-bold" style="font-family:'Rajdhani','Inter',sans-serif;color:#FFD700;">—</span>
+                            </div>
+                            <div class="h-2 rounded-full overflow-hidden mb-4" style="background:rgba(10,10,15,0.8);">
+                                <div id="amenaza-bar" class="h-full rounded-full" style="width:0%;background:linear-gradient(90deg,#FF6B00,#FFD700);position:relative;"></div>
+                            </div>
+                            <div class="db-separator"></div>
+                            <div id="dragon-balls-container" class="db-balls-row"></div>
+                            <div id="shenron-section" class="hidden">
+                                <div id="shenron-container" class="shenron-wrapper">
+                                    <div id="shenron-svg" class="shenron-svg"></div>
                                 </div>
-                                <div class="h-2.5 rounded-full overflow-hidden" style="background:#0A0A0F;">
-                                    <div id="amenaza-bar" class="h-full rounded-full fill-animate" style="background:linear-gradient(90deg,#FF6B00,#FFD700);width:0%;"></div>
+                                <div style="position:relative;display:flex;justify-content:center;">
+                                    <video id="goku-video" src="/static/video/Goku-Ultra-Instinct.mp4" class="shenron-gif" autoplay muted loop playsinline data-pin-nopin="true" disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback"></video>
+                                    <button id="unmute-btn" style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;z-index:5;" title="Activar sonido">🔇</button>
                                 </div>
                             </div>
-                            <!-- Dragon Ball stars decoración -->
-                            <div class="flex justify-center gap-2 mt-4 pt-3" style="border-top:1px solid rgba(42,42,58,0.5);">
-                                {% for i in range(4) %}
-                                <div class="w-6 h-6 rounded-full flex items-center justify-center" style="background:linear-gradient(135deg,#f97316,#c2410c);box-shadow:0 0 8px rgba(249,115,22,0.3);">
-                                    <div style="width:3px;height:3px;background:#ff2d2d;border-radius:50%;box-shadow:0 0 3px #ff2d2d;"></div>
+                            <div id="mrsatan-section" class="hidden" style="padding-top:14px;padding-bottom:4px;">
+                                <div style="position:relative;display:flex;justify-content:center;">
+                                    <img src="/static/images/MrSatan.JPG" class="mrsatan-img" alt="Mr. Satan">
                                 </div>
-                                {% endfor %}
+                            </div>
+                            <div id="gohan-section" class="hidden" style="padding-top:14px;padding-bottom:4px;">
+                                <div style="position:relative;display:flex;justify-content:center;">
+                                    <img src="/static/images/Gohan-SuperSaiyajin2.JPG" class="gohan-img" alt="Gohan SSJ2">
+                                </div>
+                            </div>
+                            <div id="goku4-section" class="hidden" style="padding-top:14px;padding-bottom:4px;">
+                                <div style="position:relative;display:flex;justify-content:center;">
+                                    <img src="/static/images/Goku-SuperSayajin4.JPG" class="goku4-img" alt="Goku SSJ4">
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Análisis IA Card -->
-                    <div id="ai-desc-card" class="rounded-2xl hidden" style="background:#12121A;border:1px solid rgba(59,130,246,0.15);overflow:hidden;">
+                    <div id="ai-desc-card" class="rounded-2xl card-hover hidden" style="background:#12121A;border:1px solid rgba(59,130,246,0.15);overflow:hidden;">
                         <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#3B82F6,transparent);"></div>
                         <div class="p-5">
                             <div class="flex items-center gap-2 mb-3">
@@ -471,9 +621,9 @@
                                             <span id="val-vibora" class="text-xs font-bold" style="color:#06B6D4;">—</span>
                                         </div>
                                         <!-- Botón Ver estadísticas completas -->
-                                        <div class="flex justify-end">
+                                        <div class="flex justify-start pt-2">
                                             <button onclick="openStatsModal()"
-                                                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+                                                    class="flex items-center gap-2 ml-2 px-3 py-2 rounded-xl text-xs font-bold transition-all"
                                                     style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.2);color:#FF6B00;">
                                                 📊 Ver todas las estadísticas
                                             </button>
@@ -485,7 +635,7 @@
                         </div>
                     </div>
                     <!-- Historial de combate -->
-                    <div id="matches-section" class="rounded-2xl hidden" style="background:#12121A;border:1px solid rgba(168,85,247,0.15);overflow:hidden;">
+                    <div id="matches-section" class="rounded-2xl card-hover hidden" style="background:#12121A;border:1px solid rgba(168,85,247,0.15);overflow:hidden;">
                         <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-5">
@@ -526,7 +676,7 @@
                                     <div id="torneo-fields" class="hidden space-y-3 p-3 rounded-xl" style="background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.1);">
                                         <div>
                                             <label class="text-xs text-gray-500 mb-1 block">Nombre del torneo</label>
-                                            <input id="m-torneo-nombre" type="text" placeholder="ej: Liga Local 2026"
+                                            <input id="m-torneo-nombre" type="text" placeholder="ej: Liga Local 2026" required
                                                 class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
                                                 style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
                                         </div>
@@ -640,7 +790,7 @@
                     </div>
 
                     <!-- Plan de mejora -->
-                    <div id="plan-card" class="rounded-2xl hidden" style="background:#12121A;border:1px solid rgba(59,130,246,0.1);overflow:hidden;">
+                    <div id="plan-card" class="rounded-2xl card-hover hidden" style="background:#12121A;border:1px solid rgba(59,130,246,0.1);overflow:hidden;">
                         <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#3B82F6,transparent);"></div>
                         <div class="p-5">
                             <div class="flex items-center gap-2 mb-3">
@@ -847,7 +997,9 @@ function renderPlayer(p, analyses) {
     };
     const catDisplay = catLabels[p.category] || p.category;
     document.getElementById('badge-category').textContent = catDisplay;
-    document.getElementById('player-cat-label').textContent = catDisplay;
+
+    // Avatar
+    setAvatar(p.avatar_url);
 
     // Quick stats & Win Rate (CORREGIDO)
     const torneos = p.torneos_jugados || 0;
@@ -927,24 +1079,304 @@ function renderPlayer(p, analyses) {
         document.getElementById('plan-card').classList.remove('hidden');
         document.getElementById('improvement-plan').textContent = latest.improvement_plan;
 
-        // Golpe definitivo
-        document.getElementById('golpe-card').classList.remove('hidden');
-        document.getElementById('golpe-nombre').textContent = latest.golpe_definitivo || 'Por determinar';
-
-        // Amenaza
-        const amenazaMap = { 'BAJO': { label:'BAJO', pct:'25', color:'#6b7280' }, 'MEDIO': { label:'MEDIO', pct:'50', color:'#f59e0b' }, 'ALTO': { label:'ALTO', pct:'75', color:'#ef4444' }, 'EXTREMO': { label:'EXTREMO', pct:'100', color:'#FFD700' } };
-        const amenaza = amenazaMap[latest.nivel_amenaza] || amenazaMap['MEDIO'];
-        document.getElementById('nivel-amenaza-badge').textContent = amenaza.label;
-        document.getElementById('nivel-amenaza-badge').style.color = amenaza.color;
-        document.getElementById('nivel-amenaza-text').textContent = amenaza.label;
-        document.getElementById('nivel-amenaza-text').style.color = amenaza.color;
-        document.getElementById('amenaza-bar').style.width = amenaza.pct + '%';
-        document.getElementById('amenaza-bar').style.background = `linear-gradient(90deg, #FF6B00, ${amenaza.color})`;
-
     } else {
         document.getElementById('power-display').textContent = '???';
         document.getElementById('no-analysis-cta').classList.remove('hidden');
     }
+
+    // Golpe definitivo (stats del jugador + análisis IA si existe)
+    renderGolpeDefinitivo(latest, p);
+}
+
+const SCOUTER_STAT_FIELDS = [
+    ['derecha','Derecha'], ['reves','Revés'], ['volea','Volea'], ['bandeja','Bandeja'],
+    ['vibora','Víbora'], ['smash','Smash'], ['lob','Lob'], ['saque','Saque'],
+    ['bajada_pared','Bajada de pared'], ['velocidad','Velocidad'], ['resistencia','Resistencia'],
+    ['reflejos','Reflejos'], ['tactica','Táctica'], ['presion','Presión'],
+    ['trabajo_en_pareja','Trabajo en pareja'],
+];
+
+function findStrongestStatFromPlayer(p) {
+    let best = { key: 'derecha', label: 'Derecha', value: p.derecha ?? 0 };
+    for (const [key, label] of SCOUTER_STAT_FIELDS) {
+        const val = p[key] ?? 0;
+        if (val > best.value) best = { key, label, value: val };
+    }
+    return best;
+}
+
+function nivelAmenazaFromScore(score) {
+    if (score >= 90) return 'MUY ALTO';
+    if (score >= 70) return 'ALTO';
+    if (score >= 50) return 'MEDIO';
+    return 'BAJO';
+}
+
+function dragonBallCount(nivel) {
+    return { 'BAJO': 1, 'MEDIO': 3, 'ALTO': 5, 'MUY ALTO': 7 }[nivel] || 1;
+}
+
+function renderDragonBalls(nivel) {
+    const count = dragonBallCount(nivel);
+    const sz = 44;
+    const cx = sz/2, cy = sz/2, r = sz/2 - 1.5;
+
+    // Star positions for 1 through 7 stars (matches dragon ball canon)
+    const starPositions = [
+        [[cx,cy]],
+        [[cx-4,cy],[cx+4,cy]],
+        [[cx-5,cy-3],[cx+5,cy-3],[cx,cy+4]],
+        [[cx-5,cy-4],[cx+5,cy-4],[cx-5,cy+4],[cx+5,cy+4]],
+        [[cx,cy-6],[cx-5,cy-1],[cx+5,cy-1],[cx-3,cy+5],[cx+3,cy+5]],
+        [[cx-4,cy-7],[cx+4,cy-7],[cx-7,cy],[cx+7,cy],[cx-4,cy+6],[cx+4,cy+6]],
+        [[cx,cy-7],[cx-5,cy-4],[cx+5,cy-4],[cx-7,cy+1],[cx+7,cy+1],[cx-3,cy+6],[cx+3,cy+6]],
+    ];
+
+    function starPath(px, py, r5) {
+        let d = '';
+        for (let i = 0; i < 10; i++) {
+            const a = (i * Math.PI / 5) - Math.PI / 2;
+            const rr = i % 2 === 0 ? r5 : r5 * 0.42;
+            const x = px + Math.cos(a) * rr, y = py + Math.sin(a) * rr;
+            d += (i === 0 ? 'M' : 'L') + x.toFixed(2) + ' ' + y.toFixed(2);
+        }
+        return d + 'Z';
+    }
+
+    let html = '';
+    for (let i = 1; i <= count; i++) {
+        const uid = i + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+        const pos = starPositions[i-1] || starPositions[0];
+        const sr = i <= 2 ? 5.0 : i <= 4 ? 4.0 : 3.6;
+        const stars = pos.map(([px, py]) =>
+            `<path d="${starPath(px, py, sr)}" fill="#e60000" stroke="#fff" stroke-width="1" style="animation:starTwinkle 1.8s ease-in-out infinite;animation-delay:${(i-1)*0.15}s"/>`
+        ).join('');
+
+        html += `
+            <div class="dragon-ball">
+                <svg viewBox="0 0 ${sz} ${sz}" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="bsph${uid}" cx="40%" cy="34%" r="66%">
+                            <stop offset="0%"   stop-color="#ffffff"/>
+                            <stop offset="10%"  stop-color="#fff3d6"/>
+                            <stop offset="28%"  stop-color="#ffe082"/>
+                            <stop offset="52%"  stop-color="#ffcc66"/>
+                            <stop offset="75%"  stop-color="#ffa726"/>
+                            <stop offset="100%" stop-color="#ff8f00"/>
+                        </radialGradient>
+                        <radialGradient id="bshs${uid}" cx="64%" cy="66%" r="48%">
+                            <stop offset="0%"  stop-color="#5a1500" stop-opacity="0.18"/>
+                            <stop offset="100%" stop-color="#5a1500" stop-opacity="0"/>
+                        </radialGradient>
+                        <radialGradient id="bhl${uid}" cx="28%" cy="22%" r="30%">
+                            <stop offset="0%"  stop-color="#fff" stop-opacity="0.95"/>
+                            <stop offset="35%" stop-color="#fff" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                        </radialGradient>
+                        <radialGradient id="bhl2${uid}" cx="72%" cy="74%" r="18%">
+                            <stop offset="0%"  stop-color="#ffab40" stop-opacity="0.2"/>
+                            <stop offset="100%" stop-color="#ffab40" stop-opacity="0"/>
+                        </radialGradient>
+                        <radialGradient id="bhl3${uid}" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%"  stop-color="#fff" stop-opacity="0.12"/>
+                            <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#bsph${uid})"/>
+                    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#bshs${uid})"/>
+                    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#bhl3${uid})"/>
+                    ${stars}
+                    <ellipse cx="${cx-4}" cy="${cy-5}" rx="7" ry="4.5" fill="url(#bhl${uid})"/>
+                    <circle cx="${cx+6}" cy="${cy+6}" r="4" fill="url(#bhl2${uid})"/>
+                    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+                </svg>
+            </div>`;
+    }
+    return html;
+}
+
+function renderShenron() {
+    const src = '/static/images/dragon-ball-shenron.png';
+    return `<img src="${src}" alt="Shenron" style="width:100%;height:auto;display:block;">`;
+}
+
+function renderGolpeDefinitivo(latest, player) {
+    const card = document.getElementById('golpe-card');
+    if (!card || !player) return;
+
+    let puntuacion, nombre, descripcion, nivel, statLabel;
+
+    if (latest?.golpe_puntuacion != null) {
+        puntuacion = latest.golpe_puntuacion;
+        nombre = latest.golpe_definitivo || 'Por determinar';
+        descripcion = latest.golpe_descripcion || '';
+        nivel = latest.nivel_amenaza || nivelAmenazaFromScore(puntuacion);
+        // Get the stat label from the player's strongest stat
+        const best = findStrongestStatFromPlayer(player);
+        statLabel = best.label;
+    } else {
+        const best = findStrongestStatFromPlayer(player);
+        puntuacion = best.value;
+        nombre = latest?.golpe_definitivo || `${best.label} Definitivo`;
+        descripcion = latest?.golpe_descripcion || '';
+        nivel = latest?.nivel_amenaza || nivelAmenazaFromScore(puntuacion);
+        statLabel = best.label;
+    }
+
+    if (nivel === 'EXTREMO') nivel = 'MUY ALTO';
+    nivel = nivelAmenazaFromScore(puntuacion);
+
+    const amenazaMap = {
+        'BAJO':     { label: 'BAJO',     color: '#6b7280' },
+        'MEDIO':    { label: 'MEDIO',    color: '#f59e0b' },
+        'ALTO':     { label: 'ALTO',     color: '#ef4444' },
+        'MUY ALTO': { label: 'MUY ALTO', color: '#FFD700' },
+    };
+    const amenaza = amenazaMap[nivel] || amenazaMap['MEDIO'];
+
+    card.classList.remove('hidden');
+    document.getElementById('golpe-nombre').textContent = nombre;
+    document.getElementById('golpe-stat-sub').textContent = `${statLabel} · ${puntuacion}/100`;
+    document.getElementById('nivel-amenaza-badge').textContent = amenaza.label;
+    document.getElementById('nivel-amenaza-badge').style.color = amenaza.color;
+    document.getElementById('nivel-amenaza-text').textContent = amenaza.label;
+    document.getElementById('nivel-amenaza-text').style.color = amenaza.color;
+    document.getElementById('amenaza-bar').style.width = puntuacion + '%';
+    document.getElementById('amenaza-bar').style.background = `linear-gradient(90deg, #FF6B00, ${amenaza.color})`;
+
+    const descEl = document.getElementById('golpe-descripcion');
+    if (descripcion) {
+        descEl.textContent = descripcion;
+        descEl.classList.remove('hidden');
+    } else {
+        descEl.textContent = '';
+        descEl.classList.add('hidden');
+    }
+
+    const ballsContainer = document.getElementById('dragon-balls-container');
+    if (ballsContainer) ballsContainer.innerHTML = renderDragonBalls(nivel);
+
+    const shenronSection = document.getElementById('shenron-section');
+    const shenronContainer = document.getElementById('shenron-container');
+    const shenronSvg = document.getElementById('shenron-svg');
+    const mrsatanSection = document.getElementById('mrsatan-section');
+    const gohanSection = document.getElementById('gohan-section');
+    const goku4Section = document.getElementById('goku4-section');
+    if (nivel === 'MUY ALTO') {
+        if (shenronSvg) shenronSvg.innerHTML = renderShenron();
+        if (shenronContainer) shenronContainer.classList.add('shenron-visible');
+        if (shenronSection) shenronSection.classList.remove('hidden');
+    } else {
+        if (shenronContainer) shenronContainer.classList.remove('shenron-visible');
+        if (shenronSection) shenronSection.classList.add('hidden');
+    }
+    if (nivel === 'BAJO') {
+        if (mrsatanSection) mrsatanSection.classList.remove('hidden');
+    } else {
+        if (mrsatanSection) mrsatanSection.classList.add('hidden');
+    }
+    if (nivel === 'MEDIO') {
+        if (gohanSection) gohanSection.classList.remove('hidden');
+    } else {
+        if (gohanSection) gohanSection.classList.add('hidden');
+    }
+    if (nivel === 'ALTO') {
+        if (goku4Section) goku4Section.classList.remove('hidden');
+    } else {
+        if (goku4Section) goku4Section.classList.add('hidden');
+    }
+}
+
+// ── Avatar Upload ─────────────────────────────────────────────
+function uploadAvatar(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Client-side validation
+    const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
+    if (!allowed.includes(file.type)) {
+        showToast('Formato no permitido. Usá JPG, PNG, GIF o WebP.', 'error');
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('La imagen es demasiado grande (máx 5MB).', 'error');
+        return;
+    }
+
+    // Show spinner overlay WITHOUT destroying the DOM
+    const spinner = document.getElementById('avatar-spinner');
+    spinner.classList.remove('hidden');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch(`/api/v1/players/${playerId}/avatar`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+    })
+    .then(r => {
+        if (!r.ok) return r.json().then(e => { throw new Error(e.detail || 'Error al subir') });
+        return r.json();
+    })
+    .then(p => {
+        // Image needs a cache-buster bust most browsers will see the same URL
+        const cacheBuster = p.avatar_url + (p.avatar_url.includes('?') ? '&' : '?') + Date.now();
+        return new Promise((resolve, reject) => {
+            setAvatar(cacheBuster, () => {
+                showToast('✅ Foto actualizada', 'success');
+                spinner.classList.add('hidden');
+                resolve();
+            });
+        });
+    })
+    .catch(err => {
+        spinner.classList.add('hidden');
+        showToast(err.message, 'error');
+        setAvatar(null); // back to placeholder
+    });
+}
+
+function setAvatar(url, onload) {
+    const img = document.getElementById('avatar-img');
+    const placeholder = document.getElementById('avatar-placeholder');
+    if (url) {
+        img.onload = function() {
+            img.classList.remove('hidden');
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
+            if (onload) onload();
+        };
+        img.onerror = function() {
+            // fallback to placeholder
+            img.classList.add('hidden');
+            img.style.display = 'none';
+            placeholder.style.display = 'block';
+            if (onload) onload();
+        };
+        img.src = url;
+    } else {
+        img.onload = null;
+        img.onerror = null;
+        img.src = '';
+        img.classList.add('hidden');
+        img.style.display = 'none';
+        placeholder.style.display = 'block';
+        if (onload) onload();
+    }
+}
+
+// ── Toast system ──────────────────────────────────────────────
+function showToast(msg, type) {
+    const existing = document.querySelector('.toast-msg');
+    if (existing) existing.remove();
+    const div = document.createElement('div');
+    div.className = 'toast-msg fixed top-4 right-4 px-5 py-3 rounded-xl text-sm font-bold z-[9999] shadow-2xl';
+    div.style.background = type === 'error' ? '#dc2626' : '#16a34a';
+    div.style.color = '#fff';
+    div.textContent = msg;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
 }
 
 // ── Load Data ─────────────────────────────────────────────────
@@ -1110,27 +1542,54 @@ function closeEditModal() {
     document.getElementById('edit-modal').classList.add('hidden');
 }
 
+function sanitizeEditPlayerNumbers() {
+    document.querySelectorAll('#edit-modal input[type="number"]').forEach(el => {
+        el.addEventListener('input', () => {
+            el.value = el.value.replace(/[^0-9]/g, '');
+        });
+    });
+}
+
 async function saveAndAnalyze() {
     const btn = document.getElementById('btn-save');
     const errEl = document.getElementById('edit-error');
     errEl.classList.add('hidden');
+
+    const name = document.getElementById('edit-name').value.trim();
+    if (!name) {
+        errEl.textContent = 'El nombre del jugador es obligatorio.';
+        errEl.classList.remove('hidden');
+        return;
+    }
 
     const stats = {};
     const statFields = ['derecha','reves','volea','bandeja','vibora','smash','lob','saque',
         'bajada_pared','velocidad','resistencia','reflejos','tactica','presion',
         'trabajo_en_pareja','torneos_jugados','victorias','puntos_ranking_fep'];
 
-    // Validar que todos los valores estén entre 0 y 100
     for (const f of statFields) {
-        const val = parseInt(document.getElementById(`e-${f}`)?.value || 0);
-        if (f !== 'torneos_jugados' && f !== 'victorias' && f !== 'puntos_ranking_fep') {
-            if (val < 0 || val > 100) {
-                errEl.textContent = `El valor de "${f}" debe estar entre 0 y 100`;
+        const raw = document.getElementById(`e-${f}`)?.value ?? '';
+        const value = Number(raw);
+
+        if (!Number.isFinite(value) || raw.trim() === '' || !Number.isInteger(value)) {
+            errEl.textContent = `El valor de ${f.replace('_', ' ')} debe ser un número entero válido.`;
+            errEl.classList.remove('hidden');
+            return;
+        }
+
+        if (f === 'torneos_jugados' || f === 'victorias' || f === 'puntos_ranking_fep') {
+            if (value < 0) {
+                errEl.textContent = `El valor de ${f.replace('_', ' ')} no puede ser negativo.`;
                 errEl.classList.remove('hidden');
                 return;
             }
+        } else if (value < 0 || value > 100) {
+            errEl.textContent = `El valor de ${f.replace('_', ' ')} debe estar entre 0 y 100.`;
+            errEl.classList.remove('hidden');
+            return;
         }
-        stats[f] = val;
+
+        stats[f] = value;
     }
 
     btn.textContent = '⏳ Guardando...';
@@ -1139,7 +1598,7 @@ async function saveAndAnalyze() {
 
     try {
         const body = {
-            name: document.getElementById('edit-name').value.trim(),
+            name,
             category: document.getElementById('edit-category').value,  // ya es el enum: "PRIMERA"
             stats
         };
@@ -1196,6 +1655,13 @@ async function loadMatches() {
     renderMatches(matches);
 }
 
+function getMatchTypeBadge(torneo) {
+    const isTorneo = torneo && torneo.trim() !== '';
+    return isTorneo
+        ? { text: 'Torneo', color: '#FFD700', bgColor: 'rgba(255,215,0,0.1)' }
+        : { text: 'Amistoso', color: '#FF6B00', bgColor: 'rgba(255,107,0,0.1)' };
+}
+
 function renderMatches(matches) {
     loadedMatches = matches || [];
     const container = document.getElementById('matches-section');
@@ -1216,6 +1682,7 @@ function renderMatches(matches) {
         const label   = ganado ? 'W' : 'L';
         const badgeColor = ganado ? 'rgba(0,255,135,0.1)' : 'rgba(255,45,45,0.1)';
         const badgeText  = ganado ? 'Victoria' : 'Derrota';
+        const typeBadge  = getMatchTypeBadge(m.torneo);
         const fecha = new Date(m.played_at).toLocaleDateString('es-ES', {day:'numeric', month:'short'});
         const rival   = m.rival_nombre || 'Rival';
         const resultado = m.resultado || m.result || '—';
@@ -1233,12 +1700,22 @@ function renderMatches(matches) {
                 <div class="flex items-center gap-2 flex-wrap">
                     <p class="text-sm font-semibold text-white">vs. ${rival}</p>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
+                          style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
+                    <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
                           style="background:${badgeColor};color:${color};">${badgeText}</span>
                 </div>
                 <p class="text-xs mt-0.5" style="color:#475569;">${scoring} ${torneo} · ${fecha}</p>
             </div>
-            <div class="text-right flex-shrink-0">
-                <p class="text-sm font-bold text-white">${resultado}</p>
+            <div class="text-right flex-shrink-0 flex items-center gap-2">
+                <p class="text-sm font-bold text-white mr-2">${resultado}</p>
+                <button onclick="openEditMatchModal('${m.id}')" 
+                        class="px-2 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
+                        style="background:rgba(255,107,0,0.2);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;"
+                        title="Editar partido">✏️</button>
+                <button onclick="deleteMatch('${m.id}')" 
+                        class="px-2 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
+                        style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;"
+                        title="Eliminar partido">🗑️</button>
             </div>
         </div>`;
     }).join('');
@@ -1280,6 +1757,7 @@ function renderFullMatchHistory(matches) {
         const label   = ganado ? 'W' : 'L';
         const badgeColor = ganado ? 'rgba(0,255,135,0.1)' : 'rgba(255,45,45,0.1)';
         const badgeText  = ganado ? 'Victoria' : 'Derrota';
+        const typeBadge  = getMatchTypeBadge(m.torneo);
         const fecha = new Date(m.played_at).toLocaleDateString('es-ES', {day:'numeric', month:'short'});
         const rival   = m.rival_nombre || 'Rival';
         const resultado = m.resultado || m.result || '—';
@@ -1296,12 +1774,22 @@ function renderFullMatchHistory(matches) {
                 <div class="flex items-center gap-2 flex-wrap">
                     <p class="text-sm font-semibold text-white">vs. ${rival}</p>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
+                          style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
+                    <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
                           style="background:${badgeColor};color:${color};">${badgeText}</span>
                 </div>
                 <p class="text-xs mt-0.5" style="color:#475569;">${scoring} ${torneo} · ${fecha}</p>
             </div>
-            <div class="text-right flex-shrink-0">
-                <p class="text-sm font-bold text-white">${resultado}</p>
+            <div class="text-right flex-shrink-0 flex items-center gap-2">
+                <p class="text-sm font-bold text-white mr-2">${resultado}</p>
+                <button onclick="openEditMatchModal('${m.id}')" 
+                        class="px-2 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
+                        style="background:rgba(255,107,0,0.2);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;"
+                        title="Editar partido">✏️</button>
+                <button onclick="deleteMatch('${m.id}')" 
+                        class="px-2 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
+                        style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;"
+                        title="Eliminar partido">🗑️</button>
             </div>
         </div>`;
     }).join('');
@@ -1320,6 +1808,12 @@ function openMatchModal() {
 function closeMatchModal() {
     resetMatchForm();
     document.getElementById('match-modal').classList.add('hidden');
+    // Reset button state
+    const btn = document.getElementById('btn-save-match');
+    if (btn) {
+        btn.dataset.matchId = '';
+        btn.textContent = '💾 Guardar partido';
+    }
 }
 
 function resetMatchForm() {
@@ -1397,10 +1891,6 @@ async function saveMatch() {
     console.log('saveMatch called');
     const tipoEl = document.getElementById('m-tipo');
     const tipo = tipoEl ? tipoEl.value : '';
-    let rivalEl;
-    if (tipo === 'amistoso') rivalEl = document.getElementById('m-rival') || document.getElementById('m-pareja-rival');
-    else rivalEl = document.getElementById('m-pareja-rival') || document.getElementById('m-rival');
-    const rival = rivalEl ? String(rivalEl.value || '').trim() : '';
     const resultadoEl = document.getElementById('m-resultado');
     const resultado = resultadoEl ? String(resultadoEl.value || '').trim().replace(/\s+/g, ' ') : '';
     const ganadoEl = document.getElementById('m-ganado');
@@ -1408,15 +1898,32 @@ async function saveMatch() {
     const errEl = document.getElementById('match-error');
     if (errEl) errEl.classList.add('hidden');
 
-    console.log('saveMatch inputs', { tipo, rival, resultado, ganado });
-
+    let rival = '';
     let torneoInfo = null;
+    
     if (tipo === 'torneo') {
         const nombre = document.getElementById('m-torneo-nombre').value.trim();
-        const ronda  = document.getElementById('m-ronda').value;
         const pareja = document.getElementById('m-pareja-rival').value.trim();
-        torneoInfo = `${nombre} · ${ronda}${pareja ? ' vs ' + pareja : ''}`;
+        
+        // Validar que el nombre del torneo sea requerido
+        if (!nombre) {
+            if (errEl) {
+                errEl.textContent = 'El nombre del torneo es requerido';
+                errEl.classList.remove('hidden');
+            }
+            console.warn('saveMatch validation failed: nombre torneo requerido');
+            return;
+        }
+        
+        rival = pareja; // For torneo, rival is the pareja
+        torneoInfo = pareja ? `${nombre} vs ${pareja}` : nombre;
+    } else {
+        // For amistoso
+        const rivalEl = document.getElementById('m-rival');
+        rival = rivalEl ? String(rivalEl.value || '').trim() : '';
     }
+
+    console.log('saveMatch inputs', { tipo, rival, resultado, ganado, torneoInfo });
 
     if (!rival || !resultado) {
         if (errEl) {
@@ -1452,8 +1959,14 @@ async function saveMatch() {
     btn.disabled = true;
 
     try {
-        const res = await fetch(`/api/v1/players/${playerId}/matches`, {
-            method: 'POST',
+        const matchId = btn.dataset.matchId; // Check if editing
+        const method = matchId ? 'PUT' : 'POST';
+        const url = matchId 
+            ? `/api/v1/players/${playerId}/matches/${matchId}`
+            : `/api/v1/players/${playerId}/matches`;
+
+        const res = await fetch(url, {
+            method: method,
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -1468,13 +1981,16 @@ async function saveMatch() {
         });
 
         if (res.ok) {
-            console.log('saveMatch: saved OK');
+            console.log(`saveMatch: ${matchId ? 'updated' : 'saved'} OK`);
             closeMatchModal();
             // Limpiar formulario
             if (document.getElementById('m-pareja-rival')) document.getElementById('m-pareja-rival').value = '';
             if (document.getElementById('m-rival')) document.getElementById('m-rival').value = '';
             if (document.getElementById('m-resultado')) document.getElementById('m-resultado').value = '';
             if (document.getElementById('m-torneo-nombre')) document.getElementById('m-torneo-nombre').value = '';
+            // Reset button state
+            btn.dataset.matchId = '';
+            btn.textContent = '💾 Guardar partido';
             await loadMatches();
         } else if (res.status === 401) {
             localStorage.clear();
@@ -1482,7 +1998,7 @@ async function saveMatch() {
             return;
         } else {
             const err = await res.json();
-            console.warn('saveMatch: server error', err);
+            console.warn(`saveMatch: server error (${method})`, err);
             if (errEl) {
                 if (Array.isArray(err.detail)) {
                     errEl.textContent = err.detail.map(e => e.msg).join('. ');
@@ -1506,6 +2022,7 @@ async function saveMatch() {
     }
 }
 
+sanitizeEditPlayerNumbers();
 loadPlayer();
 
 // Ensure save button is bound and won't submit forms accidentally
@@ -1537,5 +2054,136 @@ document.querySelectorAll('input[type="number"]').forEach(input => {
     });
 });
 
+// ===== MATCH EDIT/DELETE FUNCTIONS =====
+
+async function openEditMatchModal(matchId) {
+    if (!matchId || !playerId || !token) {
+        alert('Error: información del jugador faltante');
+        return;
+    }
+
+    try {
+        // Fetch the specific match details
+        const res = await fetch(`/api/v1/players/${playerId}/matches?filter=${matchId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+            if (res.status === 401) {
+                localStorage.clear();
+                window.location.href = '/login';
+            }
+            return;
+        }
+
+        const allMatches = await res.json();
+        const match = allMatches.find(m => m.id == matchId);
+        if (!match) {
+            alert('Partido no encontrado');
+            return;
+        }
+
+        // Pre-populate form fields
+        const isTorneo = match.torneo && match.torneo.trim() !== '';
+        document.getElementById('m-tipo').value = isTorneo ? 'torneo' : 'amistoso';
+        
+        if (isTorneo) {
+            // Parse torneo field: format could be "Name" or "Name vs Pareja"
+            const parts = match.torneo.split(' vs ');
+            const tourneyName = parts[0].trim();
+            const parejaRival = parts.length > 1 ? parts[1].trim() : '';
+            
+            document.getElementById('m-torneo-nombre').value = tourneyName;
+            if (document.getElementById('m-pareja-rival')) {
+                document.getElementById('m-pareja-rival').value = parejaRival;
+            }
+            if (document.getElementById('m-rival')) {
+                document.getElementById('m-rival').value = '';
+            }
+        } else {
+            document.getElementById('m-torneo-nombre').value = '';
+            if (document.getElementById('m-pareja-rival')) {
+                document.getElementById('m-pareja-rival').value = '';
+            }
+            // For amistoso, use rival_nombre
+            if (match.rival_nombre && document.getElementById('m-rival')) {
+                document.getElementById('m-rival').value = match.rival_nombre;
+            }
+        }
+        
+        // Call toggleTorneo to show/hide appropriate fields
+        toggleTorneo();
+
+        document.getElementById('m-resultado').value = match.resultado || '';
+        document.getElementById('m-ganado').checked = match.ganado || false;
+        document.getElementById('m-scoring').value = match.scoring_method || 'con_ventaja';
+
+        // Store the matchId for update
+        const btn = document.getElementById('btn-save-match');
+        btn.dataset.matchId = matchId;
+        btn.textContent = '✏️ Actualizar partido';
+
+        // Clear any previous errors
+        const errEl = document.getElementById('match-error-msg');
+        if (errEl) errEl.classList.add('hidden');
+
+        // Open modal
+        const modal = document.getElementById('match-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    } catch (e) {
+        console.error('openEditMatchModal error:', e);
+        alert('Error al cargar el partido');
+    }
+}
+
+async function deleteMatch(matchId) {
+    if (!matchId || !playerId || !token) {
+        alert('Error: información del jugador faltante');
+        return;
+    }
+
+    // Show confirmation dialog
+    const confirmed = confirm('¿Deseas eliminar el partido? Esta acción no se puede deshacer.');
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/v1/players/${playerId}/matches/${matchId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (res.ok) {
+            console.log('Match deleted successfully');
+            await loadMatches();
+        } else if (res.status === 401) {
+            localStorage.clear();
+            window.location.href = '/login';
+        } else {
+            const err = await res.json();
+            alert('Error al eliminar el partido: ' + (err.detail || 'Error desconocido'));
+        }
+    } catch (e) {
+        console.error('deleteMatch error:', e);
+        alert('Error de conexión al eliminar el partido');
+    }
+}
+
+// Mute toggle for Goku video
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('#unmute-btn');
+    if (!btn) return;
+    const video = document.getElementById('goku-video');
+    if (!video) return;
+    video.muted = !video.muted;
+    btn.textContent = video.muted ? '🔇' : '🔊';
+    btn.title = video.muted ? 'Activar sonido' : 'Silenciar';
+});
 </script>
 {% endblock %}

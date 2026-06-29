@@ -17,8 +17,8 @@ def mock_ai_result():
         "fortalezas": ["Bandeja letal", "Gran movilidad", "Saque potente"],
         "debilidades": ["Revés mejorable"],
         "plan_mejora": "Trabajar el revés 3 veces por semana.",
-        "golpe_definitivo": "Bandeja paralela",
-        "nivel_amenaza": "ALTO",
+        "golpe_definitivo": "Smash del Infinito",
+        "descripcion_golpe": "Una descarga de energía que parte la pista en dos.",
     }
 
 
@@ -103,6 +103,14 @@ class TestAnalyzePlayerUseCase:
         use_case = AnalyzePlayerUseCase(ai_client=mock_ai_client, cache=mock_cache_empty)
         use_case.execute(player_tercera)
         mock_cache_empty.set.assert_called_once()
+
+    def test_golpe_definitivo_desde_stats(self, player_tercera, mock_ai_client, mock_cache_empty):
+        use_case = AnalyzePlayerUseCase(ai_client=mock_ai_client, cache=mock_cache_empty)
+        result = use_case.execute(player_tercera)
+        assert result.golpe_puntuacion > 0
+        assert result.nivel_amenaza in ("BAJO", "MEDIO", "ALTO", "MUY ALTO")
+        assert len(result.golpe_definitivo) > 0
+        assert len(result.golpe_descripcion) > 0
 
     def test_cache_hit_no_guarda_de_nuevo(self, player_tercera, mock_ai_client, mock_cache_with_hit):
         use_case = AnalyzePlayerUseCase(ai_client=mock_ai_client, cache=mock_cache_with_hit)

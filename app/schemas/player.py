@@ -95,6 +95,7 @@ class PlayerPublicSchema(BaseModel):
     name:     str
     category: PlayerCategory
     owner_id: UUID
+    avatar_url: str | None = None
 
     derecha:      int = 50
     reves:        int = 50
@@ -130,6 +131,8 @@ class AnalysisPublicSchema(BaseModel):
     weaknesses:       list[str]
     improvement_plan: str
     golpe_definitivo: str | None = None
+    golpe_descripcion: str | None = None
+    golpe_puntuacion:  int | None = None
     nivel_amenaza:    str | None = None
 
     model_config = {"from_attributes": True}

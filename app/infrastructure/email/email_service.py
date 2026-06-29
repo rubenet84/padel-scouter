@@ -20,7 +20,7 @@ def send_welcome_email(to_email: str, username: str) -> bool:
         resend.Emails.send({
             "from": settings.emails_from,
             "to": [_get_recipient(to_email)],
-            "subject": f"🎾 Bienvenido a Padel Scouter{' [TEST - destinatario real: ' + to_email + ']' if settings.app_env == 'development' else ''}",
+            "subject": f"🎾 Bienvenido a Padel Scouter{' [TEST] ' + to_email if settings.app_env == 'development' else ''}",
             "html": f"""
             <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto;
                         background: #0f172a; color: #fff; padding: 40px; border-radius: 16px;">
@@ -71,7 +71,7 @@ def send_password_reset_email(to_email: str, reset_token: str, username: str) ->
         resend.Emails.send({
             "from": settings.emails_from,
             "to": [_get_recipient(to_email)],
-            "subject": f"🔐 Restablece tu contraseña — Padel Scouter{' [TEST]' if settings.app_env == 'development' else ''}",
+            "subject": f"🔐 Restablece tu contraseña — Padel Scouter{' TEST: ' + to_email if settings.app_env == 'development' else ''}",
             "html": f"""
             <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto;
                         background: #0f172a; color: #fff; padding: 40px; border-radius: 16px;">

@@ -61,6 +61,9 @@ class PlayerModel(Base):
     presion            = Column(Integer, default=50)
     trabajo_en_pareja  = Column(Integer, default=50)
 
+    # Avatar
+    avatar_url = Column(String(500), nullable=True)
+
     # Competitivo
     torneos_jugados    = Column(Integer, default=0)
     victorias          = Column(Integer, default=0)
@@ -84,6 +87,8 @@ class AnalysisModel(Base):
     weaknesses       = Column(Text, nullable=False)   # JSON string
     improvement_plan = Column(Text, nullable=False)
     golpe_definitivo = Column(Text, nullable=True)
+    golpe_descripcion = Column(Text, nullable=True)
+    golpe_puntuacion  = Column(Integer, nullable=True)
     nivel_amenaza    = Column(String(20), nullable=True)
     created_at       = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
 
