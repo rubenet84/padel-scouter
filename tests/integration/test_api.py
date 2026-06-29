@@ -52,13 +52,11 @@ def created_player(auth_headers):
         "name": "Test Player",
         "category": "3ª Categoría",
         "stats": {
-            "derecha": 70, "reves": 65, "volea": 60,
-            "bandeja": 55, "vibora": 50, "smash": 60,
-            "lob": 55, "saque": 65, "bajada_pared": 58,
+            "derecha": 70, "reves": 65, "volea_derecha": 60, "volea_reves": 60,
+            "bandeja": 55, "vibora": 50, "remate": 60,
+            "globo": 55, "saque": 65, "bajada_pared": 58,
             "velocidad": 70, "resistencia": 65, "reflejos": 68,
             "tactica": 62, "presion": 58, "trabajo_en_pareja": 65,
-            "torneos_jugados": 20, "victorias": 10,
-            "puntos_ranking_fep": 500,
         }
     }, headers=auth_headers)
     assert response.status_code == 201

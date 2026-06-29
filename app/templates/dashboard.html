@@ -49,7 +49,7 @@
 
             <p class="text-emerald-400 font-semibold text-sm mt-4">Estadísticas Técnicas</p>
             <div class="grid grid-cols-2 gap-3">
-                {% for stat in ['derecha','reves','volea','bandeja','vibora','smash','lob','saque','bajada_pared'] %}
+                {% for stat in ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared'] %}
                 <div>
                     <label class="text-gray-400 text-xs capitalize">{{ stat.replace('_',' ') }}</label>
                     <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
@@ -67,25 +67,6 @@
                            class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
                 </div>
                 {% endfor %}
-            </div>
-
-            <p class="text-emerald-400 font-semibold text-sm mt-4">Historial Competitivo</p>
-            <div class="grid grid-cols-3 gap-3">
-                <div>
-                    <label class="text-gray-400 text-xs">Torneos</label>
-                    <input id="s-torneos_jugados" type="number" value="0" min="0" inputmode="numeric" pattern="[0-9]*"
-                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
-                </div>
-                <div>
-                    <label class="text-gray-400 text-xs">Victorias</label>
-                    <input id="s-victorias" type="number" value="0" min="0" inputmode="numeric" pattern="[0-9]*"
-                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
-                </div>
-                <div>
-                    <label class="text-gray-400 text-xs">Puntos FEP</label>
-                    <input id="s-puntos_ranking_fep" type="number" value="0" min="0" inputmode="numeric" pattern="[0-9]*"
-                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
-                </div>
             </div>
 
             <div class="flex gap-3 mt-4">
@@ -121,9 +102,8 @@ if (!token) {
 }
 
 const STATS = [
-    'derecha','reves','volea','bandeja','vibora','smash','lob','saque','bajada_pared',
-    'velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja',
-    'torneos_jugados','victorias','puntos_ranking_fep'
+    'derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared',
+    'velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja'
 ];
 
 const CATEGORY_COLORS = {
@@ -149,7 +129,7 @@ function resetNewPlayerForm() {
     document.getElementById('p-name').value = '';
     document.getElementById('p-category').value = '3ª Categoría';
     STATS.forEach(s => {
-        document.getElementById(`s-${s}`).value = s === 'torneos_jugados' || s === 'victorias' || s === 'puntos_ranking_fep' ? '0' : '50';
+        document.getElementById(`s-${s}`).value = '50';
     });
     const errEl = document.getElementById('create-error');
     errEl.classList.add('hidden');
@@ -186,13 +166,15 @@ function renderPlayers(players) {
             </div>`;
         return;
     }
-    grid.innerHTML = players.map(p => `
+    grid.innerHTML = players.map(p => {
+        const safeName = p.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        return `
         <div class="bg-gray-900 border border-gray-800 hover:border-emerald-500/50
                     rounded-xl p-6 cursor-pointer transition"
              onclick="window.location.href='/player/${p.id}'">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <h3 class="font-bold text-lg">${p.name}</h3>
+                    <h3 class="font-bold text-lg">${safeName}</h3>
                     <span class="text-xs px-2 py-1 rounded-full mt-1 inline-block"
                           style="background:${CATEGORY_COLORS[p.category]}22;
                                  color:${CATEGORY_COLORS[p.category]}">
@@ -206,8 +188,8 @@ function renderPlayers(players) {
                            border-emerald-500/30 text-emerald-400 text-sm py-2 rounded-lg transition mt-2">
                 🔮 Analizar con IA
             </button>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 async function createPlayer() {
@@ -233,18 +215,10 @@ async function createPlayer() {
             return;
         }
 
-        if (s === 'torneos_jugados' || s === 'victorias' || s === 'puntos_ranking_fep') {
-            if (value < 0) {
-                errEl.textContent = `El valor de ${s.replace('_', ' ')} no puede ser negativo.`;
-                errEl.classList.remove('hidden');
-                return;
-            }
-        } else {
-            if (value < 0 || value > 100) {
-                errEl.textContent = `El valor de ${s.replace('_', ' ')} debe estar entre 0 y 100.`;
-                errEl.classList.remove('hidden');
-                return;
-            }
+        if (value < 0 || value > 100) {
+            errEl.textContent = `El valor de ${s.replace('_', ' ')} debe estar entre 0 y 100.`;
+            errEl.classList.remove('hidden');
+            return;
         }
 
         stats[s] = value;

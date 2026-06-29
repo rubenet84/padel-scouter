@@ -10,6 +10,7 @@ from app.infrastructure.ai.gemini_client import analyze_player_with_ai
 from app.infrastructure.cache.redis_client import redis_cache
 from app.domain.entities.player import Player, PlayerStats
 from app.domain.use_cases.analyze_player import AnalyzePlayerUseCase
+from app.domain.value_objects.computed_stats import get_computed_stats
 from app.schemas.player import AnalysisPublicSchema
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
@@ -36,17 +37,15 @@ def analyze_player(
     # Construir entidad de dominio
     stats = PlayerStats(
         derecha=player_model.derecha, reves=player_model.reves,
-        volea=player_model.volea, bandeja=player_model.bandeja,
-        vibora=player_model.vibora, smash=player_model.smash,
-        lob=player_model.lob, saque=player_model.saque,
+        volea_derecha=player_model.volea_derecha, volea_reves=player_model.volea_reves,
+        bandeja=player_model.bandeja,
+        vibora=player_model.vibora, remate=player_model.remate,
+        globo=player_model.globo, saque=player_model.saque,
         bajada_pared=player_model.bajada_pared,
         velocidad=player_model.velocidad, resistencia=player_model.resistencia,
         reflejos=player_model.reflejos, tactica=player_model.tactica,
         presion=player_model.presion,
         trabajo_en_pareja=player_model.trabajo_en_pareja,
-        torneos_jugados=player_model.torneos_jugados,
-        victorias=player_model.victorias,
-        puntos_ranking_fep=player_model.puntos_ranking_fep,
     )
     player = Player(
         id=player_model.id,
@@ -55,12 +54,15 @@ def analyze_player(
         stats=stats,
     )
 
+    # Obtener stats computados desde partidos + torneos reales
+    computed_stats = get_computed_stats(db, player_id)
+
     # Ejecutar caso de uso
     use_case = AnalyzePlayerUseCase(
         ai_client=GeminiClientWrapper(),
         cache=redis_cache,
     )
-    result = use_case.execute(player)
+    result = use_case.execute(player, computed_stats=computed_stats)
 
     # Persistir análisis
     analysis = AnalysisModel(

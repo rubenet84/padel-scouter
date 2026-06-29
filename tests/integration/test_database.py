@@ -44,7 +44,7 @@ class TestDatabaseConnection:
             name="Juan García",
             category=PlayerCategory.TERCERA,
             owner_id=user.id,
-            derecha=70, reves=65, volea=60,
+            derecha=70, reves=65, volea_derecha=60, volea_reves=60,
         )
         db_session.add(player)
         db_session.commit()

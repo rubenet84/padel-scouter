@@ -255,7 +255,7 @@
                         <div class="p-6">
                             <!-- Avatar (click to upload) -->
                             <div class="flex justify-center mb-3">
-                                <div class="pulse-ring cursor-pointer group" onclick="document.getElementById('avatar-input').click();" title="Hacé clic para subir foto">
+                                <div class="pulse-ring cursor-pointer group" onclick="document.getElementById('avatar-input').click();" title="Hacer clic para subir foto">
                                     <div id="avatar-container" class="w-24 h-24 rounded-full ki-charge flex items-center justify-center text-4xl overflow-hidden relative" style="border:2px solid rgba(255,107,0,0.5);background:#1A1A25;">
                                         <img id="avatar-img" src="" class="hidden w-full h-full object-cover" alt="Avatar" style="display:none;">
                                         <span id="avatar-placeholder" class="text-4xl">🎾</span>
@@ -352,17 +352,17 @@
                             </div>
                             <div id="mrsatan-section" class="hidden" style="padding-top:14px;padding-bottom:4px;">
                                 <div style="position:relative;display:flex;justify-content:center;">
-                                    <img src="/static/images/MrSatan.JPG" class="mrsatan-img" alt="Mr. Satan">
+                                    <img src="/static/images/MrSatan.JPG?v=2" class="mrsatan-img" alt="Mr. Satan">
                                 </div>
                             </div>
                             <div id="gohan-section" class="hidden" style="padding-top:14px;padding-bottom:4px;">
                                 <div style="position:relative;display:flex;justify-content:center;">
-                                    <img src="/static/images/Gohan-SuperSaiyajin2.JPG" class="gohan-img" alt="Gohan SSJ2">
+                                    <img src="/static/images/Gohan-SuperSaiyajin2.JPG?v=2" class="gohan-img" alt="Gohan SSJ2">
                                 </div>
                             </div>
                             <div id="goku4-section" class="hidden" style="padding-top:14px;padding-bottom:4px;">
                                 <div style="position:relative;display:flex;justify-content:center;">
-                                    <img src="/static/images/Goku-SuperSayajin4.JPG" class="goku4-img" alt="Goku SSJ4">
+                                    <img src="/static/images/Goku-SuperSayajin4.JPG?v=2" class="goku4-img" alt="Goku SSJ4">
                                 </div>
                             </div>
                         </div>
@@ -391,8 +391,8 @@
                             ✏️ Editar jugador
                         </button>
                         <a href="/dashboard"
-                           class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
-                           style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:#64748b;">
+                        class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                        style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:#64748b;">
                             ← Dashboard
                         </a>
                     </div>
@@ -412,8 +412,8 @@
                                     <div>
                                         <label class="text-xs text-gray-500 mb-1 block">Nombre</label>
                                         <input id="edit-name" type="text"
-                                               class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,107,0,0.2);">
+                                            class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,107,0,0.2);">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-500 mb-1 block">Categoría</label>
@@ -436,48 +436,53 @@
                                 <div class="grid grid-cols-3 gap-3 mb-5">
                                     <div><label class="text-xs text-gray-500">Derecha</label>
                                         <input id="e-derecha" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Revés</label>
                                         <input id="e-reves" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
-                                    <div><label class="text-xs text-gray-500">Volea</label>
-                                        <input id="e-volea" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                    <div><label class="text-xs text-gray-500">Volea Derecha</label>
+                                        <input id="e-volea_derecha" type="number" min="0" max="100"
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                    </div>
+                                    <div><label class="text-xs text-gray-500">Volea Revés</label>
+                                        <input id="e-volea_reves" type="number" min="0" max="100"
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Bandeja</label>
                                         <input id="e-bandeja" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Víbora</label>
                                         <input id="e-vibora" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
-                                    <div><label class="text-xs text-gray-500">Smash</label>
-                                        <input id="e-smash" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                    <div><label class="text-xs text-gray-500">Remate</label>
+                                        <input id="e-remate" type="number" min="0" max="100"
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
-                                    <div><label class="text-xs text-gray-500">Lob</label>
-                                        <input id="e-lob" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                    <div><label class="text-xs text-gray-500">Globo</label>
+                                        <input id="e-globo" type="number" min="0" max="100"
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Saque</label>
                                         <input id="e-saque" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Bajada pared</label>
                                         <input id="e-bajada_pared" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                 </div>
                     
@@ -486,18 +491,18 @@
                                 <div class="grid grid-cols-3 gap-3 mb-5">
                                     <div><label class="text-xs text-gray-500">Velocidad</label>
                                         <input id="e-velocidad" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Resistencia</label>
                                         <input id="e-resistencia" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Reflejos</label>
                                         <input id="e-reflejos" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                 </div>
                     
@@ -506,40 +511,22 @@
                                 <div class="grid grid-cols-3 gap-3 mb-5">
                                     <div><label class="text-xs text-gray-500">Táctica</label>
                                         <input id="e-tactica" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Presión</label>
                                         <input id="e-presion" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Trabajo en pareja</label>
                                         <input id="e-trabajo_en_pareja" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                 </div>
                     
-                                <!-- Historial competitivo -->
-                                <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(168,85,247,0.6);">🏆 Historial Competitivo</p>
-                                <div class="grid grid-cols-3 gap-3 mb-6">
-                                    <div><label class="text-xs text-gray-500">Torneos jugados</label>
-                                        <input id="e-torneos_jugados" type="number" min="0"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
-                                    </div>
-                                    <div><label class="text-xs text-gray-500">Victorias</label>
-                                        <input id="e-victorias" type="number" min="0"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
-                                    </div>
-                                    <div><label class="text-xs text-gray-500">Puntos FEP</label>
-                                        <input id="e-puntos_ranking_fep" type="number" min="0"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
-                                    </div>
-                                </div>
+                                <!-- Historial competitivo — removido: stats computadas desde partidos reales -->
                     
                                 <div id="edit-error" class="hidden mb-4 text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
                     
@@ -605,25 +592,25 @@
                                     <!-- Individual top stats -->
                                     <div class="pt-3 grid grid-cols-2 gap-2" style="border-top:1px solid rgba(42,42,58,0.5);">
                                         <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(255,107,0,0.06);">
-                                            <span class="text-xs" style="color:#64748b;">Smash</span>
-                                            <span id="val-smash" class="text-xs font-bold" style="color:#FF6B00;">—</span>
+                                            <span class="text-xs" style="color:#64748b;">Remate</span>
+                                            <span id="val-remate" class="text-xs font-bold" style="color:#FF6B00;">—</span>
                                         </div>
                                         <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(255,107,0,0.06);">
                                             <span class="text-xs" style="color:#64748b;">Bandeja</span>
                                             <span id="val-bandeja" class="text-xs font-bold" style="color:#FF6B00;">—</span>
                                         </div>
                                         <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(6,182,212,0.06);">
-                                            <span class="text-xs" style="color:#64748b;">Volea</span>
-                                            <span id="val-volea" class="text-xs font-bold" style="color:#06B6D4;">—</span>
+                                            <span class="text-xs" style="color:#64748b;">Volea Derecha</span>
+                                            <span id="val-volea_derecha" class="text-xs font-bold" style="color:#06B6D4;">—</span>
                                         </div>
                                         <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(6,182,212,0.06);">
-                                            <span class="text-xs" style="color:#64748b;">Víbora</span>
-                                            <span id="val-vibora" class="text-xs font-bold" style="color:#06B6D4;">—</span>
+                                            <span class="text-xs" style="color:#64748b;">Volea de Revés</span>
+                                            <span id="val-volea_reves" class="text-xs font-bold" style="color:#06B6D4;">—</span>
                                         </div>
                                         <!-- Botón Ver estadísticas completas -->
-                                        <div class="flex justify-start pt-2">
+                                        <div class="flex justify-start px-2 pt-2">
                                             <button onclick="openStatsModal()"
-                                                    class="flex items-center gap-2 ml-2 px-3 py-2 rounded-xl text-xs font-bold transition-all"
+                                                    class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all"
                                                     style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.2);color:#FF6B00;">
                                                 📊 Ver todas las estadísticas
                                             </button>
@@ -645,6 +632,15 @@
                                         style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:#a855f7;">
                                     + Añadir partido
                                 </button>
+                            </div>
+                            <!-- Filtro de partidos -->
+                            <div class="flex items-center gap-3 mb-4">
+                                <select id="match-filter" onchange="onMatchFilterChange()"
+                                        class="rounded-lg px-3 py-2 text-sm text-white"
+                                        style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                                    <option value="all">📋 Todos</option>
+                                    <option value="amistoso">🎾 Amistosos</option>
+                                </select>
                             </div>
                             <div id="matches-list" class="space-y-2"></div>
                         </div>
@@ -675,10 +671,44 @@
                                     <!-- Campos torneo (ocultos por defecto) -->
                                     <div id="torneo-fields" class="hidden space-y-3 p-3 rounded-xl" style="background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.1);">
                                         <div>
-                                            <label class="text-xs text-gray-500 mb-1 block">Nombre del torneo</label>
-                                            <input id="m-torneo-nombre" type="text" placeholder="ej: Liga Local 2026" required
-                                                class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                                            <label class="text-xs text-gray-500 mb-1 block">Seleccionar torneo</label>
+                                            <div class="flex gap-2">
+                                                <select id="m-torneo-select"
+                                                        class="flex-1 rounded-lg px-3 py-2.5 text-sm text-white"
+                                                        style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                                                    <option value="">— Seleccionar —</option>
+                                                </select>
+                                                <button type="button" onclick="showNewTournamentForm()"
+                                                        class="px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all"
+                                                        style="background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);color:#a855f7;">
+                                                    + Nuevo
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- Inline new tournament form (hidden) -->
+                                        <div id="new-tournament-form" class="hidden space-y-2 p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(168,85,247,0.15);">
+                                            <input id="m-tournament-name" type="text" placeholder="Nombre del torneo" maxlength="200"
+                                                class="w-full rounded-lg px-3 py-2 text-sm text-white"
                                                 style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                                            <input id="m-tournament-date" type="date"
+                                                class="w-full rounded-lg px-3 py-2 text-sm text-white"
+                                                style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                                            <input id="m-tournament-fep" type="number" placeholder="Puntos FEP (opcional)" min="0"
+                                                class="w-full rounded-lg px-3 py-2 text-sm text-white"
+                                                style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                                            <div id="new-tournament-error" class="hidden text-xs p-2 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
+                                            <div class="flex gap-2">
+                                                <button type="button" onclick="createTournamentInline()"
+                                                        class="flex-1 py-2 rounded-lg text-xs font-bold transition-all"
+                                                        style="background:rgba(0,255,135,0.15);border:1px solid rgba(0,255,135,0.3);color:#00FF87;">
+                                                    Crear torneo
+                                                </button>
+                                                <button type="button" onclick="cancelNewTournament()"
+                                                        class="py-2 rounded-lg text-xs font-bold transition-all"
+                                                        style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;">
+                                                    Cancelar
+                                                </button>
+                                            </div>
                                         </div>
                                         <div class="grid grid-cols-2 gap-3">
                                             <div>
@@ -686,11 +716,13 @@
                                                 <select id="m-ronda"
                                                         class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
                                                         style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
-                                                    <option>Fase de grupos</option>
-                                                    <option>Octavos</option>
-                                                    <option>Cuartos</option>
-                                                    <option>Semifinal</option>
-                                                    <option>Final</option>
+                                                    <option value="Fase de grupos">Fase de grupos</option>
+                                                    <option value="32avos">32avos</option>
+                                                    <option value="16avos">16avos</option>
+                                                    <option value="Octavos">Octavos</option>
+                                                    <option value="Cuartos">Cuartos</option>
+                                                    <option value="Semifinal">Semifinal</option>
+                                                    <option value="Final">Final</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -706,8 +738,8 @@
                                     <div id="amistoso-rival-field">
                                         <label class="text-xs text-gray-500 mb-1 block">Rival</label>
                                         <input id="m-rival" type="text" placeholder="ej: García / López"
-                                               class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
-                                               style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                                            class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                                            style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
                                     </div>
 
                                     <!-- Resultado -->
@@ -819,9 +851,9 @@
 
 <!-- Top-level Modal: Estadísticas Completas (moved here to avoid parent overflow clipping) -->
 <div id="stats-modal"
-     class="fixed inset-0 flex items-center justify-center p-4 hidden"
-     role="dialog" aria-modal="true"
-     style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
+    class="fixed inset-0 flex items-center justify-center p-4 hidden"
+    role="dialog" aria-modal="true"
+    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
     <div class="w-full max-w-2xl rounded-2xl" style="background:#12121A;border:1px solid rgba(255,107,0,0.2);max-height:85vh;overflow-y:auto;position:relative;">
         <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#FF6B00,transparent);"></div>
         <div class="p-6">
@@ -881,8 +913,8 @@ function drawRadar(p) {
     const cx = 140, cy = 140, maxR = 105;
     const labels = ['DERECHA','VOLEA','BANDEJA','SMASH','VELOCIDAD','TÁCTICA'];
     const values = [
-        p.derecha || 50, p.volea || 50, p.bandeja || 50,
-        p.smash || 50, p.velocidad || 50, p.tactica || 50
+        p.derecha || 50, Math.round(((p.volea_derecha||50)+(p.volea_reves||50))/2) || 50, p.bandeja || 50,
+        p.remate || 50, p.velocidad || 50, p.tactica || 50
     ];
     const N = labels.length;
     const step = (Math.PI * 2) / N;
@@ -1001,23 +1033,11 @@ function renderPlayer(p, analyses) {
     // Avatar
     setAvatar(p.avatar_url);
 
-    // Quick stats & Win Rate (CORREGIDO)
-    const torneos = p.torneos_jugados || 0;
-    const victorias = Math.min(p.victorias || 0, torneos);
-    
-    document.getElementById('stat-torneos').textContent = torneos;
-    const wr = torneos > 0 ? Math.round((victorias / torneos) * 100) + '%' : '—';
-    document.getElementById('stat-winrate').textContent = wr;
-    document.getElementById('stat-fep').textContent = (p.puntos_ranking_fep || 0).toLocaleString();
-
     // Aggregate bars
-    const tecnica = Math.round(((p.derecha||50)+(p.reves||50)+(p.volea||50)+(p.bandeja||50)+(p.vibora||50)+(p.smash||50)+(p.lob||50)+(p.saque||50)+(p.bajada_pared||50)) / 9);
+    const voleaAvg = Math.round(((p.volea_derecha||50)+(p.volea_reves||50))/2);
+    const tecnica = Math.round(((p.derecha||50)+(p.reves||50)+voleaAvg+(p.bandeja||50)+(p.vibora||50)+(p.remate||50)+(p.globo||50)+(p.saque||50)+(p.bajada_pared||50)) / 9);
     const fisico  = Math.round(((p.velocidad||50)+(p.resistencia||50)+(p.reflejos||50)) / 3);
     const mental  = Math.round(((p.tactica||50)+(p.presion||50)+(p.trabajo_en_pareja||50)) / 3);
-    
-    // Competitivo bar (CORREGIDO con límite 100)
-    const comp = torneos > 0 ? Math.round((victorias / torneos) * 100) : 0;
-    const compFinal = Math.min(comp, 100);
 
     document.getElementById('bar-tecnica').style.width = Math.min(tecnica, 100) + '%';
     document.getElementById('bar-tecnica-val').textContent = Math.min(tecnica, 100);
@@ -1025,14 +1045,15 @@ function renderPlayer(p, analyses) {
     document.getElementById('bar-fisico-val').textContent = Math.min(fisico, 100);
     document.getElementById('bar-mental').style.width = Math.min(mental, 100) + '%';
     document.getElementById('bar-mental-val').textContent = Math.min(mental, 100);
-    document.getElementById('bar-comp').style.width = compFinal + '%';
-    document.getElementById('bar-comp-val').textContent = compFinal + '%';
+
+    // Computed stats — fetch async and populate stats card + competitive bar
+    renderComputedStats(playerId);
 
     // Individual stats
-    document.getElementById('val-smash').textContent = p.smash || 50;
+    document.getElementById('val-remate').textContent = p.remate || 50;
     document.getElementById('val-bandeja').textContent = p.bandeja || 50;
-    document.getElementById('val-volea').textContent = p.volea || 50;
-    document.getElementById('val-vibora').textContent = p.vibora || 50;
+    document.getElementById('val-volea_derecha').textContent = p.volea_derecha || 50;
+    document.getElementById('val-volea_reves').textContent = p.volea_reves || 50;
 
     // Radar
     drawRadar(p);
@@ -1063,7 +1084,7 @@ function renderPlayer(p, analyses) {
                 <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(0,255,135,0.1);">
                     <span style="color:#00FF87;font-size:10px;">✓</span>
                 </div>
-                <p class="text-sm text-white">${s}</p>
+                <p class="text-sm text-white">${escapeHtml(s)}</p>
             </li>`).join('');
 
         const wlist = document.getElementById('weaknesses-list');
@@ -1072,7 +1093,7 @@ function renderPlayer(p, analyses) {
                 <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(255,45,45,0.1);">
                     <span style="color:#FF2D2D;font-size:10px;">✗</span>
                 </div>
-                <p class="text-sm text-white">${w}</p>
+                <p class="text-sm text-white">${escapeHtml(w)}</p>
             </li>`).join('');
 
         // Improvement plan
@@ -1089,8 +1110,10 @@ function renderPlayer(p, analyses) {
 }
 
 const SCOUTER_STAT_FIELDS = [
-    ['derecha','Derecha'], ['reves','Revés'], ['volea','Volea'], ['bandeja','Bandeja'],
-    ['vibora','Víbora'], ['smash','Smash'], ['lob','Lob'], ['saque','Saque'],
+    ['derecha','Derecha'], ['reves','Revés'],
+    ['volea_derecha','Volea Derecha'], ['volea_reves','Volea Revés'],
+    ['bandeja','Bandeja'],
+    ['vibora','Víbora'], ['remate','Remate'], ['globo','Globo'], ['saque','Saque'],
     ['bajada_pared','Bajada de pared'], ['velocidad','Velocidad'], ['resistencia','Resistencia'],
     ['reflejos','Reflejos'], ['tactica','Táctica'], ['presion','Presión'],
     ['trabajo_en_pareja','Trabajo en pareja'],
@@ -1196,8 +1219,8 @@ function renderDragonBalls(nivel) {
 }
 
 function renderShenron() {
-    const src = '/static/images/dragon-ball-shenron.png';
-    return `<img src="${src}" alt="Shenron" style="width:100%;height:auto;display:block;">`;
+    const cb = Date.now();
+    return `<img src="/static/images/dragon-ball-shenron.png?cb=${cb}" alt="Shenron" style="width:100%;height:auto;display:block;">`;
 }
 
 function renderGolpeDefinitivo(latest, player) {
@@ -1366,6 +1389,11 @@ function setAvatar(url, onload) {
     }
 }
 
+// ── HTML Sanitizer (OWASP A03 — Injection prevention) ─────────
+function escapeHtml(str) {
+    return (str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
 // ── Toast system ──────────────────────────────────────────────
 function showToast(msg, type) {
     const existing = document.querySelector('.toast-msg');
@@ -1441,15 +1469,16 @@ function openStatsModal() {
                 </div>
                 <div class="h-1.5 rounded-full overflow-hidden" style="background:#0A0A0F;">
                     <div class="h-full rounded-full"
-                         style="width:${val ?? 50}%;background:${color};transition:width 0.8s ease;"></div>
+                        style="width:${val ?? 50}%;background:${color};transition:width 0.8s ease;"></div>
                 </div>
             </div>`).join('');
     };
 
     renderBars('stats-tecnica', [
-        ['Derecha', p.derecha], ['Revés', p.reves], ['Volea', p.volea],
-        ['Bandeja', p.bandeja], ['Víbora', p.vibora], ['Smash', p.smash],
-        ['Lob', p.lob], ['Saque', p.saque], ['Bajada de pared', p.bajada_pared]
+        ['Derecha', p.derecha], ['Revés', p.reves],
+        ['Volea Derecha', p.volea_derecha], ['Volea Revés', p.volea_reves],
+        ['Bandeja', p.bandeja], ['Víbora', p.vibora], ['Remate', p.remate],
+        ['Globo', p.globo], ['Saque', p.saque], ['Bajada de pared', p.bajada_pared]
     ], 'linear-gradient(90deg,#FF6B00,#FFD700)');
 
     renderBars('stats-fisico', [
@@ -1460,23 +1489,38 @@ function openStatsModal() {
         ['Táctica', p.tactica], ['Presión', p.presion], ['Trabajo en pareja', p.trabajo_en_pareja]
     ], 'linear-gradient(90deg,#00FF87,#22D3EE)');
 
-    const wr = p.torneos_jugados > 0
-        ? Math.round((Math.min(p.victorias, p.torneos_jugados) / p.torneos_jugados) * 100) + '%'
-        : '0%';
-
-    document.getElementById('stats-comp').innerHTML = `
-        <div class="text-center p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
-            <p class="text-xl font-bold text-white">${p.torneos_jugados || 0}</p>
-            <p class="text-xs mt-1" style="color:#475569;">Torneos</p>
-        </div>
-        <div class="text-center p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
-            <p class="text-xl font-bold" style="color:#00FF87;">${p.victorias || 0}</p>
-            <p class="text-xs mt-1" style="color:#475569;">Victorias</p>
-        </div>
-        <div class="text-center p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
-            <p class="text-xl font-bold" style="color:#FF6B00;">${(p.puntos_ranking_fep || 0).toLocaleString()}</p>
-            <p class="text-xs mt-1" style="color:#475569;">Pts FEP</p>
+    // Competitive section — fetch computed stats
+    const compEl = document.getElementById('stats-comp');
+    compEl.innerHTML = `
+        <div class="text-center p-3 rounded-xl col-span-3" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
+            <p class="text-sm" style="color:#475569;">Cargando estadísticas competitivas...</p>
         </div>`;
+
+    fetch(`/api/v1/players/${playerId}/stats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    }).then(r => {
+        if (!r.ok) throw new Error('No se pudieron cargar las estadísticas');
+        return r.json();
+    }).then(stats => {
+        compEl.innerHTML = `
+            <div class="text-center p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
+                <p class="text-xl font-bold text-white">${stats.torneos}</p>
+                <p class="text-xs mt-1" style="color:#475569;">Torneos</p>
+            </div>
+            <div class="text-center p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
+                <p class="text-xl font-bold" style="color:#00FF87;">${stats.win_rate.toFixed(1)}%</p>
+                <p class="text-xs mt-1" style="color:#475569;">Porcentaje de Victorias</p>
+            </div>
+            <div class="text-center p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
+                <p class="text-xl font-bold" style="color:#FF6B00;">${stats.fep_points.toLocaleString()}</p>
+                <p class="text-xs mt-1" style="color:#475569;">Pts FEP</p>
+            </div>`;
+    }).catch(() => {
+        compEl.innerHTML = `
+            <div class="text-center p-3 rounded-xl col-span-3" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
+                <p class="text-sm" style="color:#ef4444;">No se pudieron cargar las estadísticas competitivas</p>
+            </div>`;
+    });
 
     // Mostrar con animación
     const modal = document.getElementById('stats-modal');
@@ -1526,9 +1570,9 @@ function openEditModal() {
     document.getElementById('edit-name').value = p.name;
     document.getElementById('edit-category').value = resolveCategoryKey(p.category);
 
-    const fields = ['derecha','reves','volea','bandeja','vibora','smash','lob','saque',
+    const fields = ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque',
         'bajada_pared','velocidad','resistencia','reflejos','tactica','presion',
-        'trabajo_en_pareja','torneos_jugados','victorias','puntos_ranking_fep'];
+        'trabajo_en_pareja'];
     fields.forEach(f => {
         const el = document.getElementById(`e-${f}`);
         if (el) el.value = p[f] ?? 50;
@@ -1563,9 +1607,9 @@ async function saveAndAnalyze() {
     }
 
     const stats = {};
-    const statFields = ['derecha','reves','volea','bandeja','vibora','smash','lob','saque',
+    const statFields = ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque',
         'bajada_pared','velocidad','resistencia','reflejos','tactica','presion',
-        'trabajo_en_pareja','torneos_jugados','victorias','puntos_ranking_fep'];
+        'trabajo_en_pareja'];
 
     for (const f of statFields) {
         const raw = document.getElementById(`e-${f}`)?.value ?? '';
@@ -1577,13 +1621,7 @@ async function saveAndAnalyze() {
             return;
         }
 
-        if (f === 'torneos_jugados' || f === 'victorias' || f === 'puntos_ranking_fep') {
-            if (value < 0) {
-                errEl.textContent = `El valor de ${f.replace('_', ' ')} no puede ser negativo.`;
-                errEl.classList.remove('hidden');
-                return;
-            }
-        } else if (value < 0 || value > 100) {
+        if (value < 0 || value > 100) {
             errEl.textContent = `El valor de ${f.replace('_', ' ')} debe estar entre 0 y 100.`;
             errEl.classList.remove('hidden');
             return;
@@ -1655,8 +1693,8 @@ async function loadMatches() {
     renderMatches(matches);
 }
 
-function getMatchTypeBadge(torneo) {
-    const isTorneo = torneo && torneo.trim() !== '';
+function getMatchTypeBadge(match) {
+    const isTorneo = match.tournament_id || (match.torneo && match.torneo.trim() !== '');
     return isTorneo
         ? { text: 'Torneo', color: '#FFD700', bgColor: 'rgba(255,215,0,0.1)' }
         : { text: 'Amistoso', color: '#FF6B00', bgColor: 'rgba(255,107,0,0.1)' };
@@ -1682,29 +1720,30 @@ function renderMatches(matches) {
         const label   = ganado ? 'W' : 'L';
         const badgeColor = ganado ? 'rgba(0,255,135,0.1)' : 'rgba(255,45,45,0.1)';
         const badgeText  = ganado ? 'Victoria' : 'Derrota';
-        const typeBadge  = getMatchTypeBadge(m.torneo);
+        const typeBadge  = getMatchTypeBadge(m);
         const fecha = new Date(m.played_at).toLocaleDateString('es-ES', {day:'numeric', month:'short'});
-        const rival   = m.rival_nombre || 'Rival';
-        const resultado = m.resultado || m.result || '—';
-        const torneo  = m.torneo ? `· ${m.torneo}` : '';
+        const rival   = escapeHtml(m.rival_nombre) || 'Rival';
+        const resultado = escapeHtml(m.resultado || m.result || '—');
+        const ronda   = m.ronda ? `· ${escapeHtml(m.ronda)}` : '';
+        const torneo  = m.torneo ? `· ${escapeHtml(m.torneo)}` : '';
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
 
         return `
         <div class="flex items-center gap-4 p-3.5 rounded-xl transition-all"
-             style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
+            style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
             <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                 style="background:${bgColor};">
+                style="background:${bgColor};">
                 <span class="text-sm font-black" style="color:${color};">${label}</span>
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                     <p class="text-sm font-semibold text-white">vs. ${rival}</p>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
-                          style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
+                        style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
-                          style="background:${badgeColor};color:${color};">${badgeText}</span>
+                        style="background:${badgeColor};color:${color};">${badgeText}</span>
                 </div>
-                <p class="text-xs mt-0.5" style="color:#475569;">${scoring} ${torneo} · ${fecha}</p>
+                <p class="text-xs mt-0.5" style="color:#475569;">${ronda} ${scoring} ${torneo} · ${fecha}</p>
             </div>
             <div class="text-right flex-shrink-0 flex items-center gap-2">
                 <p class="text-sm font-bold text-white mr-2">${resultado}</p>
@@ -1757,28 +1796,29 @@ function renderFullMatchHistory(matches) {
         const label   = ganado ? 'W' : 'L';
         const badgeColor = ganado ? 'rgba(0,255,135,0.1)' : 'rgba(255,45,45,0.1)';
         const badgeText  = ganado ? 'Victoria' : 'Derrota';
-        const typeBadge  = getMatchTypeBadge(m.torneo);
+        const typeBadge  = getMatchTypeBadge(m);
         const fecha = new Date(m.played_at).toLocaleDateString('es-ES', {day:'numeric', month:'short'});
-        const rival   = m.rival_nombre || 'Rival';
-        const resultado = m.resultado || m.result || '—';
-        const torneo  = m.torneo ? `· ${m.torneo}` : '';
+        const rival   = escapeHtml(m.rival_nombre) || 'Rival';
+        const resultado = escapeHtml(m.resultado || m.result || '—');
+        const ronda   = m.ronda ? `· ${escapeHtml(m.ronda)}` : '';
+        const torneo  = m.torneo ? `· ${escapeHtml(m.torneo)}` : '';
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
         return `
         <div class="flex items-center gap-4 p-3.5 rounded-xl transition-all"
-             style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
+            style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
             <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                 style="background:${bgColor};">
+                style="background:${bgColor};">
                 <span class="text-sm font-black" style="color:${color};">${label}</span>
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                     <p class="text-sm font-semibold text-white">vs. ${rival}</p>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
-                          style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
+                        style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
-                          style="background:${badgeColor};color:${color};">${badgeText}</span>
+                        style="background:${badgeColor};color:${color};">${badgeText}</span>
                 </div>
-                <p class="text-xs mt-0.5" style="color:#475569;">${scoring} ${torneo} · ${fecha}</p>
+                <p class="text-xs mt-0.5" style="color:#475569;">${ronda} ${scoring} ${torneo} · ${fecha}</p>
             </div>
             <div class="text-right flex-shrink-0 flex items-center gap-2">
                 <p class="text-sm font-bold text-white mr-2">${resultado}</p>
@@ -1818,7 +1858,8 @@ function closeMatchModal() {
 
 function resetMatchForm() {
     const formFields = [
-        'm-tipo', 'm-rival', 'm-pareja-rival', 'm-resultado', 'm-ganado', 'm-scoring', 'm-torneo-nombre'
+        'm-tipo', 'm-rival', 'm-pareja-rival', 'm-resultado', 'm-ganado', 'm-scoring',
+        'm-torneo-select', 'm-ronda'
     ];
     formFields.forEach(id => {
         const el = document.getElementById(id);
@@ -1826,6 +1867,10 @@ function resetMatchForm() {
         if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.value = '';
         if (el.tagName === 'SELECT') el.selectedIndex = 0;
     });
+
+    // Hide inline tournament form
+    const newForm = document.getElementById('new-tournament-form');
+    if (newForm) newForm.classList.add('hidden');
 
     const error = document.getElementById('match-error');
     if (error) {
@@ -1848,6 +1893,9 @@ function toggleTorneo() {
     } else {
         torneoFields.classList.add('hidden');
         if (amistosoRivalField) amistosoRivalField.classList.remove('hidden');
+        // Hide inline tournament form when switching to amistoso
+        const newForm = document.getElementById('new-tournament-form');
+        if (newForm) newForm.classList.add('hidden');
     }
 }
 
@@ -1899,31 +1947,41 @@ async function saveMatch() {
     if (errEl) errEl.classList.add('hidden');
 
     let rival = '';
-    let torneoInfo = null;
+    let tournamentId = null;
+    let ronda = null;
     
     if (tipo === 'torneo') {
-        const nombre = document.getElementById('m-torneo-nombre').value.trim();
+        const torneoSelect = document.getElementById('m-torneo-select');
+        tournamentId = torneoSelect ? torneoSelect.value : '';
         const pareja = document.getElementById('m-pareja-rival').value.trim();
+        ronda = document.getElementById('m-ronda') ? document.getElementById('m-ronda').value : null;
         
-        // Validar que el nombre del torneo sea requerido
-        if (!nombre) {
+        if (!tournamentId) {
             if (errEl) {
-                errEl.textContent = 'El nombre del torneo es requerido';
+                errEl.textContent = 'Seleccioná un torneo de la lista';
                 errEl.classList.remove('hidden');
             }
-            console.warn('saveMatch validation failed: nombre torneo requerido');
+            console.warn('saveMatch validation failed: torneo requerido');
             return;
         }
         
         rival = pareja; // For torneo, rival is the pareja
-        torneoInfo = pareja ? `${nombre} vs ${pareja}` : nombre;
     } else {
         // For amistoso
         const rivalEl = document.getElementById('m-rival');
         rival = rivalEl ? String(rivalEl.value || '').trim() : '';
     }
 
-    console.log('saveMatch inputs', { tipo, rival, resultado, ganado, torneoInfo });
+    // OWASP: validate name max length
+    if (rival.length > 200) {
+        if (errEl) {
+            errEl.textContent = 'El nombre del rival es demasiado largo (máx 200 caracteres)';
+            errEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    console.log('saveMatch inputs', { tipo, rival, resultado, ganado, tournamentId, ronda });
 
     if (!rival || !resultado) {
         if (errEl) {
@@ -1965,29 +2023,27 @@ async function saveMatch() {
             ? `/api/v1/players/${playerId}/matches/${matchId}`
             : `/api/v1/players/${playerId}/matches`;
 
+        const body = {
+            rival_nombre: rival,
+            resultado: resultado,
+            ganado: ganado,
+            tournament_id: tipo === 'torneo' ? tournamentId : null,
+            ronda: tipo === 'torneo' ? ronda : null,
+            scoring_method: document.getElementById('m-scoring').value,
+        };
+
         const res = await fetch(url, {
             method: method,
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                rival_nombre: rival,
-                resultado: resultado,
-                ganado: ganado,
-                torneo: torneoInfo,
-                scoring_method: document.getElementById('m-scoring').value,
-            })
+            body: JSON.stringify(body)
         });
 
         if (res.ok) {
             console.log(`saveMatch: ${matchId ? 'updated' : 'saved'} OK`);
             closeMatchModal();
-            // Limpiar formulario
-            if (document.getElementById('m-pareja-rival')) document.getElementById('m-pareja-rival').value = '';
-            if (document.getElementById('m-rival')) document.getElementById('m-rival').value = '';
-            if (document.getElementById('m-resultado')) document.getElementById('m-resultado').value = '';
-            if (document.getElementById('m-torneo-nombre')) document.getElementById('m-torneo-nombre').value = '';
             // Reset button state
             btn.dataset.matchId = '';
             btn.textContent = '💾 Guardar partido';
@@ -2022,8 +2078,223 @@ async function saveMatch() {
     }
 }
 
+// ── Computed Stats ──────────────────────────────────────────────
+async function renderComputedStats(pid) {
+    try {
+        const res = await fetch(`/api/v1/players/${pid}/stats`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Error fetching stats');
+        const stats = await res.json();
+
+        // Stats card
+        document.getElementById('stat-torneos').textContent = stats.torneos;
+        document.getElementById('stat-torneos').nextElementSibling.textContent = 'Torneos';
+        document.getElementById('stat-winrate').textContent = stats.win_rate.toFixed(1) + '%';
+        document.getElementById('stat-winrate').nextElementSibling.textContent = 'Win Rate';
+        document.getElementById('stat-fep').textContent = stats.fep_points.toLocaleString();
+        document.getElementById('stat-fep').nextElementSibling.textContent = 'Pts FEP';
+
+        // Competitive bar
+        const compPct = Math.min(stats.win_rate, 100);
+        document.getElementById('bar-comp').style.width = compPct + '%';
+        document.getElementById('bar-comp-val').textContent = compPct.toFixed(1) + '%';
+    } catch (e) {
+        console.warn('renderComputedStats error:', e);
+        // Graceful fallback — show dashes if stats fail to load
+        document.getElementById('stat-torneos').textContent = '—';
+        document.getElementById('stat-winrate').textContent = '—';
+        document.getElementById('stat-fep').textContent = '—';
+    }
+}
+
+// ── Tournament Dropdown ─────────────────────────────────────────
+async function loadTournaments() {
+    try {
+        const res = await fetch('/api/v1/tournaments/', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const tournaments = await res.json();
+        const select = document.getElementById('m-torneo-select');
+        if (!select) return;
+        // Keep the first placeholder option
+        select.innerHTML = '<option value="">— Seleccionar —</option>';
+        tournaments.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            const dateStr = new Date(t.date).toLocaleDateString('es-ES');
+            opt.textContent = `🏆 ${t.name} — ${dateStr}`;
+            select.appendChild(opt);
+        });
+    } catch (e) {
+        console.warn('loadTournaments error:', e);
+    }
+}
+
+async function loadTournamentFilterOptions() {
+    try {
+        const res = await fetch('/api/v1/tournaments/', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const tournaments = await res.json();
+        const select = document.getElementById('match-filter');
+        if (!select) return;
+        tournaments.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.textContent = `🏆 ${t.name}`;
+            select.appendChild(opt);
+        });
+    } catch (e) {
+        console.warn('loadTournamentFilterOptions error:', e);
+    }
+}
+
+// ── Inline Tournament Create ────────────────────────────────────
+let pendingTournamentCallback = null;
+
+function showNewTournamentForm() {
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('m-tournament-date').value = today;
+    document.getElementById('m-tournament-fep').value = '';
+    document.getElementById('m-tournament-name').value = '';
+    document.getElementById('new-tournament-error').classList.add('hidden');
+    document.getElementById('new-tournament-form').classList.remove('hidden');
+}
+
+function cancelNewTournament() {
+    document.getElementById('new-tournament-form').classList.add('hidden');
+}
+
+async function createTournamentInline() {
+    const errEl = document.getElementById('new-tournament-error');
+    errEl.classList.add('hidden');
+
+    const name = document.getElementById('m-tournament-name').value.trim();
+    const date = document.getElementById('m-tournament-date').value;
+    const fepRaw = document.getElementById('m-tournament-fep').value;
+    const fepPoints = fepRaw ? parseInt(fepRaw, 10) : 0;
+
+    // OWASP: validate name max length
+    if (!name || name.length < 2) {
+        errEl.textContent = 'El nombre del torneo debe tener al menos 2 caracteres.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+    if (name.length > 200) {
+        errEl.textContent = 'El nombre del torneo no puede superar los 200 caracteres.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+    if (!date) {
+        errEl.textContent = 'La fecha del torneo es requerida.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/v1/tournaments/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                date: date,
+                fep_points: fepPoints
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            errEl.textContent = typeof err.detail === 'string' ? err.detail : 'Error al crear torneo';
+            errEl.classList.remove('hidden');
+            return;
+        }
+
+        const tournament = await res.json();
+
+        // Hide inline form
+        cancelNewTournament();
+
+        // Add to tournament dropdown and select it
+        const select = document.getElementById('m-torneo-select');
+        const opt = document.createElement('option');
+        opt.value = tournament.id;
+        const dateStr = new Date(tournament.date).toLocaleDateString('es-ES');
+        opt.textContent = `🏆 ${tournament.name} — ${dateStr}`;
+        select.appendChild(opt);
+        select.value = tournament.id;
+
+        // Also add to filter dropdown
+        const filterSelect = document.getElementById('match-filter');
+        const filterOpt = document.createElement('option');
+        filterOpt.value = tournament.id;
+        filterOpt.textContent = `🏆 ${tournament.name}`;
+        filterSelect.appendChild(filterOpt);
+
+        showToast('✅ Torneo creado', 'success');
+    } catch (e) {
+        errEl.textContent = 'Error de conexión al crear torneo';
+        errEl.classList.remove('hidden');
+    }
+}
+
+// ── Match Filter ────────────────────────────────────────────────
+let currentFilter = 'all';
+
+async function onMatchFilterChange() {
+    const filter = document.getElementById('match-filter').value;
+    currentFilter = filter;
+
+    let url = `/api/v1/players/${playerId}/matches`;
+    if (filter === 'amistoso') {
+        url += '?tournament_id=none';
+    } else if (filter !== 'all') {
+        url += `?tournament_id=${filter}`;
+    }
+
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const matches = await res.json();
+        renderMatches(matches);
+    } catch (e) {
+        console.warn('onMatchFilterChange error:', e);
+    }
+}
+
+// Override loadMatches to support current filter
+loadMatches = async function() {
+    let url = `/api/v1/players/${playerId}/matches`;
+    if (currentFilter === 'amistoso') {
+        url += '?tournament_id=none';
+    } else if (currentFilter !== 'all') {
+        url += `?tournament_id=${currentFilter}`;
+    }
+
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const matches = await res.json();
+        renderMatches(matches);
+    } catch (e) {
+        console.warn('loadMatches error:', e);
+    }
+};
+
 sanitizeEditPlayerNumbers();
 loadPlayer();
+loadTournaments();
+loadTournamentFilterOptions();
 
 // Ensure save button is bound and won't submit forms accidentally
 (function bindSaveMatchButton(){
@@ -2063,8 +2334,8 @@ async function openEditMatchModal(matchId) {
     }
 
     try {
-        // Fetch the specific match details
-        const res = await fetch(`/api/v1/players/${playerId}/matches?filter=${matchId}`, {
+        // Fetch all matches to find this one
+        const res = await fetch(`/api/v1/players/${playerId}/matches`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -2084,27 +2355,31 @@ async function openEditMatchModal(matchId) {
         }
 
         // Pre-populate form fields
-        const isTorneo = match.torneo && match.torneo.trim() !== '';
+        const isTorneo = match.tournament_id || (match.torneo && match.torneo.trim() !== '');
         document.getElementById('m-tipo').value = isTorneo ? 'torneo' : 'amistoso';
-        
+
         if (isTorneo) {
-            // Parse torneo field: format could be "Name" or "Name vs Pareja"
-            const parts = match.torneo.split(' vs ');
-            const tourneyName = parts[0].trim();
-            const parejaRival = parts.length > 1 ? parts[1].trim() : '';
-            
-            document.getElementById('m-torneo-nombre').value = tourneyName;
+            // Set tournament dropdown if we have a tournament_id
+            if (match.tournament_id) {
+                const select = document.getElementById('m-torneo-select');
+                if (select) {
+                    // Try to select matching tournament; if not found as option yet,
+                    // ensure tournaments are loaded by this point (loadTournaments is called on page init)
+                    select.value = match.tournament_id;
+                }
+            }
+            // Set ronda if available
+            if (match.ronda) {
+                document.getElementById('m-ronda').value = match.ronda;
+            }
+            // Set pareja rival
             if (document.getElementById('m-pareja-rival')) {
-                document.getElementById('m-pareja-rival').value = parejaRival;
+                document.getElementById('m-pareja-rival').value = match.rival_nombre || '';
             }
             if (document.getElementById('m-rival')) {
                 document.getElementById('m-rival').value = '';
             }
         } else {
-            document.getElementById('m-torneo-nombre').value = '';
-            if (document.getElementById('m-pareja-rival')) {
-                document.getElementById('m-pareja-rival').value = '';
-            }
             // For amistoso, use rival_nombre
             if (match.rival_nombre && document.getElementById('m-rival')) {
                 document.getElementById('m-rival').value = match.rival_nombre;
@@ -2115,7 +2390,7 @@ async function openEditMatchModal(matchId) {
         toggleTorneo();
 
         document.getElementById('m-resultado').value = match.resultado || '';
-        document.getElementById('m-ganado').checked = match.ganado || false;
+        document.getElementById('m-ganado').value = match.ganado ? 'true' : 'false';
         document.getElementById('m-scoring').value = match.scoring_method || 'con_ventaja';
 
         // Store the matchId for update

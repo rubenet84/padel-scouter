@@ -1,0 +1,61 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Tech stack: FastAPI, PostgreSQL 16, SQLAlchemy 2.0, Alembic, Redis 7, Pydantic v2, Jinja2, Google Gemini AI, python-jose, bcrypt, ReportLab, Resend, Poetry.
+  Architecture: Clean Architecture / DDD — domain/ (entities, value_objects, use_cases, repositories), infrastructure/ (database, ai, cache, email), api/v1/ (routes), schemas/ (Pydantic), core/ (config, security, dependencies).
+  Testing: pytest 9.1, pytest-asyncio, pytest-cov 7.1. Test layers: unit (plain pytest), integration (FastAPI TestClient), e2e (directory exists, no tests yet).
+  Style: Black 26.5, Ruff 0.15. No type checker configured. Spanish domain language (padel terminology).
+
+testing:
+  strict_tdd: true
+  detected: 2026-06-29
+  runner:
+    command: pytest
+    framework: pytest 9.1.1
+  layers:
+    unit:
+      available: true
+      tool: pytest
+    integration:
+      available: true
+      tool: pytest + FastAPI TestClient
+    e2e:
+      available: false
+      tool: —
+  coverage:
+    available: true
+    command: pytest --cov
+  quality:
+    linter:
+      available: true
+      command: ruff check
+    type_checker:
+      available: false
+      command: —
+    formatter:
+      available: true
+      command: black --check
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns
+    tdd: true
+    test_command: pytest
+  verify:
+    test_command: pytest
+    build_command: ""
+    coverage_threshold: 80
+  archive:
+    - Warn before merging destructive deltas

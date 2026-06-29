@@ -64,13 +64,14 @@ class UserPublicSchema(BaseModel):
 # ── Players ───────────────────────────────────────────────────
 
 class PlayerStatsSchema(BaseModel):
-    derecha:      int = Field(default=50, ge=0, le=100)
-    reves:        int = Field(default=50, ge=0, le=100)
-    volea:        int = Field(default=50, ge=0, le=100)
-    bandeja:      int = Field(default=50, ge=0, le=100)
+    derecha:       int = Field(default=50, ge=0, le=100)
+    reves:         int = Field(default=50, ge=0, le=100)
+    volea_derecha: int = Field(default=50, ge=0, le=100)
+    volea_reves:   int = Field(default=50, ge=0, le=100)
+    bandeja:       int = Field(default=50, ge=0, le=100)
     vibora:       int = Field(default=50, ge=0, le=100)
-    smash:        int = Field(default=50, ge=0, le=100)
-    lob:          int = Field(default=50, ge=0, le=100)
+    remate:       int = Field(default=50, ge=0, le=100)
+    globo:        int = Field(default=50, ge=0, le=100)
     saque:        int = Field(default=50, ge=0, le=100)
     bajada_pared: int = Field(default=50, ge=0, le=100)
     velocidad:    int = Field(default=50, ge=0, le=100)
@@ -79,9 +80,6 @@ class PlayerStatsSchema(BaseModel):
     tactica:            int = Field(default=50, ge=0, le=100)
     presion:            int = Field(default=50, ge=0, le=100)
     trabajo_en_pareja:  int = Field(default=50, ge=0, le=100)
-    torneos_jugados:    int = Field(default=0, ge=0)
-    victorias:          int = Field(default=0, ge=0)
-    puntos_ranking_fep: int = Field(default=0, ge=0)
 
 
 class PlayerCreateSchema(BaseModel):
@@ -97,13 +95,14 @@ class PlayerPublicSchema(BaseModel):
     owner_id: UUID
     avatar_url: str | None = None
 
-    derecha:      int = 50
-    reves:        int = 50
-    volea:        int = 50
-    bandeja:      int = 50
+    derecha:       int = 50
+    reves:         int = 50
+    volea_derecha: int = 50
+    volea_reves:   int = 50
+    bandeja:       int = 50
     vibora:       int = 50
-    smash:        int = 50
-    lob:          int = 50
+    remate:       int = 50
+    globo:        int = 50
     saque:        int = 50
     bajada_pared: int = 50
     velocidad:    int = 50
@@ -112,9 +111,18 @@ class PlayerPublicSchema(BaseModel):
     tactica:            int = 50
     presion:            int = 50
     trabajo_en_pareja:  int = 50
-    torneos_jugados:    int = 0
-    victorias:          int = 0
-    puntos_ranking_fep: int = 0
+
+    model_config = {"from_attributes": True}
+
+
+# ── Computed Stats ────────────────────────────────────────────
+
+class ComputedStatsSchema(BaseModel):
+    """Competitive stats computed from matches + tournaments."""
+
+    torneos:   int
+    win_rate:  float  # 0.0 – 100.0 percentage
+    fep_points: int
 
     model_config = {"from_attributes": True}
 
@@ -153,7 +161,8 @@ class MatchCreateSchema(BaseModel):
     rival_nombre:   str = Field(min_length=2, max_length=150)
     resultado:      str = Field(min_length=3, max_length=50)
     ganado:         bool
-    torneo:         str | None = Field(default=None, max_length=150)
+    tournament_id:  UUID | None = Field(default=None, description="FK → tournaments.id. null = amistoso")
+    ronda:          str | None = Field(default=None, max_length=100, description="Fase de grupos, Octavos, Cuartos, Semifinal, Final, etc.")
     scoring_method: ScoringMethod = ScoringMethod.CON_VENTAJA
     notes:          str | None = None
 
@@ -187,7 +196,8 @@ class MatchPublicSchema(BaseModel):
     id:             UUID
     player1_id:     UUID
     rival_nombre:   str | None = None
-    torneo:         str | None = None
+    tournament_id:  UUID | None = None
+    ronda:          str | None = None
     resultado:      str
     ganado:         bool
     scoring_method: ScoringMethod

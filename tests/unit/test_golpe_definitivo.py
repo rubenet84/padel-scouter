@@ -11,10 +11,10 @@ from app.domain.value_objects.golpe_definitivo import (
 class TestGolpeDefinitivo:
 
     def test_find_strongest_stat(self):
-        stats = PlayerStats(smash=95, derecha=80, velocidad=70)
+        stats = PlayerStats(remate=95, derecha=80, velocidad=70)
         key, label, cat, value = find_strongest_stat(stats)
-        assert key == "smash"
-        assert label == "Smash"
+        assert key == "remate"
+        assert label == "Remate"
         assert cat == "técnica"
         assert value == 95
 

@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.api.v1.auth import router as auth_router
 from app.api.v1.players import router as players_router
+from app.api.v1.tournaments import router as tournaments_router
 from app.api.v1.analysis import router as analysis_router
 from app.api.v1.views import router as views_router
 from app.infrastructure.database.models import Base
@@ -39,6 +40,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(players_router, prefix="/api/v1")
+app.include_router(tournaments_router, prefix="/api/v1")
 app.include_router(analysis_router, prefix="/api/v1")
 app.include_router(views_router)
 

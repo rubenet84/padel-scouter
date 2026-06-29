@@ -6,6 +6,7 @@ from app.domain.entities.player import Player
 from app.domain.entities.analysis import AnalysisResult
 from app.domain.value_objects.power_level import calculate_power_level
 from app.domain.value_objects.category import PlayerCategory
+from app.domain.value_objects.computed_stats import ComputedStats
 from app.domain.value_objects.golpe_definitivo import (
     find_strongest_stat,
     nivel_amenaza_from_score,
@@ -23,9 +24,17 @@ class AnalyzePlayerUseCase:
     ai_client: object    # gemini_client o mock en tests
     cache: object        # redis_cache o mock en tests
 
-    def execute(self, player: Player) -> AnalysisResult:
+    def execute(
+        self,
+        player: Player,
+        computed_stats: ComputedStats | None = None,
+    ) -> AnalysisResult:
         # 1. Calcular poder de combate y golpe definitivo base
-        power_level = calculate_power_level(player.stats, player.category)
+        power_level = calculate_power_level(
+            player.stats,
+            player.category,
+            computed_stats=computed_stats,
+        )
         stat_key, stat_label, stat_cat, stat_value = find_strongest_stat(player.stats)
         nivel_amenaza = nivel_amenaza_from_score(stat_value)
 
@@ -36,11 +45,12 @@ class AnalyzePlayerUseCase:
             "power_level": power_level,
             "derecha": player.stats.derecha,
             "reves": player.stats.reves,
-            "volea": player.stats.volea,
+            "volea_derecha": player.stats.volea_derecha,
+            "volea_reves": player.stats.volea_reves,
             "bandeja": player.stats.bandeja,
             "vibora": player.stats.vibora,
-            "smash": player.stats.smash,
-            "lob": player.stats.lob,
+            "remate": player.stats.remate,
+            "globo": player.stats.globo,
             "saque": player.stats.saque,
             "bajada_pared": player.stats.bajada_pared,
             "velocidad": player.stats.velocidad,
@@ -49,9 +59,6 @@ class AnalyzePlayerUseCase:
             "tactica": player.stats.tactica,
             "presion": player.stats.presion,
             "trabajo_en_pareja": player.stats.trabajo_en_pareja,
-            "torneos_jugados": player.stats.torneos_jugados,
-            "victorias": player.stats.victorias,
-            "puntos_ranking_fep": player.stats.puntos_ranking_fep,
             "golpe_stat_key": stat_key,
             "golpe_stat_label": stat_label,
             "golpe_stat_categoria": stat_cat,
@@ -67,7 +74,7 @@ class AnalyzePlayerUseCase:
             ai_result = self.ai_client.analyze_player_with_ai(player_data)
             self.cache.set("analysis", player_data, ai_result)
 
-        golpe_nombre = ai_result.get("golpe_definitivo") or f"{stat_label} Definitivo"
+        golpe_nombre = (ai_result.get("golpe_definitivo") or f"{stat_label} Definitivo").strip("'\"")
         golpe_descripcion = ai_result.get("descripcion_golpe") or (
             f"Su {stat_label.lower()} alcanza un poder de {stat_value}/100. "
             f"Una técnica {stat_cat} que desata energía pura sobre la pista."
