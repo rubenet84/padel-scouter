@@ -6,6 +6,7 @@ from app.domain.entities.player import Player
 from app.domain.entities.analysis import AnalysisResult
 from app.domain.value_objects.power_level import calculate_power_level
 from app.domain.value_objects.category import PlayerCategory
+from app.domain.value_objects.computed_stats import ComputedStats
 from app.domain.value_objects.golpe_definitivo import (
     find_strongest_stat,
     nivel_amenaza_from_score,
@@ -23,9 +24,17 @@ class AnalyzePlayerUseCase:
     ai_client: object    # gemini_client o mock en tests
     cache: object        # redis_cache o mock en tests
 
-    def execute(self, player: Player) -> AnalysisResult:
+    def execute(
+        self,
+        player: Player,
+        computed_stats: ComputedStats | None = None,
+    ) -> AnalysisResult:
         # 1. Calcular poder de combate y golpe definitivo base
-        power_level = calculate_power_level(player.stats, player.category)
+        power_level = calculate_power_level(
+            player.stats,
+            player.category,
+            computed_stats=computed_stats,
+        )
         stat_key, stat_label, stat_cat, stat_value = find_strongest_stat(player.stats)
         nivel_amenaza = nivel_amenaza_from_score(stat_value)
 

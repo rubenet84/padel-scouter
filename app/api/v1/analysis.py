@@ -10,6 +10,7 @@ from app.infrastructure.ai.gemini_client import analyze_player_with_ai
 from app.infrastructure.cache.redis_client import redis_cache
 from app.domain.entities.player import Player, PlayerStats
 from app.domain.use_cases.analyze_player import AnalyzePlayerUseCase
+from app.domain.value_objects.computed_stats import get_computed_stats
 from app.schemas.player import AnalysisPublicSchema
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
@@ -56,12 +57,15 @@ def analyze_player(
         stats=stats,
     )
 
+    # Obtener stats computados desde partidos + torneos reales
+    computed_stats = get_computed_stats(db, player_id)
+
     # Ejecutar caso de uso
     use_case = AnalyzePlayerUseCase(
         ai_client=GeminiClientWrapper(),
         cache=redis_cache,
     )
-    result = use_case.execute(player)
+    result = use_case.execute(player, computed_stats=computed_stats)
 
     # Persistir análisis
     analysis = AnalysisModel(
