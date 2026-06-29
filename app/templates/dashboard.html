@@ -69,25 +69,6 @@
                 {% endfor %}
             </div>
 
-            <p class="text-emerald-400 font-semibold text-sm mt-4">Historial Competitivo</p>
-            <div class="grid grid-cols-3 gap-3">
-                <div>
-                    <label class="text-gray-400 text-xs">Torneos</label>
-                    <input id="s-torneos_jugados" type="number" value="0" min="0" inputmode="numeric" pattern="[0-9]*"
-                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
-                </div>
-                <div>
-                    <label class="text-gray-400 text-xs">Victorias</label>
-                    <input id="s-victorias" type="number" value="0" min="0" inputmode="numeric" pattern="[0-9]*"
-                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
-                </div>
-                <div>
-                    <label class="text-gray-400 text-xs">Puntos FEP</label>
-                    <input id="s-puntos_ranking_fep" type="number" value="0" min="0" inputmode="numeric" pattern="[0-9]*"
-                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
-                </div>
-            </div>
-
             <div class="flex gap-3 mt-4">
                 <button onclick="createPlayer()"
                         class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition">
@@ -122,8 +103,7 @@ if (!token) {
 
 const STATS = [
     'derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared',
-    'velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja',
-    'torneos_jugados','victorias','puntos_ranking_fep'
+    'velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja'
 ];
 
 const CATEGORY_COLORS = {
@@ -149,7 +129,7 @@ function resetNewPlayerForm() {
     document.getElementById('p-name').value = '';
     document.getElementById('p-category').value = '3ª Categoría';
     STATS.forEach(s => {
-        document.getElementById(`s-${s}`).value = s === 'torneos_jugados' || s === 'victorias' || s === 'puntos_ranking_fep' ? '0' : '50';
+        document.getElementById(`s-${s}`).value = '50';
     });
     const errEl = document.getElementById('create-error');
     errEl.classList.add('hidden');
@@ -235,18 +215,10 @@ async function createPlayer() {
             return;
         }
 
-        if (s === 'torneos_jugados' || s === 'victorias' || s === 'puntos_ranking_fep') {
-            if (value < 0) {
-                errEl.textContent = `El valor de ${s.replace('_', ' ')} no puede ser negativo.`;
-                errEl.classList.remove('hidden');
-                return;
-            }
-        } else {
-            if (value < 0 || value > 100) {
-                errEl.textContent = `El valor de ${s.replace('_', ' ')} debe estar entre 0 y 100.`;
-                errEl.classList.remove('hidden');
-                return;
-            }
+        if (value < 0 || value > 100) {
+            errEl.textContent = `El valor de ${s.replace('_', ' ')} debe estar entre 0 y 100.`;
+            errEl.classList.remove('hidden');
+            return;
         }
 
         stats[s] = value;
