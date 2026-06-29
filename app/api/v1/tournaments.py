@@ -32,8 +32,21 @@ def create_tournament(
       - A03 (Injection): name validado por Pydantic (strip_html, max_length)
       - A07 (Authentication): JWT requerido
     """
+    # Validar: no duplicar nombre + fecha
+    name_clean = data.name.strip()
+    existing = db.query(TournamentModel).filter(
+        TournamentModel.name == name_clean,
+        TournamentModel.date == data.date,
+        TournamentModel.owner_id == current_user.id,
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Ya existe un torneo con ese nombre y fecha.",
+        )
+
     tournament = TournamentModel(
-        name=data.name.strip(),
+        name=name_clean,
         date=data.date,
         fep_points=data.fep_points or 0,
         owner_id=current_user.id,
@@ -157,6 +170,19 @@ def update_tournament(
         raise HTTPException(status_code=404, detail="Torneo no encontrado")
 
     # name is NOT updated — it's immutable
+    # Validar: si cambia la fecha, que no choque con otro torneo del mismo nombre
+    if data.date != tournament.date:
+        dup = db.query(TournamentModel).filter(
+            TournamentModel.name == tournament.name,
+            TournamentModel.date == data.date,
+            TournamentModel.owner_id == current_user.id,
+            TournamentModel.id != tournament_id,
+        ).first()
+        if dup:
+            raise HTTPException(
+                status_code=400,
+                detail="Ya existe otro torneo con ese nombre y fecha.",
+            )
     tournament.date = data.date
     if data.fep_points is not None:
         tournament.fep_points = data.fep_points

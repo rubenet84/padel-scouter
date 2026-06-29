@@ -1,5 +1,6 @@
 import re
 from datetime import date, datetime
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
@@ -8,7 +9,7 @@ from pydantic import BaseModel, Field, field_validator
 class TournamentCreateSchema(BaseModel):
     name: str = Field(..., min_length=2, max_length=200, description="Tournament name")
     date: date
-    fep_points: int | None = Field(default=0, ge=0)
+    fep_points: int | None = Field(default=0, ge=0, le=99999)
 
     @field_validator("name")
     @classmethod
@@ -17,8 +18,8 @@ class TournamentCreateSchema(BaseModel):
 
 
 class TournamentUpdateSchema(BaseModel):
-    date: date
-    fep_points: int | None = Field(default=0, ge=0)
+    date: Optional[date] = None
+    fep_points: Optional[int] = Field(default=None, ge=0, le=99999)
 
 
 class TournamentPublicSchema(BaseModel):

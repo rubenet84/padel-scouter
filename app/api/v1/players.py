@@ -249,6 +249,19 @@ def add_match(
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
         legacy_torneo = tournament.name  # set legacy torneo field for backward compat
 
+        # Validar: no duplicar ronda en el mismo torneo
+        if data.ronda:
+            existing = db.query(MatchModel).filter(
+                MatchModel.player1_id == player_id,
+                MatchModel.tournament_id == data.tournament_id,
+                MatchModel.ronda == data.ronda,
+            ).first()
+            if existing:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Ya existe un partido en {data.ronda} para este torneo. Solo se puede editar o eliminar.",
+                )
+
     match = MatchModel(
         player1_id=player_id,
         player2_id=player_id,       # self-reference OK para partidos individuales
@@ -342,6 +355,20 @@ def update_match(
         if not tournament:
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
         legacy_torneo = tournament.name
+
+        # Validar: no duplicar ronda en el mismo torneo (excluyendo este partido)
+        if data.ronda and (data.ronda != match.ronda or data.tournament_id != match.tournament_id):
+            existing = db.query(MatchModel).filter(
+                MatchModel.player1_id == player_id,
+                MatchModel.tournament_id == data.tournament_id,
+                MatchModel.ronda == data.ronda,
+                MatchModel.id != match_id,
+            ).first()
+            if existing:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Ya existe otro partido en {data.ronda} para este torneo.",
+                )
 
     # Update fields
     match.rival_nombre = data.rival_nombre
