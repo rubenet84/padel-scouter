@@ -49,7 +49,7 @@
 
             <p class="text-emerald-400 font-semibold text-sm mt-4">Estadísticas Técnicas</p>
             <div class="grid grid-cols-2 gap-3">
-                {% for stat in ['derecha','reves','volea','bandeja','vibora','smash','lob','saque','bajada_pared'] %}
+                {% for stat in ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared'] %}
                 <div>
                     <label class="text-gray-400 text-xs capitalize">{{ stat.replace('_',' ') }}</label>
                     <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
@@ -121,7 +121,7 @@ if (!token) {
 }
 
 const STATS = [
-    'derecha','reves','volea','bandeja','vibora','smash','lob','saque','bajada_pared',
+    'derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared',
     'velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja',
     'torneos_jugados','victorias','puntos_ranking_fep'
 ];
@@ -186,13 +186,15 @@ function renderPlayers(players) {
             </div>`;
         return;
     }
-    grid.innerHTML = players.map(p => `
+    grid.innerHTML = players.map(p => {
+        const safeName = p.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        return `
         <div class="bg-gray-900 border border-gray-800 hover:border-emerald-500/50
                     rounded-xl p-6 cursor-pointer transition"
              onclick="window.location.href='/player/${p.id}'">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <h3 class="font-bold text-lg">${p.name}</h3>
+                    <h3 class="font-bold text-lg">${safeName}</h3>
                     <span class="text-xs px-2 py-1 rounded-full mt-1 inline-block"
                           style="background:${CATEGORY_COLORS[p.category]}22;
                                  color:${CATEGORY_COLORS[p.category]}">
@@ -206,8 +208,8 @@ function renderPlayers(players) {
                            border-emerald-500/30 text-emerald-400 text-sm py-2 rounded-lg transition mt-2">
                 🔮 Analizar con IA
             </button>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 async function createPlayer() {

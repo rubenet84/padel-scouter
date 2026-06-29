@@ -8,11 +8,12 @@ class PlayerStats:
     # Técnica (0-100)
     derecha:       int = 50
     reves:         int = 50
-    volea:         int = 50
+    volea_derecha: int = 50
+    volea_reves:   int = 50
     bandeja:       int = 50
     vibora:        int = 50
-    smash:         int = 50
-    lob:           int = 50
+    remate:        int = 50
+    globo:         int = 50
     saque:         int = 50
     bajada_pared:  int = 50
 

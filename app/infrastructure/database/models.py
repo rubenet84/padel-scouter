@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from sqlalchemy import (
     Column, String, Integer, Float, Boolean,
-    DateTime, ForeignKey, Enum as SAEnum, Text
+    Date, DateTime, ForeignKey, Enum as SAEnum, Text
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, relationship
@@ -41,13 +41,17 @@ class PlayerModel(Base):
     updated_at = Column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
     # Stats técnica
-    derecha      = Column(Integer, default=50)
-    reves        = Column(Integer, default=50)
-    volea        = Column(Integer, default=50)
-    bandeja      = Column(Integer, default=50)
+    derecha       = Column(Integer, default=50)
+    reves         = Column(Integer, default=50)
+    volea         = Column(Integer, default=50)       # legacy — mantener para compat
+    volea_derecha = Column(Integer, default=50)
+    volea_reves   = Column(Integer, default=50)
+    bandeja       = Column(Integer, default=50)
     vibora       = Column(Integer, default=50)
-    smash        = Column(Integer, default=50)
-    lob          = Column(Integer, default=50)
+    smash        = Column(Integer, default=50)    # legacy
+    remate       = Column(Integer, default=50)
+    lob          = Column(Integer, default=50)    # legacy
+    globo        = Column(Integer, default=50)
     saque        = Column(Integer, default=50)
     bajada_pared = Column(Integer, default=50)
 
@@ -73,6 +77,20 @@ class PlayerModel(Base):
     analyses  = relationship("AnalysisModel", back_populates="player")
     matches_as_p1 = relationship("MatchModel", foreign_keys="MatchModel.player1_id")
     matches_as_p2 = relationship("MatchModel", foreign_keys="MatchModel.player2_id")
+
+
+class TournamentModel(Base):
+    __tablename__ = "tournaments"
+
+    id         = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    name       = Column(String(200), nullable=False)
+    date       = Column(Date, nullable=False)
+    fep_points = Column(Integer, default=0, nullable=True)
+    owner_id   = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+
+    owner   = relationship("UserModel")
+    matches = relationship("MatchModel", back_populates="tournament")
 
 
 class AnalysisModel(Base):
@@ -103,6 +121,8 @@ class MatchModel(Base):
     player2_id     = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=False)
     rival_nombre   = Column(String(150), nullable=True)
     torneo         = Column(String(150), nullable=True)
+    tournament_id  = Column(UUID(as_uuid=True), ForeignKey("tournaments.id"), nullable=True)
+    ronda          = Column(String(100), nullable=True)
     resultado      = Column(String(50),  nullable=True)
     ganado         = Column(Boolean,     default=True, nullable=False)
     scoring_method = Column(SAEnum(ScoringMethod), nullable=False,
@@ -111,3 +131,5 @@ class MatchModel(Base):
     winner_id      = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=True)
     played_at      = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     notes          = Column(Text, nullable=True)
+
+    tournament = relationship("TournamentModel", back_populates="matches")

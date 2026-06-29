@@ -255,7 +255,7 @@
                         <div class="p-6">
                             <!-- Avatar (click to upload) -->
                             <div class="flex justify-center mb-3">
-                                <div class="pulse-ring cursor-pointer group" onclick="document.getElementById('avatar-input').click();" title="Hacé clic para subir foto">
+                                <div class="pulse-ring cursor-pointer group" onclick="document.getElementById('avatar-input').click();" title="Hacer clic para subir foto">
                                     <div id="avatar-container" class="w-24 h-24 rounded-full ki-charge flex items-center justify-center text-4xl overflow-hidden relative" style="border:2px solid rgba(255,107,0,0.5);background:#1A1A25;">
                                         <img id="avatar-img" src="" class="hidden w-full h-full object-cover" alt="Avatar" style="display:none;">
                                         <span id="avatar-placeholder" class="text-4xl">🎾</span>
@@ -352,17 +352,17 @@
                             </div>
                             <div id="mrsatan-section" class="hidden" style="padding-top:14px;padding-bottom:4px;">
                                 <div style="position:relative;display:flex;justify-content:center;">
-                                    <img src="/static/images/MrSatan.JPG" class="mrsatan-img" alt="Mr. Satan">
+                                    <img src="/static/images/MrSatan.JPG?v=2" class="mrsatan-img" alt="Mr. Satan">
                                 </div>
                             </div>
                             <div id="gohan-section" class="hidden" style="padding-top:14px;padding-bottom:4px;">
                                 <div style="position:relative;display:flex;justify-content:center;">
-                                    <img src="/static/images/Gohan-SuperSaiyajin2.JPG" class="gohan-img" alt="Gohan SSJ2">
+                                    <img src="/static/images/Gohan-SuperSaiyajin2.JPG?v=2" class="gohan-img" alt="Gohan SSJ2">
                                 </div>
                             </div>
                             <div id="goku4-section" class="hidden" style="padding-top:14px;padding-bottom:4px;">
                                 <div style="position:relative;display:flex;justify-content:center;">
-                                    <img src="/static/images/Goku-SuperSayajin4.JPG" class="goku4-img" alt="Goku SSJ4">
+                                    <img src="/static/images/Goku-SuperSayajin4.JPG?v=2" class="goku4-img" alt="Goku SSJ4">
                                 </div>
                             </div>
                         </div>
@@ -391,8 +391,8 @@
                             ✏️ Editar jugador
                         </button>
                         <a href="/dashboard"
-                           class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
-                           style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:#64748b;">
+                        class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                        style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:#64748b;">
                             ← Dashboard
                         </a>
                     </div>
@@ -412,8 +412,8 @@
                                     <div>
                                         <label class="text-xs text-gray-500 mb-1 block">Nombre</label>
                                         <input id="edit-name" type="text"
-                                               class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,107,0,0.2);">
+                                            class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,107,0,0.2);">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-500 mb-1 block">Categoría</label>
@@ -436,48 +436,53 @@
                                 <div class="grid grid-cols-3 gap-3 mb-5">
                                     <div><label class="text-xs text-gray-500">Derecha</label>
                                         <input id="e-derecha" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Revés</label>
                                         <input id="e-reves" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
-                                    <div><label class="text-xs text-gray-500">Volea</label>
-                                        <input id="e-volea" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                    <div><label class="text-xs text-gray-500">Volea Derecha</label>
+                                        <input id="e-volea_derecha" type="number" min="0" max="100"
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                    </div>
+                                    <div><label class="text-xs text-gray-500">Volea Revés</label>
+                                        <input id="e-volea_reves" type="number" min="0" max="100"
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Bandeja</label>
                                         <input id="e-bandeja" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Víbora</label>
                                         <input id="e-vibora" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
-                                    <div><label class="text-xs text-gray-500">Smash</label>
-                                        <input id="e-smash" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                    <div><label class="text-xs text-gray-500">Remate</label>
+                                        <input id="e-remate" type="number" min="0" max="100"
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
-                                    <div><label class="text-xs text-gray-500">Lob</label>
-                                        <input id="e-lob" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                    <div><label class="text-xs text-gray-500">Globo</label>
+                                        <input id="e-globo" type="number" min="0" max="100"
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Saque</label>
                                         <input id="e-saque" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Bajada pared</label>
                                         <input id="e-bajada_pared" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                 </div>
                     
@@ -486,18 +491,18 @@
                                 <div class="grid grid-cols-3 gap-3 mb-5">
                                     <div><label class="text-xs text-gray-500">Velocidad</label>
                                         <input id="e-velocidad" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Resistencia</label>
                                         <input id="e-resistencia" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Reflejos</label>
                                         <input id="e-reflejos" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                 </div>
                     
@@ -506,18 +511,18 @@
                                 <div class="grid grid-cols-3 gap-3 mb-5">
                                     <div><label class="text-xs text-gray-500">Táctica</label>
                                         <input id="e-tactica" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Presión</label>
                                         <input id="e-presion" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Trabajo en pareja</label>
                                         <input id="e-trabajo_en_pareja" type="number" min="0" max="100"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                 </div>
                     
@@ -526,18 +531,18 @@
                                 <div class="grid grid-cols-3 gap-3 mb-6">
                                     <div><label class="text-xs text-gray-500">Torneos jugados</label>
                                         <input id="e-torneos_jugados" type="number" min="0"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Victorias</label>
                                         <input id="e-victorias" type="number" min="0"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                     <div><label class="text-xs text-gray-500">Puntos FEP</label>
                                         <input id="e-puntos_ranking_fep" type="number" min="0"
-                                               class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
-                                               style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                                            class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                                            style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                                     </div>
                                 </div>
                     
@@ -605,25 +610,25 @@
                                     <!-- Individual top stats -->
                                     <div class="pt-3 grid grid-cols-2 gap-2" style="border-top:1px solid rgba(42,42,58,0.5);">
                                         <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(255,107,0,0.06);">
-                                            <span class="text-xs" style="color:#64748b;">Smash</span>
-                                            <span id="val-smash" class="text-xs font-bold" style="color:#FF6B00;">—</span>
+                                            <span class="text-xs" style="color:#64748b;">Remate</span>
+                                            <span id="val-remate" class="text-xs font-bold" style="color:#FF6B00;">—</span>
                                         </div>
                                         <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(255,107,0,0.06);">
                                             <span class="text-xs" style="color:#64748b;">Bandeja</span>
                                             <span id="val-bandeja" class="text-xs font-bold" style="color:#FF6B00;">—</span>
                                         </div>
                                         <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(6,182,212,0.06);">
-                                            <span class="text-xs" style="color:#64748b;">Volea</span>
-                                            <span id="val-volea" class="text-xs font-bold" style="color:#06B6D4;">—</span>
+                                            <span class="text-xs" style="color:#64748b;">Volea Derecha</span>
+                                            <span id="val-volea_derecha" class="text-xs font-bold" style="color:#06B6D4;">—</span>
                                         </div>
                                         <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(6,182,212,0.06);">
-                                            <span class="text-xs" style="color:#64748b;">Víbora</span>
-                                            <span id="val-vibora" class="text-xs font-bold" style="color:#06B6D4;">—</span>
+                                            <span class="text-xs" style="color:#64748b;">Volea de Revés</span>
+                                            <span id="val-volea_reves" class="text-xs font-bold" style="color:#06B6D4;">—</span>
                                         </div>
                                         <!-- Botón Ver estadísticas completas -->
-                                        <div class="flex justify-start pt-2">
+                                        <div class="flex justify-start px-2 pt-2">
                                             <button onclick="openStatsModal()"
-                                                    class="flex items-center gap-2 ml-2 px-3 py-2 rounded-xl text-xs font-bold transition-all"
+                                                    class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all"
                                                     style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.2);color:#FF6B00;">
                                                 📊 Ver todas las estadísticas
                                             </button>
@@ -706,8 +711,8 @@
                                     <div id="amistoso-rival-field">
                                         <label class="text-xs text-gray-500 mb-1 block">Rival</label>
                                         <input id="m-rival" type="text" placeholder="ej: García / López"
-                                               class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
-                                               style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                                            class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                                            style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
                                     </div>
 
                                     <!-- Resultado -->
@@ -819,9 +824,9 @@
 
 <!-- Top-level Modal: Estadísticas Completas (moved here to avoid parent overflow clipping) -->
 <div id="stats-modal"
-     class="fixed inset-0 flex items-center justify-center p-4 hidden"
-     role="dialog" aria-modal="true"
-     style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
+    class="fixed inset-0 flex items-center justify-center p-4 hidden"
+    role="dialog" aria-modal="true"
+    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
     <div class="w-full max-w-2xl rounded-2xl" style="background:#12121A;border:1px solid rgba(255,107,0,0.2);max-height:85vh;overflow-y:auto;position:relative;">
         <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#FF6B00,transparent);"></div>
         <div class="p-6">
@@ -881,8 +886,8 @@ function drawRadar(p) {
     const cx = 140, cy = 140, maxR = 105;
     const labels = ['DERECHA','VOLEA','BANDEJA','SMASH','VELOCIDAD','TÁCTICA'];
     const values = [
-        p.derecha || 50, p.volea || 50, p.bandeja || 50,
-        p.smash || 50, p.velocidad || 50, p.tactica || 50
+        p.derecha || 50, Math.round(((p.volea_derecha||50)+(p.volea_reves||50))/2) || 50, p.bandeja || 50,
+        p.remate || 50, p.velocidad || 50, p.tactica || 50
     ];
     const N = labels.length;
     const step = (Math.PI * 2) / N;
@@ -1011,7 +1016,8 @@ function renderPlayer(p, analyses) {
     document.getElementById('stat-fep').textContent = (p.puntos_ranking_fep || 0).toLocaleString();
 
     // Aggregate bars
-    const tecnica = Math.round(((p.derecha||50)+(p.reves||50)+(p.volea||50)+(p.bandeja||50)+(p.vibora||50)+(p.smash||50)+(p.lob||50)+(p.saque||50)+(p.bajada_pared||50)) / 9);
+    const voleaAvg = Math.round(((p.volea_derecha||50)+(p.volea_reves||50))/2);
+    const tecnica = Math.round(((p.derecha||50)+(p.reves||50)+voleaAvg+(p.bandeja||50)+(p.vibora||50)+(p.remate||50)+(p.globo||50)+(p.saque||50)+(p.bajada_pared||50)) / 9);
     const fisico  = Math.round(((p.velocidad||50)+(p.resistencia||50)+(p.reflejos||50)) / 3);
     const mental  = Math.round(((p.tactica||50)+(p.presion||50)+(p.trabajo_en_pareja||50)) / 3);
     
@@ -1029,10 +1035,10 @@ function renderPlayer(p, analyses) {
     document.getElementById('bar-comp-val').textContent = compFinal + '%';
 
     // Individual stats
-    document.getElementById('val-smash').textContent = p.smash || 50;
+    document.getElementById('val-remate').textContent = p.remate || 50;
     document.getElementById('val-bandeja').textContent = p.bandeja || 50;
-    document.getElementById('val-volea').textContent = p.volea || 50;
-    document.getElementById('val-vibora').textContent = p.vibora || 50;
+    document.getElementById('val-volea_derecha').textContent = p.volea_derecha || 50;
+    document.getElementById('val-volea_reves').textContent = p.volea_reves || 50;
 
     // Radar
     drawRadar(p);
@@ -1063,7 +1069,7 @@ function renderPlayer(p, analyses) {
                 <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(0,255,135,0.1);">
                     <span style="color:#00FF87;font-size:10px;">✓</span>
                 </div>
-                <p class="text-sm text-white">${s}</p>
+                <p class="text-sm text-white">${escapeHtml(s)}</p>
             </li>`).join('');
 
         const wlist = document.getElementById('weaknesses-list');
@@ -1072,7 +1078,7 @@ function renderPlayer(p, analyses) {
                 <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(255,45,45,0.1);">
                     <span style="color:#FF2D2D;font-size:10px;">✗</span>
                 </div>
-                <p class="text-sm text-white">${w}</p>
+                <p class="text-sm text-white">${escapeHtml(w)}</p>
             </li>`).join('');
 
         // Improvement plan
@@ -1089,8 +1095,10 @@ function renderPlayer(p, analyses) {
 }
 
 const SCOUTER_STAT_FIELDS = [
-    ['derecha','Derecha'], ['reves','Revés'], ['volea','Volea'], ['bandeja','Bandeja'],
-    ['vibora','Víbora'], ['smash','Smash'], ['lob','Lob'], ['saque','Saque'],
+    ['derecha','Derecha'], ['reves','Revés'],
+    ['volea_derecha','Volea Derecha'], ['volea_reves','Volea Revés'],
+    ['bandeja','Bandeja'],
+    ['vibora','Víbora'], ['remate','Remate'], ['globo','Globo'], ['saque','Saque'],
     ['bajada_pared','Bajada de pared'], ['velocidad','Velocidad'], ['resistencia','Resistencia'],
     ['reflejos','Reflejos'], ['tactica','Táctica'], ['presion','Presión'],
     ['trabajo_en_pareja','Trabajo en pareja'],
@@ -1196,8 +1204,8 @@ function renderDragonBalls(nivel) {
 }
 
 function renderShenron() {
-    const src = '/static/images/dragon-ball-shenron.png';
-    return `<img src="${src}" alt="Shenron" style="width:100%;height:auto;display:block;">`;
+    const cb = Date.now();
+    return `<img src="/static/images/dragon-ball-shenron.png?cb=${cb}" alt="Shenron" style="width:100%;height:auto;display:block;">`;
 }
 
 function renderGolpeDefinitivo(latest, player) {
@@ -1366,6 +1374,11 @@ function setAvatar(url, onload) {
     }
 }
 
+// ── HTML Sanitizer (OWASP A03 — Injection prevention) ─────────
+function escapeHtml(str) {
+    return (str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
 // ── Toast system ──────────────────────────────────────────────
 function showToast(msg, type) {
     const existing = document.querySelector('.toast-msg');
@@ -1441,15 +1454,16 @@ function openStatsModal() {
                 </div>
                 <div class="h-1.5 rounded-full overflow-hidden" style="background:#0A0A0F;">
                     <div class="h-full rounded-full"
-                         style="width:${val ?? 50}%;background:${color};transition:width 0.8s ease;"></div>
+                        style="width:${val ?? 50}%;background:${color};transition:width 0.8s ease;"></div>
                 </div>
             </div>`).join('');
     };
 
     renderBars('stats-tecnica', [
-        ['Derecha', p.derecha], ['Revés', p.reves], ['Volea', p.volea],
-        ['Bandeja', p.bandeja], ['Víbora', p.vibora], ['Smash', p.smash],
-        ['Lob', p.lob], ['Saque', p.saque], ['Bajada de pared', p.bajada_pared]
+        ['Derecha', p.derecha], ['Revés', p.reves],
+        ['Volea Derecha', p.volea_derecha], ['Volea Revés', p.volea_reves],
+        ['Bandeja', p.bandeja], ['Víbora', p.vibora], ['Remate', p.remate],
+        ['Globo', p.globo], ['Saque', p.saque], ['Bajada de pared', p.bajada_pared]
     ], 'linear-gradient(90deg,#FF6B00,#FFD700)');
 
     renderBars('stats-fisico', [
@@ -1526,7 +1540,7 @@ function openEditModal() {
     document.getElementById('edit-name').value = p.name;
     document.getElementById('edit-category').value = resolveCategoryKey(p.category);
 
-    const fields = ['derecha','reves','volea','bandeja','vibora','smash','lob','saque',
+    const fields = ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque',
         'bajada_pared','velocidad','resistencia','reflejos','tactica','presion',
         'trabajo_en_pareja','torneos_jugados','victorias','puntos_ranking_fep'];
     fields.forEach(f => {
@@ -1563,7 +1577,7 @@ async function saveAndAnalyze() {
     }
 
     const stats = {};
-    const statFields = ['derecha','reves','volea','bandeja','vibora','smash','lob','saque',
+    const statFields = ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque',
         'bajada_pared','velocidad','resistencia','reflejos','tactica','presion',
         'trabajo_en_pareja','torneos_jugados','victorias','puntos_ranking_fep'];
 
@@ -1684,25 +1698,25 @@ function renderMatches(matches) {
         const badgeText  = ganado ? 'Victoria' : 'Derrota';
         const typeBadge  = getMatchTypeBadge(m.torneo);
         const fecha = new Date(m.played_at).toLocaleDateString('es-ES', {day:'numeric', month:'short'});
-        const rival   = m.rival_nombre || 'Rival';
-        const resultado = m.resultado || m.result || '—';
-        const torneo  = m.torneo ? `· ${m.torneo}` : '';
+        const rival   = escapeHtml(m.rival_nombre) || 'Rival';
+        const resultado = escapeHtml(m.resultado || m.result || '—');
+        const torneo  = m.torneo ? `· ${escapeHtml(m.torneo)}` : '';
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
 
         return `
         <div class="flex items-center gap-4 p-3.5 rounded-xl transition-all"
-             style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
+            style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
             <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                 style="background:${bgColor};">
+                style="background:${bgColor};">
                 <span class="text-sm font-black" style="color:${color};">${label}</span>
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                     <p class="text-sm font-semibold text-white">vs. ${rival}</p>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
-                          style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
+                        style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
-                          style="background:${badgeColor};color:${color};">${badgeText}</span>
+                        style="background:${badgeColor};color:${color};">${badgeText}</span>
                 </div>
                 <p class="text-xs mt-0.5" style="color:#475569;">${scoring} ${torneo} · ${fecha}</p>
             </div>
@@ -1759,24 +1773,24 @@ function renderFullMatchHistory(matches) {
         const badgeText  = ganado ? 'Victoria' : 'Derrota';
         const typeBadge  = getMatchTypeBadge(m.torneo);
         const fecha = new Date(m.played_at).toLocaleDateString('es-ES', {day:'numeric', month:'short'});
-        const rival   = m.rival_nombre || 'Rival';
-        const resultado = m.resultado || m.result || '—';
-        const torneo  = m.torneo ? `· ${m.torneo}` : '';
+        const rival   = escapeHtml(m.rival_nombre) || 'Rival';
+        const resultado = escapeHtml(m.resultado || m.result || '—');
+        const torneo  = m.torneo ? `· ${escapeHtml(m.torneo)}` : '';
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
         return `
         <div class="flex items-center gap-4 p-3.5 rounded-xl transition-all"
-             style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
+            style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
             <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                 style="background:${bgColor};">
+                style="background:${bgColor};">
                 <span class="text-sm font-black" style="color:${color};">${label}</span>
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                     <p class="text-sm font-semibold text-white">vs. ${rival}</p>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
-                          style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
+                        style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
-                          style="background:${badgeColor};color:${color};">${badgeText}</span>
+                        style="background:${badgeColor};color:${color};">${badgeText}</span>
                 </div>
                 <p class="text-xs mt-0.5" style="color:#475569;">${scoring} ${torneo} · ${fecha}</p>
             </div>

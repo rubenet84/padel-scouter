@@ -36,9 +36,10 @@ def analyze_player(
     # Construir entidad de dominio
     stats = PlayerStats(
         derecha=player_model.derecha, reves=player_model.reves,
-        volea=player_model.volea, bandeja=player_model.bandeja,
-        vibora=player_model.vibora, smash=player_model.smash,
-        lob=player_model.lob, saque=player_model.saque,
+        volea_derecha=player_model.volea_derecha, volea_reves=player_model.volea_reves,
+        bandeja=player_model.bandeja,
+        vibora=player_model.vibora, remate=player_model.remate,
+        globo=player_model.globo, saque=player_model.saque,
         bajada_pared=player_model.bajada_pared,
         velocidad=player_model.velocidad, resistencia=player_model.resistencia,
         reflejos=player_model.reflejos, tactica=player_model.tactica,

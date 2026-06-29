@@ -18,11 +18,11 @@ def calculate_power_level(stats: PlayerStats, category: PlayerCategory) -> int:
     tecnica = (
         stats.derecha      * 0.12 +
         stats.reves        * 0.10 +
-        stats.volea        * 0.10 +
+        ((stats.volea_derecha + stats.volea_reves) / 2) * 0.10 +
         stats.bandeja      * 0.10 +
         stats.vibora       * 0.08 +
-        stats.smash        * 0.08 +
-        stats.lob          * 0.06 +
+        stats.remate       * 0.08 +
+        stats.globo         * 0.06 +
         stats.saque        * 0.08 +
         stats.bajada_pared * 0.08
     )  # suma pesos: 0.80 → escala sobre 100

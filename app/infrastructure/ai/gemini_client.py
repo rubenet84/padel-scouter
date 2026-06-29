@@ -21,11 +21,12 @@ PODER DE COMBATE: {power_level}
 ESTADÍSTICAS TÉCNICAS (0-100):
 - Derecha: {derecha}
 - Revés: {reves}
-- Volea: {volea}
+- Volea de Derecha: {volea_derecha}
+- Volea de Revés: {volea_reves}
 - Bandeja: {bandeja}
 - Víbora: {vibora}
-- Smash: {smash}
-- Lob: {lob}
+- Remate: {remate}
+- Globo: {globo}
 - Saque: {saque}
 - Bajada de pared: {bajada_pared}
 
@@ -55,7 +56,7 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:
   "fortalezas": ["fortaleza 1", "fortaleza 2", "fortaleza 3"],
   "debilidades": ["debilidad 1", "debilidad 2"],
   "plan_mejora": "Plan de mejora específico y detallado para subir al siguiente nivel",
-  "golpe_definitivo": "Nombre épico estilo Dragon Ball para el golpe basado en {golpe_stat_label} (ej: 'Kamehameha de Bandeja', 'Smash del Infinito')",
+  "golpe_definitivo": "Nombre épico estilo Dragon Ball para el golpe basado en {golpe_stat_label} (ej: Kamehameha de Bandeja, Remate del Infinito)",
   "descripcion_golpe": "Descripción cinematográfica de 2-3 frases estilo Dragon Ball del golpe {golpe_stat_label}, mencionando su poder destructivo, aura de energía y sensación de amenaza nivel {nivel_amenaza}. Sé espectacular y dramático."
 }}
 """

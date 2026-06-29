@@ -64,13 +64,14 @@ class UserPublicSchema(BaseModel):
 # ── Players ───────────────────────────────────────────────────
 
 class PlayerStatsSchema(BaseModel):
-    derecha:      int = Field(default=50, ge=0, le=100)
-    reves:        int = Field(default=50, ge=0, le=100)
-    volea:        int = Field(default=50, ge=0, le=100)
-    bandeja:      int = Field(default=50, ge=0, le=100)
+    derecha:       int = Field(default=50, ge=0, le=100)
+    reves:         int = Field(default=50, ge=0, le=100)
+    volea_derecha: int = Field(default=50, ge=0, le=100)
+    volea_reves:   int = Field(default=50, ge=0, le=100)
+    bandeja:       int = Field(default=50, ge=0, le=100)
     vibora:       int = Field(default=50, ge=0, le=100)
-    smash:        int = Field(default=50, ge=0, le=100)
-    lob:          int = Field(default=50, ge=0, le=100)
+    remate:       int = Field(default=50, ge=0, le=100)
+    globo:        int = Field(default=50, ge=0, le=100)
     saque:        int = Field(default=50, ge=0, le=100)
     bajada_pared: int = Field(default=50, ge=0, le=100)
     velocidad:    int = Field(default=50, ge=0, le=100)
@@ -97,13 +98,14 @@ class PlayerPublicSchema(BaseModel):
     owner_id: UUID
     avatar_url: str | None = None
 
-    derecha:      int = 50
-    reves:        int = 50
-    volea:        int = 50
-    bandeja:      int = 50
+    derecha:       int = 50
+    reves:         int = 50
+    volea_derecha: int = 50
+    volea_reves:   int = 50
+    bandeja:       int = 50
     vibora:       int = 50
-    smash:        int = 50
-    lob:          int = 50
+    remate:       int = 50
+    globo:        int = 50
     saque:        int = 50
     bajada_pared: int = 50
     velocidad:    int = 50
