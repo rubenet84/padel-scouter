@@ -61,10 +61,12 @@ Chain strategy: pending
 
 ## Phase 5: Cleanup
 
-- [ ] 5.1 Drop `torneos_jugados`, `victorias`, `puntos_ranking_fep` from `PlayerModel` in `models.py` + write Alembic migration
-- [ ] 5.2 Remove competitive fields from `PlayerStats` entity (`app/domain/entities/player.py`) and from `PlayerStatsSchema`/`PlayerPublicSchema` in `app/schemas/player.py`
-- [ ] 5.3 Update unit tests in `tests/unit/test_power_level.py` + `tests/conftest.py` — update `PlayerStats` fixtures (remove competitive fields), add test for `computed_stats` param
-- [ ] 5.4 Update integration tests in `tests/integration/test_database.py` — remove competitive fields from `PlayerModel` creation
+- [x] 5.1 Remove competitive fields from `PlayerStats` entity (`app/domain/entities/player.py`) and `PlayerStatsSchema`/`PlayerPublicSchema` in `app/schemas/player.py` — dropped `torneos_jugados`, `victorias`, `puntos_ranking_fep` + removed `win_rate()` method
+- [x] 5.2 Drop columns from `PlayerModel` in `models.py` + wrote Alembic migration `d4e5f6a7b8c9` (parent: `3c101144546e`)
+- [x] 5.3 Updated `tests/conftest.py` fixtures — removed competitive fields from `stats_iniciacion`, `stats_tercera`, `stats_pro`
+- [x] 5.4 Updated `tests/integration/test_api.py` — removed competitive fields from `created_player` payload
+- [x] 5.5 Cleaned up extra references in `analysis.py`, `analyze_player.py`, `gemini_client.py` — removed competitive field access and AI prompt section
+- [x] 5.6 Verified no remaining Python code references (only alembic migrations)
 
 ## Dependencies
 

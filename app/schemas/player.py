@@ -111,9 +111,6 @@ class PlayerPublicSchema(BaseModel):
     tactica:            int = 50
     presion:            int = 50
     trabajo_en_pareja:  int = 50
-    torneos_jugados:    int = 0
-    victorias:          int = 0
-    puntos_ranking_fep: int = 0
 
     model_config = {"from_attributes": True}
 

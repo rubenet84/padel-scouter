@@ -68,11 +68,6 @@ class PlayerModel(Base):
     # Avatar
     avatar_url = Column(String(500), nullable=True)
 
-    # Competitivo
-    torneos_jugados    = Column(Integer, default=0)
-    victorias          = Column(Integer, default=0)
-    puntos_ranking_fep = Column(Integer, default=0)
-
     owner     = relationship("UserModel", back_populates="players")
     analyses  = relationship("AnalysisModel", back_populates="player")
     matches_as_p1 = relationship("MatchModel", foreign_keys="MatchModel.player1_id")

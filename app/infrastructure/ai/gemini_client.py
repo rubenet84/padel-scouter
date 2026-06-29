@@ -40,11 +40,6 @@ ESTADÍSTICAS MENTALES (0-100):
 - Presión: {presion}
 - Trabajo en pareja: {trabajo_en_pareja}
 
-HISTORIAL COMPETITIVO:
-- Torneos jugados: {torneos_jugados}
-- Victorias: {victorias}
-- Puntos ranking FEP: {puntos_ranking_fep}
-
 GOLPE DEFINITIVO DETECTADO POR EL SCOUTER:
 - Habilidad más potente: {golpe_stat_label} ({golpe_stat_categoria})
 - Puntuación: {golpe_puntuacion}/100

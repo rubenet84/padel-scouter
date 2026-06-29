@@ -46,9 +46,6 @@ def analyze_player(
         reflejos=player_model.reflejos, tactica=player_model.tactica,
         presion=player_model.presion,
         trabajo_en_pareja=player_model.trabajo_en_pareja,
-        torneos_jugados=player_model.torneos_jugados,
-        victorias=player_model.victorias,
-        puntos_ranking_fep=player_model.puntos_ranking_fep,
     )
     player = Player(
         id=player_model.id,

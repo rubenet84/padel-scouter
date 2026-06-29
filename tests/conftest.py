@@ -10,8 +10,7 @@ def stats_iniciacion() -> PlayerStats:
         vibora=0,  remate=10, globo=10,  saque=20,
         bajada_pared=5, velocidad=40, resistencia=35,
         reflejos=30, tactica=15, presion=10,
-        trabajo_en_pareja=15, torneos_jugados=0,
-        victorias=0, puntos_ranking_fep=0
+        trabajo_en_pareja=15,
     )
 
 
@@ -22,8 +21,7 @@ def stats_tercera() -> PlayerStats:
         vibora=45, remate=60, globo=55,  saque=62,
         bajada_pared=50, velocidad=65, resistencia=60,
         reflejos=62, tactica=58, presion=55,
-        trabajo_en_pareja=60, torneos_jugados=30,
-        victorias=15, puntos_ranking_fep=800
+        trabajo_en_pareja=60,
     )
 
 
@@ -34,6 +32,5 @@ def stats_pro() -> PlayerStats:
         vibora=88, remate=94, globo=85,  saque=91,
         bajada_pared=89, velocidad=95, resistencia=92,
         reflejos=94, tactica=95, presion=90,
-        trabajo_en_pareja=95, torneos_jugados=120,
-        victorias=85, puntos_ranking_fep=5000
+        trabajo_en_pareja=95,
     )

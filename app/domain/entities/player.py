@@ -27,11 +27,6 @@ class PlayerStats:
     presion:             int = 50
     trabajo_en_pareja:   int = 50
 
-    # Competitivo
-    torneos_jugados:     int = 0
-    victorias:           int = 0
-    puntos_ranking_fep:  int = 0
-
 
 @dataclass
 class Player:
@@ -39,8 +34,3 @@ class Player:
     category: PlayerCategory
     stats:    PlayerStats
     id:       UUID = field(default_factory=uuid4)
-
-    def win_rate(self) -> float:
-        if self.stats.torneos_jugados == 0:
-            return 0.0
-        return self.stats.victorias / self.stats.torneos_jugados

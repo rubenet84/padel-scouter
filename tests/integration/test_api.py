@@ -57,8 +57,6 @@ def created_player(auth_headers):
             "globo": 55, "saque": 65, "bajada_pared": 58,
             "velocidad": 70, "resistencia": 65, "reflejos": 68,
             "tactica": 62, "presion": 58, "trabajo_en_pareja": 65,
-            "torneos_jugados": 20, "victorias": 10,
-            "puntos_ranking_fep": 500,
         }
     }, headers=auth_headers)
     assert response.status_code == 201
