@@ -37,13 +37,13 @@
 
             <select id="p-category"
                     class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-emerald-500 focus:outline-none">
-                <option value="Iniciación">Iniciación</option>
-                <option value="5ª Categoría">5ª Categoría</option>
-                <option value="4ª Categoría">4ª Categoría</option>
-                <option value="3ª Categoría" selected>3ª Categoría</option>
-                <option value="2ª Categoría">2ª Categoría</option>
-                <option value="1ª Categoría">1ª Categoría</option>
-                <option value="Profesional">Profesional</option>
+                <option value="Iniciación">🟢 Iniciación (1.0 – 2.5)</option>
+                <option value="5ª Categoría">🟡 5ª Categoría (2.0 – 3.0)</option>
+                <option value="4ª Categoría">🟡 4ª Categoría (3.0 – 3.75)</option>
+                <option value="3ª Categoría" selected>🟡 3ª Categoría (3.75 – 4.25)</option>
+                <option value="2ª Categoría">🔴 2ª Categoría (4.25 – 4.75)</option>
+                <option value="1ª Categoría">🔴 1ª Categoría (4.75 – 6.0)</option>
+                <option value="Profesional">🔴 Profesional (6.0 – 7.0)</option>
             </select>
             <div id="create-error" class="hidden mt-3 text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
 
@@ -114,6 +114,16 @@ const CATEGORY_COLORS = {
     '2ª Categoría': '#f59e0b',
     '1ª Categoría': '#ef4444',
     'Profesional': '#fbbf24',
+};
+
+const CATEGORY_LEVELS = {
+    'Iniciación':   { min: 1.0, max: 2.5,  group: 'Iniciación', color: '#22c55e', icon: '🟢' },
+    '5ª Categoría': { min: 2.0, max: 3.0,  group: 'Intermedio', color: '#eab308', icon: '🟡' },
+    '4ª Categoría': { min: 3.0, max: 3.75, group: 'Intermedio', color: '#eab308', icon: '🟡' },
+    '3ª Categoría': { min: 3.75,max: 4.25, group: 'Intermedio', color: '#eab308', icon: '🟡' },
+    '2ª Categoría': { min: 4.25,max: 4.75, group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
+    '1ª Categoría': { min: 4.75,max: 6.0,  group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
+    'Profesional':  { min: 6.0, max: 7.0,  group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
 };
 
 function openNewPlayerModal() {

@@ -385,10 +385,15 @@
 
                 <!-- Action buttons -->
                     <div class="flex gap-3 flex-wrap">
-                        <button onclick="openEditModal()"
+                         <button onclick="openEditModal()"
                                 class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
                                 style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
                             ✏️ Editar jugador
+                        </button>
+                        <button onclick="openLevelGuideModal()"
+                                class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                                style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:#a855f7;">
+                            📖 Guía de Niveles
                         </button>
                         <a href="/dashboard"
                         class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
@@ -420,13 +425,13 @@
                                         <select id="edit-category"
                                                 class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
                                                 style="background:#0A0A0F;border:1px solid rgba(255,107,0,0.2);">
-                                            <option value="Iniciación">Iniciación</option>
-                                            <option value="5ª Categoría">5ª Categoría</option>
-                                            <option value="4ª Categoría">4ª Categoría</option>
-                                            <option value="3ª Categoría">3ª Categoría</option>
-                                            <option value="2ª Categoría">2ª Categoría</option>
-                                            <option value="1ª Categoría">1ª Categoría</option>
-                                            <option value="Profesional">Profesional</option>
+                                            <option value="Iniciación">🟢 Iniciación (1.0 – 2.5)</option>
+                                            <option value="5ª Categoría">🟡 5ª Categoría (2.0 – 3.0)</option>
+                                            <option value="4ª Categoría">🟡 4ª Categoría (3.0 – 3.75)</option>
+                                            <option value="3ª Categoría">🟡 3ª Categoría (3.75 – 4.25)</option>
+                                            <option value="2ª Categoría">🔴 2ª Categoría (4.25 – 4.75)</option>
+                                            <option value="1ª Categoría">🔴 1ª Categoría (4.75 – 6.0)</option>
+                                            <option value="Profesional">🔴 Profesional (6.0 – 7.0)</option>
                                         </select>
                                     </div>
                                 </div>
@@ -607,12 +612,17 @@
                                             <span class="text-xs" style="color:#64748b;">Volea de Revés</span>
                                             <span id="val-volea_reves" class="text-xs font-bold" style="color:#06B6D4;">—</span>
                                         </div>
-                                        <!-- Botón Ver estadísticas completas -->
-                                        <div class="flex justify-start px-2 pt-2">
+                                        <!-- Botones de estadísticas -->
+                                        <div class="grid grid-cols-2 gap-2 pt-2 col-span-2">
                                             <button onclick="openStatsModal()"
-                                                    class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all"
+                                                    class="flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-xs font-bold transition-all"
                                                     style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.2);color:#FF6B00;">
-                                                📊 Ver todas las estadísticas
+                                                📊 Estadísticas Jugador
+                                            </button>
+                                            <button onclick="openMatchAnalyticsModal()"
+                                                    class="flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-xs font-bold transition-all"
+                                                    style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);color:#06B6D4;">
+                                                📈 Análisis de partidos
                                             </button>
                                         </div>
                                         <!-- stats-modal moved to top-level to avoid clipping -->
@@ -635,6 +645,10 @@
                             </div>
                             <!-- Filtro de partidos -->
                             <div class="flex items-center gap-3 mb-4">
+                                <input id="mh-filter-search" type="text" placeholder="🔍 Buscar por rival, fecha, resultado, ronda..."
+                                    oninput="filterMatchesBySearch()"
+                                    class="rounded-lg px-3 py-2 text-sm text-white flex-1 min-w-0"
+                                    style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
                                 <select id="match-filter" onchange="onMatchFilterChange()"
                                         class="rounded-lg px-3 py-2 text-sm text-white"
                                         style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
@@ -652,7 +666,7 @@
                             <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
                             <div class="p-6">
                                 <div class="flex items-center justify-between mb-6">
-                                    <span class="text-sm font-bold" style="color:#a855f7;">📋 Nuevo partido</span>
+                                    <span id="match-modal-title" class="text-sm font-bold" style="color:#a855f7;">📋 Nuevo partido</span>
                                     <button onclick="closeMatchModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
                                 </div>
 
@@ -670,7 +684,7 @@
 
                                     <!-- Campos torneo (ocultos por defecto) -->
                                     <div id="torneo-fields" class="hidden space-y-3 p-3 rounded-xl" style="background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.1);">
-                                        <div>
+                                        <div id="torneo-select-section">
                                             <label class="text-xs text-gray-500 mb-1 block">Seleccionar torneo</label>
                                             <div class="flex gap-1">
                                                 <select id="m-torneo-select"
@@ -750,6 +764,15 @@
                                                 </button>
                                             </div>
                                         </div>
+                                        <!-- Nombre del torneo (visible solo al editar) -->
+                                        <div id="torneo-edit-name" class="hidden">
+                                            <label class="text-xs text-gray-500 mb-1 block">Torneo</label>
+                                            <select id="torneo-edit-name-select" disabled
+                                                class="w-full rounded-lg px-3 py-2.5 text-sm text-white opacity-70"
+                                                style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                                                <option></option>
+                                            </select>
+                                        </div>
                                         <div class="grid grid-cols-2 gap-3">
                                             <div>
                                                 <label class="text-xs text-gray-500 mb-1 block">Ronda</label>
@@ -814,6 +837,22 @@
                                         </div>
                                     </div>
 
+                                    <!-- Fecha del partido -->
+                                    <div>
+                                        <label class="text-xs text-gray-500 mb-1 block">Fecha del partido <span class="text-gray-600">(opcional, hoy por defecto)</span></label>
+                                        <input id="m-date" type="date"
+                                            class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                                            style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);color-scheme:dark;">
+                                    </div>
+
+                                    <!-- Notas del partido -->
+                                    <div>
+                                        <label class="text-xs text-gray-500 mb-1 block">Notas <span class="text-gray-600">(lesión, retiro, incidencias...)</span></label>
+                                        <textarea id="m-notas" rows="2" placeholder="ej: rival se retiró por lesión en el segundo set"
+                                            class="w-full rounded-lg px-3 py-2.5 text-sm text-white resize-none"
+                                            style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);"></textarea>
+                                    </div>
+
                                     <div id="match-error" class="hidden text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
 
                                     <button type="button" id="btn-save-match"
@@ -830,9 +869,33 @@
                         <div class="w-full max-w-3xl rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(168,85,247,0.25);max-height:90vh;overflow-y:auto;">
                             <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
                             <div class="p-6">
-                                <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center justify-between mb-4">
                                     <span class="text-sm font-bold" style="color:#a855f7;">📜 Historial completo de combate</span>
                                     <button onclick="closeMatchHistoryModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+                                </div>
+                                <!-- Sort controls -->
+                                <div class="flex items-center gap-2 mb-4 text-xs">
+                                    <span class="text-gray-500">Ordenar:</span>
+                                    <button id="sort-date-desc" onclick="setSortMode('date-desc')"
+                                        class="px-2.5 py-1 rounded-lg font-bold transition-all"
+                                        style="background:rgba(168,85,247,0.2);border:1px solid rgba(168,85,247,0.3);color:#a855f7;">
+                                        📅 Más reciente
+                                    </button>
+                                    <button id="sort-date-asc" onclick="setSortMode('date-asc')"
+                                        class="px-2.5 py-1 rounded-lg font-bold transition-all"
+                                        style="background:rgba(168,85,247,0.05);border:1px solid rgba(42,42,58,0.3);color:#666;">
+                                        📅 Más antiguo
+                                    </button>
+                                    <button id="sort-round" onclick="setSortMode('round')"
+                                        class="px-2.5 py-1 rounded-lg font-bold transition-all"
+                                        style="background:rgba(168,85,247,0.05);border:1px solid rgba(42,42,58,0.3);color:#666;">
+                                        🔄 Ronda ASC
+                                    </button>
+                                    <button id="sort-round-desc" onclick="setSortMode('round-desc')"
+                                        class="px-2.5 py-1 rounded-lg font-bold transition-all"
+                                        style="background:rgba(168,85,247,0.05);border:1px solid rgba(42,42,58,0.3);color:#666;">
+                                        🔄 Ronda DESC
+                                    </button>
                                 </div>
                                 <div id="match-history-list" class="space-y-3"></div>
                             </div>
@@ -922,6 +985,272 @@
     </div>
 </div>
 
+<!-- ── Match Analytics Modal ────────────────────────────────── -->
+<div id="match-analytics-modal"
+    class="fixed inset-0 flex items-center justify-center p-4 hidden"
+    role="dialog" aria-modal="true"
+    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
+    onclick="if (event.target===event.currentTarget) closeMatchAnalyticsModal()">
+    <div class="w-full max-w-2xl rounded-2xl" style="background:#12121A;border:1px solid rgba(6,182,212,0.2);max-height:85vh;overflow-y:auto;position:relative;">
+        <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#06B6D4,transparent);"></div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(6,182,212,0.8);">📈 Análisis de Partidos</span>
+                <button onclick="closeMatchAnalyticsModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+
+            <div id="analytics-loading" class="text-center py-12">
+                <p class="text-gray-500 text-sm">Cargando análisis...</p>
+            </div>
+
+            <div id="analytics-content" class="hidden space-y-6">
+
+                <!-- Tarjetas rápidas: Totales -->
+                <div>
+                    <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(255,215,0,0.6);">📊 Totales</p>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-total-partidos" class="text-lg font-bold text-white">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Partidos</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-victorias" class="text-lg font-bold" style="color:#00FF87;">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Victorias</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-derrotas" class="text-lg font-bold" style="color:#ef4444;">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Derrotas</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-win-rate" class="text-lg font-bold" style="color:#00FF87;">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Victorias</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sets -->
+                <div>
+                    <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(0,180,216,0.6);">🎾 Sets</p>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-total-sets" class="text-lg font-bold text-white">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Sets</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-sets-ganados" class="text-lg font-bold" style="color:#00FF87;">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Ganados</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-sets-perdidos" class="text-lg font-bold" style="color:#ef4444;">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Perdidos</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-set-ratio" class="text-lg font-bold" style="color:#06B6D4;">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Sets Ganados</p>
+                        </div>
+                    </div>
+                    <div class="mt-2 grid grid-cols-4 gap-2">
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-2-sets" class="text-lg font-bold text-white">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Partidos 2 sets</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-2-sets-ratio" class="text-lg font-bold" style="color:#06B6D4;">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">En 2 sets</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-3-sets" class="text-lg font-bold text-white">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Partidos 3 sets</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-3-sets-ratio" class="text-lg font-bold" style="color:#06B6D4;">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">En 3 sets</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Torneos / Amistosos -->
+                <div>
+                    <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(168,85,247,0.6);">🏆 Torneos</p>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-torneos" class="text-lg font-bold text-white">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Torneos</p>
+                        </div>
+                        <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <p id="a-amistosos" class="text-lg font-bold text-white">—</p>
+                            <p class="text-xs uppercase tracking-wider" style="color:#475569;">Amistosos</p>
+                        </div>
+                    </div>
+
+                    <div id="a-mejor-ronda-row" class="hidden mb-3">
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);">
+                            <span class="text-xs" style="color:#94a3b8;">🏅 Mejor ronda:</span>
+                            <span id="a-mejor-ronda" class="text-sm font-bold" style="color:#a855f7;">—</span>
+                        </div>
+                    </div>
+
+                    <!-- Desglose de rondas -->
+                    <div id="a-rondas-section" class="hidden">
+                        <p class="text-xs font-semibold mb-2" style="color:#94a3b8;">Rondas alcanzadas por torneo</p>
+                        <div id="a-rondas-list" class="space-y-1.5"></div>
+                        <div class="flex items-center gap-2 mt-2 px-3 py-2 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                            <span class="text-xs" style="color:#94a3b8;">📊 Fase media:</span>
+                            <span id="a-fase-media" class="text-sm font-bold" style="color:#06B6D4;">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sistema de puntuación -->
+                <div>
+                    <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(255,215,0,0.6);">📋 Sistema de Puntuación</p>
+                    <div id="a-scoring-list" class="grid grid-cols-3 gap-2"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Level Guide Modal ────────────────────────────────────── -->
+<div id="level-guide-modal"
+    class="fixed inset-0 flex items-center justify-center p-4 hidden"
+    role="dialog" aria-modal="true"
+    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
+    onclick="if (event.target===event.currentTarget) closeLevelGuideModal()">
+    <div class="w-full max-w-[1450px] rounded-2xl" style="background:#12121A;border:1px solid rgba(168,85,247,0.2);max-height:90vh;overflow-y:auto;position:relative;">
+        <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-5">
+                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(168,85,247,0.8);">📖 Guía de Niveles</span>
+                <button onclick="closeLevelGuideModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+
+            <div class="grid grid-cols-4 gap-5 items-stretch">
+
+                <!-- INICIACIÓN -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(34,197,94,0.2);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(34,197,94,0.08);border-bottom:1px solid rgba(34,197,94,0.1);">
+                        <span class="text-base font-bold" style="color:#22c55e;">🟢 INICIACIÓN</span>
+                        <span class="text-base ml-1.5 font-bold" style="color:#22c55e;">1.0 – 2.5</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Primeros pasos. Reglas, técnica básica y consistencia.</p>
+                            <div class="space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Golpes básicos</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Dificultad en voleas</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Prioriza mantener la bola</div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(34,197,94,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#22c55e;">
+                                <span>🎾</span> Pala redonda · punto dulce amplio
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INTERMEDIO -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(234,179,8,0.2);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(234,179,8,0.08);border-bottom:1px solid rgba(234,179,8,0.1);">
+                        <span class="text-base font-bold" style="color:#eab308;">🟡 INTERMEDIO</span>
+                        <span class="text-base ml-1.5 font-bold" style="color:#eab308;">2.0 – 4.5</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Control, colocación y táctica con consistencia.</p>
+                            <div class="space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Bandeja y víbora</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Lee rebotes y se posiciona</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Controla el ritmo</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Compite con frecuencia</div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(234,179,8,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#eab308;">
+                                <span>🎾</span> Pala híbrida · equilibrio control/potencia
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AVANZADO -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(239,68,68,0.2);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.1);">
+                        <span class="text-base font-bold" style="color:#ef4444;">🔴 AVANZADO</span>
+                        <span class="text-base ml-1.5 font-bold" style="color:#ef4444;">4.25 – 7.0</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Sólido, rápido y agresivo. Domina todos los golpes.</p>
+                            <div class="space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Precisión en golpes complejos</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Gran lectura del partido</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Domina ataque y defensa</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Torneos habituales</div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(239,68,68,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#ef4444;">
+                                <span>🎾</span> Pala técnica · alta precisión
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mapa de categorías -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(59,130,246,0.25);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.1);">
+                        <span class="text-base font-bold" style="color:#3b82f6;">📋 CORRESPONDENCIA</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Todas las categorías FEP con su rango numérico.</p>
+                            <div class="space-y-2.5">
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟢 Iniciación</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">1.0 – 2.5</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 5ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">2.0 – 3.0</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 4ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.0 – 3.75</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 3ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.75 – 4.25</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 2ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.25 – 4.75</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 1ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.75 – 6.0</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 Profesional</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">6.0 – 7.0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(59,130,246,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#3b82f6;">
+                                <span>📋</span> Basado en FEP 2026
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -934,6 +1263,16 @@ let playerData = null;
 let analysisData = null;
 let loadedMatches = [];
 let loadedTournaments = [];
+
+const CATEGORY_LEVELS = {
+    'Iniciación':   { min: 1.0, max: 2.5,  group: 'Iniciación', color: '#22c55e', icon: '🟢' },
+    '5ª Categoría': { min: 2.0, max: 3.0,  group: 'Intermedio', color: '#eab308', icon: '🟡' },
+    '4ª Categoría': { min: 3.0, max: 3.75, group: 'Intermedio', color: '#eab308', icon: '🟡' },
+    '3ª Categoría': { min: 3.75,max: 4.25, group: 'Intermedio', color: '#eab308', icon: '🟡' },
+    '2ª Categoría': { min: 4.25,max: 4.75, group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
+    '1ª Categoría': { min: 4.75,max: 6.0,  group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
+    'Profesional':  { min: 6.0, max: 7.0,  group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
+};
 
 // ── Radar Chart ───────────────────────────────────────────────
 function drawRadar(p) {
@@ -1065,7 +1404,11 @@ function renderPlayer(p, analyses) {
         'TERCERA':'3ª Categoría','SEGUNDA':'2ª Categoría','PRIMERA':'1ª Categoría','PRO':'Profesional'
     };
     const catDisplay = catLabels[p.category] || p.category;
-    document.getElementById('badge-category').textContent = catDisplay;
+    const levelInfo = CATEGORY_LEVELS[catDisplay];
+    const badgeText = levelInfo
+        ? `${levelInfo.icon} ${catDisplay} · Nivel ${levelInfo.min}  –  ${levelInfo.max}`
+        : catDisplay;
+    document.getElementById('badge-category').textContent = badgeText;
 
     // Avatar
     setAvatar(p.avatar_url);
@@ -1537,14 +1880,130 @@ function closeStatsModal() {
     document.getElementById('stats-modal').classList.add('hidden');
 }
 
+// ── Match Analytics Modal ─────────────────────────────────────
+async function openMatchAnalyticsModal() {
+    const modal = document.getElementById('match-analytics-modal');
+    modal.classList.remove('hidden');
+    modal.style.opacity = '0';
+    setTimeout(() => { modal.style.transition = 'opacity 0.2s'; modal.style.opacity = '1'; }, 10);
+
+    document.getElementById('analytics-loading').classList.remove('hidden');
+    document.getElementById('analytics-content').classList.add('hidden');
+
+    try {
+        const res = await fetch(`/api/v1/players/${playerId}/analytics`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Error fetching analytics');
+        const a = await res.json();
+
+        // Totales
+        document.getElementById('a-total-partidos').textContent = a.total_partidos;
+        document.getElementById('a-victorias').textContent = a.victorias;
+        document.getElementById('a-derrotas').textContent = a.derrotas;
+        document.getElementById('a-win-rate').textContent = a.win_rate.toFixed(1) + '%';
+
+        // Sets
+        document.getElementById('a-total-sets').textContent = a.total_sets;
+        document.getElementById('a-sets-ganados').textContent = a.sets_ganados;
+        document.getElementById('a-sets-perdidos').textContent = a.sets_perdidos;
+        document.getElementById('a-set-ratio').textContent = (a.set_ratio * 100).toFixed(0) + '%';
+        const total = a.partidos_2_sets + a.partidos_3_sets;
+        const pct2 = total > 0 ? (a.partidos_2_sets / total * 100).toFixed(0) : '0';
+        const pct3 = total > 0 ? (a.partidos_3_sets / total * 100).toFixed(0) : '0';
+        document.getElementById('a-2-sets').textContent = a.partidos_2_sets;
+        document.getElementById('a-2-sets-ratio').textContent = pct2 + '%';
+        document.getElementById('a-3-sets').textContent = a.partidos_3_sets;
+        document.getElementById('a-3-sets-ratio').textContent = pct3 + '%';
+
+        // Torneos / Amistosos
+        document.getElementById('a-torneos').textContent = a.torneos_jugados;
+        document.getElementById('a-amistosos').textContent = a.amistosos_jugados;
+
+        // Mejor ronda
+        const mejorRow = document.getElementById('a-mejor-ronda-row');
+        if (a.mejor_ronda) {
+            document.getElementById('a-mejor-ronda').textContent = a.mejor_ronda;
+            mejorRow.classList.remove('hidden');
+        } else {
+            mejorRow.classList.add('hidden');
+        }
+
+        // Desglose de rondas
+        const rondasSection = document.getElementById('a-rondas-section');
+        const rondasList = document.getElementById('a-rondas-list');
+        const roundKeys = Object.keys(a.rondas_breakdown);
+        if (roundKeys.length > 0) {
+            rondasList.innerHTML = roundKeys.map(r => {
+                const count = a.rondas_breakdown[r];
+                return `
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                        <span class="text-xs font-semibold flex-1" style="color:#cbd5e1;">${r}</span>
+                        <div class="flex-1 h-2 rounded-full overflow-hidden" style="background:#0A0A0F;">
+                            <div class="h-full rounded-full" style="width:${(count / Math.max(...Object.values(a.rondas_breakdown))) * 100}%;background:linear-gradient(90deg,#a855f7,#06B6D4);"></div>
+                        </div>
+                        <span class="text-xs font-bold" style="color:#a855f7;min-width:2rem;text-align:right;">${count}${count > 1 ? ' veces' : ' vez'}</span>
+                    </div>`;
+            }).join('');
+            rondasSection.classList.remove('hidden');
+        } else {
+            rondasSection.classList.add('hidden');
+        }
+
+        // Fase media
+        if (a.fase_media_nombre) {
+                    document.getElementById('a-fase-media').textContent = a.fase_media_nombre;
+        } else {
+            document.getElementById('a-fase-media').textContent = '—';
+        }
+
+        // Scoring breakdown
+        const scoringList = document.getElementById('a-scoring-list');
+        const scoringEntries = Object.entries(a.scoring_breakdown);
+        if (scoringEntries.length > 0) {
+            scoringList.innerHTML = scoringEntries.map(([label, count]) => `
+                <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                    <p class="text-lg font-bold text-white">${count}</p>
+                    <p class="text-xs uppercase tracking-wider" style="color:#475569;">${label}</p>
+                </div>
+            `).join('');
+        } else {
+            scoringList.innerHTML = '<p class="text-xs text-gray-500 col-span-3 text-center py-4">Sin datos</p>';
+        }
+
+        document.getElementById('analytics-loading').classList.add('hidden');
+        document.getElementById('analytics-content').classList.remove('hidden');
+    } catch (e) {
+        console.warn('match analytics error:', e);
+        document.getElementById('analytics-loading').innerHTML = '<p class="text-red-400 text-sm">Error al cargar análisis</p>';
+    }
+}
+
+function closeMatchAnalyticsModal() {
+    document.getElementById('match-analytics-modal').classList.add('hidden');
+    document.getElementById('analytics-content').classList.add('hidden');
+    document.getElementById('analytics-loading').classList.remove('hidden');
+    document.getElementById('analytics-loading').innerHTML = '<p class="text-gray-500 text-sm">Cargando análisis...</p>';
+}
+
 // Cerrar modales con Escape
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         closeStatsModal();
+        closeMatchAnalyticsModal();
+        closeLevelGuideModal();
         closeEditModal();
         closeMatchModal();
     }
 });
+
+// ── Level Guide Modal ─────────────────────────────────────────
+function openLevelGuideModal() {
+    document.getElementById('level-guide-modal').classList.remove('hidden');
+}
+function closeLevelGuideModal() {
+    document.getElementById('level-guide-modal').classList.add('hidden');
+}
 
 // ── Edit Modal ────────────────────────────────────────────────
 function resolveCategoryKey(categoryValue) {
@@ -1704,7 +2163,11 @@ function getMatchTypeBadge(match) {
         : { text: 'Amistoso', color: '#FF6B00', bgColor: 'rgba(255,107,0,0.1)' };
 }
 
-function renderMatches(matches) {
+function hasLesionNote(notes) {
+    return (notes || '').toLowerCase().match(/lesi[oó]n|retiro|retirada|abandono/i);
+}
+
+function renderMatches(matches, emptyMsg, searchTotalCount) {
     loadedMatches = matches || [];
     const container = document.getElementById('matches-section');
     if (!container) return;
@@ -1712,32 +2175,40 @@ function renderMatches(matches) {
 
     const list = document.getElementById('matches-list');
     if (!matches || matches.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-sm" style="color:#475569;">Sin partidos registrados aún</div>`;
+        list.innerHTML = `<div class="text-center py-8 text-sm" style="color:#475569;">${escapeHtml(emptyMsg || 'Sin partidos registrados aún')}</div>`;
         return;
     }
 
+    const totalCount = searchTotalCount || matches.length;
     const preview = matches.slice(0, 3);
     const previewHtml = preview.map(m => {
         const ganado = m.ganado;
         const color   = ganado ? '#00FF87' : '#FF2D2D';
         const bgColor = ganado ? 'rgba(0,255,135,0.08)' : 'rgba(255,45,45,0.08)';
-        const label   = ganado ? 'W' : 'L';
+        const label   = ganado ? '🏆' : '❌';
         const badgeColor = ganado ? 'rgba(0,255,135,0.1)' : 'rgba(255,45,45,0.1)';
         const badgeText  = ganado ? 'Victoria' : 'Derrota';
         const typeBadge  = getMatchTypeBadge(m);
+        const lesion    = hasLesionNote(m.notes);
+        const lesionBadge = lesion
+            ? `<span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider" style="background:rgba(239,68,68,0.12);color:#ef4444;">🩹 Lesión</span>`
+            : '';
         const fecha = new Date(m.played_at).toLocaleDateString('es-ES', {day:'numeric', month:'short'});
         const rival   = escapeHtml(m.rival_nombre) || 'Rival';
-        const resultado = escapeHtml(m.resultado || m.result || '—');
+        const resultado = escapeHtml(m.resultado || '—');
         const ronda   = m.ronda ? `· ${escapeHtml(m.ronda)}` : '';
-        const torneo  = m.torneo ? `· ${escapeHtml(m.torneo)}` : '';
+        const tName   = getTournamentNameById(m.tournament_id);
+        const torneo  = tName ? `· ${escapeHtml(tName)}` : '';
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
+        const notas   = m.notes ? escapeHtml(m.notes) : '';
+        const notasHtml = notas ? `<p class="text-xs mt-1 italic" style="color:#64748b;">📝 ${notas}</p>` : '';
 
         return `
         <div class="flex items-center gap-4 p-3.5 rounded-xl transition-all"
             style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
             <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                 style="background:${bgColor};">
-                <span class="text-sm font-black" style="color:${color};">${label}</span>
+                <span class="text-base" style="color:${color};">${label}</span>
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
@@ -1746,8 +2217,10 @@ function renderMatches(matches) {
                         style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
                         style="background:${badgeColor};color:${color};">${badgeText}</span>
+                    ${lesionBadge}
                 </div>
                 <p class="text-xs mt-0.5" style="color:#475569;">${ronda} ${scoring} ${torneo} · ${fecha}</p>
+                ${notasHtml}
             </div>
             <div class="text-right flex-shrink-0 flex items-center gap-2">
                 <p class="text-sm font-bold text-white mr-2">${resultado}</p>
@@ -1764,13 +2237,18 @@ function renderMatches(matches) {
     }).join('');
 
     let moreButton = '';
-    if (matches.length > 3) {
+    if (totalCount > 3) {
+        const isSearch = searchTotalCount > 0;
+        const label = isSearch
+            ? `Hay ${searchTotalCount} resultados. <span style="color:#a855f7;text-decoration:underline;">Ver en el historial</span>`
+            : 'Ver todo el historial de combate';
+        const onclick = isSearch ? "openSearchedMatchHistory()" : "openFullMatchHistory()";
         moreButton = `
             <div class="pt-3 text-center">
-                <button onclick="openFullMatchHistory()"
+                <button onclick="${onclick}"
                         class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all"
                         style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:#a855f7;">
-                    Ver todo el historial de combate
+                    ${label}
                 </button>
             </div>
         `;
@@ -1786,6 +2264,70 @@ function openFullMatchHistory() {
     renderFullMatchHistory(loadedMatches);
 }
 
+function openSearchedMatchHistory() {
+    const modal = document.getElementById('match-history-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    renderFullMatchHistory(searchedMatches || loadedMatches);
+}
+
+// ── Sort controls for full match history ──
+let sortMode = 'date-desc';
+
+function setSortMode(mode) {
+    sortMode = mode;
+    // Update button styles
+    ['sort-date-desc', 'sort-date-asc', 'sort-round'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        const actualId = 'sort-' + mode.replace(/-/g, '-');
+        if (id === 'sort-' + mode) {
+            btn.style.background = 'rgba(168,85,247,0.2)';
+            btn.style.border = '1px solid rgba(168,85,247,0.3)';
+            btn.style.color = '#a855f7';
+        } else {
+            btn.style.background = 'rgba(168,85,247,0.05)';
+            btn.style.border = '1px solid rgba(42,42,58,0.3)';
+            btn.style.color = '#666';
+        }
+    });
+    // Re-render if modal is open
+    const modal = document.getElementById('match-history-modal');
+    if (!modal || modal.classList.contains('hidden')) return;
+    const container = document.getElementById('match-history-list');
+    if (!container) return;
+    const isSearchActive = searchedMatches && document.getElementById('mh-filter-search').value.trim();
+    renderFullMatchHistory(isSearchActive ? searchedMatches : loadedMatches);
+}
+
+function sortMatches(matches) {
+    const sorted = [...matches];
+    if (sortMode === 'date-desc') {
+        sorted.sort((a, b) => new Date(b.played_at) - new Date(a.played_at));
+    } else if (sortMode === 'date-asc') {
+        sorted.sort((a, b) => new Date(a.played_at) - new Date(b.played_at));
+    } else if (sortMode === 'round') {
+        sorted.sort((a, b) => {
+            const idxA = a.ronda ? ROUND_ORDER.indexOf(a.ronda) : -1;
+            const idxB = b.ronda ? ROUND_ORDER.indexOf(b.ronda) : -1;
+            if (idxA === -1 && idxB === -1) return 0;
+            if (idxA === -1) return 1;
+            if (idxB === -1) return -1;
+            return idxA - idxB;
+        });
+    } else if (sortMode === 'round-desc') {
+        sorted.sort((a, b) => {
+            const idxA = a.ronda ? ROUND_ORDER.indexOf(a.ronda) : -1;
+            const idxB = b.ronda ? ROUND_ORDER.indexOf(b.ronda) : -1;
+            if (idxA === -1 && idxB === -1) return 0;
+            if (idxA === -1) return 1;
+            if (idxB === -1) return -1;
+            return idxB - idxA;
+        });
+    }
+    return sorted;
+}
+
 function renderFullMatchHistory(matches) {
     const container = document.getElementById('match-history-list');
     if (!container) return;
@@ -1793,26 +2335,34 @@ function renderFullMatchHistory(matches) {
         container.innerHTML = `<div class="text-center py-8 text-sm" style="color:#475569;">Sin partidos registrados aún</div>`;
         return;
     }
-    container.innerHTML = matches.map(m => {
+    const sorted = sortMatches(matches);
+    container.innerHTML = sorted.map(m => {
         const ganado = m.ganado;
         const color   = ganado ? '#00FF87' : '#FF2D2D';
         const bgColor = ganado ? 'rgba(0,255,135,0.08)' : 'rgba(255,45,45,0.08)';
-        const label   = ganado ? 'W' : 'L';
+        const label   = ganado ? '🏆' : '❌';
         const badgeColor = ganado ? 'rgba(0,255,135,0.1)' : 'rgba(255,45,45,0.1)';
         const badgeText  = ganado ? 'Victoria' : 'Derrota';
         const typeBadge  = getMatchTypeBadge(m);
+        const lesion    = hasLesionNote(m.notes);
+        const lesionBadge = lesion
+            ? `<span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider" style="background:rgba(239,68,68,0.12);color:#ef4444;">🩹 Lesión</span>`
+            : '';
         const fecha = new Date(m.played_at).toLocaleDateString('es-ES', {day:'numeric', month:'short'});
         const rival   = escapeHtml(m.rival_nombre) || 'Rival';
-        const resultado = escapeHtml(m.resultado || m.result || '—');
+        const resultado = escapeHtml(m.resultado || '—');
         const ronda   = m.ronda ? `· ${escapeHtml(m.ronda)}` : '';
-        const torneo  = m.torneo ? `· ${escapeHtml(m.torneo)}` : '';
+        const tName   = getTournamentNameById(m.tournament_id);
+        const torneo  = tName ? `· ${escapeHtml(tName)}` : '';
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
+        const notas   = m.notes ? escapeHtml(m.notes) : '';
+        const notasHtml = notas ? `<p class="text-xs mt-1 italic" style="color:#64748b;">📝 ${notas}</p>` : '';
         return `
         <div class="flex items-center gap-4 p-3.5 rounded-xl transition-all"
             style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
             <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                 style="background:${bgColor};">
-                <span class="text-sm font-black" style="color:${color};">${label}</span>
+                <span class="text-base" style="color:${color};">${label}</span>
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
@@ -1821,8 +2371,10 @@ function renderFullMatchHistory(matches) {
                         style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
                         style="background:${badgeColor};color:${color};">${badgeText}</span>
+                    ${lesionBadge}
                 </div>
                 <p class="text-xs mt-0.5" style="color:#475569;">${ronda} ${scoring} ${torneo} · ${fecha}</p>
+                ${notasHtml}
             </div>
             <div class="text-right flex-shrink-0 flex items-center gap-2">
                 <p class="text-sm font-bold text-white mr-2">${resultado}</p>
@@ -1847,6 +2399,9 @@ function closeMatchHistoryModal() {
 
 function openMatchModal() {
     resetMatchForm();
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('m-date').value = today;
     document.getElementById('match-modal').classList.remove('hidden');
 }
 function closeMatchModal() {
@@ -1877,7 +2432,7 @@ function getRoundIndex(roundName) {
 function resetMatchForm() {
     const formFields = [
         'm-tipo', 'm-rival', 'm-pareja-rival', 'm-resultado', 'm-ganado', 'm-scoring',
-        'm-torneo-select', 'm-ronda'
+        'm-torneo-select', 'm-ronda', 'm-notas', 'm-date'
     ];
     formFields.forEach(id => {
         const el = document.getElementById(id);
@@ -1903,7 +2458,21 @@ function resetMatchForm() {
     }
 
     const tipo = document.getElementById('m-tipo');
-    if (tipo) tipo.value = 'amistoso';
+    if (tipo) {
+        tipo.value = 'amistoso';
+        tipo.disabled = false;
+    }
+    document.getElementById('match-modal-title').textContent = '📋 Nuevo partido';
+    // Re-enable and show tournament-related elements
+    const torneoSelect = document.getElementById('m-torneo-select');
+    if (torneoSelect) torneoSelect.disabled = false;
+    const rondaSel = document.getElementById('m-ronda');
+    if (rondaSel) rondaSel.disabled = false;
+    const torneoSection = document.getElementById('torneo-select-section');
+    if (torneoSection) torneoSection.classList.remove('hidden');
+    // No show admin-row here, onTournamentSelect handles it
+    const editName = document.getElementById('torneo-edit-name');
+    if (editName) editName.classList.add('hidden');
     toggleTorneo();
 }
 
@@ -1982,7 +2551,7 @@ async function saveMatch() {
         
         if (!tournamentId) {
             if (errEl) {
-                errEl.textContent = 'Seleccioná un torneo de la lista';
+                errEl.textContent = 'Selecciona un torneo de la lista';
                 errEl.classList.remove('hidden');
             }
             console.warn('saveMatch validation failed: torneo requerido');
@@ -2016,24 +2585,29 @@ async function saveMatch() {
         return;
     }
 
-    // Validate result format and logical winner rules
-    const vr = validateResultString(resultado);
-    if (!vr.valid) {
-        if (errEl) { errEl.textContent = vr.msg; errEl.classList.remove('hidden'); }
-        console.warn('saveMatch result invalid', vr.msg);
-        return;
-    }
+    // ── Validación de resultado ──
+    const notasValue = (document.getElementById('m-notas').value || '').trim();
+    const esLesion = hasLesionNote(notasValue);
 
-    const expectedWinner = vr.winner === 'A';
-    if (expectedWinner !== ganado) {
-        if (errEl) {
-            errEl.textContent = ganado
-                ? 'El resultado no indica que el jugador haya ganado dos sets.'
-                : 'El resultado indica que el jugador ganó dos sets.';
-            errEl.classList.remove('hidden');
+    if (!esLesion) {
+        const vr = validateResultString(resultado);
+        if (!vr.valid) {
+            if (errEl) { errEl.textContent = vr.msg; errEl.classList.remove('hidden'); }
+            console.warn('saveMatch result invalid', vr.msg);
+            return;
         }
-        console.warn('saveMatch winner mismatch', { resultado, ganado, vr });
-        return;
+
+        const expectedWinner = vr.winner === 'A';
+        if (expectedWinner !== ganado) {
+            if (errEl) {
+                errEl.textContent = ganado
+                    ? 'El resultado no indica que el jugador haya ganado dos sets.'
+                    : 'El resultado indica que el jugador ganó dos sets.';
+                errEl.classList.remove('hidden');
+            }
+            console.warn('saveMatch winner mismatch', { resultado, ganado, vr });
+            return;
+        }
     }
 
     // ── Validaciones de torneo ──
@@ -2070,7 +2644,7 @@ async function saveMatch() {
             if (higherWins.length > 0) {
                 const rounds = [...new Set(higherWins.map(m => m.ronda))].join(', ');
                 if (errEl) {
-                    errEl.textContent = `No se puede marcar como derrota porque hay partidos ganados en rondas superiores: ${rounds}. Eliminá primero esos partidos.`;
+                    errEl.textContent = `No se puede marcar como derrota porque hay partidos ganados en rondas superiores: ${rounds}. Elimina primero esos partidos.`;
                     errEl.classList.remove('hidden');
                 }
                 return;
@@ -2092,6 +2666,35 @@ async function saveMatch() {
         }
     }
 
+    // ── Validación de fecha ──
+    const fechaPartido = document.getElementById('m-date').value;
+    if (fechaPartido) {
+        // Usamos mediodía para evitar corrimientos por zona horaria,
+        // luego llevamos ambos a medianoche para comparar solo la fecha
+        const fpDate = new Date(fechaPartido + 'T12:00:00');
+        fpDate.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // FUTURA → bloquea (error)
+        if (fpDate > today) {
+            if (errEl) {
+                const parts = fechaPartido.split('-');
+                const fechaDisplay = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                errEl.textContent = `La fecha del partido (${fechaDisplay}) no puede ser posterior a hoy. Corrige la fecha para continuar.`;
+                errEl.classList.remove('hidden');
+            }
+            return;
+        }
+
+        // MUY ANTIGUA → aviso no bloqueante
+        if (fpDate.getFullYear() < today.getFullYear() - 2) {
+            if (!confirm(`La fecha ${fechaPartido} parece muy antigua. ¿Estás seguro de que es correcta?`)) {
+                return;
+            }
+        }
+    }
+
     const btn = document.getElementById('btn-save-match');
     btn.textContent = '⏳ Guardando...';
     btn.disabled = true;
@@ -2110,6 +2713,8 @@ async function saveMatch() {
             tournament_id: tipo === 'torneo' ? tournamentId : null,
             ronda: tipo === 'torneo' ? ronda : null,
             scoring_method: document.getElementById('m-scoring').value,
+            notes: document.getElementById('m-notas').value.trim() || null,
+            fecha_partido: document.getElementById('m-date').value || null,
         };
 
         const res = await fetch(url, {
@@ -2172,7 +2777,7 @@ async function renderComputedStats(pid) {
         document.getElementById('stat-torneos').textContent = stats.torneos;
         document.getElementById('stat-torneos').nextElementSibling.textContent = 'Torneos';
         document.getElementById('stat-winrate').textContent = stats.win_rate.toFixed(1) + '%';
-        document.getElementById('stat-winrate').nextElementSibling.textContent = 'Win Rate';
+        document.getElementById('stat-winrate').nextElementSibling.textContent = 'victorias';
         document.getElementById('stat-fep').textContent = stats.fep_points.toLocaleString();
         document.getElementById('stat-fep').nextElementSibling.textContent = 'Pts FEP';
 
@@ -2214,24 +2819,120 @@ async function loadTournaments() {
     }
 }
 
-async function loadTournamentFilterOptions() {
-    try {
-        const res = await fetch(`/api/v1/tournaments/?player_id=${playerId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) return;
-        const tournaments = await res.json();
-        const select = document.getElementById('match-filter');
-        if (!select) return;
-        tournaments.forEach(t => {
-            const opt = document.createElement('option');
-            opt.value = t.id;
-            opt.textContent = `🏆 ${t.name}`;
-            select.appendChild(opt);
-        });
-    } catch (e) {
-        console.warn('loadTournamentFilterOptions error:', e);
+// ── Match history filter with search ──────────────────────────
+let allServerMatches = []; // Full matches from server (before search filter)
+let searchedMatches = null; // Filtered results when search bar has text
+
+function getTournamentNameById(id) {
+    if (!id) return '';
+    const t = loadedTournaments.find(t => t.id === id);
+    return t ? t.name : '';
+}
+
+function filterMatchesBySearch() {
+    const query = document.getElementById('mh-filter-search').value.toLowerCase().trim();
+    if (!query) {
+        searchedMatches = null;
+        renderMatches(allServerMatches);
+        return;
     }
+    const terms = query.split(/\s+/).filter(t => t);
+    const filtered = allServerMatches.filter(m => {
+        const rival = (m.rival_nombre || '').toLowerCase();
+        const d = new Date(m.played_at);
+        // Componentes de fecha
+        const dia   = d.getDate();
+        const dia2  = String(dia).padStart(2, '0');
+        const mesC  = d.toLocaleDateString('es-ES', {month:'short'}).toLowerCase().replace('.',''); // "jul"
+        const mesL  = d.toLocaleDateString('es-ES', {month:'long'}).toLowerCase();                 // "julio"
+        const anio  = d.getFullYear();
+        const anio2 = String(anio).slice(-2);
+        // Fechas con barra
+        const fBarra1 = `${dia}/${d.getMonth()+1}/${anio}`;         // "1/7/2026"
+        const fBarra2 = `${dia2}/${String(d.getMonth()+1).padStart(2,'0')}/${anio}`;  // "01/07/2026"
+        const fBarra3 = `${dia2}/${String(d.getMonth()+1).padStart(2,'0')}/${anio2}`; // "01/07/26"
+        // Fechas con guion
+        const fGuion1 = fBarra1.replace(/\//g, '-');
+        const fGuion2 = fBarra2.replace(/\//g, '-');
+        const fGuion3 = fBarra3.replace(/\//g, '-');
+        // Fecha ISO
+        const isoDate = (m.played_at || '').split('T')[0];          // "2026-07-01"
+        // Día + mes corto
+        const fc1 = `${dia} ${mesC}`;    // "1 jul"
+        const fc2 = `${dia2} ${mesC}`;   // "01 jul"
+        const fc3 = `${dia} ${mesC} ${anio}`;   // "1 jul 2026"
+        const fc4 = `${dia2} ${mesC} ${anio}`;  // "01 jul 2026"
+        const fc5 = `${dia} ${mesC} ${anio2}`;  // "1 jul 26"
+        const fc6 = `${dia2} ${mesC} ${anio2}`; // "01 jul 26"
+        // Día + mes largo
+        const fl1 = `${dia} ${mesL}`;     // "1 julio"
+        const fl2 = `${dia2} ${mesL}`;    // "01 julio"
+        const fl3 = `${dia} ${mesL} ${anio}`;   // "1 julio 2026"
+        const fl4 = `${dia2} ${mesL} ${anio}`;  // "01 julio 2026"
+        const fl5 = `${dia} ${mesL} ${anio2}`;  // "1 julio 26"
+        const fl6 = `${dia2} ${mesL} ${anio2}`; // "01 julio 26"
+        // Con "de"
+        const fDe1 = `${dia} de ${mesL} de ${anio}`;   // "1 de julio de 2026"
+        const fDe2 = `${dia2} de ${mesL} de ${anio}`;  // "01 de julio de 2026"
+        const fDe3 = `${dia} de ${mesL} de ${anio2}`;  // "1 de julio de 26"
+        const fDe4 = `${dia2} de ${mesL} de ${anio2}`; // "01 de julio de 26"
+        // Solo mes/año
+        const soloAnio   = String(anio);
+        const soloAnio2  = anio2;
+        const soloMes    = mesL;
+        const soloMesC   = mesC;
+        const resultado    = (m.resultado || '').toLowerCase();
+        const torneo       = getTournamentNameById(m.tournament_id).toLowerCase();
+        const rondaPal     = (m.ronda || '').toLowerCase();
+        const ganado       = m.ganado ? 'victoria' : 'derrota';
+        const notas        = (m.notes || '').toLowerCase();
+        const lesion       = hasLesionNote(m.notes) ? 'lesion' : '';
+        // Cada término debe aparecer en ALGÚN campo del mismo partido (AND).
+        // Ronda se matchea como palabra completa para no mezclar "final" con "semifinal".
+        const haystack = [rival, resultado, torneo, ganado, notas, lesion,
+            soloAnio, soloAnio2, soloMes, soloMesC,
+            fBarra1, fBarra2, fBarra3,
+            fGuion1, fGuion2, fGuion3,
+            isoDate,
+            fc1, fc2, fc3, fc4, fc5, fc6,
+            fl1, fl2, fl3, fl4, fl5, fl6,
+            fDe1, fDe2, fDe3, fDe4
+        ];
+        const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return terms.every(t =>
+            haystack.some(f => f.includes(t)) ||
+            (rondaPal && new RegExp(`\\b${esc(t)}\\b`).test(rondaPal))
+        );
+    });
+    searchedMatches = filtered.length > 0 ? filtered : null;
+    if (filtered.length === 0 && allServerMatches.length > 0) {
+        renderMatches(filtered, `Sin resultados para "${query}"`);
+    } else if (filtered.length <= 3) {
+        renderMatches(filtered);
+    } else {
+        renderMatches(filtered.slice(0, 3), null, filtered.length);
+    }
+}
+
+function filterMatchHistory() {
+    const select = document.getElementById('match-filter');
+    const currentVal = select.value;
+    select.innerHTML = '<option value="all">📋 Todos</option><option value="amistoso">🎾 Amistosos</option>';
+    loadedTournaments.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `🏆 ${t.name}`;
+        select.appendChild(opt);
+    });
+    if (currentVal && [...select.options].some(o => o.value === currentVal)) {
+        select.value = currentVal;
+    }
+    onMatchFilterChange();
+}
+
+async function loadTournamentFilterOptions() {
+    // Use loadedTournaments populated by loadTournaments, just refresh the filter
+    filterMatchHistory();
 }
 
 // ── Inline Tournament Create ────────────────────────────────────
@@ -2328,13 +3029,7 @@ async function createTournamentInline() {
         select.value = tournament.id;
         loadedTournaments.push(tournament);
         onTournamentSelect();
-
-        // Also add to filter dropdown
-        const filterSelect = document.getElementById('match-filter');
-        const filterOpt = document.createElement('option');
-        filterOpt.value = tournament.id;
-        filterOpt.textContent = `🏆 ${tournament.name}`;
-        filterSelect.appendChild(filterOpt);
+        filterMatchHistory();
 
         showToast('✅ Torneo creado', 'success');
     } catch (e) {
@@ -2445,12 +3140,7 @@ async function saveTournamentEdit() {
         cancelTournamentEdit();
         // Refresh local data
         await loadTournaments();
-        // Update filter dropdown option text (name may have changed)
-        const filterOpt = document.querySelector(`#match-filter option[value="${t.id}"]`);
-        if (filterOpt) {
-            const updated = loadedTournaments.find(x => x.id === t.id);
-            if (updated) filterOpt.textContent = `🏆 ${updated.name}`;
-        }
+        filterMatchHistory();
         // Re-select the same tournament in the dropdown
         const select = document.getElementById('m-torneo-select');
         if (select) select.value = t.id;
@@ -2495,14 +3185,10 @@ async function deleteSelectedTournament() {
                 if (opt) opt.remove();
                 select.value = '';
             }
-            const filterSelect = document.getElementById('match-filter');
-            if (filterSelect) {
-                const opt = filterSelect.querySelector(`option[value="${t.id}"]`);
-                if (opt) opt.remove();
-            }
             // Update local cache
             loadedTournaments = loadedTournaments.filter(x => x.id !== t.id);
             onTournamentSelect();
+            filterMatchHistory();
             showToast('🗑️ Torneo eliminado', 'success');
         } else {
             const err = await res.json();
@@ -2534,7 +3220,8 @@ async function onMatchFilterChange() {
         });
         if (!res.ok) return;
         const matches = await res.json();
-        renderMatches(matches);
+        allServerMatches = matches;
+        filterMatchesBySearch();
     } catch (e) {
         console.warn('onMatchFilterChange error:', e);
     }
@@ -2555,7 +3242,8 @@ loadMatches = async function() {
         });
         if (!res.ok) return;
         const matches = await res.json();
-        renderMatches(matches);
+        allServerMatches = matches;
+        filterMatchesBySearch();
     } catch (e) {
         console.warn('loadMatches error:', e);
     }
@@ -2563,8 +3251,9 @@ loadMatches = async function() {
 
 sanitizeEditPlayerNumbers();
 loadPlayer();
-loadTournaments();
-loadTournamentFilterOptions();
+loadTournaments().then(() => loadTournamentFilterOptions());
+// Init sort mode button style
+setSortMode('date-desc');
 
 // Ensure save button is bound and won't submit forms accidentally
 (function bindSaveMatchButton(){
@@ -2630,8 +3319,12 @@ async function openEditMatchModal(matchId) {
         // Pre-populate form fields
         const isTorneo = match.tournament_id || (match.torneo && match.torneo.trim() !== '');
         document.getElementById('m-tipo').value = isTorneo ? 'torneo' : 'amistoso';
+        document.getElementById('m-tipo').disabled = true;
+        document.getElementById('match-modal-title').textContent = '✏️ Modificar partido';
 
         if (isTorneo) {
+            // Hide tournament selection elements when editing
+            document.getElementById('torneo-select-section').classList.add('hidden');
             // Set tournament dropdown if we have a tournament_id
             if (match.tournament_id) {
                 const select = document.getElementById('m-torneo-select');
@@ -2639,13 +3332,22 @@ async function openEditMatchModal(matchId) {
                     // Try to select matching tournament; if not found as option yet,
                     // ensure tournaments are loaded by this point (loadTournaments is called on page init)
                     select.value = match.tournament_id;
+                    select.disabled = true;
                     onTournamentSelect();
                 }
             }
-            // Set ronda if available
-            if (match.ronda) {
-                document.getElementById('m-ronda').value = match.ronda;
+            // Hide admin row AFTER onTournamentSelect (which shows it)
+            document.getElementById('tournament-admin-row').classList.add('hidden');
+            // Show tournament name as read-only select
+            const tName = getTournamentNameById(match.tournament_id) || match.torneo || '';
+            const editSelect = document.getElementById('torneo-edit-name-select');
+            if (editSelect) {
+                editSelect.innerHTML = `<option>🏆 ${tName}</option>`;
             }
+            document.getElementById('torneo-edit-name').classList.remove('hidden');
+            // Set ronda
+            const rondaEl = document.getElementById('m-ronda');
+            if (rondaEl && match.ronda) rondaEl.value = match.ronda;
             // Set pareja rival
             if (document.getElementById('m-pareja-rival')) {
                 document.getElementById('m-pareja-rival').value = match.rival_nombre || '';
@@ -2666,6 +3368,8 @@ async function openEditMatchModal(matchId) {
         document.getElementById('m-resultado').value = match.resultado || '';
         document.getElementById('m-ganado').value = match.ganado ? 'true' : 'false';
         document.getElementById('m-scoring').value = match.scoring_method || 'con_ventaja';
+        document.getElementById('m-notas').value = match.notes || '';
+        document.getElementById('m-date').value = (match.played_at || '').split('T')[0];
 
         // Store the matchId for update
         const btn = document.getElementById('btn-save-match');

@@ -1,8 +1,8 @@
 import re
 from uuid import UUID
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 from app.domain.value_objects.category import PlayerCategory, ScoringMethod
-from datetime import datetime
+from datetime import date, datetime
 
 
 # ── Auth ──────────────────────────────────────────────────────
@@ -127,6 +127,31 @@ class ComputedStatsSchema(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# ── Match Analytics ────────────────────────────────────────────
+
+class PlayerAnalyticsSchema(BaseModel):
+    """Estadísticas detalladas basadas en partidos y torneos reales."""
+
+    total_partidos:    int
+    victorias:         int
+    derrotas:          int
+    win_rate:          float          # 0.0 – 100.0
+    total_sets:        int
+    sets_ganados:      int
+    sets_perdidos:     int
+    set_ratio:         float          # 0.0 – 1.0
+    sets_por_partido:  float
+    partidos_2_sets:   int
+    partidos_3_sets:   int
+    torneos_jugados:   int
+    amistosos_jugados: int
+    mejor_ronda:       str | None
+    rondas_breakdown:  dict[str, int]
+    fase_media_nombre: str | None
+    fase_media_idx:    float
+    scoring_breakdown: dict[str, int]
+
+
 # ── Analysis ──────────────────────────────────────────────────
 
 class AnalysisPublicSchema(BaseModel):
@@ -149,12 +174,20 @@ class AnalysisPublicSchema(BaseModel):
 # ── Matches ───────────────────────────────────────────────────
 
 def _is_valid_set_score(a: int, b: int) -> bool:
-    """Valida un set según reglamento FIP 2026."""
+    if a < 0 or b < 0:
+        return False
     high, low = max(a, b), min(a, b)
-    if high == 7 and low == 5: return True   # 7-5
-    if high == 7 and low == 6: return True   # 7-6 tie-break
-    if high == 6 and low <= 4: return True   # 6-0 a 6-4
-    return False                              # 6-5 necesita tie-break
+    if high == 7 and (low == 5 or low == 6):
+        return True  # 7-5 o 7-6 tie-break
+    if high == 6 and low <= 4:
+        return True  # 6-0 a 6-4
+    return False
+
+
+def _has_lesion_notes(notes: str | None) -> bool:
+    if not notes:
+        return False
+    return bool(re.search(r'lesi[oó]n|retiro|retirada|abandono', notes, re.IGNORECASE))
 
 
 class MatchCreateSchema(BaseModel):
@@ -165,15 +198,27 @@ class MatchCreateSchema(BaseModel):
     ronda:          str | None = Field(default=None, max_length=100, description="Fase de grupos, Octavos, Cuartos, Semifinal, Final, etc.")
     scoring_method: ScoringMethod = ScoringMethod.CON_VENTAJA
     notes:          str | None = None
+    fecha_partido:  date | None = Field(default=None, description="Fecha en que se jugó el partido. Si no se envía, se usa la fecha actual.")
+
+    @field_validator("fecha_partido")
+    @classmethod
+    def validate_fecha_not_future(cls, v: date | None) -> date | None:
+        """Bloquea fechas futuras — un partido no puede registrarse antes de jugarse."""
+        if v is not None and v > date.today():
+            def _ddmm(d: date) -> str:
+                return f"{d.day:02d}-{d.month:02d}-{d.year}"
+            raise ValueError(
+                f"La fecha del partido ({_ddmm(v)}) no puede ser posterior a "
+                f"hoy ({_ddmm(date.today())}). Corregí la fecha para continuar."
+            )
+        return v
 
     @field_validator("resultado")
     @classmethod
-    def validate_resultado(cls, v: str) -> str:
-        """
-        FIP 2026 — formato: '6-4 6-3' o '6-4 3-6 7-5'
-        Sets separados por espacios. Tie-break: 7-6.
-        """
-        sets = v.strip().split()
+    def validate_resultado_format(cls, v: str) -> str:
+        """Validación básica: formato numérico y cantidad de sets."""
+        v = v.strip()
+        sets = v.split()
         if len(sets) < 2 or len(sets) > 3:
             raise ValueError("Debe tener 2 o 3 sets (ej: '6-4 6-3' o '6-4 3-6 7-5')")
         for s in sets:
@@ -181,15 +226,25 @@ class MatchCreateSchema(BaseModel):
             if len(parts) != 2:
                 raise ValueError(f"Formato incorrecto en set: {s}")
             try:
-                a, b = int(parts[0]), int(parts[1])
+                int(parts[0]), int(parts[1])
             except ValueError:
                 raise ValueError(f"Puntuación no numérica: {s}")
+        return v
+
+    @model_validator(mode="after")
+    def validate_resultado_scores(self):
+        """Valida sets FIP, SALVO si notes indica lesión/retiro/abandono."""
+        if _has_lesion_notes(self.notes):
+            return self
+        for s in self.resultado.split():
+            a_str, b_str = s.split('-')
+            a, b = int(a_str), int(b_str)
             if not _is_valid_set_score(a, b):
                 raise ValueError(
                     f"Set inválido según FIP 2026: {s}. "
                     f"Valores válidos: 6-0 a 6-4, 7-5, 7-6"
                 )
-        return v.strip()
+        return self
 
 
 class MatchPublicSchema(BaseModel):

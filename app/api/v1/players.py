@@ -1,6 +1,7 @@
 import os
 import uuid as uuid_lib
 from uuid import UUID
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -11,7 +12,7 @@ from app.infrastructure.database.models import PlayerModel, UserModel, MatchMode
 from app.schemas.player import (
     PlayerCreateSchema, PlayerPublicSchema,
     MatchCreateSchema, MatchPublicSchema,
-    ComputedStatsSchema,
+    ComputedStatsSchema, PlayerAnalyticsSchema,
 )
 
 # ── Round hierarchy (lower index = earlier round, single-elimination) ──
@@ -136,6 +137,32 @@ def get_player_stats(
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
 
     return get_computed_stats(db, player_id)
+
+
+@router.get("/{player_id}/analytics", response_model=PlayerAnalyticsSchema)
+def get_player_analytics(
+    player_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    """
+    Devuelve estadísticas detalladas de partidos: sets, rondas,
+    desglose por torneo, sistema de puntuación, etc.
+
+    OWASP:
+      - A01: Ownership check
+      - A07: JWT requerido
+      - A03: player_id validado como UUID
+    """
+    player = db.query(PlayerModel).filter(
+        PlayerModel.id == player_id,
+        PlayerModel.owner_id == current_user.id,
+    ).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
+    from app.domain.value_objects.analytics import get_match_analytics
+    return get_match_analytics(db, player_id)
 
 
 # ── Avatar ──────────────────────────────────────────────────────
@@ -331,6 +358,7 @@ def add_match(
         result=data.resultado,      # campo legacy del modelo
         winner_id=player_id if data.ganado else None,
         notes=data.notes,
+        played_at=datetime.combine(data.fecha_partido, datetime.utcnow().time()) if data.fecha_partido else datetime.utcnow(),
     )
     db.add(match)
     db.commit()
@@ -479,8 +507,10 @@ def update_match(
     match.ganado = data.ganado
     match.scoring_method = data.scoring_method
     match.winner_id = player_id if data.ganado else None
-    if data.notes:
+    if data.notes is not None:
         match.notes = data.notes
+    if data.fecha_partido is not None:
+        match.played_at = datetime.combine(data.fecha_partido, match.played_at.time())
 
     db.commit()
     db.refresh(match)
