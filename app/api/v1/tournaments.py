@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
@@ -25,31 +25,40 @@ def create_tournament(
     current_user: UserModel = Depends(get_current_user),
 ):
     """
-    Crear un nuevo torneo.
+    Crear un nuevo torneo. Si se pasa player_id, el torneo se asigna
+    a ese jugador y la unicidad es por nombre + fecha + player_id.
 
     OWASP:
       - A01 (Broken Access Control): owner_id = current_user.id
       - A03 (Injection): name validado por Pydantic (strip_html, max_length)
       - A07 (Authentication): JWT requerido
     """
-    # Validar: no duplicar nombre + fecha
     name_clean = data.name.strip()
-    existing = db.query(TournamentModel).filter(
+
+    # Unicidad: name + date, considerando player_id
+    # - Si el existente tiene player_id=NULL (compartido), bloquea a todos
+    # - Si el existente tiene player_id=X, solo bloquea al mismo X o si el nuevo es compartido
+    existing_dup = db.query(TournamentModel).filter(
         TournamentModel.name == name_clean,
         TournamentModel.date == data.date,
         TournamentModel.owner_id == current_user.id,
     ).first()
-    if existing:
-        raise HTTPException(
-            status_code=400,
-            detail="Ya existe un torneo con ese nombre y fecha.",
-        )
+    if existing_dup:
+        existing_null = existing_dup.player_id is None
+        new_null = data.player_id is None
+        same_player = existing_dup.player_id == data.player_id
+        if existing_null or new_null or same_player:
+            raise HTTPException(
+                status_code=400,
+                detail="Ya existe un torneo con ese nombre y fecha.",
+            )
 
     tournament = TournamentModel(
         name=name_clean,
         date=data.date,
         fep_points=data.fep_points or 0,
         owner_id=current_user.id,
+        player_id=data.player_id,
     )
     db.add(tournament)
     db.commit()
@@ -59,18 +68,23 @@ def create_tournament(
 
 @router.get("/", response_model=list[TournamentPublicSchema])
 def list_tournaments(
+    player_id: UUID | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
     """
-    Listar torneos del usuario autenticado, ordenados por fecha descendente,
-    incluyendo la cantidad de partidos asociados a cada uno.
+    Listar torneos del usuario autenticado.
+
+    Si se pasa player_id, solo devuelve:
+      - Torneos asignados a ese jugador (player_id = X)
+      - Torneos donde ese jugador tiene partidos
+      - Torneos nuevos sin asignar ni partidos (asignables)
 
     OWASP:
       - A01: solo torneos del usuario actual
       - A07: JWT requerido
     """
-    results = (
+    query = (
         db.query(
             TournamentModel,
             func.count(MatchModel.id).label("match_count"),
@@ -79,10 +93,34 @@ def list_tournaments(
             MatchModel, MatchModel.tournament_id == TournamentModel.id
         )
         .filter(TournamentModel.owner_id == current_user.id)
-        .group_by(TournamentModel.id)
-        .order_by(TournamentModel.date.desc())
-        .all()
     )
+
+    if player_id is not None:
+        has_player_match = (
+            db.query(MatchModel.id)
+            .filter(
+                MatchModel.tournament_id == TournamentModel.id,
+                or_(
+                    MatchModel.player1_id == player_id,
+                    MatchModel.player2_id == player_id,
+                ),
+            )
+            .correlate(TournamentModel)
+            .exists()
+        )
+        has_any_match = (
+            db.query(MatchModel.id)
+            .filter(MatchModel.tournament_id == TournamentModel.id)
+            .correlate(TournamentModel)
+            .exists()
+        )
+        query = query.filter(or_(
+            has_player_match,
+            TournamentModel.player_id == player_id,
+            and_(TournamentModel.player_id.is_(None), ~has_any_match),
+        ))
+
+    results = query.group_by(TournamentModel.id).order_by(TournamentModel.date.desc()).all()
 
     return [
         TournamentPublicSchema(
@@ -91,6 +129,7 @@ def list_tournaments(
             date=t.date,
             fep_points=t.fep_points,
             owner_id=t.owner_id,
+            player_id=t.player_id,
             created_at=t.created_at,
             match_count=match_count,
         )
@@ -135,6 +174,7 @@ def get_tournament(
         date=tournament.date,
         fep_points=tournament.fep_points,
         owner_id=tournament.owner_id,
+        player_id=tournament.player_id,
         created_at=tournament.created_at,
         match_count=match_count,
     )
@@ -148,10 +188,12 @@ def update_tournament(
     current_user: UserModel = Depends(get_current_user),
 ):
     """
-    Actualizar fecha y/o puntos FEP de un torneo.
+    Actualizar nombre, fecha y/o puntos FEP de un torneo.
 
-    El nombre es INMUTABLE — no se puede modificar después de la creación.
-    Solo se actualizan date y fep_points.
+    Si se cambia el nombre, se actualiza automáticamente el campo
+    `torneo` (legacy) en todos los partidos asociados.
+
+    La validación de duplicados respeta el player_id del torneo.
 
     OWASP:
       - A01: ownership check antes de mutar
@@ -169,21 +211,48 @@ def update_tournament(
     if not tournament:
         raise HTTPException(status_code=404, detail="Torneo no encontrado")
 
-    # name is NOT updated — it's immutable
-    # Validar: si cambia la fecha, que no choque con otro torneo del mismo nombre
-    if data.date != tournament.date:
-        dup = db.query(TournamentModel).filter(
-            TournamentModel.name == tournament.name,
-            TournamentModel.date == data.date,
+    effective_name = tournament.name
+
+    def _dup_filter(name, date, exclude_id):
+        f = [
+            TournamentModel.name == name,
+            TournamentModel.date == date,
             TournamentModel.owner_id == current_user.id,
-            TournamentModel.id != tournament_id,
+            TournamentModel.id != exclude_id,
+        ]
+        if tournament.player_id is not None:
+            f.append(TournamentModel.player_id == tournament.player_id)
+        else:
+            f.append(TournamentModel.player_id.is_(None))
+        return f
+
+    if data.name is not None and data.name != tournament.name:
+        effective_name = data.name
+        effective_date = data.date if data.date is not None else tournament.date
+        dup = db.query(TournamentModel).filter(
+            *_dup_filter(effective_name, effective_date, tournament_id)
         ).first()
         if dup:
             raise HTTPException(
                 status_code=400,
-                detail="Ya existe otro torneo con ese nombre y fecha.",
+                detail="Ya existe otro torneo con ese nombre y fecha para este jugador.",
             )
-    tournament.date = data.date
+        tournament.name = effective_name
+        db.query(MatchModel).filter(
+            MatchModel.tournament_id == tournament_id,
+        ).update({"torneo": effective_name})
+
+    if data.date is not None and data.date != tournament.date:
+        dup = db.query(TournamentModel).filter(
+            *_dup_filter(effective_name, data.date, tournament_id)
+        ).first()
+        if dup:
+            raise HTTPException(
+                status_code=400,
+                detail="Ya existe otro torneo con ese nombre y fecha para este jugador.",
+            )
+        tournament.date = data.date
+
     if data.fep_points is not None:
         tournament.fep_points = data.fep_points
 
@@ -203,6 +272,7 @@ def update_tournament(
         date=tournament.date,
         fep_points=tournament.fep_points,
         owner_id=tournament.owner_id,
+        player_id=tournament.player_id,
         created_at=tournament.created_at,
         match_count=match_count,
     )
@@ -215,8 +285,9 @@ def delete_tournament(
     current_user: UserModel = Depends(get_current_user),
 ):
     """
-    Eliminar un torneo. Los partidos asociados mantienen su historial:
-    su FK tournament_id se establece a NULL (SET NULL).
+    Eliminar un torneo solo si no tiene partidos asociados.
+    Si el torneo tiene player_id, solo revisa partidos de ESE jugador.
+    Si no tiene player_id (legacy), revisa todos los partidos.
 
     OWASP:
       - A01: ownership check antes de eliminar
@@ -234,10 +305,23 @@ def delete_tournament(
     if not tournament:
         raise HTTPException(status_code=404, detail="Torneo no encontrado")
 
-    # SET NULL on related matches — preserve match history
-    db.query(MatchModel).filter(
-        MatchModel.tournament_id == tournament_id,
-    ).update({"tournament_id": None})
+    match_filter = [MatchModel.tournament_id == tournament_id]
+    if tournament.player_id is not None:
+        match_filter.append(MatchModel.player1_id == tournament.player_id)
+
+    match_count = (
+        db.query(func.count(MatchModel.id))
+        .filter(*match_filter)
+        .scalar()
+        or 0
+    )
+    if match_count > 0:
+        scope = " de este jugador" if tournament.player_id is not None else ""
+        raise HTTPException(
+            status_code=400,
+            detail=f"No se puede eliminar el torneo porque tiene {match_count} partido(s){scope} asociado(s). "
+                    f"Eliminá los partidos primero.",
+        )
 
     db.delete(tournament)
     db.commit()

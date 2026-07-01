@@ -13,6 +13,23 @@ from app.schemas.player import (
     MatchCreateSchema, MatchPublicSchema,
     ComputedStatsSchema,
 )
+
+# ── Round hierarchy (lower index = earlier round, single-elimination) ──
+ROUND_ORDER = [
+    'Fase de grupos',
+    '32avos',
+    '16avos',
+    'Octavos',
+    'Cuartos',
+    'Semifinal',
+    'Final',
+]
+
+def get_round_index(round_name: str) -> int:
+    try:
+        return ROUND_ORDER.index(round_name)
+    except ValueError:
+        return -1
 from app.domain.value_objects.computed_stats import get_computed_stats
 
 from PIL import Image, UnidentifiedImageError
@@ -249,10 +266,49 @@ def add_match(
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
         legacy_torneo = tournament.name  # set legacy torneo field for backward compat
 
-        # Validar: no duplicar ronda en el mismo torneo
+        # Validar ronda
         if data.ronda:
+            round_idx = get_round_index(data.ronda)
+            if round_idx >= 0:
+                # Regla 1: si hay derrota en ronda INFERIOR, no se puede jugar después
+                lower_loss = db.query(MatchModel).filter(
+                    or_(
+                        MatchModel.player1_id == player_id,
+                        MatchModel.player2_id == player_id,
+                    ),
+                    MatchModel.tournament_id == data.tournament_id,
+                    MatchModel.ganado == False,
+                    MatchModel.ronda.in_(ROUND_ORDER[:round_idx]),
+                ).first()
+                if lower_loss:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Este jugador ya perdió en {lower_loss.ronda}. No puede haber partidos en rondas posteriores.",
+                    )
+
+                # Regla 2: si es derrota, no puede haber partidos GANADOS en rondas superiores
+                if data.ganado is False:
+                    higher_win = db.query(MatchModel).filter(
+                        or_(
+                            MatchModel.player1_id == player_id,
+                            MatchModel.player2_id == player_id,
+                        ),
+                        MatchModel.tournament_id == data.tournament_id,
+                        MatchModel.ganado == True,
+                        MatchModel.ronda.in_(ROUND_ORDER[round_idx + 1:]),
+                    ).first()
+                    if higher_win:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"No se puede marcar como derrota porque hay partidos ganados en rondas superiores. Eliminá primero esos partidos.",
+                        )
+
+            # Regla 3: no duplicar ronda en el mismo torneo
             existing = db.query(MatchModel).filter(
-                MatchModel.player1_id == player_id,
+                or_(
+                    MatchModel.player1_id == player_id,
+                    MatchModel.player2_id == player_id,
+                ),
                 MatchModel.tournament_id == data.tournament_id,
                 MatchModel.ronda == data.ronda,
             ).first()
@@ -356,19 +412,62 @@ def update_match(
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
         legacy_torneo = tournament.name
 
-        # Validar: no duplicar ronda en el mismo torneo (excluyendo este partido)
-        if data.ronda and (data.ronda != match.ronda or data.tournament_id != match.tournament_id):
-            existing = db.query(MatchModel).filter(
-                MatchModel.player1_id == player_id,
-                MatchModel.tournament_id == data.tournament_id,
-                MatchModel.ronda == data.ronda,
-                MatchModel.id != match_id,
-            ).first()
-            if existing:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Ya existe otro partido en {data.ronda} para este torneo.",
-                )
+        # Validar ronda
+        if data.ronda:
+            round_idx = get_round_index(data.ronda)
+            if round_idx >= 0:
+                # Regla 1: si cambió de ronda y hay derrota en ronda INFERIOR, no se puede pasar después
+                if data.ronda != match.ronda:
+                    lower_loss = db.query(MatchModel).filter(
+                        or_(
+                            MatchModel.player1_id == player_id,
+                            MatchModel.player2_id == player_id,
+                        ),
+                        MatchModel.tournament_id == data.tournament_id,
+                        MatchModel.ganado == False,
+                        MatchModel.ronda.in_(ROUND_ORDER[:round_idx]),
+                        MatchModel.id != match_id,
+                    ).first()
+                    if lower_loss:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"Este jugador ya perdió en {lower_loss.ronda}. No puede haber partidos en rondas posteriores.",
+                        )
+
+                # Regla 2: si se cambia a derrota, no puede haber partidos GANADOS en rondas superiores
+                if data.ganado is False and match.ganado is not False:
+                    higher_win = db.query(MatchModel).filter(
+                        or_(
+                            MatchModel.player1_id == player_id,
+                            MatchModel.player2_id == player_id,
+                        ),
+                        MatchModel.tournament_id == data.tournament_id,
+                        MatchModel.ganado == True,
+                        MatchModel.ronda.in_(ROUND_ORDER[round_idx + 1:]),
+                        MatchModel.id != match_id,
+                    ).first()
+                    if higher_win:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"No se puede marcar como derrota porque hay partidos ganados en rondas superiores. Eliminá primero esos partidos.",
+                        )
+
+            # Regla 3: no duplicar ronda en el mismo torneo (excluyendo este partido)
+            if data.ronda != match.ronda or data.tournament_id != match.tournament_id:
+                existing = db.query(MatchModel).filter(
+                    or_(
+                        MatchModel.player1_id == player_id,
+                        MatchModel.player2_id == player_id,
+                    ),
+                    MatchModel.tournament_id == data.tournament_id,
+                    MatchModel.ronda == data.ronda,
+                    MatchModel.id != match_id,
+                ).first()
+                if existing:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Ya existe otro partido en {data.ronda} para este torneo.",
+                    )
 
     # Update fields
     match.rival_nombre = data.rival_nombre

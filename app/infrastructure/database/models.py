@@ -82,9 +82,11 @@ class TournamentModel(Base):
     date       = Column(Date, nullable=False)
     fep_points = Column(Integer, default=0, nullable=True)
     owner_id   = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    player_id  = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
 
     owner   = relationship("UserModel")
+    player  = relationship("PlayerModel")
     matches = relationship("MatchModel", back_populates="tournament")
 
 

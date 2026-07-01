@@ -102,6 +102,7 @@
         padding: 1px;
         background: linear-gradient(135deg, #FF6B00, #FFD700, #FF6B00, transparent, transparent);
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
         pointer-events: none;
@@ -675,13 +676,52 @@
                                                 <select id="m-torneo-select"
                                                         class="flex-1 rounded-lg px-3 py-2.5 text-sm text-white min-w-0"
                                                         style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);"
-                                                        onchange="document.getElementById('match-error')?.classList.add('hidden')">
+                                                        onchange="onTournamentSelect()">
                                                     <option value="">— Seleccionar —</option>
                                                 </select>
                                                 <button type="button" onclick="showNewTournamentForm()"
                                                         class="px-1 py-0.5 rounded text-[11px] font-bold whitespace-nowrap transition-all"
                                                         style="background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);color:#a855f7;">
                                                     + Nuevo
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- Tournament admin row (edit/delete) -->
+                                        <div id="tournament-admin-row" class="hidden flex items-center justify-between px-1 py-1.5 rounded-lg" style="background:rgba(168,85,247,0.06);">
+                                            <span id="tournament-admin-name" class="text-xs text-gray-400 truncate mr-2"></span>
+                                            <div class="flex gap-1.5">
+                                                <button type="button" onclick="showTournamentEditForm()"
+                                                        class="px-2 py-1 rounded text-[11px] font-bold transition-all"
+                                                        style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);color:#60a5fa;"
+                                                        title="Editar torneo">✏️ Editar</button>
+                                                <button type="button" onclick="deleteSelectedTournament()"
+                                                        class="px-2 py-1 rounded text-[11px] font-bold transition-all"
+                                                        style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;"
+                                                        title="Eliminar torneo">🗑️ Eliminar</button>
+                                            </div>
+                                        </div>
+                                        <!-- Inline edit tournament form (hidden) -->
+                                        <div id="edit-tournament-form" class="hidden space-y-2 p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(59,130,246,0.2);">
+                                            <input id="e-tournament-name" type="text" placeholder="Nombre del torneo" maxlength="200"
+                                                class="w-full rounded-lg px-3 py-2 text-sm text-white"
+                                                style="background:#0A0A0F;border:1px solid rgba(59,130,246,0.2);">
+                                            <input id="e-tournament-date" type="date"
+                                                class="w-full rounded-lg px-3 py-2 text-sm text-white"
+                                                style="background:#0A0A0F;border:1px solid rgba(59,130,246,0.2);">
+                                            <input id="e-tournament-fep" type="number" placeholder="Puntos FEP" min="0" max="99999"
+                                                class="w-full rounded-lg px-3 py-2 text-sm text-white"
+                                                style="background:#0A0A0F;border:1px solid rgba(59,130,246,0.2);">
+                                            <div id="edit-tournament-error" class="hidden text-xs p-2 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
+                                            <div class="flex gap-2">
+                                                <button type="button" onclick="saveTournamentEdit()"
+                                                        class="flex-1 py-2 rounded-lg text-xs font-bold transition-all"
+                                                        style="background:rgba(0,255,135,0.15);border:1px solid rgba(0,255,135,0.3);color:#00FF87;">
+                                                    Guardar cambios
+                                                </button>
+                                                <button type="button" onclick="cancelTournamentEdit()"
+                                                        class="py-2 rounded-lg text-xs font-bold transition-all"
+                                                        style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;">
+                                                    Cancelar
                                                 </button>
                                             </div>
                                         </div>
@@ -878,11 +918,6 @@
                 <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(0,255,135,0.6);">🧠 Mental / Táctico</p>
                 <div class="grid grid-cols-1 gap-2" id="stats-mental"></div>
             </div>
-            <!-- Competitivo -->
-            <div>
-                <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(168,85,247,0.6);">🏆 Historial Competitivo</p>
-                <div class="grid grid-cols-3 gap-3" id="stats-comp"></div>
-            </div>
         </div>
     </div>
 </div>
@@ -913,7 +948,7 @@ function drawRadar(p) {
     ctx.scale(dpr, dpr);
 
     const cx = 140, cy = 140, maxR = 105;
-    const labels = ['DERECHA','VOLEA','BANDEJA','SMASH','VELOCIDAD','TÁCTICA'];
+    const labels = ['DERECHA','VOLEA','BANDEJA','REMATE','VELOCIDAD','TÁCTICA'];
     const values = [
         p.derecha || 50, Math.round(((p.volea_derecha||50)+(p.volea_reves||50))/2) || 50, p.bandeja || 50,
         p.remate || 50, p.velocidad || 50, p.tactica || 50
@@ -1491,39 +1526,6 @@ function openStatsModal() {
         ['Táctica', p.tactica], ['Presión', p.presion], ['Trabajo en pareja', p.trabajo_en_pareja]
     ], 'linear-gradient(90deg,#00FF87,#22D3EE)');
 
-    // Competitive section — fetch computed stats
-    const compEl = document.getElementById('stats-comp');
-    compEl.innerHTML = `
-        <div class="text-center p-3 rounded-xl col-span-3" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
-            <p class="text-sm" style="color:#475569;">Cargando estadísticas competitivas...</p>
-        </div>`;
-
-    fetch(`/api/v1/players/${playerId}/stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    }).then(r => {
-        if (!r.ok) throw new Error('No se pudieron cargar las estadísticas');
-        return r.json();
-    }).then(stats => {
-        compEl.innerHTML = `
-            <div class="text-center p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
-                <p class="text-xl font-bold text-white">${stats.torneos}</p>
-                <p class="text-xs mt-1" style="color:#475569;">Torneos</p>
-            </div>
-            <div class="text-center p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
-                <p class="text-xl font-bold" style="color:#00FF87;">${stats.win_rate.toFixed(1)}%</p>
-                <p class="text-xs mt-1" style="color:#475569;">Porcentaje de Victorias</p>
-            </div>
-            <div class="text-center p-3 rounded-xl" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
-                <p class="text-xl font-bold" style="color:#FF6B00;">${stats.fep_points.toLocaleString()}</p>
-                <p class="text-xs mt-1" style="color:#475569;">Pts FEP</p>
-            </div>`;
-    }).catch(() => {
-        compEl.innerHTML = `
-            <div class="text-center p-3 rounded-xl col-span-3" style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.5);">
-                <p class="text-sm" style="color:#ef4444;">No se pudieron cargar las estadísticas competitivas</p>
-            </div>`;
-    });
-
     // Mostrar con animación
     const modal = document.getElementById('stats-modal');
     modal.classList.remove('hidden');
@@ -1858,6 +1860,20 @@ function closeMatchModal() {
     }
 }
 
+// ── Round hierarchy (lower index = earlier round) ──
+const ROUND_ORDER = [
+    'Fase de grupos',
+    '32avos',
+    '16avos',
+    'Octavos',
+    'Cuartos',
+    'Semifinal',
+    'Final',
+];
+function getRoundIndex(roundName) {
+    return ROUND_ORDER.indexOf(roundName);
+}
+
 function resetMatchForm() {
     const formFields = [
         'm-tipo', 'm-rival', 'm-pareja-rival', 'm-resultado', 'm-ganado', 'm-scoring',
@@ -1873,6 +1889,12 @@ function resetMatchForm() {
     // Hide inline tournament form
     const newForm = document.getElementById('new-tournament-form');
     if (newForm) newForm.classList.add('hidden');
+
+    // Hide tournament admin row (edit/delete) until user selects a tournament
+    const adminRow = document.getElementById('tournament-admin-row');
+    if (adminRow) adminRow.classList.add('hidden');
+    const editForm = document.getElementById('edit-tournament-form');
+    if (editForm) editForm.classList.add('hidden');
 
     const error = document.getElementById('match-error');
     if (error) {
@@ -2014,9 +2036,48 @@ async function saveMatch() {
         return;
     }
 
-    // Validar: no duplicar ronda en el mismo torneo
+    // ── Validaciones de torneo ──
     if (tipo === 'torneo' && tournamentId && ronda) {
         const matchId = document.getElementById('btn-save-match').dataset.matchId;
+        const currentIdx = getRoundIndex(ronda);
+
+        // Regla 1: si hay una derrota en ronda INFERIOR (eliminación), no se puede pasar de esa ronda
+        if (!matchId && currentIdx >= 0) {
+            const lowerLoss = loadedMatches.find(m =>
+                m.tournament_id === tournamentId &&
+                m.ganado === false &&
+                getRoundIndex(m.ronda) >= 0 &&
+                getRoundIndex(m.ronda) < currentIdx
+            );
+            if (lowerLoss) {
+                if (errEl) {
+                    errEl.textContent = `Este jugador ya perdió en ${lowerLoss.ronda}. No puede haber partidos en rondas posteriores.`;
+                    errEl.classList.remove('hidden');
+                }
+                return;
+            }
+        }
+
+        // Regla 2: si es derrota, no puede haber partidos GANADOS en rondas superiores
+        if (ganado === false && currentIdx >= 0) {
+            const higherWins = loadedMatches.filter(m =>
+                m.tournament_id === tournamentId &&
+                m.ganado === true &&
+                getRoundIndex(m.ronda) >= 0 &&
+                getRoundIndex(m.ronda) > currentIdx &&
+                m.id != matchId
+            );
+            if (higherWins.length > 0) {
+                const rounds = [...new Set(higherWins.map(m => m.ronda))].join(', ');
+                if (errEl) {
+                    errEl.textContent = `No se puede marcar como derrota porque hay partidos ganados en rondas superiores: ${rounds}. Eliminá primero esos partidos.`;
+                    errEl.classList.remove('hidden');
+                }
+                return;
+            }
+        }
+
+        // Regla 3: no duplicar ronda en el mismo torneo
         const dup = loadedMatches.find(m =>
             m.tournament_id === tournamentId &&
             m.ronda === ronda &&
@@ -2131,7 +2192,7 @@ async function renderComputedStats(pid) {
 // ── Tournament Dropdown ─────────────────────────────────────────
 async function loadTournaments() {
     try {
-        const res = await fetch('/api/v1/tournaments/', {
+        const res = await fetch(`/api/v1/tournaments/?player_id=${playerId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) return;
@@ -2155,7 +2216,7 @@ async function loadTournaments() {
 
 async function loadTournamentFilterOptions() {
     try {
-        const res = await fetch('/api/v1/tournaments/', {
+        const res = await fetch(`/api/v1/tournaments/?player_id=${playerId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) return;
@@ -2184,6 +2245,12 @@ function showNewTournamentForm() {
     document.getElementById('m-tournament-name').value = '';
     document.getElementById('new-tournament-error').classList.add('hidden');
     document.getElementById('new-tournament-form').classList.remove('hidden');
+    // Hide edit form and admin row if open
+    const editForm = document.getElementById('edit-tournament-form');
+    if (editForm) editForm.classList.add('hidden');
+    document.getElementById('edit-tournament-error')?.classList.add('hidden');
+    const adminRow = document.getElementById('tournament-admin-row');
+    if (adminRow) adminRow.classList.add('hidden');
 }
 
 function cancelNewTournament() {
@@ -2216,8 +2283,8 @@ async function createTournamentInline() {
         return;
     }
 
-    // Validar: no duplicar nombre + fecha
-    const dup = loadedTournaments.find(t => t.name === name && t.date === date);
+    // Validar: no duplicar nombre + fecha (compartido bloquea a todos, personal solo al mismo jugador)
+    const dup = loadedTournaments.find(t => t.name === name && t.date === date && (!t.player_id || t.player_id === playerId));
     if (dup) {
         errEl.textContent = 'Ya existe un torneo con ese nombre y fecha.';
         errEl.classList.remove('hidden');
@@ -2234,7 +2301,8 @@ async function createTournamentInline() {
             body: JSON.stringify({
                 name: name,
                 date: date,
-                fep_points: fepPoints
+                fep_points: fepPoints,
+                player_id: playerId
             })
         });
 
@@ -2258,6 +2326,8 @@ async function createTournamentInline() {
         opt.textContent = `🏆 ${tournament.name} — ${dateStr}`;
         select.appendChild(opt);
         select.value = tournament.id;
+        loadedTournaments.push(tournament);
+        onTournamentSelect();
 
         // Also add to filter dropdown
         const filterSelect = document.getElementById('match-filter');
@@ -2270,6 +2340,177 @@ async function createTournamentInline() {
     } catch (e) {
         errEl.textContent = 'Error de conexión al crear torneo';
         errEl.classList.remove('hidden');
+    }
+}
+
+// ── Tournament Admin (Edit / Delete) ──────────────────────────
+function getSelectedTournament() {
+    const select = document.getElementById('m-torneo-select');
+    const tid = select ? select.value : '';
+    if (!tid) return null;
+    return loadedTournaments.find(t => t.id === tid) || null;
+}
+
+function onTournamentSelect() {
+    // Clear error
+    document.getElementById('match-error')?.classList.add('hidden');
+    // Hide inline forms
+    const adminRow = document.getElementById('tournament-admin-row');
+    const editForm = document.getElementById('edit-tournament-form');
+    if (editForm) editForm.classList.add('hidden');
+    const newForm = document.getElementById('new-tournament-form');
+    if (newForm) newForm.classList.add('hidden');
+    document.getElementById('new-tournament-error')?.classList.add('hidden');
+    const t = getSelectedTournament();
+    if (!t) {
+        if (adminRow) adminRow.classList.add('hidden');
+        return;
+    }
+    const nameEl = document.getElementById('tournament-admin-name');
+    if (nameEl) {
+        const dateStr = new Date(t.date).toLocaleDateString('es-ES');
+        const fepText = t.fep_points ? ` · ${t.fep_points} pts` : '';
+        nameEl.textContent = `🏆 ${t.name}${fepText} — ${dateStr}`;
+    }
+    if (adminRow) adminRow.classList.remove('hidden');
+}
+
+function showTournamentEditForm() {
+    const t = getSelectedTournament();
+    if (!t) return;
+    // Pre-fill from current tournament data
+    document.getElementById('e-tournament-name').value = t.name;
+    document.getElementById('e-tournament-date').value = t.date;
+    document.getElementById('e-tournament-fep').value = t.fep_points || '';
+    document.getElementById('edit-tournament-error').classList.add('hidden');
+    document.getElementById('edit-tournament-form').classList.remove('hidden');
+    // Hide new tournament form if open
+    const newForm = document.getElementById('new-tournament-form');
+    if (newForm) newForm.classList.add('hidden');
+    document.getElementById('new-tournament-error')?.classList.add('hidden');
+}
+
+function cancelTournamentEdit() {
+    document.getElementById('edit-tournament-form').classList.add('hidden');
+    document.getElementById('edit-tournament-error').classList.add('hidden');
+}
+
+async function saveTournamentEdit() {
+    const t = getSelectedTournament();
+    if (!t) return;
+    const errEl = document.getElementById('edit-tournament-error');
+    errEl.classList.add('hidden');
+
+    const name = document.getElementById('e-tournament-name').value.trim();
+    const date = document.getElementById('e-tournament-date').value;
+    const fepRaw = document.getElementById('e-tournament-fep').value;
+    const fepPoints = fepRaw ? parseInt(fepRaw, 10) : null;
+
+    if (!name || name.length < 2) {
+        errEl.textContent = 'El nombre debe tener al menos 2 caracteres.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+    if (name.length > 200) {
+        errEl.textContent = 'El nombre no puede superar 200 caracteres.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+    if (!date) {
+        errEl.textContent = 'La fecha es requerida.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+
+    const body = { name, date, fep_points: fepPoints };
+
+    try {
+        const res = await fetch(`/api/v1/tournaments/${t.id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            errEl.textContent = typeof err.detail === 'string' ? err.detail : 'Error al guardar';
+            errEl.classList.remove('hidden');
+            return;
+        }
+
+        // Success
+        cancelTournamentEdit();
+        // Refresh local data
+        await loadTournaments();
+        // Update filter dropdown option text (name may have changed)
+        const filterOpt = document.querySelector(`#match-filter option[value="${t.id}"]`);
+        if (filterOpt) {
+            const updated = loadedTournaments.find(x => x.id === t.id);
+            if (updated) filterOpt.textContent = `🏆 ${updated.name}`;
+        }
+        // Re-select the same tournament in the dropdown
+        const select = document.getElementById('m-torneo-select');
+        if (select) select.value = t.id;
+        onTournamentSelect();
+        // Recalcular stats (fep_points puede haber cambiado)
+        renderComputedStats(playerId);
+        // If match history modal is open, refresh matches
+        if (document.getElementById('match-history-modal')
+            && !document.getElementById('match-history-modal').classList.contains('hidden')) {
+            await loadMatches();
+            renderFullMatchHistory(loadedMatches);
+        } else {
+            await loadMatches();
+        }
+        showToast('✅ Torneo actualizado', 'success');
+    } catch (e) {
+        errEl.textContent = 'Error de conexión al actualizar torneo';
+        errEl.classList.remove('hidden');
+    }
+}
+
+async function deleteSelectedTournament() {
+    const t = getSelectedTournament();
+    if (!t) return;
+
+    if (!confirm(`¿Estás seguro de eliminar el torneo "${t.name}"?\n\nEsta acción no se puede deshacer.`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/v1/tournaments/${t.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (res.status === 204) {
+            // Success
+            // Remove from dropdowns
+            const select = document.getElementById('m-torneo-select');
+            if (select) {
+                const opt = select.querySelector(`option[value="${t.id}"]`);
+                if (opt) opt.remove();
+                select.value = '';
+            }
+            const filterSelect = document.getElementById('match-filter');
+            if (filterSelect) {
+                const opt = filterSelect.querySelector(`option[value="${t.id}"]`);
+                if (opt) opt.remove();
+            }
+            // Update local cache
+            loadedTournaments = loadedTournaments.filter(x => x.id !== t.id);
+            onTournamentSelect();
+            showToast('🗑️ Torneo eliminado', 'success');
+        } else {
+            const err = await res.json();
+            const msg = typeof err.detail === 'string' ? err.detail : 'No se pudo eliminar';
+            showToast(msg, 'error');
+        }
+    } catch (e) {
+        showToast('Error de conexión al eliminar torneo', 'error');
     }
 }
 
@@ -2398,6 +2639,7 @@ async function openEditMatchModal(matchId) {
                     // Try to select matching tournament; if not found as option yet,
                     // ensure tournaments are loaded by this point (loadTournaments is called on page init)
                     select.value = match.tournament_id;
+                    onTournamentSelect();
                 }
             }
             // Set ronda if available
