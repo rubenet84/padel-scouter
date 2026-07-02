@@ -25,3 +25,6 @@ backups/
 
 # Avatares de jugadores (subidos por los usuarios)
 app/static/avatars/
+
+# Configuración local de la herramienta Gentle AI
+.atl/
