@@ -22,3 +22,6 @@ data/reglamento_padel.pdf
 
 # Backups de base de datos
 backups/
+
+# Avatares de jugadores (subidos por los usuarios)
+app/static/avatars/
