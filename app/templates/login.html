@@ -142,50 +142,6 @@ function toggleVisibility(inputId, btn) {
     }
 }
 
-// ── Password strength checker ─────────────────────────────────
-function checkPasswordStrength(password) {
-    const checks = {
-        length:  password.length >= 12,
-        upper:   /[A-Z]/.test(password),
-        lower:   /[a-z]/.test(password),
-        number:  /\d/.test(password),
-        special: /[!@#$%^&*(),.?":{}|<>_\-]/.test(password),
-    };
-
-    // Actualizar lista de requisitos
-    Object.entries(checks).forEach(([key, met]) => {
-        const el = document.getElementById(`req-${key}`);
-        if (el) {
-            el.className = met ? 'text-emerald-400' : 'text-red-400';
-            el.textContent = (met ? '✓ ' : '✗ ') + el.textContent.slice(2);
-        }
-    });
-
-    // Calcular fortaleza
-    const score = Object.values(checks).filter(Boolean).length;
-    const bar = document.getElementById('strength-bar');
-    const label = document.getElementById('strength-label');
-
-    if (score <= 2) {
-        bar.style.width = '33%';
-        bar.className = 'h-full rounded-full transition-all duration-300 bg-red-500';
-        label.textContent = 'Débil';
-        label.className = 'text-red-400';
-    } else if (score <= 4) {
-        bar.style.width = '66%';
-        bar.className = 'h-full rounded-full transition-all duration-300 bg-yellow-500';
-        label.textContent = 'Media';
-        label.className = 'text-yellow-400';
-    } else {
-        bar.style.width = '100%';
-        bar.className = 'h-full rounded-full transition-all duration-300 bg-emerald-500';
-        label.textContent = 'Fuerte';
-        label.className = 'text-emerald-400';
-    }
-
-    return Object.values(checks).every(Boolean);
-}
-
 // ── Login ─────────────────────────────────────────────────────
 async function doLogin() {
     const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -217,6 +173,8 @@ async function doLogin() {
             // OWASP A09 — no revelar información específica
             showError('Credenciales incorrectas. Comprueba tu email y contraseña.');
         }
+    } catch {
+        showError('Error de conexión. Comprueba tu conexión a internet.');
     } finally {
         btn.textContent = 'Entrar';
         btn.disabled = false;

@@ -6,67 +6,8 @@ from uuid import UUID
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from app.domain.value_objects.rounds import ROUND_ORDER, best_round_info
 from app.infrastructure.database.models import MatchModel
-
-# ── Round hierarchy (lower index = earlier round) ──
-ROUND_ORDER: list[str] = [
-    "Fase de grupos",
-    "32avos",
-    "16avos",
-    "Octavos",
-    "Cuartos",
-    "Semifinal",
-    "Final",
-]
-
-
-def _best_round_info(
-    matches: list[MatchModel],
-) -> tuple[str | None, int, float]:
-    """
-    Analiza los partidos de un torneo y devuelve:
-      (nombre_ronda, indice_ronda, peso)
-    según la mejor ronda del jugador.
-
-    La lógica es idéntica a _best_round_weight de computed_stats:
-      1. Busca la ronda más alta con VICTORIA.
-      2. Si ganó la Final → campeón (índice 6, peso 1.0).
-      3. Si no hay victoria → ronda más alta alcanzada.
-    """
-    weights: dict[str, float] = {
-        "Fase de grupos": 0.0,
-        "32avos": 0.1780,
-        "16avos": 0.2373,
-        "Octavos": 0.3164,
-        "Cuartos": 0.4218,
-        "Semifinal": 0.5625,
-        "Final": 0.75,
-    }
-
-    win_idx = -1
-    reach_idx = -1
-
-    for m in matches:
-        ronda = (m.ronda or "").strip()
-        if ronda in ROUND_ORDER:
-            idx = ROUND_ORDER.index(ronda)
-            if idx > reach_idx:
-                reach_idx = idx
-            if m.ganado and idx > win_idx:
-                win_idx = idx
-
-    if win_idx >= 0 and ROUND_ORDER[win_idx] == "Final":
-        return ("Final", 6, 1.0)
-
-    if win_idx >= 0:
-        name = ROUND_ORDER[win_idx]
-        return (name, win_idx, weights.get(name, 0.0))
-
-    if reach_idx >= 0:
-        name = ROUND_ORDER[reach_idx]
-        return (name, reach_idx, weights.get(name, 0.0))
-
-    return (None, -1, 0.0)
 
 
 def get_match_analytics(db: Session, player_id: UUID) -> dict:
@@ -156,7 +97,7 @@ def get_match_analytics(db: Session, player_id: UUID) -> dict:
     for tid, tmatches in tour_groups.items():
         if tid is None:
             continue  # amistoso
-        r_name, r_idx, _ = _best_round_info(tmatches)
+        r_name, r_idx, _ = best_round_info(tmatches)
         if r_name is None:
             continue
         round_counts[r_name] = round_counts.get(r_name, 0) + 1

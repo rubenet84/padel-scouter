@@ -1,8 +1,11 @@
+import logging
 import os
 import uuid as uuid_lib
 from uuid import UUID
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+
+logger = logging.getLogger(__name__)
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -15,22 +18,7 @@ from app.schemas.player import (
     ComputedStatsSchema, PlayerAnalyticsSchema,
 )
 
-# ── Round hierarchy (lower index = earlier round, single-elimination) ──
-ROUND_ORDER = [
-    'Fase de grupos',
-    '32avos',
-    '16avos',
-    'Octavos',
-    'Cuartos',
-    'Semifinal',
-    'Final',
-]
-
-def get_round_index(round_name: str) -> int:
-    try:
-        return ROUND_ORDER.index(round_name)
-    except ValueError:
-        return -1
+from app.domain.value_objects.rounds import ROUND_ORDER, get_round_index
 from app.domain.value_objects.computed_stats import get_computed_stats
 
 from PIL import Image, UnidentifiedImageError
@@ -208,7 +196,10 @@ def upload_avatar(
     try:
         img = Image.open(io.BytesIO(contents))
         img.verify()  # quick structural check
-    except (UnidentifiedImageError, Exception):
+    except UnidentifiedImageError:
+        raise HTTPException(status_code=400, detail="El archivo no es una imagen válida")
+    except Exception as e:
+        logger.error("Error al verificar imagen: %s", e)
         raise HTTPException(status_code=400, detail="El archivo no es una imagen válida")
 
     # Re-open after verify (verify consumes the file)
@@ -224,17 +215,22 @@ def upload_avatar(
     if img.width > MAX_DIM or img.height > MAX_DIM:
         img.thumbnail((MAX_DIM, MAX_DIM), Image.LANCZOS)
 
-    # Rename to UUID to prevent path traversal / name collision
-    out_name = f"{uuid_lib.uuid4().hex}{ext}"
-    out_path = os.path.join(AVATAR_DIR, out_name)
+    # Ensure avatar directory exists
+    os.makedirs(AVATAR_DIR, exist_ok=True)
 
     # Save re-encoded image (strips all EXIF/metadata automatically)
+    # Force extension to match actual format saved (E5: no mismatch)
     if img.mode == "RGBA":
+        ext = ".png"
+        out_name = f"{uuid_lib.uuid4().hex}{ext}"
+        out_path = os.path.join(AVATAR_DIR, out_name)
         img.save(out_path, "PNG")
-        avatar_url = f"/static/avatars/{out_name}"
     else:
+        ext = ".jpg"
+        out_name = f"{uuid_lib.uuid4().hex}{ext}"
+        out_path = os.path.join(AVATAR_DIR, out_name)
         img.save(out_path, "JPEG", quality=85)
-        avatar_url = f"/static/avatars/{out_name}"
+    avatar_url = f"/static/avatars/{out_name}"
 
     # Remove old avatar if exists
     if player.avatar_url:
@@ -296,6 +292,11 @@ def add_match(
         # Validar ronda
         if data.ronda:
             round_idx = get_round_index(data.ronda)
+            if round_idx < 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Ronda inválida: '{data.ronda}'. Las rondas válidas son: {', '.join(ROUND_ORDER)}",
+                )
             if round_idx >= 0:
                 # Regla 1: si hay derrota en ronda INFERIOR, no se puede jugar después
                 lower_loss = db.query(MatchModel).filter(

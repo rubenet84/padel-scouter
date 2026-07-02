@@ -38,7 +38,7 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <a href="/" class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-black text-xs"
-                     style="background:linear-gradient(135deg,#FF6B00,#FFD700);">PS</div>
+                    style="background:linear-gradient(135deg,#FF6B00,#FFD700);">PS</div>
                 <div>
                     <span class="text-lg font-bold text-white">PADEL</span>
                     <span class="text-lg font-light" style="color:#FF6B00;"> SCOUTER</span>
@@ -52,8 +52,8 @@
 
             <div class="flex items-center gap-4" id="nav-right">
                 <a href="/login"
-                   class="px-4 py-2 rounded-xl text-sm font-bold transition-all"
-                   style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
+                class="px-4 py-2 rounded-xl text-sm font-bold transition-all"
+                style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
                     Acceder
                 </a>
             </div>
@@ -73,6 +73,11 @@
 
     <script src="/static/js/main.js"></script>
     <script>
+    function escHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
     (function() {
         const token = localStorage.getItem('access_token');
         const navRight = document.getElementById('nav-right');
@@ -81,8 +86,9 @@
             headers: {'Authorization': `Bearer ${token}`}
         }).then(r => r.ok ? r.json() : null).then(user => {
             if (user) {
+                const safeUsername = escHtml(user.username);
                 navRight.innerHTML = `
-                    <span class="text-sm" style="color:#64748b;">👤 ${user.username}</span>
+                    <span class="text-sm" style="color:#64748b;">👤 ${safeUsername}</span>
                     <a href="/dashboard" class="text-sm font-medium transition-colors" style="color:#00FF87;">Dashboard</a>
                     <button onclick="logout()"
                             class="px-3 py-1.5 rounded-lg text-sm font-bold transition-all"
@@ -93,6 +99,7 @@
         }).catch(() => {});
     })();
     </script>
+    {% include "partials/chatbot_widget.html" %}
     {% block scripts %}{% endblock %}
 </body>
 </html>

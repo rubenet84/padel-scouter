@@ -50,13 +50,6 @@ def create_refresh_token(data: dict[str, Any]) -> str:
 
 
 def decode_token(token: str) -> dict[str, Any]:
-    return jwt.decode(
-        token,
-        settings.secret_key.get_secret_value(),
-        algorithms=[settings.algorithm],
-    )
-
-def decode_token(token: str) -> dict[str, Any]:
     """
     Decodifica y valida un JWT.
     Lanza JWTError si es inválido o expirado.

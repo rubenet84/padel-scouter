@@ -15,3 +15,10 @@ htmlcov/
 # IDE
 .vscode/
 .idea/
+
+# Datos generados / binarios
+data/padel_rules_index.pkl
+data/reglamento_padel.pdf
+
+# Backups de base de datos
+backups/

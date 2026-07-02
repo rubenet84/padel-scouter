@@ -58,9 +58,9 @@ def forgot_password_page(request: Request):
 
 
 @router.get("/reset-password", response_class=HTMLResponse)
-def reset_password_page(request: Request, token: str = ""):
+def reset_password_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="reset_password.html",
-        context={"user": None, "token": token}
+        context={"user": None},
     )

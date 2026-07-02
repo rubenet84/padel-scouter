@@ -21,55 +21,81 @@
     </div>
 </div>
 
-<!-- Modal nuevo jugador -->
-<div id="modal-nuevo" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+{% endblock %}
+
+{% block scripts %}
+<!-- MODAL AL FINAL DEL BODY -->
+<div id="modal-nuevo"
+     style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0A0A0F;z-index:99999;align-items:center;justify-content:center;padding:16px;"
      onclick="if (event.target === event.currentTarget) closeNewPlayerModal()">
-    <div class="bg-gray-900 border border-gray-700 rounded-2xl p-8 w-full max-w-2xl max-h-screen overflow-y-auto">
+    <div style="background:#0f172a;border:2px solid #10b981;border-radius:16px;padding:32px;width:100%;max-width:1024px;max-height:85vh;overflow-y:auto;box-shadow:0 0 80px rgba(0,0,0,0.9);">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold">Nuevo Jugador</h2>
             <button onclick="closeNewPlayerModal()"
                     class="text-gray-400 hover:text-white text-2xl">&times;</button>
         </div>
 
-        <div class="space-y-4">
-            <input id="p-name" type="text" placeholder="Nombre del jugador"
-                   class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
-
-            <select id="p-category"
-                    class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-emerald-500 focus:outline-none">
-                <option value="Iniciación">🟢 Iniciación (1.0 – 2.5)</option>
-                <option value="5ª Categoría">🟡 5ª Categoría (2.0 – 3.0)</option>
-                <option value="4ª Categoría">🟡 4ª Categoría (3.0 – 3.75)</option>
-                <option value="3ª Categoría" selected>🟡 3ª Categoría (3.75 – 4.25)</option>
-                <option value="2ª Categoría">🔴 2ª Categoría (4.25 – 4.75)</option>
-                <option value="1ª Categoría">🔴 1ª Categoría (4.75 – 6.0)</option>
-                <option value="Profesional">🔴 Profesional (6.0 – 7.0)</option>
-            </select>
-            <div id="create-error" class="hidden mt-3 text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
-
-            <p class="text-emerald-400 font-semibold text-sm mt-4">Estadísticas Técnicas</p>
-            <div class="grid grid-cols-2 gap-3">
-                {% for stat in ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared'] %}
+        <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="text-gray-400 text-xs capitalize">{{ stat.replace('_',' ') }}</label>
-                    <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
-                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
+                    <label class="text-gray-400 text-xs font-medium tracking-wide uppercase">Nombre del jugador</label>
+                    <input id="p-name" type="text" placeholder="Ej: Martin Di Nenno"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-emerald-500 focus:outline-none mt-1">
                 </div>
-                {% endfor %}
+                <div>
+                    <label class="text-gray-400 text-xs font-medium tracking-wide uppercase">Categoria</label>
+                    <select id="p-category"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-emerald-500 focus:outline-none mt-1 appearance-none">
+                        <option value="Iniciación">🟢 Iniciación (1.0 – 2.5)</option>
+                        <option value="5ª Categoría">🟡 5ª Categoría (2.0 – 3.0)</option>
+                        <option value="4ª Categoría">🟡 4ª Categoría (3.0 – 3.75)</option>
+                        <option value="3ª Categoría" selected>🟡 3ª Categoría (3.75 – 4.25)</option>
+                        <option value="2ª Categoría">🔴 2ª Categoría (4.25 – 4.75)</option>
+                        <option value="1ª Categoría">🔴 1ª Categoría (4.75 – 6.0)</option>
+                        <option value="Profesional">🔴 Profesional (6.0 – 7.0)</option>
+                    </select>
+                    <p class="text-gray-600 text-xs mt-3"><span class="text-green-400">🟢 Iniciación</span> → <span class="text-yellow-400">🟡 Intermedio</span> → <span class="text-red-400">🔴 Avanzado / Profesional</span></p>
+                    <button onclick="openLevelGuideModal()" title="Haz clic aquí para ver la guía de niveles"
+                            class="text-xs font-medium mt-3 px-2.5 py-1 rounded-lg transition"
+                            style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:#a855f7;">
+                        📖 Guía de Niveles
+                    </button>
+                </div>
             </div>
 
-            <p class="text-emerald-400 font-semibold text-sm mt-4">Físico & Mental</p>
-            <div class="grid grid-cols-2 gap-3">
-                {% for stat in ['velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja'] %}
-                <div>
-                    <label class="text-gray-400 text-xs capitalize">{{ stat.replace('_',' ') }}</label>
-                    <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
-                           class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm mt-1">
+            <div id="create-error" class="hidden text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
+
+            <div>
+                <p class="text-emerald-400 font-semibold text-sm mb-1 border-b border-gray-800 pb-2">🎾 Estadisticas Tecnicas</p>
+                <p class="text-gray-600 text-xs mb-3">Valora cada golpe de <strong class="text-gray-300">0</strong> a <strong class="text-gray-300">100</strong> segun el nivel del jugador</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-4">
+                    {% for stat in ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared'] %}
+                    <div>
+                        <label class="text-gray-400 text-xs capitalize block truncate" title="Valor de 0 a 100">{{ stat.replace('_',' ') }}</label>
+                        <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
+                               class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2.5 text-white text-sm mt-1 focus:border-emerald-500 focus:outline-none"
+                               oninput="clampStat(this)">
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
 
-            <div class="flex gap-3 mt-4">
+            <div class="mt-4">
+                <p class="text-emerald-400 font-semibold text-sm mb-1 border-b border-gray-800 pb-2">💪 Fisico & Mental</p>
+                <p class="text-gray-600 text-xs mb-3">Capacidades fisicas y mentales del jugador, tambien de <strong class="text-gray-300">0</strong> a <strong class="text-gray-300">100</strong></p>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-4">
+                    {% for stat in ['velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja'] %}
+                    <div>
+                        <label class="text-gray-400 text-xs capitalize block truncate" title="Valor de 0 a 100">{{ stat.replace('_',' ') }}</label>
+                        <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
+                               class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2.5 text-white text-sm mt-1 focus:border-emerald-500 focus:outline-none"
+                               oninput="clampStat(this)">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
                 <button onclick="createPlayer()"
                         class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition">
                     Crear Jugador
@@ -82,9 +108,146 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<!-- Guía de Niveles -->
+<div id="level-guide-modal"
+    class="fixed inset-0 flex items-center justify-center p-4 hidden"
+    role="dialog" aria-modal="true"
+    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
+    onclick="if (event.target===event.currentTarget) closeLevelGuideModal()">
+    <div class="w-full max-w-[1450px] rounded-2xl" style="background:#12121A;border:1px solid rgba(168,85,247,0.2);max-height:90vh;overflow-y:auto;position:relative;">
+        <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-5">
+                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(168,85,247,0.8);">📖 Guía de Niveles</span>
+                <button onclick="closeLevelGuideModal()" class="text-gray-500 hover:text-white text-xl">&times;</button>
+            </div>
+
+            <div class="grid grid-cols-4 gap-5 items-stretch">
+
+                <!-- INICIACIÓN -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(34,197,94,0.2);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(34,197,94,0.08);border-bottom:1px solid rgba(34,197,94,0.1);">
+                        <span class="text-base font-bold" style="color:#22c55e;">🟢 INICIACIÓN</span>
+                        <span class="text-base ml-1.5 font-bold" style="color:#22c55e;">1.0 – 2.5</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Primeros pasos. Reglas, técnica básica y consistencia.</p>
+                            <div class="space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Golpes básicos</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Dificultad en voleas</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Prioriza mantener la bola</div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(34,197,94,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#22c55e;">
+                                <span>🎾</span> Pala redonda · punto dulce amplio
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INTERMEDIO -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(234,179,8,0.2);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(234,179,8,0.08);border-bottom:1px solid rgba(234,179,8,0.1);">
+                        <span class="text-base font-bold" style="color:#eab308;">🟡 INTERMEDIO</span>
+                        <span class="text-base ml-1.5 font-bold" style="color:#eab308;">2.0 – 4.5</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Control, colocación y táctica con consistencia.</p>
+                            <div class="space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Bandeja y víbora</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Lee rebotes y se posiciona</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Controla el ritmo</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Compite con frecuencia</div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(234,179,8,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#eab308;">
+                                <span>🎾</span> Pala híbrida · equilibrio control/potencia
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AVANZADO -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(239,68,68,0.2);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.1);">
+                        <span class="text-base font-bold" style="color:#ef4444;">🔴 AVANZADO</span>
+                        <span class="text-base ml-1.5 font-bold" style="color:#ef4444;">4.25 – 7.0</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Sólido, rápido y agresivo. Domina todos los golpes.</p>
+                            <div class="space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Precisión en golpes complejos</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Gran lectura del partido</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Domina ataque y defensa</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Torneos habituales</div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(239,68,68,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#ef4444;">
+                                <span>🎾</span> Pala técnica · alta precisión
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mapa de categorías -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(59,130,246,0.25);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.1);">
+                        <span class="text-base font-bold" style="color:#3b82f6;">📋 CORRESPONDENCIA</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Todas las categorías FEP con su rango numérico.</p>
+                            <div class="space-y-2.5">
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟢 Iniciación</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">1.0 – 2.5</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 5ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">2.0 – 3.0</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 4ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.0 – 3.75</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 3ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.75 – 4.25</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 2ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.25 – 4.75</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 1ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.75 – 6.0</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 Profesional</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">6.0 – 7.0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(59,130,246,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#3b82f6;">
+                                <span>📋</span> Basado en FEP 2026
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 const token = localStorage.getItem('access_token');
 if (!token) {
@@ -128,11 +291,11 @@ const CATEGORY_LEVELS = {
 
 function openNewPlayerModal() {
     resetNewPlayerForm();
-    document.getElementById('modal-nuevo').classList.remove('hidden');
+    document.getElementById('modal-nuevo').style.display = 'flex';
 }
 
 function closeNewPlayerModal() {
-    document.getElementById('modal-nuevo').classList.add('hidden');
+    document.getElementById('modal-nuevo').style.display = 'none';
 }
 
 function resetNewPlayerForm() {
@@ -146,15 +309,33 @@ function resetNewPlayerForm() {
     errEl.textContent = '';
 }
 
-function sanitizeNewPlayerNumbers() {
-    document.querySelectorAll('#modal-nuevo input[type="number"]').forEach(el => {
-        el.addEventListener('input', () => {
-            el.value = el.value.replace(/[^0-9]/g, '');
-        });
-    });
+function clampStat(el) {
+    // Solo numeros
+    el.value = el.value.replace(/[^0-9]/g, '');
+    // Maximo 3 digitos
+    if (el.value.length > 3) el.value = el.value.slice(0, 3);
+    // Dentro de rango 0-100
+    const num = Number(el.value);
+    if (el.value !== '' && !Number.isFinite(num)) {
+        el.value = '50';
+    } else if (num > 100) {
+        el.value = '100';
+    }
+    // Feedback visual si esta fuera de rango
+    if (num < 0 || num > 100) {
+        el.style.borderColor = '#ef4444';
+    } else {
+        el.style.borderColor = '';
+    }
 }
 
-sanitizeNewPlayerNumbers();
+function openLevelGuideModal() {
+    document.getElementById('level-guide-modal').classList.remove('hidden');
+}
+
+function closeLevelGuideModal() {
+    document.getElementById('level-guide-modal').classList.add('hidden');
+}
 
 async function loadPlayers() {
     const res = await fetch('/api/v1/players/', {

@@ -1,0 +1,222 @@
+{# Widget de chatbot de reglamento — estilo "scouter". Incluido desde base.html #}
+<style>
+  :root {
+    --scouter-green: #39ff88;
+    --scouter-green-dim: #0d3d24;
+    --scouter-bg: #0a0f0c;
+    --scouter-glass: rgba(10, 20, 14, 0.92);
+    --scouter-amber: #ffb020;
+  }
+
+  #ps-chatbot-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #1a2e20, var(--scouter-bg));
+    border: 2px solid var(--scouter-green);
+    box-shadow: 0 0 12px rgba(57, 255, 136, 0.55), inset 0 0 8px rgba(57, 255, 136, 0.25);
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  #ps-chatbot-toggle:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 20px rgba(57, 255, 136, 0.85), inset 0 0 10px rgba(57, 255, 136, 0.35);
+  }
+  #ps-chatbot-toggle svg { width: 26px; height: 26px; stroke: var(--scouter-green); }
+
+  #ps-chatbot-panel {
+    position: fixed;
+    bottom: 92px;
+    right: 24px;
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    height: 460px;
+    max-height: calc(100vh - 140px);
+    background: var(--scouter-glass);
+    border: 1px solid var(--scouter-green-dim);
+    border-radius: 10px;
+    box-shadow: 0 0 24px rgba(57, 255, 136, 0.25);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 9999;
+    font-family: 'Courier New', ui-monospace, monospace;
+  }
+  #ps-chatbot-panel.open { display: flex; }
+
+  #ps-chatbot-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--scouter-green-dim);
+    color: var(--scouter-green);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #ps-chatbot-header .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--scouter-green);
+    box-shadow: 0 0 6px var(--scouter-green);
+    display: inline-block; margin-right: 6px;
+    animation: ps-pulse 1.4s infinite ease-in-out;
+  }
+  @keyframes ps-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  #ps-chatbot-close { cursor: pointer; color: var(--scouter-green); background: none; border: none; font-size: 16px; }
+
+  #ps-chatbot-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ps-msg { font-size: 13px; line-height: 1.4; max-width: 88%; padding: 8px 10px; border-radius: 6px; white-space: pre-wrap; }
+  .ps-msg-user {
+    align-self: flex-end;
+    background: rgba(255, 176, 32, 0.12);
+    border: 1px solid rgba(255, 176, 32, 0.4);
+    color: var(--scouter-amber);
+  }
+  .ps-msg-bot {
+    align-self: flex-start;
+    background: rgba(57, 255, 136, 0.08);
+    border: 1px solid var(--scouter-green-dim);
+    color: var(--scouter-green);
+  }
+  .ps-msg-bot.ps-loading::after {
+    content: "▍";
+    animation: ps-blink 0.9s steps(1) infinite;
+  }
+  @keyframes ps-blink { 50% { opacity: 0; } }
+
+  #ps-chatbot-inputbar {
+    display: flex;
+    border-top: 1px solid var(--scouter-green-dim);
+    padding: 8px;
+    gap: 6px;
+  }
+  #ps-chatbot-input {
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--scouter-green-dim);
+    border-radius: 5px;
+    color: var(--scouter-green);
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+  }
+  #ps-chatbot-input::placeholder { color: rgba(57,255,136,0.4); }
+  #ps-chatbot-send {
+    background: var(--scouter-green-dim);
+    border: 1px solid var(--scouter-green);
+    color: var(--scouter-green);
+    border-radius: 5px;
+    padding: 0 12px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  #ps-chatbot-send:disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+
+<button id="ps-chatbot-toggle" aria-label="Abrir asistente de reglamento" aria-expanded="false">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"></circle>
+    <path d="M4 12h3M17 12h3M12 4v3M12 17v3"></path>
+  </svg>
+</button>
+
+<div id="ps-chatbot-panel" role="dialog" aria-label="Asistente de reglamento de pádel">
+  <div id="ps-chatbot-header">
+    <span><span class="dot"></span>Reglamento // Scouter</span>
+    <button id="ps-chatbot-close" aria-label="Cerrar">✕</button>
+  </div>
+  <div id="ps-chatbot-messages"></div>
+  <div id="ps-chatbot-inputbar">
+    <input id="ps-chatbot-input" type="text" placeholder="Pregunta una regla de pádel..." maxlength="500" />
+    <button id="ps-chatbot-send">Enviar</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const toggleBtn = document.getElementById('ps-chatbot-toggle');
+  const panel = document.getElementById('ps-chatbot-panel');
+  const closeBtn = document.getElementById('ps-chatbot-close');
+  const messagesEl = document.getElementById('ps-chatbot-messages');
+  const input = document.getElementById('ps-chatbot-input');
+  const sendBtn = document.getElementById('ps-chatbot-send');
+
+  const CHAT_ENDPOINT = '/api/v1/chatbot/ask';
+  let opened = false;
+
+  function addMessage(text, who) {
+    const el = document.createElement('div');
+    el.className = 'ps-msg ps-msg-' + who;
+    el.textContent = text;
+    messagesEl.appendChild(el);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return el;
+  }
+
+  function togglePanel() {
+    opened = !opened;
+    panel.classList.toggle('open', opened);
+    toggleBtn.setAttribute('aria-expanded', String(opened));
+    if (opened && messagesEl.children.length === 0) {
+      addMessage('Scouter activado. Pregúntame cualquier duda sobre el reglamento de pádel.', 'bot');
+    }
+    if (opened) input.focus();
+  }
+
+  toggleBtn.addEventListener('click', togglePanel);
+  closeBtn.addEventListener('click', togglePanel);
+
+  async function sendQuestion() {
+    const question = input.value.trim();
+    if (!question) return;
+
+    addMessage(question, 'user');
+    input.value = '';
+    sendBtn.disabled = true;
+
+    const loadingEl = addMessage('Analizando reglamento...', 'bot');
+    loadingEl.classList.add('ps-loading');
+
+    try {
+      const res = await fetch(CHAT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      });
+      const data = await res.json();
+      loadingEl.classList.remove('ps-loading');
+      if (!res.ok) {
+        loadingEl.textContent = data.detail || 'No se pudo consultar el reglamento ahora mismo.';
+      } else {
+        loadingEl.textContent = data.answer;
+      }
+    } catch (err) {
+      loadingEl.classList.remove('ps-loading');
+      loadingEl.textContent = 'Error de conexión con el scouter. Inténtalo de nuevo.';
+    } finally {
+      sendBtn.disabled = false;
+    }
+  }
+
+  sendBtn.addEventListener('click', sendQuestion);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendQuestion();
+  });
+})();
+</script>

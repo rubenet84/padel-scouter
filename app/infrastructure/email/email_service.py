@@ -1,5 +1,9 @@
+import logging
+
 import resend
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 resend.api_key = settings.resend_api_key.get_secret_value()
 
@@ -60,7 +64,7 @@ def send_welcome_email(to_email: str, username: str) -> bool:
         })
         return True
     except Exception as e:
-        print(f"Error enviando email de bienvenida: {e}")
+        logger.error("Error enviando email de bienvenida: %s", e)
         return False
 
 
@@ -110,5 +114,5 @@ def send_password_reset_email(to_email: str, reset_token: str, username: str) ->
         })
         return True
     except Exception as e:
-        print(f"Error enviando email de reset: {e}")
+        logger.error("Error enviando email de reset: %s", e)
         return False

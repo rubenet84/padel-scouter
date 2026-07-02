@@ -1,7 +1,10 @@
 import json
+import logging
 from google import genai
 from google.genai import types
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 client = genai.Client(api_key=settings.google_api_key.get_secret_value())
@@ -91,12 +94,12 @@ def analyze_player_with_ai(player_data: dict) -> dict:
         return json.loads(raw_text)
 
     except json.JSONDecodeError as e:
-        print(f"Gemini JSON parse error: {e}")
+        logger.warning("Gemini JSON parse error: %s", e)
         return FALLBACK_RESPONSE
 
     except Exception as e:
         error_str = str(e)
-        print(f"Gemini API error ({type(e).__name__}): {error_str[:200]}")
+        logger.error("Gemini API error (%s): %s", type(e).__name__, error_str[:200])
         # Errores temporales — devolver fallback en lugar de crashear
         if any(code in error_str for code in ["503", "429", "UNAVAILABLE", "EXHAUSTED", "ServerError", "ClientError"]):
             return FALLBACK_RESPONSE

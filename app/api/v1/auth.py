@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.security import (
@@ -66,8 +66,9 @@ def login(data: UserLoginSchema, db: Session = Depends(get_db)):
 
 
 @router.post("/forgot-password", status_code=200)
-def forgot_password(email: str, db: Session = Depends(get_db)):
+def forgot_password(email: str = Body(embed=True), db: Session = Depends(get_db)):
     """
+    OWASP A01 — email va en el body, no en query params (consistente con reset-password).
     OWASP A07 — siempre devuelve 200 aunque el email no exista,
     para no revelar si un usuario está registrado (user enumeration).
     """
@@ -83,8 +84,13 @@ def forgot_password(email: str, db: Session = Depends(get_db)):
 
 
 @router.post("/reset-password", status_code=200)
-def reset_password(token: str, new_password: str, db: Session = Depends(get_db)):
+def reset_password(
+    token: str = Body(...),
+    new_password: str = Body(...),
+    db: Session = Depends(get_db),
+):
     """
+    OWASP A01 — token y password van en el body, no en query params.
     OWASP A07 — reset seguro con token firmado de un solo uso.
     """
     from app.schemas.player import UserRegisterSchema
@@ -119,7 +125,7 @@ def reset_password(token: str, new_password: str, db: Session = Depends(get_db))
 
 
 @router.post("/refresh", response_model=TokenSchema)
-def refresh(refresh_token: str, db: Session = Depends(get_db)):
+def refresh(refresh_token: str = Body(...), db: Session = Depends(get_db)):
     from jose import JWTError
     try:
         payload = decode_token(refresh_token)

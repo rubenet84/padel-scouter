@@ -32,13 +32,15 @@ STRONG_PASSWORD = "PadelScouter2026!"
 
 @pytest.fixture(scope="module")
 def auth_headers():
+    email_unico = f"api_test_{uuid.uuid4().hex[:8]}@padel.com"
+    username_unico = f"api_tester_{uuid.uuid4().hex[:8]}"
     client.post("/api/v1/auth/register", json={
-        "email": "api_test@padel.com",
-        "username": "api_tester",
+        "email": email_unico,
+        "username": username_unico,
         "password": STRONG_PASSWORD,
     })
     response = client.post("/api/v1/auth/login", json={
-        "email": "api_test@padel.com",
+        "email": email_unico,
         "password": STRONG_PASSWORD,
     })
     assert response.status_code == 200, f"Login falló: {response.json()}"
@@ -130,7 +132,7 @@ class TestAuthEndpoints:
     def test_me_con_token(self, auth_headers):
         response = client.get("/api/v1/auth/me", headers=auth_headers)
         assert response.status_code == 200
-        assert response.json()["email"] == "api_test@padel.com"
+        assert "@padel.com" in response.json()["email"]
 
 
 class TestPlayersEndpoints:
@@ -174,22 +176,24 @@ class TestPasswordResetFlow:
     def test_forgot_password_email_existente(self):
         """OWASP A07 — siempre 200 aunque el email no exista"""
         response = client.post(
-            "/api/v1/auth/forgot-password?email=api_test@padel.com"
+            "/api/v1/auth/forgot-password",
+            json={"email": "api_test@padel.com"},
         )
         assert response.status_code == 200
-        assert "mensaje" in response.json()["message"].lower() or \
-               "recibirás" in response.json()["message"]
+        assert "recibirás" in response.json()["message"]
 
     def test_forgot_password_email_no_existente(self):
         """OWASP A07 — mismo mensaje aunque el email no exista"""
         response = client.post(
-            "/api/v1/auth/forgot-password?email=noexiste@padel.com"
+            "/api/v1/auth/forgot-password",
+            json={"email": "noexiste@padel.com"},
         )
         assert response.status_code == 200
 
     def test_reset_password_token_invalido(self):
         response = client.post(
-            "/api/v1/auth/reset-password?token=token_falso&new_password=NuevaPass2026!"
+            "/api/v1/auth/reset-password",
+            json={"token": "token_falso", "new_password": "NuevaPass2026!"},
         )
         assert response.status_code == 400
 
@@ -197,6 +201,7 @@ class TestPasswordResetFlow:
         from app.core.security import create_reset_token
         token = create_reset_token("api_test@padel.com")
         response = client.post(
-            f"/api/v1/auth/reset-password?token={token}&new_password=debil"
+            "/api/v1/auth/reset-password",
+            json={"token": token, "new_password": "debil"},
         )
         assert response.status_code == 422

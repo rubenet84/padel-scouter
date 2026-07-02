@@ -124,7 +124,7 @@ class MatchModel(Base):
     ganado         = Column(Boolean,     default=True, nullable=False)
     scoring_method = Column(SAEnum(ScoringMethod), nullable=False,
                             default=ScoringMethod.CON_VENTAJA)
-    result         = Column(String(50),  nullable=False)
+    result         = Column(String(50),  nullable=True)
     winner_id      = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=True)
     played_at      = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     notes          = Column(Text, nullable=True)

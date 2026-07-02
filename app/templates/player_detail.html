@@ -941,7 +941,7 @@
                         <div class="text-4xl mb-3">🔮</div>
                         <p class="font-bold text-white mb-1">Sin análisis IA todavía</p>
                         <p class="text-sm mb-4" style="color:#64748b;">Analiza este jugador para obtener su poder de combate, fortalezas y plan de mejora</p>
-                        <button onclick="analyzeNow()"
+                        <button id="btn-analyze" onclick="analyzeNow()"
                                 class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all"
                                 style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
                             🔮 Analizar con IA
@@ -1399,11 +1399,7 @@ function renderPlayer(p, analyses) {
     document.getElementById('breadcrumb-name').textContent = p.name;
     document.getElementById('player-name').textContent = p.name;
 
-    const catLabels = {
-        'INICIACION':'Iniciación','QUINTA':'5ª Categoría','CUARTA':'4ª Categoría',
-        'TERCERA':'3ª Categoría','SEGUNDA':'2ª Categoría','PRIMERA':'1ª Categoría','PRO':'Profesional'
-    };
-    const catDisplay = catLabels[p.category] || p.category;
+    const catDisplay = p.category;
     const levelInfo = CATEGORY_LEVELS[catDisplay];
     const badgeText = levelInfo
         ? `${levelInfo.icon} ${catDisplay} · Nivel ${levelInfo.min}  –  ${levelInfo.max}`
@@ -1626,7 +1622,6 @@ function renderGolpeDefinitivo(latest, player) {
         statLabel = best.label;
     }
 
-    if (nivel === 'EXTREMO') nivel = 'MUY ALTO';
     nivel = nivelAmenazaFromScore(puntuacion);
 
     const amenazaMap = {
@@ -2277,10 +2272,9 @@ let sortMode = 'date-desc';
 function setSortMode(mode) {
     sortMode = mode;
     // Update button styles
-    ['sort-date-desc', 'sort-date-asc', 'sort-round'].forEach(id => {
+    ['sort-date-desc', 'sort-date-asc', 'sort-round', 'sort-round-desc'].forEach(id => {
         const btn = document.getElementById(id);
         if (!btn) return;
-        const actualId = 'sort-' + mode.replace(/-/g, '-');
         if (id === 'sort-' + mode) {
             btn.style.background = 'rgba(168,85,247,0.2)';
             btn.style.border = '1px solid rgba(168,85,247,0.3)';
@@ -3377,7 +3371,7 @@ async function openEditMatchModal(matchId) {
         btn.textContent = '✏️ Actualizar partido';
 
         // Clear any previous errors
-        const errEl = document.getElementById('match-error-msg');
+        const errEl = document.getElementById('match-error');
         if (errEl) errEl.classList.add('hidden');
 
         // Open modal

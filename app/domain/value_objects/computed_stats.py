@@ -5,23 +5,7 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-
-# ── Puntos FEP por ronda (% del total del torneo) ────────────────
-ROUND_WEIGHTS: dict[str, float] = {
-    "Fase de grupos": 0.0,
-    "32avos":        0.1780,
-    "16avos":        0.2373,
-    "Octavos":       0.3164,
-    "Cuartos":       0.4218,
-    "Semifinal":     0.5625,
-    "Final":         0.75,
-}
-
-# Orden jerárquico de rondas (de menor a mayor)
-ROUND_ORDER: list[str] = [
-    "Fase de grupos", "32avos", "16avos", "Octavos",
-    "Cuartos", "Semifinal", "Final",
-]
+from app.domain.value_objects.rounds import best_round_info
 
 
 @dataclass
@@ -31,39 +15,6 @@ class ComputedStats:
     torneos: int = 0
     win_rate: float = 0.0  # 0–100 percentage
     fep_points: int = 0
-
-
-def _best_round_weight(matches: list) -> float:
-    """
-    Calcula los puntos según la mejor ronda del jugador en el torneo.
-
-    1. Busca la ronda más alta donde haya una VICTORIA.
-    2. Si ganó la Final → campeón (100%).
-    3. Si no hay ninguna victoria → usa la ronda más alta ALCANZADA.
-    """
-    win_idx = -1
-    reach_idx = -1
-
-    for m in matches:
-        ronda = m.ronda or ""
-        if ronda in ROUND_ORDER:
-            idx = ROUND_ORDER.index(ronda)
-            if idx > reach_idx:
-                reach_idx = idx
-            if m.ganado and idx > win_idx:
-                win_idx = idx
-
-    if win_idx >= 0 and ROUND_ORDER[win_idx] == "Final":
-        return 1.0  # 100% — campeón
-
-    if win_idx >= 0:
-        return ROUND_WEIGHTS.get(ROUND_ORDER[win_idx], 0.0)
-
-    # Sin victorias: usar la ronda más alta alcanzada
-    if reach_idx >= 0:
-        return ROUND_WEIGHTS.get(ROUND_ORDER[reach_idx], 0.0)
-
-    return 0.0
 
 
 def get_computed_stats(db: Session, player_id: UUID) -> ComputedStats:
@@ -114,7 +65,7 @@ def get_computed_stats(db: Session, player_id: UUID) -> ComputedStats:
         fep_total = tour_matches[0].fep_points or 0
         if fep_total == 0:
             continue
-        weight = _best_round_weight(tour_matches)
+        weight = best_round_info(tour_matches)[2]  # weight is index 2
         total_fep += int(fep_total * weight)
 
     return ComputedStats(
