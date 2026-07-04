@@ -29,43 +29,108 @@ Chain strategy: feature-branch-chain
 
 ## Phase 1: Foundation + Summary Dashboard (PR #1)
 
-- [ ] 1.1 Create `app/schemas/stats.py` — all Pydantic response schemas
-- [ ] 1.2 Create `global_stats.py` — `build_filters()`, `get_global_summary()`, `get_player_stats_batch()`
-- [ ] 1.3 Create `app/api/v1/stats.py` — `GET /summary` endpoint only
-- [ ] 1.4 Create `app/templates/global_stats.html` — summary cards section
-- [ ] 1.5 Create `app/static/js/global_stats.js` — summary fetch + cards render
-- [ ] 1.6 Modify `app/templates/base.html` — add `/global-stats` nav link
-- [ ] 1.7 Modify `app/main.py` — register stats router
-- [ ] 1.8 VERIFY: summary cards load at `/global-stats`
+- [x] 1.1 Create `app/schemas/stats.py` — all Pydantic response schemas
+- [x] 1.2 Create `global_stats.py` — `build_filters()`, `get_global_summary()`, `get_player_stats_batch()`
+- [x] 1.3 Create `app/api/v1/stats.py` — `GET /summary` endpoint only
+- [x] 1.4 Create `app/templates/global_stats.html` — summary cards section
+- [x] 1.5 Create `app/static/js/global_stats.js` — summary fetch + cards render
+- [x] 1.6 Modify `app/templates/base.html` — add `/global-stats` nav link
+- [x] 1.7 Modify `app/main.py` — register stats router
+- [x] 1.8 VERIFY: summary cards load at `/global-stats`
 
 ## Phase 2: Rankings + Global Filters (PR #2)
 
-- [ ] 2.1 Add `get_rankings(db, user_id, sort_by, order, filters)` to `global_stats.py`
-- [ ] 2.2 Add `GET /ranking` + `GET /ranking/{category}` to `stats.py`
-- [ ] 2.3 Add filter bar (season, comp_type, category, date range) to HTML
-- [ ] 2.4 Wire filter state to JS — all functions accept filter params
-- [ ] 2.5 Add ranking table, sort handlers, category filter to JS
-- [ ] 2.6 Add ranking section + category selector to HTML
-- [ ] 2.7 VERIFY: ranking loads, sort toggles, global filters affect ranking
+- [x] 2.1 Add `get_rankings(db, user_id, sort_by, order, filters)` to `global_stats.py`
+- [x] 2.2 Add `GET /ranking` + `GET /ranking/{category}` to `stats.py`
+- [x] 2.3 Add filter bar (season, comp_type, category, date range) to HTML
+- [x] 2.4 Wire filter state to JS — all functions accept filter params
+- [x] 2.5 Add ranking table, sort handlers, category filter to JS
+- [x] 2.6 Add ranking section + category selector to HTML
+- [x] 2.7 VERIFY: ranking loads, sort toggles, global filters affect ranking
 
-## Phase 3: Top Players + Comparison + H2H (PR #3)
+## Phase 3: Top Players + Comparison + H2H (PR #3) — Análisis Competitivo
 
-- [ ] 3.1 Add `get_top_players(db, user_id, metric, limit, filters)` to `global_stats.py`
-- [ ] 3.2 Add `GET /top` endpoint to `stats.py`
-- [ ] 3.3 Add 10 top-list cards render to JS
-- [ ] 3.4 Add top players grid section to HTML
-- [ ] 3.5 Add `get_comparison()` + `get_h2h()` to `global_stats.py`
-- [ ] 3.6 Add `GET /compare/{p1}/{p2}` + `GET /h2h/{p1}/{p2}` to `stats.py`
-- [ ] 3.7 Add player selector + comparison/H2H render to JS
-- [ ] 3.8 Add comparison + H2H sections to HTML
-- [ ] 3.9 VERIFY: top lists, 2-player comparison, match history — all respect filters
+- [x] 3.1 Add `get_top_players(db, user_id, metric, limit, filters)` to `global_stats.py`
+- [x] 3.2 Add `GET /top` endpoint to `stats.py`
+- [x] 3.3 Add 10 top-list cards render to JS
+- [x] 3.4 Add top players grid section to HTML
+- [x] 3.5 Add `get_comparison()` + `get_h2h()` to `global_stats.py`
+- [x] 3.6 Add `GET /compare/{p1}/{p2}` + `GET /h2h/{p1}/{p2}` to `stats.py`
+- [x] 3.7 Add player selector + comparison/H2H render to JS
+- [x] 3.8 Add comparison + H2H sections to HTML
+- [x] 3.9 VERIFY: top lists, 2-player comparison, match history — all respect filters
 
-## Phase 4: Pairs + Category Stats + Evolution + Polish (PR #4)
+## Phase 4: Polish + Records + Category Stats + Evolution + Community Card (PR #4 — FINAL)
 
-- [ ] 4.1 Add `get_pair_stats()`, `get_category_stats()`, `get_evolution()` to `global_stats.py`
-- [ ] 4.2 Add `/categories`, `/pairs`, `/evolution` endpoints to `stats.py`
-- [ ] 4.3 Add pairs/category/evolution render to JS
-- [ ] 4.4 Add remaining sections to HTML
-- [ ] 4.5 VERIFY: all dashboard sections functional with filters
-- [ ] 4.6 Optimize: review N+1 queries, add indexes if needed
-- [ ] 4.7 Final integration test: full dashboard loads without errors
+This is the finishing PR. The focus is on making the module feel like a polished product.
+
+### 4A — `GET /stats/records`
+New endpoint that returns community records — reuses the same FEP/computation logic from Top. No new schemas needed (uses TopPlayerEntry or similar).
+
+Records shown:
+- Most streak (🔥)
+- Most wins (✅)
+- Most points (🏆)
+- Most tournaments won (🏅)
+- Most finals (🏁)
+- Most semi-finals (🔶)
+- Most sets won (📊)
+- Most games won (🎾)
+
+### 4B — `GET /stats/categories/{slug}?player_limit=5`
+Enhanced category stats per category. Shows all categories + per category:
+- Total players, total matches, wins, losses, avg win%, avg points, medals, leader (player name + points)
+- If `player_limit > 0`, also include top N players sorted by points
+
+Add schema `CategoryDetail` with all those fields.
+
+### 4C — `GET /stats/evolution`
+Evolution endpoint. Returns current points per player with a placeholder for historical sparkline data.
+Schema: `EvolutionEntry { player_id, name, category, current_points, sparkline: [] }`
+Sparkline stays empty for now — component ready for future historical data.
+
+### 4D — `GET /stats/community`
+Community highlights card. Returns:
+- Player with most points
+- Best form (highest win %, min 1 match)
+- Best pair (pair with highest win %, min 2 matches together)
+- Most active (most matches played)
+
+Add schema `CommunityHighlights`.
+
+### 4E — Polish
+- CSS transitions/animations on filter changes, sort changes, page navigation
+- Skeleton loading screens for all sections (summary, ranking, top, compare, h2h, records, categories, evolution, community)
+- Homogeneous empty states: same pattern everywhere (icon + message + suggestion)
+- Mobile responsive: ensure all tables scroll horizontally, grid cols collapse, filter bar wraps
+- Query optimization: review for N+1 patterns, add missing indexes if needed
+
+### Tasks
+
+- [x] 4.1 Update `schemas/stats.py`: add `CategoryDetail`, `EvolutionEntry`, `CommunityHighlights`
+- [x] 4.2 Add backend functions to `global_stats.py`:
+  - `get_records()` — community records (reuses top logic)
+  - `get_category_details()` — enhanced per-category stats
+  - `get_evolution()` — per-player points with sparkline placeholder
+  - `get_community_highlights()` — best pair, most active, etc.
+- [x] 4.3 Add endpoints to `stats.py`: `GET /records`, `GET /categories`, `GET /categories/{category}`, `GET /evolution`, `GET /community`
+- [x] 4.4 Update `global_stats.js`:
+  - Load + render community records section
+  - Load + render enhanced category stats
+  - Load + render evolution (sparkline-ready)
+  - Load + render community highlights card in summary
+  - Skeleton loaders for EVERY section
+  - CSS animations for filter/sort/page changes
+  - Ensure `syncUrl()` handles all new params
+  - Responsive: test all grid layouts collapse on small screens
+- [x] 4.5 Update `global_stats.html`:
+  - Add records grid section
+  - Add categories detail section (per category cards)
+  - Add evolution section (sparkline-ready)
+  - Add community highlights card in summary area
+  - All new sections hidden by default, revealed by JS
+  - Skeleton placeholders in every section
+- [x] 4.6 Remove old placeholders (`future-sections`, `pairs-section`)
+- [x] 4.7 Add DB indexes if missing (player_id, owner_id, tournament_id, played_at)
+- [x] 4.8 VERIFY: all 11 endpoints functional — server starts and all routes register correctly
+- [x] 4.9 Final integration test: full app loads without Python errors, all routes serve responses
