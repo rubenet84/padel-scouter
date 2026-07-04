@@ -61,8 +61,49 @@ Chain strategy: feature-branch-chain
 - [ ] Search/filters correct
 - [ ] Modals open and close correctly
 
+**Arquitectura**
+- [ ] No aumenta el acoplamiento entre módulos
+- [ ] No aparecen nuevas variables globales
+- [ ] Se reduce la complejidad respecto al estado anterior
+- [ ] La responsabilidad del nuevo módulo está claramente definida
+
 **Visual regression**
 - [ ] Compare page visually before/after — no changes in layout, spacing, colors, animations, or behavior
+
+---
+
+## Definition of Success (cada PR)
+
+Más allá del checklist, un PR está realmente completo cuando:
+
+- [ ] El usuario no percibe ningún cambio funcional
+- [ ] El código es más pequeño o más simple que antes
+- [ ] La responsabilidad del módulo extraído es más clara
+- [ ] El siguiente PR resulta más sencillo que antes (no más difícil)
+- [ ] Se reduce deuda técnica medible (métrica >0 en la tabla)
+
+---
+
+## Baseline UAT (repetir en cada PR)
+
+Misma UAT exacta los 10 PRs. No pensar qué probar, solo ejecutar.
+
+- [ ] Abrir ficha de jugador (`/player/{id}`)
+- [ ] Cambiar entre pestañas (Partidos / Historial)
+- [ ] Editar jugador (abrir modal, cambiar datos, guardar)
+- [ ] Crear partido (todos los campos, guardar)
+- [ ] Editar partido (abrir, modificar, guardar)
+- [ ] Eliminar partido (confirmar eliminación)
+- [ ] Ver historial completo de partidos
+- [ ] Abrir Analytics de un partido
+- [ ] Ver Radar de estadísticas
+- [ ] Ver Power Level
+- [ ] Ver Dragon Balls
+- [ ] Ver Golpe Definitivo
+- [ ] Buscar partidos por texto (filtro)
+- [ ] Abrir y cerrar todos los modales (editar, stats, analytics, level guide, match)
+- [ ] Responsive móvil (viewport <768px)
+- [ ] Responsive escritorio (viewport ≥768px)
 
 ---
 
@@ -79,11 +120,24 @@ Chain strategy: feature-branch-chain
 **Dependencies**: None (standalone).
 
 **Extract → Integrate → Validate → Delete**:
-- [ ] 1.1 Extract all 210 lines of CSS (lines 5-214) into `player_detail.css`, consolidate 4 duplicate glow animations into one shared `@keyframes charGlow`
-- [ ] 1.2 Add `<link rel="stylesheet" href="{{ url_for('static', filename='css/player_detail.css') }}">` in HTML `<head>`
-- [ ] 1.3 Remove original `<style>...</style>` block
+- [x] 1.1 Extract all 210 lines of CSS (lines 5-214) into `player_detail.css`, consolidate 4 duplicate glow animations into one shared `@keyframes charGlow`
+- [x] 1.2 Add `<link rel="stylesheet" href="{{ url_for('static', filename='css/player_detail.css') }}">` in HTML `<head>`
+- [x] 1.3 Remove original `<style>...</style>` block
 - [ ] 1.4 Run visual regression — compare layout, animations, glow effects, pinned extension blocker
 - [ ] 1.5 Run full common checklist
+
+> **PR #1 progress**: Tasks 1.1–1.3 complete (extraction + integration + deletion). Tasks 1.4–1.5 require manual server + browser validation.
+
+**Metrics after PR #1**:
+| Metric | Before | After | Delta |
+|--------|:------:|:-----:|:-----:|
+| Lines `player_detail.html` | 3619 | 3410 | **−209** |
+| JS inline (lines) | 2343 | 2343 | 0 |
+| CSS inline (lines) | 210 | 0 | **−210** |
+| Functions >50 lines | 16 | 16 | 0 |
+| Duplicated code (lines) | 131 | 131 | 0 |
+| Global variables | 24 | 24 | 0 |
+| `document.getElementById()` | ~60 | ~60 | 0 |
 
 ---
 
@@ -91,7 +145,9 @@ Chain strategy: feature-branch-chain
 
 **Objective**: Remove dead variables and create `player_utils.js` with all pure utility functions.
 
-**Definition of Done**: `analysisData` and `pendingTournamentCallback` removed. `escHtml`/`escapeHtml` unified. All pure utils in one module.
+**Definition of Done**: Dead code audit completed and reviewed. Dead variables removed. `escHtml`/`escapeHtml` unified. All pure utility functions living in `player_utils.js`. No render/fetch/CRUD/analytics/radar/power code touched.
+
+**Definition of Success**: player_detail.html más pequeño y sin código muerto. Cualquier función de utilidad se encuentra en un solo lugar. El PR #3 arranca con una base más limpia.
 
 **Affected files**:
 - CREATE: `app/static/js/player_detail/player_utils.js` (~80 lines)
@@ -99,13 +155,58 @@ Chain strategy: feature-branch-chain
 
 **Dependencies**: PR #1.
 
+### Dead code audit (PRIMER COMMIT — cero eliminaciones todavía)
+
+El primer entregable del PR #2 es la auditoría. Sin borrar nada. Solo documentar.
+
+```markdown
+## Dead Code Audit
+
+### Variables sin uso
+- `analysisData` (línea 1280) — 0 referencias
+- `pendingTournamentCallback` (línea 3062) — 0 referencias
+
+### Funciones duplicadas
+- `escapeHtml` (línea ~1785) vs `escHtml` (línea ~2913)
+- _(añadir más durante auditoría)_
+
+### Listeners huérfanos
+- _(buscar addEventListener sin removeEventListener correspondiente)_
+
+### Constantes/referencias sin uso
+- `@keyframes starTwinkle` (CSS) — 0 animation: references
+- _(añadir más durante auditoría)_
+```
+
+Revisar la tabla. **Solo cuando esté aprobada**, continuar con las tareas de eliminación.
+
 **Extract → Integrate → Validate → Delete**:
-- [ ] 2.1 Remove dead variables: `analysisData` (line 1280) and `pendingTournamentCallback` (line 3062)
-- [ ] 2.2 Unify duplicate `escapeHtml` (line 1785) and `escHtml` (line 2913) — keep one implementation in `player_utils.js`
-- [ ] 2.3 Extract to `player_utils.js`: escapeHtml, removeAccentAndLowerCase, strengthDescription, findMatchByKey, getKeyFromString, formatStreak, formatDate, formatResult, showToast, getMatchTypeBadge, hasLesionNote, dragonBallCount, nivelAmenazaFromScore, resolveCategoryKey
-- [ ] 2.4 Wire `<script src="...player_utils.js">` import, replace all call sites
-- [ ] 2.5 Delete original function definitions from `player_detail.html`
-- [ ] 2.6 Run common checklist
+- [ ] 2.0 Generate dead code audit table — commit this FIRST as documentation, zero deletions yet
+- [ ] 2.1 Review and approve audit table (con el usuario si es necesario)
+- [ ] 2.2 Remove dead variables: `analysisData` (line 1280) and `pendingTournamentCallback` (line 3062)
+- [ ] 2.3 Remove dead `@keyframes starTwinkle` from `player_detail.css` (identified in PR #1 — never referenced by any animation property)
+- [ ] 2.4 Remove dead code found during audit (listeners huérfanos, constantes sin referencia)
+- [ ] 2.5 Unify duplicate `escapeHtml` (line 1785) and `escHtml` (line 2913) — keep one implementation in `player_utils.js`
+- [ ] 2.6 Extract to `player_utils.js`: escapeHtml, removeAccentAndLowerCase, strengthDescription, findMatchByKey, getKeyFromString, formatStreak, formatDate, formatResult, showToast, getMatchTypeBadge, hasLesionNote, dragonBallCount, nivelAmenazaFromScore, resolveCategoryKey
+- [ ] 2.7 Wire `<script src="...player_utils.js">` import, replace all call sites
+- [ ] 2.8 Delete original function definitions from `player_detail.html`
+- [ ] 2.9 Run common checklist + Baseline UAT
+- [ ] 2.10 Update metrics table
+
+### Alcance explícito para PR #2
+
+**SÍ incluye**:
+- ✅ Eliminar variables/funciones/listeners/constantes nunca usados
+- ✅ Unificar utilidades duplicadas en `player_utils.js`
+- ✅ Mover utilidades puras a `player_utils.js`
+
+**NO incluye** (se toca en PRs posteriores):
+- ❌ Nada de render
+- ❌ Nada de fetch/API
+- ❌ Nada de CRUD
+- ❌ Nada de analytics
+- ❌ Nada de radar
+- ❌ Nada de dragon balls / power level / golpe definitivo
 
 ---
 
@@ -295,12 +396,21 @@ Chain strategy: feature-branch-chain
 
 ## Metrics Tracking
 
-| Metric | Before | After | Delta |
-|--------|:------:|:-----:|:-----:|
-| Lines `player_detail.html` | 3619 | | |
-| JS inline (lines) | 2343 | | |
-| CSS inline (lines) | 210 | | |
-| Functions >50 lines | 16 | | |
-| Duplicated code (lines) | 131 | | |
-| Global variables | 24 | | |
-| `document.getElementById()` | ~60 | | |
+Cada PR actualiza esta tabla. El valor **Before** de cada PR es el **After** del PR anterior.
+
+| # | PR | player_detail.html | JS inline | CSS inline | Función más larga | Func. >100 | Func. >50 | Código dup. | Globales |
+|:-:|----|:------------------:|:---------:|:----------:|:-----------------:|:----------:|:---------:|:-----------:|:--------:|
+| — | Inicial | 3619 | 2343 | 210 | 239 | 5 | 16 | 131 | 24 |
+| 1 | **PR #1** | → 3410 | 2343 | → **0** | 239 | 5 | 16 | 131 | 24 |
+| 2 | PR #2 | | | 0 | | | | | |
+| 3 | PR #3 | | | 0 | | | | | |
+| 4 | PR #4 | | | 0 | | | | | |
+| 5 | PR #5 | | | 0 | | | | | |
+| 6A | PR #6A | | | 0 | | | | | |
+| 6B | PR #6B | | | 0 | | | | | |
+| 7 | PR #7 | | | 0 | | | | | |
+| 8A | PR #8A | | | 0 | | | | | |
+| 8B | PR #8B | | | 0 | | | | | |
+| — | **Objetivo** | **<700** | **0** | **0** | **<100** | **0** | **—** | **0** | **0** |
+
+> El objetivo <700 líneas es referencia, no mandato. La métrica real es que cada archivo tenga responsabilidad única y cohesionada.

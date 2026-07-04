@@ -55,6 +55,25 @@ templates/ ───────────────────────
 
 ## 2. Catálogo de módulos
 
+Cada módulo se explica en una frase:
+
+| Módulo | Frase única |
+|--------|-------------|
+| `player_state.js` | Estado compartido de la página. |
+| `player_utils.js` | Funciones puras reutilizables. |
+| `player_api.js` | Toda la comunicación HTTP con el backend. |
+| `player_dom.js` | Referencias centralizadas al DOM. |
+| `player_render.js` | Pinta la vista del jugador. |
+| `match_renderer.js` | Renderiza partidos y tarjetas. |
+| `tournament_renderer.js` | Renderiza torneos. |
+| `player_matches.js` | Orquesta el CRUD de partidos. |
+| `player_analytics.js` | Abre y gestiona analytics de partidos. |
+| `player_search.js` | Filtra partidos por búsqueda. |
+| `player_radar.js` | Dibuja el gráfico radar de stats. |
+| `player_power.js` | Gestiona power level, dragon balls y golpe definitivo. |
+| `player_modals.js` | Abre y cierra modales. |
+| `player_detail.js` | Único punto de entrada. Inicializa los subsistemas. |
+
 ### 2.1 Core — `static/js/player_detail/`
 
 #### `player_state.js` — Gestión de estado
@@ -425,7 +444,9 @@ Nunca código "a medias" repartido entre dos sitios. Cada PR queda autocontenido
 4. **DOM centralizado**: los `document.getElementById()` solo existen en `player_dom.js`.
 5. **Sin fugas**: después del último PR, `player_detail.html` debe tener cero JS inline (solo `{% block scripts %}` incluyendo `player_detail.js`).
 6. **Validación post-PR**: comportamiento visual y funcional idéntico al anterior. Si el radar se veía igual, la edición funcionaba igual, los filtros actuaban igual.
-7. **Sin archivos >700 líneas**: si un módulo nuevo supera ese umbral, se divide antes de mergear.
+7. **Sin archivos >700 líneas (referencia, no mandato)**: la métrica real es que cada archivo tenga una responsabilidad única y cohesionada. Si un archivo de 800 líneas tiene una sola responsabilidad clara, mejor que dos archivos de 400 con acoplamiento artificial.
+8. **REGLADEORO — No mover código que no se entienda completamente**: si durante un PR aparece una función con lógica no documentada o comportamiento ambiguo, el trabajo se detiene, se documenta y se deja para un PR posterior. Nunca se refactoriza "a ciegas".
+9. **Regla de la frase única**: cada módulo nuevo debe poder explicarse en una frase. Si necesita un párrafo, tiene demasiadas responsabilidades.
 
 ---
 
