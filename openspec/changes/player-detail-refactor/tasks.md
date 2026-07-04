@@ -123,10 +123,10 @@ Misma UAT exacta los 10 PRs. No pensar qué probar, solo ejecutar.
 - [x] 1.1 Extract all 210 lines of CSS (lines 5-214) into `player_detail.css`, consolidate 4 duplicate glow animations into one shared `@keyframes charGlow`
 - [x] 1.2 Add `<link rel="stylesheet" href="{{ url_for('static', filename='css/player_detail.css') }}">` in HTML `<head>`
 - [x] 1.3 Remove original `<style>...</style>` block
-- [ ] 1.4 Run visual regression — compare layout, animations, glow effects, pinned extension blocker
-- [ ] 1.5 Run full common checklist
+- [x] 1.4 Run visual regression — compare layout, animations, glow effects, pinned extension blocker
+- [x] 1.5 Run full common checklist
 
-> **PR #1 progress**: Tasks 1.1–1.3 complete (extraction + integration + deletion). Tasks 1.4–1.5 require manual server + browser validation.
+> **PR #1 progress**: ✅ Complete. All 5 tasks done. Visual validation confirmed.
 
 **Metrics after PR #1**:
 | Metric | Before | After | Delta |
@@ -401,7 +401,7 @@ Cada PR actualiza esta tabla. El valor **Before** de cada PR es el **After** del
 | # | PR | player_detail.html | JS inline | CSS inline | Función más larga | Func. >100 | Func. >50 | Código dup. | Globales |
 |:-:|----|:------------------:|:---------:|:----------:|:-----------------:|:----------:|:---------:|:-----------:|:--------:|
 | — | Inicial | 3619 | 2343 | 210 | 239 | 5 | 16 | 131 | 24 |
-| 1 | **PR #1** | → 3410 | 2343 | → **0** | 239 | 5 | 16 | 131 | 24 |
+| 1 | **PR #1** ✅ | → 3410 | 2343 | → **0** | 239 | 5 | 16 | 131 | 24 |
 | 2 | PR #2 | | | 0 | | | | | |
 | 3 | PR #3 | | | 0 | | | | | |
 | 4 | PR #4 | | | 0 | | | | | |
