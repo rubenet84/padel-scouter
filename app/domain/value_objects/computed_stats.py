@@ -35,7 +35,7 @@ def get_computed_stats(db: Session, player_id: UUID) -> ComputedStats:
                     ELSE 0.0
                 END AS win_rate
             FROM matches m
-            WHERE m.player1_id = :player_id
+            WHERE m.player1_id = :player_id OR m.partner_id = :player_id
         """),
         {"player_id": player_id},
     ).first()
@@ -49,7 +49,7 @@ def get_computed_stats(db: Session, player_id: UUID) -> ComputedStats:
             SELECT t.id, t.fep_points, m.ronda, m.ganado
             FROM matches m
             JOIN tournaments t ON m.tournament_id = t.id
-            WHERE m.player1_id = :player_id AND m.tournament_id IS NOT NULL
+            WHERE (m.player1_id = :player_id OR m.partner_id = :player_id) AND m.tournament_id IS NOT NULL
             ORDER BY t.id
         """),
         {"player_id": player_id},

@@ -255,7 +255,7 @@
                         <div class="p-6">
                             <!-- Avatar (click to upload) -->
                             <div class="flex justify-center mb-3">
-                                <div class="pulse-ring cursor-pointer group" onclick="document.getElementById('avatar-input').click();" title="Hacer clic para subir foto">
+                                <div class="pulse-ring cursor-pointer group" onclick="document.getElementById('avatar-input').click();" title="Subir o cambiar la foto de perfil del jugador">
                                     <div id="avatar-container" class="w-24 h-24 rounded-full ki-charge flex items-center justify-center text-4xl overflow-hidden relative" style="border:2px solid rgba(255,107,0,0.5);background:#1A1A25;">
                                         <img id="avatar-img" src="" class="hidden w-full h-full object-cover" alt="Avatar" style="display:none;">
                                         <span id="avatar-placeholder" class="text-4xl">🎾</span>
@@ -385,12 +385,12 @@
 
                 <!-- Action buttons -->
                     <div class="flex gap-3 flex-wrap">
-                         <button onclick="openEditModal()"
-                                class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
-                                style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
+                         <button onclick="openEditModal()" title="Abrir formulario para editar los datos y estadísticas del jugador"
+                                 class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                                 style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
                             ✏️ Editar jugador
                         </button>
-                        <button onclick="openLevelGuideModal()"
+                        <button onclick="openLevelGuideModal()" title="Ver la explicación de todas las categorías y niveles de juego"
                                 class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
                                 style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:#a855f7;">
                             📖 Guía de Niveles
@@ -637,7 +637,7 @@
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-5">
                                 <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(168,85,247,0.7);">📋 Historial de Combate</span>
-                                <button onclick="openMatchModal()"
+                                <button onclick="openMatchModal()" title="Registrar un nuevo partido con rival, ronda y resultado"
                                         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
                                         style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:#a855f7;">
                                     + Añadir partido
@@ -662,7 +662,7 @@
 
                     <!-- Modal añadir partido -->
                     <div id="match-modal" class="fixed inset-0 flex items-center justify-center p-4 hidden" style="z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
-                        <div class="w-full max-w-md rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(168,85,247,0.25);">
+                        <div class="w-full max-w-xl rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(168,85,247,0.25);">
                             <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
                             <div class="p-6">
                                 <div class="flex items-center justify-between mb-6">
@@ -680,6 +680,23 @@
                                             <option value="amistoso">🎾 Partido amistoso</option>
                                             <option value="torneo">🏆 Torneo</option>
                                         </select>
+                                    </div>
+
+                                    <!-- Compañero/Pareja section -->
+                                    <div id="partner-section">
+                                        <label class="text-xs text-gray-500 mb-1 block">Compañero/a</label>
+                                        <select id="m-partner-select" 
+                                                class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                                                style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);"
+                                                onchange="onPartnerSelect()">
+                                            <option value="">— Escribí el nombre abajo si no está en la lista —</option>
+                                            <!-- Dynamically populated with existing players -->
+                                        </select>
+                                        <input id="m-partner-name" type="text" placeholder="O escribí el nombre si no está registrado"
+                                               class="w-full rounded-lg px-3 py-2.5 text-sm text-white mt-2"
+                                               style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);"
+                                               oninput="document.getElementById('m-partner-select').value='';">
+                                        <p class="text-xs mt-1" style="color:#475569;">Seleccioná un jugador del listado o escribí el nombre si no está registrado</p>
                                     </div>
 
                                     <!-- Campos torneo (ocultos por defecto) -->
@@ -2197,6 +2214,18 @@ function renderMatches(matches, emptyMsg, searchTotalCount) {
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
         const notas   = m.notes ? escapeHtml(m.notes) : '';
         const notasHtml = notas ? `<p class="text-xs mt-1 italic" style="color:#64748b;">📝 ${notas}</p>` : '';
+        // Partner display — swap when viewed from partner's profile
+        let partnerDisplay = '';
+        if (m.partner_id) {
+            if (playerId === m.partner_id) {
+                // Viewer IS the partner → show "con [player1]" linking to player1
+                partnerDisplay = ` · con <a href="/player/${m.player1_id}" style="color:#a855f7;text-decoration:underline;">${escapeHtml(m.player1_name || 'Jugador')}</a>`;
+            } else {
+                partnerDisplay = ` · con <a href="/player/${m.partner_id}" style="color:#a855f7;text-decoration:underline;">${escapeHtml(m.partner_nombre || 'Compañero')}</a>`;
+            }
+        } else if (m.partner_nombre) {
+            partnerDisplay = ` · con ${escapeHtml(m.partner_nombre)}`;
+        }
 
         return `
         <div class="flex items-center gap-4 p-3.5 rounded-xl transition-all"
@@ -2207,7 +2236,7 @@ function renderMatches(matches, emptyMsg, searchTotalCount) {
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <p class="text-sm font-semibold text-white">vs. ${rival}</p>
+                    <p class="text-sm font-semibold text-white">vs. ${rival}${partnerDisplay}</p>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
                         style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
@@ -2351,6 +2380,18 @@ function renderFullMatchHistory(matches) {
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
         const notas   = m.notes ? escapeHtml(m.notes) : '';
         const notasHtml = notas ? `<p class="text-xs mt-1 italic" style="color:#64748b;">📝 ${notas}</p>` : '';
+        // Partner display — swap when viewed from partner's profile
+        let partnerDisplay = '';
+        if (m.partner_id) {
+            if (playerId === m.partner_id) {
+                // Viewer IS the partner → show "con [player1]" linking to player1
+                partnerDisplay = ` · con <a href="/player/${m.player1_id}" style="color:#a855f7;text-decoration:underline;">${escapeHtml(m.player1_name || 'Jugador')}</a>`;
+            } else {
+                partnerDisplay = ` · con <a href="/player/${m.partner_id}" style="color:#a855f7;text-decoration:underline;">${escapeHtml(m.partner_nombre || 'Compañero')}</a>`;
+            }
+        } else if (m.partner_nombre) {
+            partnerDisplay = ` · con ${escapeHtml(m.partner_nombre)}`;
+        }
         return `
         <div class="flex items-center gap-4 p-3.5 rounded-xl transition-all"
             style="background:rgba(10,10,15,0.5);border:1px solid rgba(42,42,58,0.3);">
@@ -2360,7 +2401,7 @@ function renderFullMatchHistory(matches) {
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <p class="text-sm font-semibold text-white">vs. ${rival}</p>
+                    <p class="text-sm font-semibold text-white">vs. ${rival}${partnerDisplay}</p>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
                         style="background:${typeBadge.bgColor};color:${typeBadge.color};">${typeBadge.text}</span>
                     <span class="px-1.5 py-0.5 text-xs font-bold rounded uppercase tracking-wider"
@@ -2391,8 +2432,10 @@ function closeMatchHistoryModal() {
     modal.classList.add('hidden');
 }
 
-function openMatchModal() {
+async function openMatchModal() {
     resetMatchForm();
+    // Load partner players list
+    await loadPartnerPlayers();
     // Set default date to today
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('m-date').value = today;
@@ -2426,7 +2469,8 @@ function getRoundIndex(roundName) {
 function resetMatchForm() {
     const formFields = [
         'm-tipo', 'm-rival', 'm-pareja-rival', 'm-resultado', 'm-ganado', 'm-scoring',
-        'm-torneo-select', 'm-ronda', 'm-notas', 'm-date'
+        'm-torneo-select', 'm-ronda', 'm-notas', 'm-date',
+        'm-partner-select', 'm-partner-name'
     ];
     formFields.forEach(id => {
         const el = document.getElementById(id);
@@ -2434,6 +2478,8 @@ function resetMatchForm() {
         if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.value = '';
         if (el.tagName === 'SELECT') el.selectedIndex = 0;
     });
+    // Reset partner section (unlock, re-enable, hide text input)
+    unlockPartnerSection();
 
     // Hide inline tournament form
     const newForm = document.getElementById('new-tournament-form');
@@ -2700,12 +2746,16 @@ async function saveMatch() {
             ? `/api/v1/players/${playerId}/matches/${matchId}`
             : `/api/v1/players/${playerId}/matches`;
 
+        const partnerSelect = document.getElementById('m-partner-select');
+        const partnerInput = document.getElementById('m-partner-name');
         const body = {
             rival_nombre: rival,
             resultado: resultado,
             ganado: ganado,
             tournament_id: tipo === 'torneo' ? tournamentId : null,
             ronda: tipo === 'torneo' ? ronda : null,
+            partner_id: partnerSelect ? (partnerSelect.value || null) : null,
+            partner_nombre: partnerInput ? (partnerInput.value.trim() || null) : null,
             scoring_method: document.getElementById('m-scoring').value,
             notes: document.getElementById('m-notas').value.trim() || null,
             fecha_partido: document.getElementById('m-date').value || null,
@@ -2786,6 +2836,85 @@ async function renderComputedStats(pid) {
         document.getElementById('stat-winrate').textContent = '—';
         document.getElementById('stat-fep').textContent = '—';
     }
+}
+
+// ── Partner / Compañero ─────────────────────────────────────────
+async function loadPartnerPlayers() {
+    try {
+        const res = await fetch(`/api/v1/players/`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const players = await res.json();
+        const select = document.getElementById('m-partner-select');
+        if (!select) return;
+        // Keep the first "— Seleccionar jugador —" option
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">— Seleccionar jugador —</option>';
+        players.forEach(p => {
+            if (p.id === playerId) return; // can't be your own partner
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.name + ' (' + p.category + ')';
+            if (p.id === currentValue) opt.selected = true;
+            select.appendChild(opt);
+        });
+        // Restore selection if it was set
+        if (currentValue) select.value = currentValue;
+    } catch (e) {
+        console.warn('loadPartnerPlayers error:', e);
+    }
+}
+
+function onPartnerSelect() {
+    const select = document.getElementById('m-partner-select');
+    const input = document.getElementById('m-partner-name');
+    if (!select || !input) return;
+    // Si se selecciona un jugador del combo, limpiar el texto libre
+    if (select.value) {
+        input.value = '';
+    }
+}
+
+function lockPartnerForTournament(partnerName) {
+    const select = document.getElementById('m-partner-select');
+    const input = document.getElementById('m-partner-name');
+    const section = document.getElementById('partner-section');
+    if (!select || !input || !section) return;
+    // Disable both controls
+    select.disabled = true;
+    input.disabled = true;
+    // Show locked indicator
+    const existingLock = document.getElementById('partner-locked-display');
+    if (!existingLock) {
+        const display = document.createElement('div');
+        display.id = 'partner-locked-display';
+        display.className = 'flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white';
+        display.style.cssText = 'background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);opacity:0.7;';
+        display.innerHTML = `<span>🔒 ${escHtml(partnerName)}</span>`;
+        // Hide the original flex container, insert display
+        const flexContainer = select.parentElement;
+        flexContainer.classList.add('hidden');
+        flexContainer.parentElement.insertBefore(display, flexContainer);
+    }
+}
+
+function unlockPartnerSection() {
+    const select = document.getElementById('m-partner-select');
+    const input = document.getElementById('m-partner-name');
+    if (select) { select.disabled = false; select.value = ''; }
+    if (input) { input.disabled = false; input.value = ''; }
+    const lockedDisplay = document.getElementById('partner-locked-display');
+    if (lockedDisplay) lockedDisplay.remove();
+    const flexContainer = select ? select.parentElement : null;
+    if (flexContainer) flexContainer.classList.remove('hidden');
+}
+
+function escHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 // ── Tournament Dropdown ─────────────────────────────────────────
@@ -2978,11 +3107,17 @@ async function createTournamentInline() {
         return;
     }
 
-    // Validar: no duplicar nombre + fecha (compartido bloquea a todos, personal solo al mismo jugador)
-    const dup = loadedTournaments.find(t => t.name === name && t.date === date && (!t.player_id || t.player_id === playerId));
+    // Si ya existe un torneo con ese nombre y fecha (de cualquier jugador), reusarlo
+    const dup = loadedTournaments.find(t => t.name === name && t.date === date);
     if (dup) {
-        errEl.textContent = 'Ya existe un torneo con ese nombre y fecha.';
-        errEl.classList.remove('hidden');
+        cancelNewTournament();
+        const select = document.getElementById('m-torneo-select');
+        if (select) {
+            select.value = dup.id;
+            onTournamentSelect();
+            filterMatchHistory();
+        }
+        showToast('✅ Torneo ya existente — seleccionado');
         return;
     }
 
@@ -3062,6 +3197,27 @@ function onTournamentSelect() {
         nameEl.textContent = `🏆 ${t.name}${fepText} — ${dateStr}`;
     }
     if (adminRow) adminRow.classList.remove('hidden');
+
+    // Auto-fill partner from existing tournament match (only for NEW matches, not edit)
+    const isEditing = document.getElementById('btn-save-match').dataset.matchId;
+    if (!isEditing) {
+        unlockPartnerSection();
+        const existingMatch = (loadedMatches || []).find(m =>
+            m.tournament_id === t.id &&
+            (m.partner_id || m.partner_nombre)
+        );
+        if (existingMatch) {
+            const select = document.getElementById('m-partner-select');
+            const input = document.getElementById('m-partner-name');
+            if (existingMatch.partner_id && select) {
+                select.value = existingMatch.partner_id;
+                onPartnerSelect(); // clears text input
+            } else if (existingMatch.partner_nombre && input) {
+                input.value = existingMatch.partner_nombre;
+            }
+            lockPartnerForTournament(existingMatch.partner_nombre || 'Compañero');
+        }
+    }
 }
 
 function showTournamentEditForm() {
@@ -3354,6 +3510,27 @@ async function openEditMatchModal(matchId) {
             if (match.rival_nombre && document.getElementById('m-rival')) {
                 document.getElementById('m-rival').value = match.rival_nombre;
             }
+        }
+
+        // ── Partner / Compañero population ──
+        // Load partner players first, then populate
+        await loadPartnerPlayers();
+        const partnerSelect = document.getElementById('m-partner-select');
+        const partnerInput = document.getElementById('m-partner-name');
+        if (match.partner_id && partnerSelect) {
+            partnerSelect.value = match.partner_id;
+            partnerInput.classList.add('hidden');
+            partnerInput.value = '';
+            onPartnerSelect();
+        } else if (match.partner_nombre && partnerInput) {
+            partnerInput.value = match.partner_nombre;
+            partnerInput.classList.remove('hidden');
+            if (partnerSelect) partnerSelect.value = '';
+        }
+        // Lock partner fields for tournament matches
+        if (isTorneo) {
+            const pName = match.partner_nombre || 'Compañero';
+            lockPartnerForTournament(pName);
         }
         
         // Call toggleTorneo to show/hide appropriate fields

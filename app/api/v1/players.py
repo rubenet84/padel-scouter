@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 
 logger = logging.getLogger(__name__)
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.dependencies import get_current_user
 from app.infrastructure.database.session import get_db
@@ -30,6 +30,15 @@ ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 MAX_DIM = 2048
 
 router = APIRouter(prefix="/players", tags=["players"])
+
+
+def _player_filter(player_id: UUID):
+    """Matches where player participated in any role (creator, self-ref, or partner)."""
+    return or_(
+        MatchModel.player1_id == player_id,
+        MatchModel.player2_id == player_id,
+        MatchModel.partner_id == player_id,
+    )
 
 
 # ── Players CRUD ──────────────────────────────────────────────
@@ -278,12 +287,11 @@ def add_match(
     if not player:
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
 
-    # Verify tournament ownership if provided
+    # Verify tournament exists
     legacy_torneo = None
     if data.tournament_id is not None:
         tournament = db.query(TournamentModel).filter(
             TournamentModel.id == data.tournament_id,
-            TournamentModel.owner_id == current_user.id,
         ).first()
         if not tournament:
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
@@ -300,10 +308,7 @@ def add_match(
             if round_idx >= 0:
                 # Regla 1: si hay derrota en ronda INFERIOR, no se puede jugar después
                 lower_loss = db.query(MatchModel).filter(
-                    or_(
-                        MatchModel.player1_id == player_id,
-                        MatchModel.player2_id == player_id,
-                    ),
+                    _player_filter(player_id),
                     MatchModel.tournament_id == data.tournament_id,
                     MatchModel.ganado == False,
                     MatchModel.ronda.in_(ROUND_ORDER[:round_idx]),
@@ -317,10 +322,7 @@ def add_match(
                 # Regla 2: si es derrota, no puede haber partidos GANADOS en rondas superiores
                 if data.ganado is False:
                     higher_win = db.query(MatchModel).filter(
-                        or_(
-                            MatchModel.player1_id == player_id,
-                            MatchModel.player2_id == player_id,
-                        ),
+                        _player_filter(player_id),
                         MatchModel.tournament_id == data.tournament_id,
                         MatchModel.ganado == True,
                         MatchModel.ronda.in_(ROUND_ORDER[round_idx + 1:]),
@@ -333,10 +335,7 @@ def add_match(
 
             # Regla 3: no duplicar ronda en el mismo torneo
             existing = db.query(MatchModel).filter(
-                or_(
-                    MatchModel.player1_id == player_id,
-                    MatchModel.player2_id == player_id,
-                ),
+                _player_filter(player_id),
                 MatchModel.tournament_id == data.tournament_id,
                 MatchModel.ronda == data.ronda,
             ).first()
@@ -346,9 +345,48 @@ def add_match(
                     detail=f"Ya existe un partido en {data.ronda} para este torneo. Solo se puede editar o eliminar.",
                 )
 
+    # ── Partner / Compañero logic ───────────────────────────────────
+    partner_id = data.partner_id
+    partner_nombre = data.partner_nombre
+
+    # Tournament partner locking: if there's an existing match in this tournament
+    # with a partner set, auto-fill and reject any new partner value
+    if data.tournament_id is not None:
+        existing_partner_match = db.query(MatchModel).filter(
+            _player_filter(player_id),
+            MatchModel.tournament_id == data.tournament_id,
+            MatchModel.partner_id.isnot(None),
+        ).first()
+        if existing_partner_match:
+            # Partner is locked for this tournament.
+            # Auto-swap: if current player IS the partner in existing match,
+            # swap so partner_id points to the original player1.
+            if existing_partner_match.partner_id == player_id:
+                # Current player was the partner → swap: partner = original player1
+                partner_id = existing_partner_match.player1_id
+                partner_nombre = existing_partner_match.player1.name if existing_partner_match.player1 else existing_partner_match.partner_nombre
+            else:
+                partner_id = existing_partner_match.partner_id
+                partner_nombre = existing_partner_match.partner_nombre
+
+    # Verify partner_id belongs to same user
+    if partner_id is not None:
+        partner_player = db.query(PlayerModel).filter(
+            PlayerModel.id == partner_id,
+            PlayerModel.owner_id == current_user.id,
+        ).first()
+        if not partner_player:
+            raise HTTPException(
+                status_code=400,
+                detail="El compañero seleccionado no existe o no pertenece a tu cuenta.",
+            )
+        # Auto-fill partner_nombre from player name if not provided
+        if not partner_nombre:
+            partner_nombre = partner_player.name
+
     match = MatchModel(
         player1_id=player_id,
-        player2_id=player_id,       # self-reference OK para partidos individuales
+        player2_id=player_id,       # self-reference OK — kept for backward compat
         rival_nombre=data.rival_nombre,
         tournament_id=data.tournament_id,
         ronda=data.ronda,
@@ -360,6 +398,8 @@ def add_match(
         winner_id=player_id if data.ganado else None,
         notes=data.notes,
         played_at=datetime.combine(data.fecha_partido, datetime.utcnow().time()) if data.fecha_partido else datetime.utcnow(),
+        partner_id=partner_id,
+        partner_nombre=partner_nombre,
     )
     db.add(match)
     db.commit()
@@ -385,6 +425,7 @@ def get_matches(
         or_(
             MatchModel.player1_id == player_id,
             MatchModel.player2_id == player_id,
+            MatchModel.partner_id == player_id,
         )
     )
 
@@ -400,8 +441,20 @@ def get_matches(
                 raise HTTPException(status_code=400, detail="tournament_id inválido")
             query = query.filter(MatchModel.tournament_id == tid)
 
-    matches = query.order_by(MatchModel.played_at.desc()).limit(20).all()
-    return matches
+    matches = (
+        query
+        .options(joinedload(MatchModel.player1))
+        .order_by(MatchModel.played_at.desc())
+        .limit(20)
+        .all()
+    )
+    # Hydrate player1_name for correct partner display on the other side
+    result = []
+    for m in matches:
+        d = MatchPublicSchema.model_validate(m)
+        d.player1_name = m.player1.name if m.player1 else None
+        result.append(d)
+    return result
 
 
 @router.put("/{player_id}/matches/{match_id}", response_model=MatchPublicSchema)
@@ -422,20 +475,19 @@ def update_match(
 
     match = db.query(MatchModel).filter(
         MatchModel.id == match_id,
-        or_(
-            MatchModel.player1_id == player_id,
-            MatchModel.player2_id == player_id,
-        )
+        _player_filter(player_id),
     ).first()
     if not match:
-        raise HTTPException(status_code=404, detail="Partido no encontrado")
+        raise HTTPException(
+            status_code=404,
+            detail="Partido no encontrado o no tenés permiso para editarlo. Solo vos o tu compañero pueden modificar este partido.",
+        )
 
     # Verify tournament ownership if provided
     legacy_torneo = None
     if data.tournament_id is not None:
         tournament = db.query(TournamentModel).filter(
             TournamentModel.id == data.tournament_id,
-            TournamentModel.owner_id == current_user.id,
         ).first()
         if not tournament:
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
@@ -448,10 +500,7 @@ def update_match(
                 # Regla 1: si cambió de ronda y hay derrota en ronda INFERIOR, no se puede pasar después
                 if data.ronda != match.ronda:
                     lower_loss = db.query(MatchModel).filter(
-                        or_(
-                            MatchModel.player1_id == player_id,
-                            MatchModel.player2_id == player_id,
-                        ),
+                        _player_filter(player_id),
                         MatchModel.tournament_id == data.tournament_id,
                         MatchModel.ganado == False,
                         MatchModel.ronda.in_(ROUND_ORDER[:round_idx]),
@@ -466,10 +515,7 @@ def update_match(
                 # Regla 2: si se cambia a derrota, no puede haber partidos GANADOS en rondas superiores
                 if data.ganado is False and match.ganado is not False:
                     higher_win = db.query(MatchModel).filter(
-                        or_(
-                            MatchModel.player1_id == player_id,
-                            MatchModel.player2_id == player_id,
-                        ),
+                        _player_filter(player_id),
                         MatchModel.tournament_id == data.tournament_id,
                         MatchModel.ganado == True,
                         MatchModel.ronda.in_(ROUND_ORDER[round_idx + 1:]),
@@ -484,10 +530,7 @@ def update_match(
             # Regla 3: no duplicar ronda en el mismo torneo (excluyendo este partido)
             if data.ronda != match.ronda or data.tournament_id != match.tournament_id:
                 existing = db.query(MatchModel).filter(
-                    or_(
-                        MatchModel.player1_id == player_id,
-                        MatchModel.player2_id == player_id,
-                    ),
+                    _player_filter(player_id),
                     MatchModel.tournament_id == data.tournament_id,
                     MatchModel.ronda == data.ronda,
                     MatchModel.id != match_id,
@@ -497,6 +540,63 @@ def update_match(
                         status_code=400,
                         detail=f"Ya existe otro partido en {data.ronda} para este torneo.",
                     )
+
+    # ── Partner / Compañero update logic ────────────────────────────
+    if data.tournament_id is not None:
+        # Tournament match: partner is locked once set on any match in this tournament.
+        # Auto-swap: if current player IS the partner in existing match, swap.
+        existing_partner_match = db.query(MatchModel).filter(
+            _player_filter(player_id),
+            MatchModel.tournament_id == data.tournament_id,
+            MatchModel.partner_id.isnot(None),
+            MatchModel.id != match_id,
+        ).first()
+        if existing_partner_match:
+            if existing_partner_match.partner_id == player_id:
+                # Current player was the partner → swap
+                match.partner_id = existing_partner_match.player1_id
+                match.partner_nombre = existing_partner_match.player1.name if existing_partner_match.player1 else existing_partner_match.partner_nombre
+            else:
+                match.partner_id = existing_partner_match.partner_id
+                match.partner_nombre = existing_partner_match.partner_nombre
+        else:
+            # First tournament match without partner yet — allow setting it
+            partner_id = data.partner_id
+            partner_nombre = data.partner_nombre
+
+            if partner_id is not None:
+                partner_player = db.query(PlayerModel).filter(
+                    PlayerModel.id == partner_id,
+                    PlayerModel.owner_id == current_user.id,
+                ).first()
+                if not partner_player:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="El compañero seleccionado no existe o no pertenece a tu cuenta.",
+                    )
+                if not partner_nombre:
+                    partner_nombre = partner_player.name
+            match.partner_id = partner_id
+            match.partner_nombre = partner_nombre
+    else:
+        # Amistoso: allow changing partner freely
+        partner_id = data.partner_id
+        partner_nombre = data.partner_nombre
+
+        if partner_id is not None:
+            partner_player = db.query(PlayerModel).filter(
+                PlayerModel.id == partner_id,
+                PlayerModel.owner_id == current_user.id,
+            ).first()
+            if not partner_player:
+                raise HTTPException(
+                    status_code=400,
+                    detail="El compañero seleccionado no existe o no pertenece a tu cuenta.",
+                )
+            if not partner_nombre:
+                partner_nombre = partner_player.name
+        match.partner_id = partner_id
+        match.partner_nombre = partner_nombre
 
     # Update fields
     match.rival_nombre = data.rival_nombre
@@ -535,13 +635,13 @@ def delete_match(
 
     match = db.query(MatchModel).filter(
         MatchModel.id == match_id,
-        or_(
-            MatchModel.player1_id == player_id,
-            MatchModel.player2_id == player_id,
-        )
+        _player_filter(player_id),
     ).first()
     if not match:
-        raise HTTPException(status_code=404, detail="Partido no encontrado")
+        raise HTTPException(
+            status_code=404,
+            detail="Partido no encontrado o no tenés permiso para eliminarlo. Solo vos o tu compañero pueden eliminar este partido.",
+        )
 
     db.delete(match)
     db.commit()

@@ -196,6 +196,8 @@ class MatchCreateSchema(BaseModel):
     ganado:         bool
     tournament_id:  UUID | None = Field(default=None, description="FK → tournaments.id. null = amistoso")
     ronda:          str | None = Field(default=None, max_length=100, description="Fase de grupos, Octavos, Cuartos, Semifinal, Final, etc.")
+    partner_id:     UUID | None = Field(default=None, description="FK → players.id del compañero")
+    partner_nombre: str | None = Field(default=None, max_length=150, description="Nombre libre del compañero (cuando no está registrado)")
     scoring_method: ScoringMethod = ScoringMethod.CON_VENTAJA
     notes:          str | None = None
     fecha_partido:  date | None = Field(default=None, description="Fecha en que se jugó el partido. Si no se envía, se usa la fecha actual.")
@@ -258,5 +260,8 @@ class MatchPublicSchema(BaseModel):
     scoring_method: ScoringMethod
     played_at:      datetime
     notes:          str | None = None
+    partner_id:     UUID | None = None
+    partner_nombre: str | None = None
+    player1_name:   str | None = None
 
     model_config = {"from_attributes": True}

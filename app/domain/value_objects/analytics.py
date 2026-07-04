@@ -29,6 +29,7 @@ def get_match_analytics(db: Session, player_id: UUID) -> dict:
             or_(
                 MatchModel.player1_id == player_id,
                 MatchModel.player2_id == player_id,
+                MatchModel.partner_id == player_id,
             )
         )
         .all()

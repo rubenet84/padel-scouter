@@ -72,6 +72,7 @@ class PlayerModel(Base):
     analyses  = relationship("AnalysisModel", back_populates="player")
     matches_as_p1 = relationship("MatchModel", foreign_keys="MatchModel.player1_id")
     matches_as_p2 = relationship("MatchModel", foreign_keys="MatchModel.player2_id")
+    matches_as_partner = relationship("MatchModel", foreign_keys="MatchModel.partner_id")
 
 
 class TournamentModel(Base):
@@ -127,6 +128,11 @@ class MatchModel(Base):
     result         = Column(String(50),  nullable=True)
     winner_id      = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=True)
     played_at      = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    partner_id     = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=True)
+    partner_nombre = Column(String(150), nullable=True)
     notes          = Column(Text, nullable=True)
 
+    player1    = relationship("PlayerModel", foreign_keys="MatchModel.player1_id")
+    player2    = relationship("PlayerModel", foreign_keys="MatchModel.player2_id")
     tournament = relationship("TournamentModel", back_populates="matches")
+    partner    = relationship("PlayerModel", foreign_keys="MatchModel.partner_id")
