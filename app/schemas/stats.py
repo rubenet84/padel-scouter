@@ -128,3 +128,43 @@ class H2HResult(BaseModel):
     games_b: int = 0
     last_match: H2HMatch | None = None
     history: list[H2HMatch] = []
+
+
+# ── PR #4: Records, Categories, Evolution, Community ──────────────
+
+
+class PlayerRecord(BaseModel):
+    player_id: UUID
+    name: str
+    category: str
+    value: float | int
+    metric_key: str  # e.g. "points", "wins", "streak"
+    metric_label: str  # e.g. "Puntos FEP", "Victorias"
+
+
+class CategoryDetail(BaseModel):
+    category: str
+    total_players: int = 0
+    total_matches: int = 0
+    total_wins: int = 0
+    total_losses: int = 0
+    avg_win_pct: float = 0.0
+    avg_points: float = 0.0
+    leader_name: str | None = None
+    leader_points: int | None = None
+    top_players: list[TopPlayerEntry] = []
+
+
+class EvolutionEntry(BaseModel):
+    player_id: UUID
+    name: str
+    category: str
+    current_points: int = 0
+    sparkline: list[int] = []  # historical points — placeholder for now
+
+
+class CommunityHighlights(BaseModel):
+    most_points: PlayerBrief | None = None
+    best_form: PlayerBrief | None = None
+    best_pair: dict | None = None  # {player1_name, player2_name, win_pct, matches}
+    most_active: PlayerBrief | None = None

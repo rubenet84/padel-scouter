@@ -385,6 +385,11 @@ function initFilterHandlers() {
         loadRanking();
         // Also reload top players with new filters
         loadTopPlayers();
+        // PR #4: Reload new sections with new filters
+        loadRecords();
+        loadCategoryStats();
+        loadEvolution();
+        loadCommunityHighlights();
     });
 
     // Also apply on Enter key in date inputs
@@ -396,6 +401,11 @@ function initFilterHandlers() {
                     rankingState.page = 1;
                     loadRanking();
                     loadTopPlayers();
+                    // PR #4: Reload new sections
+                    loadRecords();
+                    loadCategoryStats();
+                    loadEvolution();
+                    loadCommunityHighlights();
                 }
             });
         }
@@ -937,18 +947,373 @@ function handleCompareUrlParam() {
     }, 200);
 }
 
+// ── PR #4: Community Records ────────────────────────────────────
+const RECORDS_META = {
+    points:           { icon: '🏆', color: '#FFD700', label: 'Puntos FEP' },
+    wins:            { icon: '✅', color: '#10b981', label: 'Victorias' },
+    streak:          { icon: '🔥', color: '#f97316', label: 'Racha' },
+    tournaments_won: { icon: '🏅', color: '#FF6B00', label: 'Torneos Ganados' },
+    finals:          { icon: '🏁', color: '#ef4444', label: 'Finales' },
+    semis:           { icon: '🔶', color: '#f59e0b', label: 'Semifinales' },
+    sets_won:        { icon: '📊', color: '#6366f1', label: 'Sets Ganados' },
+    games_won:       { icon: '🎾', color: '#ec4899', label: 'Juegos Ganados' },
+};
+
+async function loadRecords() {
+    const grid = document.getElementById('records-grid');
+    const section = document.getElementById('records-section');
+    if (!grid || !section) return;
+
+    if (!TOKEN) return;
+
+    const params = buildFilterParams();
+    const url = `/api/v1/stats/records?${params.toString()}`;
+
+    // Show skeleton
+    section.classList.remove('hidden');
+
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        if (!res.ok) {
+            section.classList.add('hidden');
+            return;
+        }
+        const json = await res.json();
+        if (!json.success || !json.data) {
+            section.classList.add('hidden');
+            return;
+        }
+        renderRecords(json.data);
+    } catch {
+        section.classList.add('hidden');
+    }
+}
+
+function renderRecords(data) {
+    const grid = document.getElementById('records-grid');
+    if (!grid) return;
+
+    if (!data || data.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center py-8"><div class="text-3xl mb-2">📭</div><p class="text-gray-400">No hay datos disponibles</p></div>';
+        return;
+    }
+
+    grid.innerHTML = data.map(rec => {
+        const meta = RECORDS_META[rec.metric_key] || { icon: '📊', color: '#888', label: rec.metric_label };
+        const valueDisplay = rec.metric_key === 'streak'
+            ? (rec.value > 0 ? `W${rec.value}` : rec.value < 0 ? `L${Math.abs(rec.value)}` : '—')
+            : rec.value;
+        return `
+            <div class="rounded-xl border border-[#2A2A3A] p-3 card-hover opacity-0 fade-in" style="background:#12121A;">
+                <div class="flex items-center gap-1.5 mb-2">
+                    <span aria-hidden="true">${meta.icon}</span>
+                    <span class="text-xs font-bold uppercase tracking-widest" style="color:${meta.color};">${escHtml(meta.label)}</span>
+                </div>
+                <div class="text-lg font-black text-white">${escHtml(String(valueDisplay))}</div>
+                <a href="/player/${rec.player_id}" class="text-sm text-gray-400 hover:text-emerald-400 transition-colors truncate block">${escHtml(rec.name)}</a>
+                <div class="text-xs text-gray-500">${escHtml(rec.category)}</div>
+            </div>
+        `;
+    }).join('');
+
+    // Trigger fade-in
+    requestAnimationFrame(() => {
+        grid.querySelectorAll('.fade-in').forEach(el => {
+            el.style.transition = 'opacity 0.4s ease-in';
+            el.style.opacity = '1';
+        });
+    });
+}
+
+// ── PR #4: Category Stats ────────────────────────────────────────
+async function loadCategoryStats() {
+    const content = document.getElementById('categories-content');
+    const section = document.getElementById('categories-section');
+    if (!content || !section) return;
+
+    if (!TOKEN) return;
+
+    const params = buildFilterParams();
+    params.set('player_limit', '3');
+    const url = `/api/v1/stats/categories?${params.toString()}`;
+
+    section.classList.remove('hidden');
+
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        if (!res.ok) {
+            section.classList.add('hidden');
+            return;
+        }
+        const json = await res.json();
+        if (!json.success || !json.data || json.data.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+        renderCategoryStats(json.data);
+    } catch {
+        section.classList.add('hidden');
+    }
+}
+
+function renderCategoryStats(data) {
+    const content = document.getElementById('categories-content');
+    if (!content) return;
+
+    if (!data || data.length === 0) {
+        content.innerHTML = '<div class="text-center py-8"><div class="text-3xl mb-2">📭</div><p class="text-gray-400">No hay datos disponibles</p></div>';
+        return;
+    }
+
+    content.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        ${data.map(cat => `
+            <div class="rounded-xl border border-[#2A2A3A] p-4 card-hover opacity-0 fade-in" style="background:#12121A;">
+                <h3 class="text-lg font-bold text-white mb-3">${escHtml(cat.category)}</h3>
+                <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                    <div><span class="text-gray-400">Jugadores:</span> <span class="text-white font-semibold">${cat.total_players}</span></div>
+                    <div><span class="text-gray-400">Partidos:</span> <span class="text-white font-semibold">${cat.total_matches}</span></div>
+                    <div><span class="text-gray-400">Victorias:</span> <span class="text-emerald-400 font-semibold">${cat.total_wins}</span></div>
+                    <div><span class="text-gray-400">Derrotas:</span> <span class="text-red-400 font-semibold">${cat.total_losses}</span></div>
+                    <div><span class="text-gray-400">% Victoria:</span> <span class="text-white font-semibold">${cat.avg_win_pct}%</span></div>
+                    <div><span class="text-gray-400">Prom. Puntos:</span> <span class="text-white font-semibold">${cat.avg_points}</span></div>
+                </div>
+                ${cat.leader_name ? `
+                    <div class="text-xs text-gray-400 mb-2">
+                        Líder: <span class="text-emerald-400 font-bold">${escHtml(cat.leader_name)}</span>
+                        <span class="text-gray-500"> · ${cat.leader_points} pts</span>
+                    </div>
+                ` : ''}
+                ${cat.top_players && cat.top_players.length > 0 ? `
+                    <div class="border-t border-[#2A2A3A] pt-2 mt-2">
+                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1.5">Top Jugadores</div>
+                        ${cat.top_players.map((tp, i) => `
+                            <div class="flex items-center justify-between text-xs py-0.5">
+                                <span class="text-gray-500 font-mono w-4">${i + 1}.</span>
+                                <a href="/player/${tp.player_id}" class="text-white hover:text-emerald-400 transition-colors flex-1 truncate">${escHtml(tp.name)}</a>
+                                <span class="text-white font-semibold font-mono">${tp.value} pts</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('')}
+    </div>`;
+
+    // Trigger fade-in
+    requestAnimationFrame(() => {
+        content.querySelectorAll('.fade-in').forEach(el => {
+            el.style.transition = 'opacity 0.4s ease-in';
+            el.style.opacity = '1';
+        });
+    });
+}
+
+// ── PR #4: Evolution ─────────────────────────────────────────────
+async function loadEvolution() {
+    const content = document.getElementById('evolution-content');
+    const section = document.getElementById('evolution-section');
+    if (!content || !section) return;
+
+    if (!TOKEN) return;
+
+    const params = buildFilterParams();
+    const url = `/api/v1/stats/evolution?${params.toString()}`;
+
+    section.classList.remove('hidden');
+
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        if (!res.ok) {
+            section.classList.add('hidden');
+            return;
+        }
+        const json = await res.json();
+        if (!json.success || !json.data) {
+            section.classList.add('hidden');
+            return;
+        }
+        renderEvolution(json.data);
+    } catch {
+        section.classList.add('hidden');
+    }
+}
+
+function renderEvolution(data) {
+    const content = document.getElementById('evolution-content');
+    if (!content) return;
+
+    if (!data || data.length === 0) {
+        content.innerHTML = '<div class="text-center py-8"><div class="text-3xl mb-2">📭</div><p class="text-gray-400">No hay datos disponibles</p></div>';
+        return;
+    }
+
+    content.innerHTML = `
+        <div class="rounded-xl border border-[#2A2A3A] overflow-x-auto" style="background:#12121A;">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-[#2A2A3A] text-gray-400 text-xs uppercase tracking-wider">
+                        <th class="p-3 text-left">Nombre</th>
+                        <th class="p-3 text-left">Categoría</th>
+                        <th class="p-3 text-right">Puntos</th>
+                        <th class="p-3 text-right">Evolución</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(e => `
+                        <tr class="border-b border-[#2A2A3A] hover:bg-white/5 transition-colors">
+                            <td class="p-3">
+                                <a href="/player/${e.player_id}" class="text-white font-medium hover:text-emerald-400 transition-colors">${escHtml(e.name)}</a>
+                            </td>
+                            <td class="p-3 text-gray-400 text-xs">${escHtml(e.category)}</td>
+                            <td class="p-3 text-right text-white font-semibold font-mono">${e.current_points}</td>
+                            <td class="p-3 text-right text-gray-500 text-xs">${e.sparkline && e.sparkline.length > 0 ? '📈' : '— Prep. históricos'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+// ── PR #4: Community Highlights ─────────────────────────────────
+async function loadCommunityHighlights() {
+    const container = document.getElementById('community-content');
+    const card = document.getElementById('community-highlights');
+    if (!container || !card) return;
+
+    if (!TOKEN) return;
+
+    const params = buildFilterParams();
+    const url = `/api/v1/stats/community?${params.toString()}`;
+
+    card.classList.remove('hidden');
+
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        if (!res.ok) {
+            card.classList.add('hidden');
+            return;
+        }
+        const json = await res.json();
+        if (!json.success || !json.data) {
+            card.classList.add('hidden');
+            return;
+        }
+        renderCommunityHighlights(json.data);
+    } catch {
+        card.classList.add('hidden');
+    }
+}
+
+function renderCommunityHighlights(data) {
+    const container = document.getElementById('community-content');
+    if (!container) return;
+
+    if (!data) {
+        container.innerHTML = '<div class="text-center py-4 text-gray-500">Sin datos de comunidad</div>';
+        return;
+    }
+
+    function playerRow(icon, label, player, extra) {
+        if (!player) return '';
+        return `
+            <div class="flex items-center justify-between py-2 border-b border-[#2A2A3A]/50 last:border-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span aria-hidden="true">${icon}</span>
+                    <span class="text-xs text-gray-400 shrink-0">${escHtml(label)}</span>
+                </div>
+                <div class="text-right min-w-0 ml-2">
+                    <a href="/player/${player.id}" class="text-sm text-white font-medium hover:text-emerald-400 transition-colors truncate block">${escHtml(player.name)}</a>
+                    <div class="text-xs text-gray-500">
+                        ${player.points ? player.points + ' pts · ' : ''}${player.win_pct}% · ${escHtml(player.category)}
+                        ${extra ? ' · ' + extra : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    let rows = '';
+
+    rows += playerRow('🏆', 'Más Puntos', data.most_points);
+    rows += playerRow('⭐', 'Mejor Forma', data.best_form);
+
+    if (data.best_pair) {
+        rows += `
+            <div class="flex items-center justify-between py-2 border-b border-[#2A2A3A]/50 last:border-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span aria-hidden="true">🤝</span>
+                    <span class="text-xs text-gray-400 shrink-0">Mejor Pareja</span>
+                </div>
+                <div class="text-right min-w-0 ml-2">
+                    <div class="text-sm text-white font-medium">${escHtml(data.best_pair.player1_name)} + ${escHtml(data.best_pair.player2_name)}</div>
+                    <div class="text-xs text-gray-500">${data.best_pair.win_pct}% · ${data.best_pair.matches} partidos</div>
+                </div>
+            </div>
+        `;
+    }
+
+    rows += playerRow('⚡', 'Más Activo', data.most_active);
+
+    if (!rows) {
+        rows = '<div class="text-center py-4 text-gray-500">Sin datos de comunidad</div>';
+    }
+
+    container.innerHTML = rows;
+}
+
+// ── PR #4: Polish — CSS Animations ──────────────────────────────
+function addAnimationStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .fade-in { opacity: 0; }
+        .section-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .sort-highlight {
+            transition: color 0.2s ease;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        @media (max-width: 640px) {
+            .overflow-x-auto {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 // ── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+    addAnimationStyles();
     loadSummary();
     initRankingLazyLoad();
 
     // PR #3: Load top players (visible by default, hidden until data)
     loadTopPlayers();
 
+    // PR #4: Load new sections with slight delay for progressive loading
+    setTimeout(() => {
+        loadRecords();
+        loadCategoryStats();
+        loadEvolution();
+    }, 100);
+
     // PR #3: Init compare handlers after a short delay to let ranking load
     setTimeout(() => {
         loadPlayersList();
         initCompareHandlers();
         handleCompareUrlParam();
+        loadCommunityHighlights();
     }, 300);
 });

@@ -32,6 +32,22 @@
         </div>
     </section>
 
+    <!-- PR #4: Community Highlights Card -->
+    <div id="community-highlights" class="mt-6 gradient-border rounded-2xl hidden" style="background:#12121A;">
+        <div class="p-4">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4">🏆 Comunidad</h3>
+            <div id="community-content">
+                <!-- filled by JS -->
+                <div class="animate-pulse space-y-3">
+                    <div class="h-4 bg-[#2A2A3A] rounded w-3/4"></div>
+                    <div class="h-4 bg-[#2A2A3A] rounded w-1/2"></div>
+                    <div class="h-4 bg-[#2A2A3A] rounded w-2/3"></div>
+                    <div class="h-4 bg-[#2A2A3A] rounded w-3/5"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- PR #2: Ranking Table -->
     <section id="ranking-container" class="mt-12" aria-label="Ranking de jugadores">
         <h2 class="text-2xl font-bold mb-4 text-white">Ranking</h2>
@@ -182,11 +198,109 @@
         </div>
     </section>
 
-    <!-- PR #4: Future sections placeholder -->
-    <section id="future-sections" class="mt-12" aria-label="Más estadísticas">
-        <div id="pairs-section" class="hidden"></div>
-        <div id="categories-section" class="hidden"></div>
-        <div id="evolution-section" class="hidden"></div>
+    <!-- PR #4: Community Records -->
+    <section id="records-section" class="mt-12 hidden" aria-label="Récords de la comunidad">
+        <h2 class="text-2xl font-bold mb-1 text-white">🏆 Récords de la <span class="text-emerald-400">Comunidad</span></h2>
+        <p class="text-gray-400 text-sm mb-6">Las mejores marcas de tu club</p>
+        <div id="records-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <!-- Skeleton -->
+            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+                <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
+                <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
+                <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
+            </div>
+            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+                <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
+                <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
+                <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
+            </div>
+            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+                <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
+                <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
+                <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
+            </div>
+            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+                <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
+                <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
+                <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PR #4: Category Stats -->
+    <section id="categories-section" class="mt-12 hidden" aria-label="Estadísticas por categoría">
+        <h2 class="text-2xl font-bold mb-1 text-white">Estadísticas por <span class="text-emerald-400">Categoría</span></h2>
+        <p class="text-gray-400 text-sm mb-6">Resumen detallado de cada categoría</p>
+        <div id="categories-content">
+            <!-- Skeleton -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+                    <div class="h-4 bg-[#2A2A3A] rounded w-24 mb-4"></div>
+                    <div class="h-3 bg-[#2A2A3A] rounded w-full mb-2"></div>
+                    <div class="h-3 bg-[#2A2A3A] rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-[#2A2A3A] rounded w-2/3"></div>
+                </div>
+                <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+                    <div class="h-4 bg-[#2A2A3A] rounded w-24 mb-4"></div>
+                    <div class="h-3 bg-[#2A2A3A] rounded w-full mb-2"></div>
+                    <div class="h-3 bg-[#2A2A3A] rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-[#2A2A3A] rounded w-2/3"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PR #4: Evolution -->
+    <section id="evolution-section" class="mt-12 hidden" aria-label="Evolución de puntos">
+        <h2 class="text-2xl font-bold mb-1 text-white">Evolución de <span class="text-emerald-400">Puntos</span></h2>
+        <p class="text-gray-400 text-sm mb-6">Puntuación actual de cada jugador</p>
+        <div id="evolution-content">
+            <!-- Skeleton -->
+            <div class="rounded-xl border border-[#2A2A3A] overflow-x-auto" style="background:#12121A;">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-[#2A2A3A]">
+                            <th class="p-3 text-left text-gray-400 font-semibold">Nombre</th>
+                            <th class="p-3 text-left text-gray-400 font-semibold">Categoría</th>
+                            <th class="p-3 text-right text-gray-400 font-semibold">Puntos</th>
+                            <th class="p-3 text-right text-gray-400 font-semibold">Evolución</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-[#2A2A3A] animate-pulse">
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                        </tr>
+                        <tr class="border-b border-[#2A2A3A] animate-pulse">
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                        </tr>
+                        <tr class="border-b border-[#2A2A3A] animate-pulse">
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                        </tr>
+                        <tr class="border-b border-[#2A2A3A] animate-pulse">
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                        </tr>
+                        <tr class="border-b border-[#2A2A3A] animate-pulse">
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </section>
 </div>
 {% endblock %}

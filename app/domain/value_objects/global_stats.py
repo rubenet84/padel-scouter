@@ -9,13 +9,17 @@ from sqlalchemy.orm import Session
 from app.domain.value_objects.computed_stats import get_computed_stats
 from app.domain.value_objects.rounds import best_round_info
 from app.schemas.stats import (
+    CategoryDetail,
+    CommunityHighlights,
     ComparisonPlayer,
     ComparisonResult,
+    EvolutionEntry,
     GlobalSummary,
     H2HMatch,
     H2HResult,
     PlayerBrief,
     PlayerRankRow,
+    PlayerRecord,
     RankingResponse,
     TopLists,
     TopPlayerEntry,
@@ -977,4 +981,512 @@ def get_h2h(
         games_b=games_b,
         last_match=last_match,
         history=history,
+    )
+
+
+# ── PR #4: Community Records ──────────────────────────────────────
+
+
+def get_records(
+    db: Session,
+    user_id: UUID,
+    filters: dict | None = None,
+) -> list[PlayerRecord]:
+    """
+    Community records — top player for each metric.
+    Reuses the same FEP/computation logic from get_top_players.
+    Returns one PlayerRecord per metric (the top player for that metric).
+    Metrics: points, wins, streak, tournaments_won, finals, semis, sets_won, games_won.
+    """
+    filters = filters or {}
+
+    players = db.execute(
+        text("""
+            SELECT id, name, category
+            FROM players
+            WHERE owner_id = :uid
+            ORDER BY name
+        """),
+        {"uid": user_id},
+    ).fetchall()
+
+    if not players:
+        return []
+
+    category_filter = filters.get("category")
+    if category_filter:
+        players = [p for p in players if p.category == category_filter]
+        if not players:
+            return []
+
+    player_ids = [p.id for p in players]
+    match_filter_keys = {"season", "competition_type", "date_from", "date_to"}
+    match_filters = {k: v for k, v in filters.items() if k in match_filter_keys}
+    where_clause, params = build_filters(user_ids=player_ids, **match_filters)
+
+    match_rows = db.execute(
+        text(f"""
+            SELECT m.id, m.player1_id, m.partner_id, m.resultado, m.ganado,
+                   m.tournament_id, m.ronda, m.played_at,
+                   t.fep_points
+            FROM matches m
+            LEFT JOIN tournaments t ON m.tournament_id = t.id
+            WHERE {where_clause}
+            ORDER BY m.played_at DESC
+        """),
+        params,
+    ).fetchall()
+
+    # Compute FEP points per player
+    pt_groups: dict[UUID, dict[UUID, list]] = defaultdict(lambda: defaultdict(list))
+    for m in match_rows:
+        if not m.tournament_id:
+            continue
+        for pid in player_ids:
+            if m.player1_id == pid or m.partner_id == pid:
+                pt_groups[pid][m.tournament_id].append(m)
+
+    fep_points: dict[UUID, int] = {}
+    for pid in player_ids:
+        total_fep = 0
+        for tid, tms in pt_groups.get(pid, {}).items():
+            fep_total = tms[0].fep_points or 0
+            if fep_total == 0:
+                continue
+            weight = best_round_info(tms)[2]
+            total_fep += int(fep_total * weight)
+        fep_points[pid] = total_fep
+
+    metrics = _compute_player_metrics(match_rows, player_ids, fep_points)
+    players_map = {p.id: p for p in players}
+
+    record_config = [
+        ("points", "Puntos FEP"),
+        ("wins", "Victorias"),
+        ("streak", "Racha"),
+        ("tournaments_won", "Torneos Ganados"),
+        ("finals", "Finales"),
+        ("semis", "Semifinales"),
+        ("sets_won", "Sets Ganados"),
+        ("games_won", "Juegos Ganados"),
+    ]
+
+    records: list[PlayerRecord] = []
+    for metric_key, metric_label in record_config:
+        sorted_pids = sorted(
+            metrics.keys(),
+            key=lambda pid: metrics[pid][metric_key],
+            reverse=True,
+        )
+        for pid in sorted_pids:
+            p = players_map[pid]
+            m = metrics[pid]
+            if metric_key == "win_pct" and m["matches"] < 1:
+                continue
+            records.append(
+                PlayerRecord(
+                    player_id=pid,
+                    name=p.name,
+                    category=p.category,
+                    value=m[metric_key],
+                    metric_key=metric_key,
+                    metric_label=metric_label,
+                )
+            )
+            break  # only top 1 per metric
+
+    return records
+
+
+# ── PR #4: Category Details ───────────────────────────────────────
+
+
+def get_category_details(
+    db: Session,
+    user_id: UUID,
+    category: str | None = None,
+    player_limit: int = 5,
+    filters: dict | None = None,
+) -> list[CategoryDetail]:
+    """
+    Enhanced per-category stats. If category is None, returns ALL categories.
+    For each category: total players, matches, wins, losses, avg win%, avg points.
+    If player_limit > 0, include top N players sorted by FEP points.
+    Uses a single query for all categories to avoid N+1.
+    """
+    filters = filters or {}
+
+    players = db.execute(
+        text("""
+            SELECT id, name, category
+            FROM players
+            WHERE owner_id = :uid
+            ORDER BY name
+        """),
+        {"uid": user_id},
+    ).fetchall()
+
+    if not players:
+        return []
+
+    # Group players by category
+    cat_players: dict[str, list] = defaultdict(list)
+    for p in players:
+        cat_players[p.category].append(p)
+
+    categories_to_process = [category] if category else list(cat_players.keys())
+    categories_to_process = [c for c in categories_to_process if c in cat_players]
+    if not categories_to_process:
+        return []
+
+    all_cat_ids: list[UUID] = []
+    for c in categories_to_process:
+        all_cat_ids.extend(p.id for p in cat_players[c])
+
+    match_filter_keys = {"season", "competition_type", "date_from", "date_to"}
+    match_filters = {k: v for k, v in filters.items() if k in match_filter_keys}
+    where_clause, params = build_filters(user_ids=all_cat_ids, **match_filters)
+
+    match_rows = db.execute(
+        text(f"""
+            SELECT m.id, m.player1_id, m.partner_id, m.resultado, m.ganado,
+                   m.tournament_id, m.ronda, m.played_at,
+                   t.fep_points
+            FROM matches m
+            LEFT JOIN tournaments t ON m.tournament_id = t.id
+            WHERE {where_clause}
+            ORDER BY m.played_at DESC
+        """),
+        params,
+    ).fetchall()
+
+    # Compute FEP for all relevant players
+    pt_groups: dict[UUID, dict[UUID, list]] = defaultdict(lambda: defaultdict(list))
+    for m in match_rows:
+        if not m.tournament_id:
+            continue
+        for pid in all_cat_ids:
+            if m.player1_id == pid or m.partner_id == pid:
+                pt_groups[pid][m.tournament_id].append(m)
+
+    fep_points: dict[UUID, int] = {}
+    for pid in all_cat_ids:
+        total_fep = 0
+        for tid, tms in pt_groups.get(pid, {}).items():
+            fep_total = tms[0].fep_points or 0
+            if fep_total == 0:
+                continue
+            weight = best_round_info(tms)[2]
+            total_fep += int(fep_total * weight)
+        fep_points[pid] = total_fep
+
+    metrics = _compute_player_metrics(match_rows, all_cat_ids, fep_points)
+    players_map = {p.id: p for p in players}
+
+    results: list[CategoryDetail] = []
+    for cat in categories_to_process:
+        cat_ids = [p.id for p in cat_players[cat]]
+
+        cat_total_players = len(cat_ids)
+        cat_matches = sum(metrics[pid]["matches"] for pid in cat_ids if pid in metrics)
+        cat_wins = sum(metrics[pid]["wins"] for pid in cat_ids if pid in metrics)
+        cat_losses = sum(metrics[pid]["losses"] for pid in cat_ids if pid in metrics)
+        cat_points = sum(metrics[pid]["points"] for pid in cat_ids if pid in metrics)
+
+        avg_win_pct = round(cat_wins / cat_matches * 100, 1) if cat_matches > 0 else 0.0
+        avg_points = round(cat_points / cat_total_players, 1) if cat_total_players > 0 else 0.0
+
+        # Leader (most points)
+        leader_pid = max(cat_ids, key=lambda pid: metrics.get(pid, {}).get("points", 0))
+        leader_name = players_map[leader_pid].name
+        leader_points = metrics.get(leader_pid, {}).get("points", 0)
+
+        # Top N players by points
+        top_list: list[TopPlayerEntry] = []
+        if player_limit > 0:
+            sorted_cat = sorted(
+                cat_ids,
+                key=lambda pid: metrics.get(pid, {}).get("points", 0),
+                reverse=True,
+            )
+            for pid in sorted_cat[:player_limit]:
+                p = players_map[pid]
+                top_list.append(
+                    TopPlayerEntry(
+                        player_id=pid,
+                        name=p.name,
+                        category=p.category,
+                        value=metrics.get(pid, {}).get("points", 0),
+                    )
+                )
+
+        results.append(
+            CategoryDetail(
+                category=cat,
+                total_players=cat_total_players,
+                total_matches=cat_matches,
+                total_wins=cat_wins,
+                total_losses=cat_losses,
+                avg_win_pct=avg_win_pct,
+                avg_points=avg_points,
+                leader_name=leader_name,
+                leader_points=leader_points,
+                top_players=top_list,
+            )
+        )
+
+    return results
+
+
+# ── PR #4: Evolution (sparkline-ready) ────────────────────────────
+
+
+def get_evolution(
+    db: Session,
+    user_id: UUID,
+    filters: dict | None = None,
+) -> list[EvolutionEntry]:
+    """
+    Returns current FEP points per player with empty sparkline array.
+    The sparkline is ready for future historical data.
+    """
+    filters = filters or {}
+
+    players = db.execute(
+        text("""
+            SELECT id, name, category
+            FROM players
+            WHERE owner_id = :uid
+            ORDER BY name
+        """),
+        {"uid": user_id},
+    ).fetchall()
+
+    if not players:
+        return []
+
+    category_filter = filters.get("category")
+    if category_filter:
+        players = [p for p in players if p.category == category_filter]
+        if not players:
+            return []
+
+    player_ids = [p.id for p in players]
+    match_filter_keys = {"season", "competition_type", "date_from", "date_to"}
+    match_filters = {k: v for k, v in filters.items() if k in match_filter_keys}
+    where_clause, params = build_filters(user_ids=player_ids, **match_filters)
+
+    match_rows = db.execute(
+        text(f"""
+            SELECT m.id, m.player1_id, m.partner_id, m.resultado, m.ganado,
+                   m.tournament_id, m.ronda, m.played_at,
+                   t.fep_points
+            FROM matches m
+            LEFT JOIN tournaments t ON m.tournament_id = t.id
+            WHERE {where_clause}
+            ORDER BY m.played_at DESC
+        """),
+        params,
+    ).fetchall()
+
+    # Compute FEP points per player
+    pt_groups: dict[UUID, dict[UUID, list]] = defaultdict(lambda: defaultdict(list))
+    for m in match_rows:
+        if not m.tournament_id:
+            continue
+        for pid in player_ids:
+            if m.player1_id == pid or m.partner_id == pid:
+                pt_groups[pid][m.tournament_id].append(m)
+
+    fep_points: dict[UUID, int] = {}
+    for pid in player_ids:
+        total_fep = 0
+        for tid, tms in pt_groups.get(pid, {}).items():
+            fep_total = tms[0].fep_points or 0
+            if fep_total == 0:
+                continue
+            weight = best_round_info(tms)[2]
+            total_fep += int(fep_total * weight)
+        fep_points[pid] = total_fep
+
+    return [
+        EvolutionEntry(
+            player_id=p.id,
+            name=p.name,
+            category=p.category,
+            current_points=fep_points.get(p.id, 0),
+            sparkline=[],
+        )
+        for p in players
+    ]
+
+
+# ── PR #4: Community Highlights ───────────────────────────────────
+
+
+def get_community_highlights(
+    db: Session,
+    user_id: UUID,
+    filters: dict | None = None,
+) -> CommunityHighlights:
+    """
+    Community dashboard highlights:
+    - Most points: player with highest FEP points
+    - Best form: player with highest win % (min 1 match)
+    - Best pair: pair with highest win % (min 2 matches together)
+    - Most active: player with most matches played
+    """
+    filters = filters or {}
+
+    players = db.execute(
+        text("""
+            SELECT id, name, category
+            FROM players
+            WHERE owner_id = :uid
+            ORDER BY name
+        """),
+        {"uid": user_id},
+    ).fetchall()
+
+    if not players:
+        return CommunityHighlights()
+
+    player_ids = [p.id for p in players]
+    match_filter_keys = {"season", "competition_type", "date_from", "date_to"}
+    match_filters = {k: v for k, v in filters.items() if k in match_filter_keys}
+    where_clause, params = build_filters(user_ids=player_ids, **match_filters)
+
+    match_rows = db.execute(
+        text(f"""
+            SELECT m.id, m.player1_id, m.partner_id, m.player2_id, m.partner_nombre,
+                   m.resultado, m.ganado, m.tournament_id, m.ronda, m.played_at,
+                   t.fep_points
+            FROM matches m
+            LEFT JOIN tournaments t ON m.tournament_id = t.id
+            WHERE {where_clause}
+            ORDER BY m.played_at DESC
+        """),
+        params,
+    ).fetchall()
+
+    # Compute FEP points
+    pt_groups: dict[UUID, dict[UUID, list]] = defaultdict(lambda: defaultdict(list))
+    for m in match_rows:
+        if not m.tournament_id:
+            continue
+        for pid in player_ids:
+            if m.player1_id == pid or m.partner_id == pid:
+                pt_groups[pid][m.tournament_id].append(m)
+
+    fep_points: dict[UUID, int] = {}
+    for pid in player_ids:
+        total_fep = 0
+        for tid, tms in pt_groups.get(pid, {}).items():
+            fep_total = tms[0].fep_points or 0
+            if fep_total == 0:
+                continue
+            weight = best_round_info(tms)[2]
+            total_fep += int(fep_total * weight)
+        fep_points[pid] = total_fep
+
+    metrics = _compute_player_metrics(match_rows, player_ids, fep_points)
+    players_map = {p.id: p for p in players}
+
+    # ── Most points ──────────────────────────────────────────
+    most_points_pid: UUID | None = None
+    most_points_val = -1
+    for pid in player_ids:
+        pts = fep_points.get(pid, 0)
+        if pts > most_points_val:
+            most_points_val = pts
+            most_points_pid = pid
+
+    most_points: PlayerBrief | None = None
+    if most_points_pid and most_points_val > 0:
+        p = players_map[most_points_pid]
+        most_points = PlayerBrief(
+            id=most_points_pid,
+            name=p.name,
+            category=p.category,
+            points=most_points_val,
+            win_pct=metrics.get(most_points_pid, {}).get("win_pct", 0.0),
+        )
+
+    # ── Best form (highest win %, min 1 match) ───────────────
+    best_form_pid: UUID | None = None
+    best_form_val = -1.0
+    for pid in player_ids:
+        m = metrics.get(pid, {})
+        if m.get("matches", 0) >= 1 and m.get("win_pct", 0) > best_form_val:
+            best_form_val = m["win_pct"]
+            best_form_pid = pid
+
+    best_form: PlayerBrief | None = None
+    if best_form_pid:
+        p = players_map[best_form_pid]
+        best_form = PlayerBrief(
+            id=best_form_pid,
+            name=p.name,
+            category=p.category,
+            points=fep_points.get(best_form_pid, 0),
+            win_pct=best_form_val,
+        )
+
+    # ── Best pair (highest win %, min 2 matches together) ────
+    pair_stats: dict[frozenset, dict] = {}
+    for m in match_rows:
+        p1 = m.player1_id
+        partner = m.partner_id
+        if not partner:
+            continue
+        if p1 not in players_map or partner not in players_map:
+            continue
+        pair_key = frozenset([p1, partner])
+        if pair_key not in pair_stats:
+            pair_stats[pair_key] = {"wins": 0, "total": 0, "members": [p1, partner]}
+        pair_stats[pair_key]["total"] += 1
+        if m.ganado:
+            pair_stats[pair_key]["wins"] += 1
+
+    best_pair: dict | None = None
+    best_pair_win_pct = -1.0
+    for key, st in pair_stats.items():
+        if st["total"] < 2:
+            continue
+        wp = st["wins"] / st["total"] * 100
+        if wp > best_pair_win_pct:
+            best_pair_win_pct = wp
+            members = list(key)
+            best_pair = {
+                "player1_name": players_map[members[0]].name,
+                "player2_name": players_map[members[1]].name,
+                "win_pct": round(wp, 1),
+                "matches": st["total"],
+            }
+
+    # ── Most active (most matches) ───────────────────────────
+    most_active_pid: UUID | None = None
+    most_active_val = -1
+    for pid in player_ids:
+        mt = metrics.get(pid, {}).get("matches", 0)
+        if mt > most_active_val:
+            most_active_val = mt
+            most_active_pid = pid
+
+    most_active: PlayerBrief | None = None
+    if most_active_pid and most_active_val > 0:
+        p = players_map[most_active_pid]
+        most_active = PlayerBrief(
+            id=most_active_pid,
+            name=p.name,
+            category=p.category,
+            points=fep_points.get(most_active_pid, 0),
+            win_pct=metrics.get(most_active_pid, {}).get("win_pct", 0.0),
+        )
+
+    return CommunityHighlights(
+        most_points=most_points,
+        best_form=best_form,
+        best_pair=best_pair,
+        most_active=most_active,
     )
