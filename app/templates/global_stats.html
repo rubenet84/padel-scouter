@@ -35,7 +35,101 @@
     <!-- PR #2: Ranking Table -->
     <section id="ranking-container" class="mt-12" aria-label="Ranking de jugadores">
         <h2 class="text-2xl font-bold mb-4 text-white">Ranking</h2>
-        <p class="text-gray-500">Próximamente</p>
+
+        <!-- Filter Bar -->
+        <div id="ranking-filters" class="flex flex-wrap gap-3 mb-6 items-end">
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-category">Categoría</label>
+                <select id="filter-category" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                    <option value="">Todas</option>
+                    <option value="INICIACION">Iniciación</option>
+                    <option value="QUINTA">5ª Categoría</option>
+                    <option value="CUARTA">4ª Categoría</option>
+                    <option value="TERCERA">3ª Categoría</option>
+                    <option value="SEGUNDA">2ª Categoría</option>
+                    <option value="PRIMERA">1ª Categoría</option>
+                    <option value="PRO">Profesional</option>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-season">Temporada</label>
+                <select id="filter-season" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                    <option value="">Todas</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-type">Tipo</label>
+                <select id="filter-type" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                    <option value="">Todos</option>
+                    <option value="torneo">Torneo</option>
+                    <option value="amistoso">Amistoso</option>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-date-from">Desde</label>
+                <input type="date" id="filter-date-from"
+                       class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-date-to">Hasta</label>
+                <input type="date" id="filter-date-to"
+                       class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+            </div>
+            <button id="filter-apply"
+                    class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors">
+                Aplicar
+            </button>
+        </div>
+
+        <!-- Ranking Table -->
+        <div id="ranking-table-wrapper" class="overflow-x-auto rounded-xl border border-[#2A2A3A]" style="background:#12121A;">
+            <table class="w-full text-sm" id="ranking-table">
+                <thead>
+                    <tr class="border-b border-[#2A2A3A] text-gray-400 text-xs uppercase tracking-wider">
+                        <th class="p-3 text-center w-12">#</th>
+                        <th class="p-3 text-left cursor-pointer hover:text-white transition-colors sortable" data-sort="name">
+                            Jugador <span class="sort-icon"></span>
+                        </th>
+                        <th class="p-3 text-left">Categoría</th>
+                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="points">
+                            Pts <span class="sort-icon"></span>
+                        </th>
+                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="wins">
+                            G <span class="sort-icon"></span>
+                        </th>
+                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="win_pct">
+                            %G <span class="sort-icon"></span>
+                        </th>
+                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="matches">
+                            PJ <span class="sort-icon"></span>
+                        </th>
+                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="sets_won">
+                            Sets <span class="sort-icon"></span>
+                        </th>
+                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="games_won">
+                            Juegos <span class="sort-icon"></span>
+                        </th>
+                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="streak">
+                            Rachas <span class="sort-icon"></span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="ranking-body">
+                    <tr><td colspan="10" class="p-6 text-center text-gray-500">Cargando ranking...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div id="ranking-pagination" class="flex justify-center items-center gap-2 mt-4 hidden">
+        </div>
     </section>
 
     <!-- PR #3+: Top, Comparador, H2H -->

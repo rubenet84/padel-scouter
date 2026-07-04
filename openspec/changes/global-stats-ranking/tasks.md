@@ -40,13 +40,13 @@ Chain strategy: feature-branch-chain
 
 ## Phase 2: Rankings + Global Filters (PR #2)
 
-- [ ] 2.1 Add `get_rankings(db, user_id, sort_by, order, filters)` to `global_stats.py`
-- [ ] 2.2 Add `GET /ranking` + `GET /ranking/{category}` to `stats.py`
-- [ ] 2.3 Add filter bar (season, comp_type, category, date range) to HTML
-- [ ] 2.4 Wire filter state to JS — all functions accept filter params
-- [ ] 2.5 Add ranking table, sort handlers, category filter to JS
-- [ ] 2.6 Add ranking section + category selector to HTML
-- [ ] 2.7 VERIFY: ranking loads, sort toggles, global filters affect ranking
+- [x] 2.1 Add `get_rankings(db, user_id, sort_by, order, filters)` to `global_stats.py`
+- [x] 2.2 Add `GET /ranking` + `GET /ranking/{category}` to `stats.py`
+- [x] 2.3 Add filter bar (season, comp_type, category, date range) to HTML
+- [x] 2.4 Wire filter state to JS — all functions accept filter params
+- [x] 2.5 Add ranking table, sort handlers, category filter to JS
+- [x] 2.6 Add ranking section + category selector to HTML
+- [x] 2.7 VERIFY: ranking loads, sort toggles, global filters affect ranking
 
 ## Phase 3: Top Players + Comparison + H2H (PR #3)
 
