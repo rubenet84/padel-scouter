@@ -48,17 +48,17 @@ Chain strategy: feature-branch-chain
 - [x] 2.6 Add ranking section + category selector to HTML
 - [x] 2.7 VERIFY: ranking loads, sort toggles, global filters affect ranking
 
-## Phase 3: Top Players + Comparison + H2H (PR #3)
+## Phase 3: Top Players + Comparison + H2H (PR #3) — Análisis Competitivo
 
-- [ ] 3.1 Add `get_top_players(db, user_id, metric, limit, filters)` to `global_stats.py`
-- [ ] 3.2 Add `GET /top` endpoint to `stats.py`
-- [ ] 3.3 Add 10 top-list cards render to JS
-- [ ] 3.4 Add top players grid section to HTML
-- [ ] 3.5 Add `get_comparison()` + `get_h2h()` to `global_stats.py`
-- [ ] 3.6 Add `GET /compare/{p1}/{p2}` + `GET /h2h/{p1}/{p2}` to `stats.py`
-- [ ] 3.7 Add player selector + comparison/H2H render to JS
-- [ ] 3.8 Add comparison + H2H sections to HTML
-- [ ] 3.9 VERIFY: top lists, 2-player comparison, match history — all respect filters
+- [x] 3.1 Add `get_top_players(db, user_id, metric, limit, filters)` to `global_stats.py`
+- [x] 3.2 Add `GET /top` endpoint to `stats.py`
+- [x] 3.3 Add 10 top-list cards render to JS
+- [x] 3.4 Add top players grid section to HTML
+- [x] 3.5 Add `get_comparison()` + `get_h2h()` to `global_stats.py`
+- [x] 3.6 Add `GET /compare/{p1}/{p2}` + `GET /h2h/{p1}/{p2}` to `stats.py`
+- [x] 3.7 Add player selector + comparison/H2H render to JS
+- [x] 3.8 Add comparison + H2H sections to HTML
+- [x] 3.9 VERIFY: top lists, 2-player comparison, match history — all respect filters
 
 ## Phase 4: Pairs + Category Stats + Evolution + Polish (PR #4)
 

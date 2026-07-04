@@ -383,6 +383,8 @@ function initFilterHandlers() {
     applyBtn.addEventListener('click', () => {
         rankingState.page = 1;
         loadRanking();
+        // Also reload top players with new filters
+        loadTopPlayers();
     });
 
     // Also apply on Enter key in date inputs
@@ -393,6 +395,7 @@ function initFilterHandlers() {
                 if (e.key === 'Enter') {
                     rankingState.page = 1;
                     loadRanking();
+                    loadTopPlayers();
                 }
             });
         }
@@ -432,8 +435,520 @@ function initRankingLazyLoad() {
     observer.observe(section);
 }
 
+// ── Top Players ──────────────────────────────────────────────────
+const TOP_METRICS = [
+    { key: 'top_points',            label: 'Puntos FEP',        icon: '🏆', color: '#FFD700' },
+    { key: 'top_wins',             label: 'Victorias',         icon: '✅', color: '#10b981' },
+    { key: 'top_win_pct',          label: '% Victorias',       icon: '🎯', color: '#00B4D8' },
+    { key: 'top_matches',          label: 'Partidos Jugados',  icon: '⚔️', color: '#a855f7' },
+    { key: 'top_tournaments_won',  label: 'Torneos Ganados',   icon: '🏅', color: '#FF6B00' },
+    { key: 'top_finals',           label: 'Finales',           icon: '🏁', color: '#ef4444' },
+    { key: 'top_semis',            label: 'Semifinales',        icon: '🔶', color: '#f59e0b' },
+    { key: 'top_sets_won',         label: 'Sets Ganados',      icon: '📊', color: '#6366f1' },
+    { key: 'top_games_won',        label: 'Juegos Ganados',    icon: '🎾', color: '#ec4899' },
+    { key: 'top_streak',           label: 'Racha Actual',      icon: '🔥', color: '#f97316' },
+];
+
+const TOP_POSITIONS = ['🥇', '🥈', '🥉', '4.', '5.'];
+
+async function loadTopPlayers() {
+    const section = document.getElementById('top-section');
+    if (!section) return;
+
+    if (!TOKEN) {
+        section.classList.add('hidden');
+        return;
+    }
+
+    const params = buildFilterParams();
+    const url = `/api/v1/stats/top?${params.toString()}`;
+
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!json.success) return;
+        renderTopPlayers(json.data);
+    } catch {
+        // silently fail
+    }
+}
+
+function renderTopPlayers(data) {
+    const section = document.getElementById('top-section');
+    const grid = document.getElementById('top-grid');
+    if (!grid) return;
+    if (section) section.classList.remove('hidden');
+
+    grid.innerHTML = TOP_METRICS.map(metric => {
+        const entries = data[metric.key] || [];
+        return `
+            <div class="rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+                <div class="flex items-center gap-2 mb-3">
+                    <span aria-hidden="true">${metric.icon}</span>
+                    <span class="text-sm font-bold uppercase tracking-widest" style="color:${metric.color};">${escHtml(metric.label)}</span>
+                </div>
+                <div class="space-y-1.5">
+                    ${entries.length === 0
+                        ? '<div class="text-gray-500 text-sm py-2">Sin datos</div>'
+                        : entries.map((e, i) => `
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="text-xs font-mono shrink-0" style="color:${metric.color};">${TOP_POSITIONS[i] || (i + 1) + '.'}</span>
+                                    <a href="/player/${e.player_id}" class="text-white hover:text-emerald-400 transition-colors truncate">${escHtml(e.name)}</a>
+                                    <span class="text-xs text-gray-500 shrink-0">${escHtml(e.category)}</span>
+                                </div>
+                                <span class="text-white font-semibold font-mono ml-2 shrink-0">${e.value}</span>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ── Helper: build filter params from current state ──────────────
+function buildFilterParams() {
+    const f = getFilterValues();
+    const p = new URLSearchParams();
+    if (f.category) p.set('category', f.category);
+    if (f.season) p.set('season', f.season);
+    if (f.competition_type) p.set('competition_type', f.competition_type);
+    if (f.date_from) p.set('date_from', f.date_from);
+    if (f.date_to) p.set('date_to', f.date_to);
+    return p;
+}
+
+// ── Comparador ──────────────────────────────────────────────────
+let playersList = [];
+
+async function loadPlayersList() {
+    if (!TOKEN) return;
+    try {
+        const res = await fetch('/api/v1/stats/ranking?page_size=200', {
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+        playersList = json.data.players || [];
+        populateCompareSelectors();
+    } catch {
+        // silent
+    }
+}
+
+function populateCompareSelectors() {
+    const s1 = document.getElementById('compare-p1');
+    const s2 = document.getElementById('compare-p2');
+    if (!s1 || !s2) return;
+
+    const opts = playersList.map(p =>
+        `<option value="${p.id}">${escHtml(p.name)} (${escHtml(p.category)})</option>`
+    ).join('');
+
+    s1.innerHTML = `<option value="">Seleccionar jugador...</option>${opts}`;
+    s2.innerHTML = `<option value="">Seleccionar jugador...</option>${opts}`;
+}
+
+async function loadComparison(id1, id2) {
+    const panel = document.getElementById('compare-panel');
+    if (!panel) return;
+
+    panel.innerHTML = '<div class="text-center text-gray-500 py-8 animate-pulse">Cargando comparación...</div>';
+    panel.classList.remove('hidden');
+
+    const params = buildFilterParams();
+    const url = `/api/v1/stats/compare/${id1}/${id2}?${params.toString()}`;
+
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        if (!res.ok) {
+            panel.innerHTML = '<div class="text-center text-red-400 py-8">Error al cargar la comparación</div>';
+            return;
+        }
+        const json = await res.json();
+        if (!json.success) {
+            panel.innerHTML = `<div class="text-center text-red-400 py-8">${escHtml(json.error || 'Error desconocido')}</div>`;
+            return;
+        }
+        renderComparison(json.data);
+    } catch {
+        panel.innerHTML = '<div class="text-center text-red-400 py-8">Error de conexión</div>';
+    }
+}
+
+function renderComparison(data) {
+    const panel = document.getElementById('compare-panel');
+    if (!panel) return;
+
+    const a = data.player_a;
+    const b = data.player_b;
+
+    // Player info rows for side-by-side display
+    const statRows = [
+        { label: 'Victorias',        keyA: a.wins,       keyB: b.wins },
+        { label: 'Derrotas',         keyA: a.losses,     keyB: b.losses },
+        { label: '% Victorias',       keyA: a.win_pct,    keyB: b.win_pct, suffix: '%' },
+        { label: 'Partidos',         keyA: a.matches,    keyB: b.matches },
+        { label: 'Sets Ganados',     keyA: a.sets_won,   keyB: b.sets_won },
+        { label: 'Juegos Ganados',   keyA: a.games_won,  keyB: b.games_won },
+        { label: 'Puntos FEP',       keyA: a.points,     keyB: b.points },
+        { label: 'Racha Actual',     keyA: a.streak,     keyB: b.streak },
+    ];
+
+    function barPct(valA, valB) {
+        const max = Math.max(Math.abs(valA), Math.abs(valB));
+        if (max === 0) return 0;
+        return Math.round((Math.abs(valA) / max) * 100);
+    }
+
+    function formatStreak(s) {
+        if (s === 0) return '—';
+        return s > 0 ? `W${s}` : `L${Math.abs(s)}`;
+    }
+
+    function avatarHtml(player) {
+        if (player.avatar) {
+            return `<img src="${escHtml(player.avatar)}" alt="" class="w-16 h-16 rounded-full object-cover border-2 border-[#2A2A3A]">`;
+        }
+        const initials = (player.name || '??').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        return `<div class="w-16 h-16 rounded-full bg-[#2A2A3A] flex items-center justify-center text-lg font-bold text-emerald-400 border-2 border-[#3A3A4A]">${initials}</div>`;
+    }
+
+    const section = document.getElementById('compare-section');
+    if (section) section.classList.remove('hidden');
+
+    panel.innerHTML = `
+        <!-- Same category notice -->
+        ${!data.same_category ? `
+            <div class="mb-4 p-3 rounded-lg bg-yellow-900/20 border border-yellow-700/40 text-yellow-300 text-sm">
+                ⚠️ ${escHtml(data.notice || 'Distinta categoría — los puntos no son directamente comparables')}
+            </div>
+        ` : data.notice ? `
+            <div class="mb-4 p-3 rounded-lg bg-yellow-900/20 border border-yellow-700/40 text-yellow-300 text-sm">
+                ⚠️ ${escHtml(data.notice)}
+            </div>
+        ` : ''}
+
+        <div class="rounded-xl border border-[#2A2A3A] overflow-hidden" style="background:#12121A;">
+            <!-- Header: Player names + VS -->
+            <div class="grid grid-cols-3 border-b border-[#2A2A3A]">
+                <div class="p-4 text-center">
+                    ${avatarHtml(a)}
+                    <div class="mt-2 font-bold text-white text-lg">${escHtml(a.name)}</div>
+                    <div class="text-xs text-gray-400">${escHtml(a.category)}</div>
+                    ${a.position !== null ? `<div class="text-xs text-emerald-400 mt-1">#${a.position} en ranking</div>` : ''}
+                    <div class="text-lg font-black mt-1" style="color:#FFD700;">🏆 ${a.points} pts</div>
+                </div>
+                <div class="p-4 flex items-center justify-center">
+                    <div class="text-3xl font-black text-gray-500">VS</div>
+                </div>
+                <div class="p-4 text-center">
+                    ${avatarHtml(b)}
+                    <div class="mt-2 font-bold text-white text-lg">${escHtml(b.name)}</div>
+                    <div class="text-xs text-gray-400">${escHtml(b.category)}</div>
+                    ${b.position !== null ? `<div class="text-xs text-emerald-400 mt-1">#${b.position} en ranking</div>` : ''}
+                    <div class="text-lg font-black mt-1" style="color:#FFD700;">🏆 ${b.points} pts</div>
+                </div>
+            </div>
+
+            <!-- Point difference (same category) -->
+            ${data.same_category && data.point_difference !== null ? `
+                <div class="px-4 py-2 text-center text-sm text-gray-400 border-b border-[#2A2A3A]">
+                    Diferencia de puntos: <span class="text-white font-bold">${data.point_difference} pts</span>
+                </div>
+            ` : ''}
+
+            <!-- Stats comparison rows -->
+            <div class="p-4 space-y-4">
+                ${statRows.map(row => {
+                    const valA = row.keyA;
+                    const valB = row.keyB;
+                    const max = Math.max(Math.abs(valA), Math.abs(valB));
+                    const pctA = barPct(valA, valB);
+                    const pctB = barPct(valB, valA);
+                    const suffix = row.suffix || '';
+
+                    function displayVal(v) {
+                        if (row.label === 'Racha Actual') return formatStreak(v);
+                        return v + suffix;
+                    }
+
+                    const barColorA = valA >= valB ? 'bg-emerald-500' : 'bg-gray-600';
+                    const barColorB = valB >= valA ? 'bg-emerald-500' : 'bg-gray-600';
+
+                    return `
+                        <div>
+                            <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                <span>${escHtml(row.label)}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-white font-mono w-12 text-right shrink-0">${displayVal(valA)}</span>
+                                <div class="flex-1">
+                                    <div class="h-2 rounded-full bg-[#2A2A3A] overflow-hidden">
+                                        <div class="h-full rounded-full ${barColorA} transition-all" style="width:${pctA}%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="h-2 rounded-full bg-[#2A2A3A] overflow-hidden">
+                                        <div class="h-full rounded-full ${barColorB} transition-all" style="width:${pctB}%"></div>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-white font-mono w-12 shrink-0">${displayVal(valB)}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+}
+
+// ── H2H ──────────────────────────────────────────────────────────
+async function loadH2H(id1, id2) {
+    const container = document.getElementById('h2h-content');
+    if (!container) return;
+
+    container.innerHTML = '<div class="text-center text-gray-500 py-8 animate-pulse">Cargando historial...</div>';
+
+    const params = buildFilterParams();
+    const url = `/api/v1/stats/h2h/${id1}/${id2}?${params.toString()}`;
+
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        if (!res.ok) {
+            container.innerHTML = '<div class="text-center text-red-400 py-8">Error al cargar el historial</div>';
+            return;
+        }
+        const json = await res.json();
+        if (!json.success) {
+            container.innerHTML = `<div class="text-center text-red-400 py-8">${escHtml(json.error || 'Error desconocido')}</div>`;
+            return;
+        }
+        renderH2H(json.data);
+    } catch {
+        container.innerHTML = '<div class="text-center text-red-400 py-8">Error de conexión</div>';
+    }
+}
+
+function renderH2H(data) {
+    const container = document.getElementById('h2h-content');
+    if (!container) return;
+
+    const section = document.getElementById('h2h-section');
+    if (section) section.classList.remove('hidden');
+
+    // Get player names from the selectors
+    const s1 = document.getElementById('compare-p1');
+    const s2 = document.getElementById('compare-p2');
+    const nameA = s1?.selectedOptions?.[0]?.text?.split(' (')[0] || 'Jugador A';
+    const nameB = s2?.selectedOptions?.[0]?.text?.split(' (')[0] || 'Jugador B';
+    const escA = escHtml(nameA);
+    const escB = escHtml(nameB);
+
+    if (data.total_matches === 0) {
+        container.innerHTML = `
+            <div class="rounded-xl border border-[#2A2A3A] p-8 text-center" style="background:#12121A;">
+                <div class="text-4xl mb-3">🤷</div>
+                <h3 class="text-lg font-bold text-white mb-2">Historial entre ${escA} y ${escB}</h3>
+                <p class="text-gray-400">Estos jugadores todavía no se han enfrentado</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <h3 class="text-xl font-bold text-white mb-4">Historial entre Jugadores</h3>
+
+        <!-- Summary cards -->
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="rounded-xl border border-[#2A2A3A] p-4 text-center" style="background:#12121A;">
+                <div class="text-2xl font-black text-white">${data.total_matches}</div>
+                <div class="text-xs text-gray-400 mt-1">Enfrentamientos</div>
+            </div>
+            <div class="rounded-xl border border-[#2A2A3A] p-4 text-center" style="background:#12121A;">
+                <div class="text-2xl font-black text-emerald-400">${data.wins_a}</div>
+                <div class="text-xs text-gray-400 mt-1">Victorias ${escA}</div>
+            </div>
+            <div class="rounded-xl border border-[#2A2A3A] p-4 text-center" style="background:#12121A;">
+                <div class="text-2xl font-black text-emerald-400">${data.wins_b}</div>
+                <div class="text-xs text-gray-400 mt-1">Victorias ${escB}</div>
+            </div>
+        </div>
+
+        <!-- Sets/Games summary -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="rounded-xl border border-[#2A2A3A] p-3" style="background:#12121A;">
+                <div class="text-xs text-gray-400 uppercase tracking-wider">Sets</div>
+                <div class="text-white font-mono text-sm mt-1">${escA}: ${data.sets_a} · ${escB}: ${data.sets_b}</div>
+            </div>
+            <div class="rounded-xl border border-[#2A2A3A] p-3" style="background:#12121A;">
+                <div class="text-xs text-gray-400 uppercase tracking-wider">Juegos</div>
+                <div class="text-white font-mono text-sm mt-1">${escA}: ${data.games_a} · ${escB}: ${data.games_b}</div>
+            </div>
+        </div>
+
+        <!-- Last match -->
+        ${data.last_match ? `
+            <div class="mb-4 p-3 rounded-lg bg-emerald-900/10 border border-emerald-700/30 text-sm">
+                <span class="text-gray-400">Último enfrentamiento:</span>
+                <span class="text-white font-medium">${escHtml(data.last_match.date || '')}</span>
+                <span class="text-gray-400 mx-2">·</span>
+                <span class="text-emerald-400 font-bold">${escHtml(data.last_match.winner_name || '')}</span>
+                <span class="text-gray-400"> ganó </span>
+                <span class="text-white font-mono">${escHtml(data.last_match.resultado || '')}</span>
+            </div>
+        ` : ''}
+
+        <!-- Match history -->
+        <h4 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3">Historial de Enfrentamientos</h4>
+        <div class="space-y-2">
+            ${data.history.map(m => {
+                const isWinA = m.winner_id === data.player_a_id;
+                const isWinB = m.winner_id === data.player_b_id;
+                const resultClass = isWinA ? 'text-emerald-400' : (isWinB ? 'text-red-400' : 'text-gray-400');
+                return `
+                    <div class="flex items-center justify-between rounded-lg border border-[#2A2A3A] p-3 text-sm" style="background:#12121A;">
+                        <div class="flex items-center gap-3">
+                            <span class="text-gray-500 text-xs font-mono">${escHtml(m.date || '')}</span>
+                            <span class="text-white font-mono">${escHtml(m.resultado || '')}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-400">Ganó</span>
+                            <span class="font-semibold ${resultClass}">${escHtml(m.winner_name || '—')}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+// ── Compare Selector Handlers ───────────────────────────────────
+function initCompareHandlers() {
+    const btn = document.getElementById('compare-btn');
+    const clearBtn = document.getElementById('compare-clear');
+    const s1 = document.getElementById('compare-p1');
+    const s2 = document.getElementById('compare-p2');
+
+    if (!btn || !s1 || !s2) return;
+
+    btn.addEventListener('click', () => {
+        const id1 = s1.value;
+        const id2 = s2.value;
+
+        if (!id1 || !id2) {
+            // Show tooltip-like feedback
+            btn.textContent = 'Selecciona ambos jugadores';
+            btn.style.opacity = '0.7';
+            setTimeout(() => {
+                btn.textContent = 'Comparar';
+                btn.style.opacity = '1';
+            }, 2000);
+            return;
+        }
+
+        if (id1 === id2) {
+            btn.textContent = 'Jugadores distintos';
+            btn.style.opacity = '0.7';
+            setTimeout(() => {
+                btn.textContent = 'Comparar';
+                btn.style.opacity = '1';
+            }, 2000);
+            return;
+        }
+
+        // Update URL
+        const p = new URLSearchParams(window.location.search);
+        p.set('compare', `${id1},${id2}`);
+        history.replaceState(null, '', window.location.pathname + '?' + p.toString());
+
+        loadComparison(id1, id2);
+        loadH2H(id1, id2);
+    });
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            s1.value = '';
+            s2.value = '';
+            document.getElementById('compare-panel')?.classList.add('hidden');
+            document.getElementById('compare-section')?.classList.add('hidden');
+            document.getElementById('h2h-section')?.classList.add('hidden');
+
+            // Remove compare from URL
+            const p = new URLSearchParams(window.location.search);
+            p.delete('compare');
+            const qs = p.toString();
+            history.replaceState(null, '', qs ? window.location.pathname + '?' + qs : window.location.pathname);
+        });
+    }
+}
+
+// ── Handle ?compare=id1,id2 URL param ─────────────────────────
+function handleCompareUrlParam() {
+    const p = new URLSearchParams(window.location.search);
+    const compare = p.get('compare');
+    if (!compare) return;
+
+    const parts = compare.split(',');
+    if (parts.length !== 2) return;
+
+    const [id1, id2] = parts;
+    if (!id1 || !id2) return;
+
+    // Wait for player list to populate, then select and compare
+    const waitForPlayers = setInterval(() => {
+        const s1 = document.getElementById('compare-p1');
+        const s2 = document.getElementById('compare-p2');
+        if (!s1 || !s2) return;
+        if (s1.options.length > 1 && s2.options.length > 1) {
+            clearInterval(waitForPlayers);
+
+            // Check if these IDs exist in the options
+            const opt1 = s1.querySelector(`option[value="${id1}"]`);
+            const opt2 = s2.querySelector(`option[value="${id2}"]`);
+            if (!opt1 || !opt2) {
+                // If not in current page, try to load anyway
+                s1.value = id1;
+                s2.value = id2;
+            } else {
+                s1.value = id1;
+                s2.value = id2;
+            }
+
+            // Scroll to compare section
+            const section = document.getElementById('compare-section');
+            if (section) {
+                section.classList.remove('hidden');
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            loadComparison(id1, id2);
+            loadH2H(id1, id2);
+        }
+    }, 200);
+}
+
 // ── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     loadSummary();
     initRankingLazyLoad();
+
+    // PR #3: Load top players (visible by default, hidden until data)
+    loadTopPlayers();
+
+    // PR #3: Init compare handlers after a short delay to let ranking load
+    setTimeout(() => {
+        loadPlayersList();
+        initCompareHandlers();
+        handleCompareUrlParam();
+    }, 300);
 });

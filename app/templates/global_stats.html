@@ -132,19 +132,60 @@
         </div>
     </section>
 
-    <!-- PR #3+: Top, Comparador, H2H -->
+    <!-- PR #3: Top Jugadores -->
+    <section id="top-section" class="mt-12 hidden" aria-label="Top jugadores">
+        <h2 class="text-2xl font-bold mb-1 text-white">Top <span class="text-emerald-400">Jugadores</span></h2>
+        <p class="text-gray-400 text-sm mb-6">Los mejores en cada categoría estadística</p>
+        <div id="top-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- filled by JS -->
+        </div>
+    </section>
+
+    <!-- PR #3: Comparador -->
+    <section id="compare-section" class="mt-12 hidden" aria-label="Comparador de jugadores">
+        <h2 class="text-2xl font-bold mb-1 text-white">Comparador <span class="text-emerald-400">de Jugadores</span></h2>
+        <p class="text-gray-400 text-sm mb-6">Compara estadísticas de dos jugadores cara a cara</p>
+
+        <!-- Player Selector -->
+        <div id="compare-selector" class="flex flex-wrap items-end gap-3 mb-6 p-4 rounded-xl border border-[#2A2A3A]" style="background:#12121A;">
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-gray-400 uppercase tracking-wider" for="compare-p1">Jugador A</label>
+                <select id="compare-p1" class="bg-[#0D0D15] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm min-w-[180px] focus:outline-none focus:border-emerald-500">
+                    <option value="">Seleccionar jugador...</option>
+                </select>
+            </div>
+            <div class="text-xl text-gray-500 font-bold pb-2">VS</div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-gray-400 uppercase tracking-wider" for="compare-p2">Jugador B</label>
+                <select id="compare-p2" class="bg-[#0D0D15] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm min-w-[180px] focus:outline-none focus:border-emerald-500">
+                    <option value="">Seleccionar jugador...</option>
+                </select>
+            </div>
+            <button id="compare-btn"
+                    class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors">
+                Comparar
+            </button>
+            <button id="compare-clear"
+                    class="text-gray-400 hover:text-white px-3 py-2 rounded-lg text-sm transition-colors">
+                Limpiar
+            </button>
+        </div>
+
+        <!-- Comparison Panel (filled by JS) -->
+        <div id="compare-panel" class="hidden"></div>
+    </section>
+
+    <!-- PR #3: Historial H2H -->
+    <section id="h2h-section" class="mt-12 hidden" aria-label="Historial entre jugadores">
+        <div id="h2h-content">
+            <!-- filled by JS -->
+        </div>
+    </section>
+
+    <!-- PR #4: Future sections placeholder -->
     <section id="future-sections" class="mt-12" aria-label="Más estadísticas">
-        <!-- Top Jugadores -->
-        <div id="top-section" class="hidden"></div>
-        <!-- Comparador -->
-        <div id="compare-section" class="hidden"></div>
-        <!-- Historial H2H -->
-        <div id="h2h-section" class="hidden"></div>
-        <!-- Parejas -->
         <div id="pairs-section" class="hidden"></div>
-        <!-- Categorías -->
         <div id="categories-section" class="hidden"></div>
-        <!-- Evolución -->
         <div id="evolution-section" class="hidden"></div>
     </section>
 </div>
