@@ -181,17 +181,19 @@ El primer entregable del PR #2 es la auditoría. Sin borrar nada. Solo documenta
 Revisar la tabla. **Solo cuando esté aprobada**, continuar con las tareas de eliminación.
 
 **Extract → Integrate → Validate → Delete**:
-- [ ] 2.0 Generate dead code audit table — commit this FIRST as documentation, zero deletions yet
-- [ ] 2.1 Review and approve audit table (con el usuario si es necesario)
-- [ ] 2.2 Remove dead variables: `analysisData` (line 1280) and `pendingTournamentCallback` (line 3062)
-- [ ] 2.3 Remove dead `@keyframes starTwinkle` from `player_detail.css` (identified in PR #1 — never referenced by any animation property)
-- [ ] 2.4 Remove dead code found during audit (listeners huérfanos, constantes sin referencia)
-- [ ] 2.5 Unify duplicate `escapeHtml` (line 1785) and `escHtml` (line 2913) — keep one implementation in `player_utils.js`
-- [ ] 2.6 Extract to `player_utils.js`: escapeHtml, removeAccentAndLowerCase, strengthDescription, findMatchByKey, getKeyFromString, formatStreak, formatDate, formatResult, showToast, getMatchTypeBadge, hasLesionNote, dragonBallCount, nivelAmenazaFromScore, resolveCategoryKey
-- [ ] 2.7 Wire `<script src="...player_utils.js">` import, replace all call sites
-- [ ] 2.8 Delete original function definitions from `player_detail.html`
-- [ ] 2.9 Run common checklist + Baseline UAT
-- [ ] 2.10 Update metrics table
+- [x] 2.0 Generate dead code audit table — commit this FIRST as documentation, zero deletions yet
+- [x] 2.1 Review and approve audit table (con el usuario si es necesario)
+- [x] 2.2 Remove dead variables: `analysisData` (line 1280) and `pendingTournamentCallback` (line 3062)
+- [x] 2.3 Remove dead `@keyframes starTwinkle` from `player_detail.css`
+- [x] 2.4 Remove dead code found during audit
+- [x] 2.5 Unify duplicate `escapeHtml`/`escHtml` — keep `escapeHtml` in `player_utils.js`
+- [x] 2.6 Extract to `player_utils.js`: escapeHtml, removeAccentAndLowerCase, nivelAmenazaFromScore, dragonBallCount, getMatchTypeBadge, hasLesionNote, resolveCategoryKey, getTournamentNameById, showToast
+- [x] 2.7 Wire `<script src="...player_utils.js">` import, replace `escHtml` with `escapeHtml` at all call sites
+- [x] 2.8 Delete original function definitions from `player_detail.html`
+- [x] 2.9 Run common checklist + Baseline UAT — page loads (200), all function calls intact, no `escHtml` remnants
+- [x] 2.10 Update metrics table
+
+> **Nota**: `strengthDescription`, `findMatchByKey`, `getKeyFromString`, `formatStreak`, `formatDate`, `formatResult` no existen como funciones nombradas en el código — son lógica inline. Diferidas a PRs posteriores por la REGLADEORO.
 
 ### Alcance explícito para PR #2
 
