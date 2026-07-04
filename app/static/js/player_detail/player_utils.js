@@ -1,6 +1,16 @@
-// player_utils.js — Pure utility functions
-// PR #2: Extract from player_detail.html inline script
-// No DOM, no state, no API calls
+/**
+ * player_utils.js
+ *
+ * Funciones puras reutilizables.
+ * PR #2 — Extraídas de player_detail.html inline script.
+ *
+ * Restricciones (se mantienen durante todo el refactor):
+ * - No DOM
+ * - No fetch
+ * - No estado
+ * - No eventos
+ * - No importa ni exporta (script clásico, no module)
+ */
 
 // ── String utilities ──────────────────────────────────────────────
 
