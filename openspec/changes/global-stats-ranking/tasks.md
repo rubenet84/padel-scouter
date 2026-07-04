@@ -29,14 +29,14 @@ Chain strategy: feature-branch-chain
 
 ## Phase 1: Foundation + Summary Dashboard (PR #1)
 
-- [ ] 1.1 Create `app/schemas/stats.py` — all Pydantic response schemas
-- [ ] 1.2 Create `global_stats.py` — `build_filters()`, `get_global_summary()`, `get_player_stats_batch()`
-- [ ] 1.3 Create `app/api/v1/stats.py` — `GET /summary` endpoint only
-- [ ] 1.4 Create `app/templates/global_stats.html` — summary cards section
-- [ ] 1.5 Create `app/static/js/global_stats.js` — summary fetch + cards render
-- [ ] 1.6 Modify `app/templates/base.html` — add `/global-stats` nav link
-- [ ] 1.7 Modify `app/main.py` — register stats router
-- [ ] 1.8 VERIFY: summary cards load at `/global-stats`
+- [x] 1.1 Create `app/schemas/stats.py` — all Pydantic response schemas
+- [x] 1.2 Create `global_stats.py` — `build_filters()`, `get_global_summary()`, `get_player_stats_batch()`
+- [x] 1.3 Create `app/api/v1/stats.py` — `GET /summary` endpoint only
+- [x] 1.4 Create `app/templates/global_stats.html` — summary cards section
+- [x] 1.5 Create `app/static/js/global_stats.js` — summary fetch + cards render
+- [x] 1.6 Modify `app/templates/base.html` — add `/global-stats` nav link
+- [x] 1.7 Modify `app/main.py` — register stats router
+- [x] 1.8 VERIFY: summary cards load at `/global-stats`
 
 ## Phase 2: Rankings + Global Filters (PR #2)
 

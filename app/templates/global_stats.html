@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Estadísticas Globales — Padel Scouter{% endblock %}
+
+{% block content %}
+<style>
+    .gradient-border { position: relative; }
+    .gradient-border::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(135deg, #FF6B00, #FFD700, #FF6B00, transparent, transparent);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+    .card-hover { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 30px #FF6B0015; }
+</style>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-black mb-2">Estadísticas <span class="text-emerald-400">Globales</span></h1>
+    <p class="text-gray-400 text-sm mb-8">Resumen general de todos tus jugadores</p>
+
+    <!-- PR #1: Summary Dashboard -->
+    <section id="dashboard-summary" aria-label="Resumen de estadísticas">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="col-span-full text-center text-gray-500 py-12">Cargando...</div>
+        </div>
+    </section>
+
+    <!-- PR #2: Ranking Table -->
+    <section id="ranking-container" class="mt-12" aria-label="Ranking de jugadores">
+        <h2 class="text-2xl font-bold mb-4 text-white">Ranking</h2>
+        <p class="text-gray-500">Próximamente</p>
+    </section>
+
+    <!-- PR #3+: Top, Comparador, H2H -->
+    <section id="future-sections" class="mt-12" aria-label="Más estadísticas">
+        <!-- Top Jugadores -->
+        <div id="top-section" class="hidden"></div>
+        <!-- Comparador -->
+        <div id="compare-section" class="hidden"></div>
+        <!-- Historial H2H -->
+        <div id="h2h-section" class="hidden"></div>
+        <!-- Parejas -->
+        <div id="pairs-section" class="hidden"></div>
+        <!-- Categorías -->
+        <div id="categories-section" class="hidden"></div>
+        <!-- Evolución -->
+        <div id="evolution-section" class="hidden"></div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/global_stats.js"></script>
+{% endblock %}

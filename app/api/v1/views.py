@@ -48,6 +48,15 @@ def player_detail(request: Request, player_id: str):
         context={"user": {}, "player": {"id": player_id, "name": ""}}
     )
 
+@router.get("/global-stats", response_class=HTMLResponse)
+def global_stats_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="global_stats.html",
+        context={"user": {}},
+    )
+
+
 @router.get("/forgot-password", response_class=HTMLResponse)
 def forgot_password_page(request: Request):
     return templates.TemplateResponse(
