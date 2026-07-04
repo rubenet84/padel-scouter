@@ -890,7 +890,6 @@ function initCompareHandlers() {
             s1.value = '';
             s2.value = '';
             document.getElementById('compare-panel')?.classList.add('hidden');
-            document.getElementById('compare-section')?.classList.add('hidden');
             document.getElementById('h2h-section')?.classList.add('hidden');
 
             // Remove compare from URL
