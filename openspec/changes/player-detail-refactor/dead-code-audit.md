@@ -79,3 +79,31 @@ Las siguientes funciones aparecen en `design.md` como candidatas a `player_utils
 | Funciones duplicadas | 1 par | Unificar (conservar escapeHtml, eliminar escHtml) |
 | Utilidades a migrar | 8 | Mover a player_utils.js |
 | Utilidades a crear | 7 | Crear en player_utils.js desde lógica inline |
+
+---
+
+## 7. Trazabilidad: elemento → acción → PR
+
+Esta tabla se actualiza según se ejecuten los PRs.
+
+| Elemento | Acción | PR | Estado |
+|----------|--------|:--:|:------:|
+| `analysisData` | Eliminar variable | PR #2 | pendiente |
+| `pendingTournamentCallback` | Eliminar variable | PR #2 | pendiente |
+| `@keyframes starTwinkle` | Eliminar CSS muerto | PR #2 | pendiente |
+| `escHtml` | Eliminar (unificar en `escapeHtml`) | PR #2 | pendiente |
+| `escapeHtml` | Migrar a `player_utils.js` | PR #2 | pendiente |
+| `showToast` | Migrar a `player_utils.js` | PR #2 | pendiente |
+| `nivelAmenazaFromScore` | Migrar a `player_utils.js` | PR #2 | pendiente |
+| `dragonBallCount` | Migrar a `player_utils.js` | PR #2 | pendiente |
+| `resolveCategoryKey` | Migrar a `player_utils.js` | PR #2 | pendiente |
+| `getMatchTypeBadge` | Migrar a `player_utils.js` | PR #2 | pendiente |
+| `hasLesionNote` | Migrar a `player_utils.js` | PR #2 | pendiente |
+| `getTournamentNameById` | Migrar a `player_utils.js` | PR #2 | pendiente |
+| `removeAccentAndLowerCase` | Crear desde lógica inline | PR #2 | pendiente |
+| `strengthDescription` | Crear desde lógica inline | backlog | pendiente |
+| `findMatchByKey` | Crear desde lógica inline | backlog | pendiente |
+| `getKeyFromString` | Crear desde lógica inline | backlog | pendiente |
+| `formatStreak` | Crear desde lógica inline | backlog | pendiente |
+| `formatDate` | Crear desde lógica inline | backlog | pendiente |
+| `formatResult` | Crear desde lógica inline | backlog | pendiente |
