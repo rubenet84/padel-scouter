@@ -111,18 +111,18 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 
 > **Nota**: Primer PR que conecta `player_dom.js`. Las funciones extraídas usan `window.DOM.*` en lugar de `document.getElementById`. 17 llamadas DOM reemplazadas. renderPlayer, setAvatar, uploadAvatar, findStrongestStatFromPlayer y SCOUTER_STAT_FIELDS ahora viven en player_render.js.
 
-### PR #6B — Match + Tournament Rendering (target)
+### PR #6B — Match + Tournament Rendering
 
 | Métrica | Antes | Después | Δ |
 |---------|:-----:|:-------:|:-:|
-| player_detail.html | 2.444 | | |
-| JS inline | 1.363 | | |
-| match_renderer.js (nuevo) | — | | |
-| tournament_renderer.js (nuevo) | — | | |
-| Plantillas Match Card `<div class="match-card"` | **2** | **1** | **−1** |
-| Función más larga | 105 | | |
-| Funciones >100 líneas | 1 | | |
-| Globales | 5 | | |
-| `document.getElementById()` | ~43 | | |
+| player_detail.html | 2.444 | **2.202** | **−242** |
+| JS inline | 1.363 | **1.130** | **−233** |
+| match_renderer.js (nuevo) | — | **189** | +189 |
+| tournament_renderer.js (nuevo) | — | **26** | +26 |
+| Plantillas Match Card `<div class="match-card"` | **2** | **0** (1 en .js) | **−2** |
+| Función más larga | 105 | **105** | 0 |
+| Funciones >100 líneas | 1 | 1 | 0 |
+| Globales | 5 | **5** | 0 |
+| `document.getElementById()` | ~43 | **~43** | 0 |
 
-> **Target**: Una única función `renderMatchCard()`. Cero HTML duplicado. tournament_renderer.js sin fetch/CRUD.
+> **Nota**: 131 líneas de match card duplicada unificadas en `renderMatchCard(m)`. tournament_renderer.js es puro render — 0 fetch/CRUD. `renderMatches`, `renderFullMatchHistory`, `sortMatches`, `setSortMode`, `getRoundIndex` migrados sin cambios de comportamiento. No se tocaron funciones de datos ni CRUD.
