@@ -119,3 +119,19 @@ Solo decisiones arquitectónicas importantes. Cada ADR tiene contexto, decisión
 **Decisión**: Extender como regla general para el resto del refactor: cualquier HTML que aparezca más de una vez debe unificarse en ese PR.
 
 **Estado**: Aprobada.
+
+---
+
+## ADR-011: API functions return data, never modify DOM
+
+**Contexto**: PR #7 se aproxima y moverá las llamadas `fetch()` a `player_api.js`. En el código actual, muchas funciones mezclan API call + manipulación directa del DOM. Esto dificulta testear y viola la separación de responsabilidades.
+
+**Decisión**: Toda función en `player_api.js` debe devolver datos (Promise con objeto/array). Ninguna función de API debe manipular el DOM directamente. El renderizado queda a cargo de `player_render.js`, `match_renderer.js`, etc. La coordinación entre API y render (ej: `loadMatches()` → `renderMatches()`) se maneja desde `player_detail.js` o los módulos de feature (`player_matches.js` en PR #8A).
+
+**Consecuencias**:
+- `player_api.js` se puede testear sin DOM (solo mock de fetch)
+- Cualquier cambio en el render no afecta a las llamadas API
+- La orquestación queda explícita en entry point o feature modules
+- Más líneas de orquestación, pero cero acoplamiento oculto
+
+**Estado**: Aprobada, aplica desde PR #7.

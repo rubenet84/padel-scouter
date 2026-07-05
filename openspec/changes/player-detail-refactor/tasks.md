@@ -394,12 +394,14 @@ renderPlayer() [stays in template] calls both (unchanged signatures)
 
 **Rule**: Toda plantilla HTML repetida debe existir en un único lugar al terminar el PR.
 
+**Progress**: ✅ Complete. See apply-progress for details.
+
 **Definition of Done** (5 condiciones):
-- [ ] Existe una única plantilla Match Card (`<div class="match-card"...`)
-- [ ] `renderMatches()` ya no contiene HTML duplicado — usa `renderMatchCard()`
-- [ ] `renderFullMatchHistory()` reutiliza exactamente la misma plantilla
-- [ ] No cambia ni un solo elemento visual de la tarjeta
-- [ ] `tournament_renderer.js` solo renderiza; no carga ni guarda datos
+- [x] Existe una única plantilla Match Card (`<div class="match-card"...`)
+- [x] `renderMatches()` ya no contiene HTML duplicado — usa `renderMatchCard()`
+- [x] `renderFullMatchHistory()` reutiliza exactamente la misma plantilla
+- [x] No cambia ni un solo elemento visual de la tarjeta
+- [x] `tournament_renderer.js` solo renderiza; no carga ni guarda datos
 
 **Affected files**:
 - CREATE: `app/static/js/player_detail/match_renderer.js` (~120 lines)
@@ -429,16 +431,18 @@ tournament_renderer.js
 - ❌ match_renderer.js no debe superar ~200-250 líneas
 
 **Validación específica**:
-- [ ] `grep '<div class="match-card"'` → exactamente 1 ocurrencia en todo el proyecto
-- [ ] `grep 'function renderMatchCard\|function buildMatchCard'` → exactamente 1 función
-- [ ] `getElementById` count no aumenta
-- [ ] match_renderer.js ≤250 líneas
+- [x] `grep '<div class="match-card"'` → exactamente 1 ocurrencia en todo el proyecto
+- [x] `grep 'function renderMatchCard\|function buildMatchCard'` → exactamente 1 función
+- [x] `getElementById` count no aumenta
+- [x] match_renderer.js ≤250 líneas
 
 ---
 
 ## PR #7 — Infrastructure (API + Partials)
 
 **Objective**: Create `player_api.js` with all `fetch()` calls and split HTML into 6 Jinja partials.
+
+**Rule**: Toda función de API debe devolver datos (Promise con objeto/array). Ninguna función de API puede manipular el DOM directamente. El render lo hacen `player_render.js`, `match_renderer.js`, etc.
 
 **Definition of Done**: All API calls centralized. `player_detail.html` uses `{% include %}` for all partials. Zero inline fetch calls remain in HTML.
 
@@ -520,7 +524,7 @@ Cada PR actualiza esta tabla. El valor **Before** de cada PR es el **After** del
 | 4 | **PR #4** ✅ | → **3055** | → **~1983** | 0 | 239 | 5 | 16 | 131 | 24 |
 | 5 | PR #5 | | | 0 | | | | | |
 | 6A | **PR #6A** ✅ | → **~2640** | → **~1797** | 0 | 213 (player_render.js) | 5 | 16 | 131 | 24 |
-| 6B | PR #6B | | | 0 | | | | | |
+| 6B | **PR #6B** ✅ | → **2202** | → **~1604** | 0 | 202 (match_renderer.js) | 5 | 15 | **0** (unificado) | 24 | |
 | 7 | PR #7 | | | 0 | | | | | |
 | 8A | PR #8A | | | 0 | | | | | |
 | 8B | PR #8B | | | 0 | | | | | |
