@@ -575,16 +575,41 @@ async function initPlayerDetail(id) {
 - [ ] Cero fetch() inline en player_detail.html
 - [ ] Cero `document.getElementById` en player_api.js
 
+### Execution Strategy
+
+**Commit 1 — infraestructura solamente** (app funcionando igual):
+- Crear `player_api.js` con funciones vacías/implementadas SIN conectar
+- Crear los 6 partials Jinja
+- Nada de borrar código del template todavía
+
+**Integración incremental** (una función por vez + UAT):
+1. `fetchPlayer()` + UAT
+2. `fetchMatches()` + UAT
+3. `fetchTournaments()` + UAT
+4. Recién después: eliminar funciones originales del template
+
+**Stop criterion**: Si una función mezcla API + render + lógica de negocio y no se puede separar en ~30-45 min, se documenta en backlog-v2.md y se continúa. No forzar la extracción.
+
 **Extract → Integrate → Validate → Delete**:
-- [ ] 7.1 Pre-flight: verificar architecture contract antes de escribir código
-- [ ] 7.2 Create `player_api.js` — `fetchPlayer`, `fetchMatches`, `fetchTournaments`, `saveMatch`, `updateMatch`, `deleteMatch`. Todas devuelven datos, ninguna toca DOM/state
-- [ ] 7.3 Extract partials (solo bloques grandes): `_player_header`, `_player_stats`, `_player_modals`, `_player_history`, `_player_tournaments`, `_player_analytics`
-- [ ] 7.4 Rebuild `player_detail.html` layout using `{% include %}` for each partial
-- [ ] 7.5 Wire API calls — `loadPlayer()` ahora usa `fetchPlayer()`, `loadMatches()` usa `fetchMatches()`, etc.
-- [ ] 7.6 Refactor `player_detail.js` — entry point orquesta: `initPlayerDetail()` llama a API, setea state, llama a render
-- [ ] 7.7 Delete original inline fetch calls and HTML sections from `player_detail.html`
-- [ ] 7.8 Verify import graph (acíclico, ningún módulo importa a otro)
-- [ ] 7.9 Run common checklist — focus on API calls working (create match, load data, delete)
+- [ ] 7.0 **Pre-flight**: verificar architecture contract antes de escribir código
+- [ ] 7.1 **Commit 1 — infraestructura**: crear `player_api.js` con funciones vacías (firmas), crear 6 partials vacíos, preparar imports. App sigue funcionando igual.
+- [ ] 7.2 **`fetchPlayer()`**: implementar, conectar en `loadPlayer()`, UAT
+- [ ] 7.3 **`fetchMatches()`**: implementar, conectar en `loadMatches()`, UAT
+- [ ] 7.4 **`fetchTournaments()`**: implementar, conectar en `loadTournaments()`, UAT
+- [ ] 7.5 **Partials Jinja**: rellenar cada partial con su contenido HTML extraído del template. Reemplazar secciones con `{% include %}`
+- [ ] 7.6 **Wire API + entry point**: refactorizar `player_detail.js` para que orqueste (`fetchPlayer() → state → renderX()`)
+- [ ] 7.7 **Delete original inline fetch calls y secciones HTML** del template
+- [ ] 7.8 **Verify import graph** (acíclico, ningún módulo importa a otro)
+- [ ] 7.9 **Run common checklist** — focus on API calls working (create match, load data, delete), UAT completa
+
+### Approval Gates (PR #7 no se aprueba si alguno falla)
+
+- [ ] `player_api.js` no contiene referencias al DOM (`document`, `window.DOM`, `querySelector`)
+- [ ] Ninguna función de render hace `fetch()`
+- [ ] Ningún módulo importa a otro módulo de feature
+- [ ] `player_detail.js` es orquestador (≤80 líneas o claramente en esa dirección)
+- [ ] Los partials solo tienen HTML/Jinja — sin lógica JavaScript
+- [ ] UAT completa sin regresiones
 
 ---
 
