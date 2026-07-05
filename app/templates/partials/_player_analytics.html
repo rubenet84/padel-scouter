@@ -1,0 +1,106 @@
+{# _player_analytics.html — Analytics charts #}
+{# Dependencias: player (object), matches (array) — rendered dynamically by JS #}
+
+<div id="analytics-content" class="hidden space-y-6">
+    <!-- Tarjetas rápidas: Totales -->
+    <div>
+        <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(255,215,0,0.6);">📊 Totales</p>
+        <div class="grid grid-cols-4 gap-2">
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-total-partidos" class="text-lg font-bold text-white">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Partidos</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-victorias" class="text-lg font-bold" style="color:#00FF87;">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Victorias</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-derrotas" class="text-lg font-bold" style="color:#ef4444;">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Derrotas</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-win-rate" class="text-lg font-bold" style="color:#00FF87;">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Victorias</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sets -->
+    <div>
+        <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(0,180,216,0.6);">🎾 Sets</p>
+        <div class="grid grid-cols-4 gap-2">
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-total-sets" class="text-lg font-bold text-white">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Sets</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-sets-ganados" class="text-lg font-bold" style="color:#00FF87;">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Ganados</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-sets-perdidos" class="text-lg font-bold" style="color:#ef4444;">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Perdidos</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-set-ratio" class="text-lg font-bold" style="color:#06B6D4;">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Sets Ganados</p>
+            </div>
+        </div>
+        <div class="mt-2 grid grid-cols-4 gap-2">
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-2-sets" class="text-lg font-bold text-white">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Partidos 2 sets</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-2-sets-ratio" class="text-lg font-bold" style="color:#06B6D4;">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">En 2 sets</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-3-sets" class="text-lg font-bold text-white">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Partidos 3 sets</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-3-sets-ratio" class="text-lg font-bold" style="color:#06B6D4;">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">En 3 sets</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Torneos / Amistosos -->
+    <div>
+        <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(168,85,247,0.6);">🏆 Torneos</p>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-torneos" class="text-lg font-bold text-white">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Torneos</p>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <p id="a-amistosos" class="text-lg font-bold text-white">—</p>
+                <p class="text-xs uppercase tracking-wider" style="color:#475569;">Amistosos</p>
+            </div>
+        </div>
+
+        <div id="a-mejor-ronda-row" class="hidden mb-3">
+            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);">
+                <span class="text-xs" style="color:#94a3b8;">🏅 Mejor ronda:</span>
+                <span id="a-mejor-ronda" class="text-sm font-bold" style="color:#a855f7;">—</span>
+            </div>
+        </div>
+
+        <!-- Desglose de rondas -->
+        <div id="a-rondas-section" class="hidden">
+            <p class="text-xs font-semibold mb-2" style="color:#94a3b8;">Rondas alcanzadas por torneo</p>
+            <div id="a-rondas-list" class="space-y-1.5"></div>
+            <div class="flex items-center gap-2 mt-2 px-3 py-2 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
+                <span class="text-xs" style="color:#94a3b8;">📊 Fase media:</span>
+                <span id="a-fase-media" class="text-sm font-bold" style="color:#06B6D4;">—</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de puntuación -->
+    <div>
+        <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(255,215,0,0.6);">📋 Sistema de Puntuación</p>
+        <div id="a-scoring-list" class="grid grid-cols-3 gap-2"></div>
+    </div>
+</div>

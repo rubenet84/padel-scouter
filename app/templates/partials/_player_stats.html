@@ -1,0 +1,91 @@
+{# _player_stats.html — Stats, radar chart, power level #}
+{# Dependencias: player (object) #}
+
+<!-- Radar Chart -->
+<div class="gradient-border rounded-2xl card-hover" style="background:#12121A;overflow:hidden;">
+    <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#06B6D4,transparent);"></div>
+    <div class="p-6">
+        <div class="flex items-center justify-between mb-6">
+            <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(6,182,212,0.6);">📡 Scouter Analysis</span>
+            <span class="text-xs px-2 py-1 rounded-full" style="background:rgba(255,107,0,0.1);border:1px solid rgba(255,107,0,0.2);color:#FF6B00;">FEP 2026</span>
+        </div>
+        <div class="flex flex-col md:flex-row items-center gap-8">
+            <!-- Radar canvas -->
+            <div class="flex-shrink-0 radar-glow">
+                <canvas id="radarChart" width="280" height="280"></canvas>
+            </div>
+            <!-- Stat bars -->
+            <div class="flex-1 w-full space-y-3">
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm" style="color:#cbd5e1;">⚡ Técnica</span>
+                        <span id="bar-tecnica-val" class="text-sm font-bold text-white">—</span>
+                    </div>
+                    <div class="h-2 rounded-full overflow-hidden" style="background:#0A0A0F;">
+                        <div id="bar-tecnica" class="h-full rounded-full fill-animate stat-bar-power" style="width:0%;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm" style="color:#cbd5e1;">💨 Físico</span>
+                        <span id="bar-fisico-val" class="text-sm font-bold text-white">—</span>
+                    </div>
+                    <div class="h-2 rounded-full overflow-hidden" style="background:#0A0A0F;">
+                        <div id="bar-fisico" class="h-full rounded-full fill-animate stat-bar-speed" style="width:0%;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm" style="color:#cbd5e1;">🧠 Mental</span>
+                        <span id="bar-mental-val" class="text-sm font-bold text-white">—</span>
+                    </div>
+                    <div class="h-2 rounded-full overflow-hidden" style="background:#0A0A0F;">
+                        <div id="bar-mental" class="h-full rounded-full fill-animate stat-bar-accuracy" style="width:0%;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm" style="color:#cbd5e1;">🏆 Competitivo</span>
+                        <span id="bar-comp-val" class="text-sm font-bold text-white">—</span>
+                    </div>
+                    <div class="h-2 rounded-full overflow-hidden" style="background:#0A0A0F;">
+                        <div id="bar-comp" class="h-full rounded-full fill-animate stat-bar-tactics" style="width:0%;"></div>
+                    </div>
+                </div>
+                <!-- Individual top stats -->
+                <div class="pt-3 grid grid-cols-2 gap-2" style="border-top:1px solid rgba(42,42,58,0.5);">
+                    <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(255,107,0,0.06);">
+                        <span class="text-xs" style="color:#64748b;">Remate</span>
+                        <span id="val-remate" class="text-xs font-bold" style="color:#FF6B00;">—</span>
+                    </div>
+                    <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(255,107,0,0.06);">
+                        <span class="text-xs" style="color:#64748b;">Bandeja</span>
+                        <span id="val-bandeja" class="text-xs font-bold" style="color:#FF6B00;">—</span>
+                    </div>
+                    <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(6,182,212,0.06);">
+                        <span class="text-xs" style="color:#64748b;">Volea Derecha</span>
+                        <span id="val-volea_derecha" class="text-xs font-bold" style="color:#06B6D4;">—</span>
+                    </div>
+                    <div class="flex justify-between items-center px-2 py-1.5 rounded-lg" style="background:rgba(6,182,212,0.06);">
+                        <span class="text-xs" style="color:#64748b;">Volea de Revés</span>
+                        <span id="val-volea_reves" class="text-xs font-bold" style="color:#06B6D4;">—</span>
+                    </div>
+                    <!-- Botones de estadísticas -->
+                    <div class="grid grid-cols-2 gap-2 pt-2 col-span-2">
+                        <button onclick="openStatsModal()"
+                                class="flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-xs font-bold transition-all"
+                                style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.2);color:#FF6B00;">
+                            📊 Estadísticas Jugador
+                        </button>
+                        <button onclick="openMatchAnalyticsModal()"
+                                class="flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-xs font-bold transition-all"
+                                style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);color:#06B6D4;">
+                            📈 Análisis de partidos
+                        </button>
+                    </div>
+                    <!-- stats-modal moved to top-level to avoid clipping -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
