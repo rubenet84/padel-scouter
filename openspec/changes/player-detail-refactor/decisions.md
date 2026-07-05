@@ -135,3 +135,18 @@ Solo decisiones arquitectónicas importantes. Cada ADR tiene contexto, decisión
 - Más líneas de orquestación, pero cero acoplamiento oculto
 
 **Estado**: Aprobada, aplica desde PR #7.
+
+---
+
+## ADR-012: PR #7 architecture pre-flight contract
+
+**Contexto**: PR #7 es el punto más riesgoso para introducir acoplamiento. Se definió un contrato arquitectónico completo antes de implementar: API contract, flujo de datos, partials, import graph, y rol de player_detail.js.
+
+**Decisiones**:
+1. API Contract: fetch functions devuelven datos, nunca tocan DOM/state/modales
+2. Flujo: API → state → render. Prohibido API→DOM directo o render→fetch
+3. 6 partials grandes solamente (≥80 líneas o responsabilidad clara). No extraer bloques pequeños
+4. Import graph acíclico: ningún módulo importa a otro. player_detail.js es el único orquestador
+5. player_detail.js ≤80 líneas, solo orquestación (fetch → state → render)
+
+**Estado**: Aprobada, aplica desde PR #7.

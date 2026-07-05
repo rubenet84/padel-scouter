@@ -440,31 +440,151 @@ tournament_renderer.js
 
 ## PR #7 — Infrastructure (API + Partials)
 
-**Objective**: Create `player_api.js` with all `fetch()` calls and split HTML into 6 Jinja partials.
+**Objective**: Create `player_api.js` with all `fetch()` calls and split HTML into Jinja partials (solo bloques grandes con responsabilidad clara).
 
-**Rule**: Toda función de API debe devolver datos (Promise con objeto/array). Ninguna función de API puede manipular el DOM directamente. El render lo hacen `player_render.js`, `match_renderer.js`, etc.
+### Architecture Contract (pre-flight check)
 
-**Definition of Done**: All API calls centralized. `player_detail.html` uses `{% include %}` for all partials. Zero inline fetch calls remain in HTML.
+#### 1. API Contract — `player_api.js`
+
+```js
+// ÚNICA responsabilidad: fetch + devolver datos. NUNCA toca DOM, state, ni modales.
+
+export async function fetchPlayer(playerId) {}
+export async function fetchMatches(playerId) {}
+export async function fetchTournaments(playerId) {}
+export async function saveMatch(playerId, payload) {}
+export async function updateMatch(matchId, payload) {}
+export async function deleteMatch(matchId) {}
+```
+
+Reglas (si una se rompe, el PR falla):
+- ✅ devuelve datos (Promise con objeto/array) o lanza excepción
+- ❌ NUNCA hace `document.getElementById`
+- ❌ NUNCA hace `showToast`
+- ❌ NUNCA abre modales
+- ❌ NUNCA modifica `state`
+
+#### 2. Flujo de datos (obligatorio)
+
+```
+API  →  state  →  render
+```
+
+- ❌ NUNCA: API → DOM directo
+- ❌ NUNCA: render → fetch()
+- El estado es el único intermediario entre datos y presentación.
+
+#### 3. Partials Jinja
+
+Solo los bloques grandes con responsabilidad clara. NO extraer bloques <80 líneas sin una razón muy sólida.
+
+| Partial | Contenido | Dependencias |
+|---------|-----------|-------------|
+| `_player_header.html` | Header, avatar, datos básicos del jugador | `player` |
+| `_player_stats.html` | Stats, radar chart, power level | `player` |
+| `_player_modals.html` | Todos los modales (match CRUD, torneo, confirmación) | `player`, `tournaments` |
+| `_player_history.html` | Match list, historial, búsqueda, filtros | `matches` |
+| `_player_tournaments.html` | Tournament list, select, gestión | `tournaments` |
+| `_player_analytics.html` | Analytics charts | `player`, `matches` |
+
+> Si un partial necesita 15 variables distintas, está mal separado. Repensar.
+
+#### 4. Import graph (obligatorio — acíclico)
+
+```
+player_detail.js  (entry point, SOLO orquesta)
+│
+├── player_api          (fetch, devuelve datos)
+├── player_render       (renderPlayer, avatar)
+├── match_renderer      (renderMatchCard, renderMatches, renderFullMatchHistory, sortMatches)
+├── tournament_renderer (renderTournaments)
+├── player_radar        (drawRadar)
+├── player_power        (animatePower, dragon balls, shenron, golpe)
+├── player_search       (filterMatchesBySearch, filterMatchHistory)
+├── player_modals       (modal open/close functions)
+├── player_dom          (DOM references — solo accedido via window.DOM)
+├── player_state         (PlayerState singleton)
+└── player_utils        (pure utility functions)
+```
+
+❌ Ningún módulo importa a otro. `player_detail.js` es el único orquestador.
+❌ Prohibido: `player_render → player_api` o `match_renderer → player_state`
+✅ Permitido: cualquier módulo accede a `window.state` o `window.DOM` (TEMP bridge hasta PR #8)
+
+#### 5. player_detail.js — solo orquestación
+
+Objetivo: ~30-50 líneas. NADA de lógica de negocio.
+
+```js
+async function initPlayerDetail(id) {
+    const player = await fetchPlayer(id);
+    state.player = player;
+    renderPlayer();
+    initRadar();
+    initPower();
+    initSearch();
+    // ...
+}
+```
+
+❌ No crecer a 400 líneas. Si supera ~80 líneas, algo está mal.
+
+---
+
+**Rule**: Toda función de API debe devolver datos (Promise con objeto/array). Ninguna función de API puede manipular el DOM directamente.
+
+**Definition of Done**:
+- [ ] API Contract respetado (5 reglas, tolerancia cero)
+- [ ] Flujo API → state → render verificado
+- [ ] Partials extraídos solo los grandes (>80 líneas o responsabilidad clara)
+- [ ] Import graph acíclico (ningún módulo importa a otro)
+- [ ] player_detail.js ≤80 líneas, solo orquestación
+- [ ] Todos los fetch() están en player_api.js, cero inline
 
 **Affected files**:
 - CREATE: `app/static/js/player_detail/player_api.js` (~150 lines)
-- CREATE: `app/templates/partials/player_header.html`
-- CREATE: `app/templates/partials/player_matches.html`
-- CREATE: `app/templates/partials/player_radar.html`
-- CREATE: `app/templates/partials/player_power.html`
-- CREATE: `app/templates/partials/player_analytics.html`
-- CREATE: `app/templates/partials/player_modals.html`
+- CREATE: `app/templates/partials/_player_header.html`
+- CREATE: `app/templates/partials/_player_stats.html`
+- CREATE: `app/templates/partials/_player_modals.html`
+- CREATE: `app/templates/partials/_player_history.html`
+- CREATE: `app/templates/partials/_player_tournaments.html`
+- CREATE: `app/templates/partials/_player_analytics.html`
 - MODIFY: `app/templates/player_detail.html`
 
 **Dependencies**: PR #6B.
 
+### PR #7 Specific Checklist
+
+**API Architecture**
+- [ ] API no toca DOM
+- [ ] API no importa módulos de render
+- [ ] API no modifica state
+- [ ] API solo devuelve datos o lanza excepción
+
+**Render Architecture**
+- [ ] Render nunca hace fetch
+- [ ] Render nunca importa API
+- [ ] Partials sin lógica JS (solo Jinja + HTML)
+
+**Module Architecture**
+- [ ] Imports acíclicos
+- [ ] player_detail.js solo orquesta (≤80 líneas)
+- [ ] Ningún módulo importa a otro
+
+**Cleanup**
+- [ ] Cero fetch() inline en player_detail.html
+- [ ] Cero `document.getElementById` en player_api.js
+
 **Extract → Integrate → Validate → Delete**:
-- [ ] 7.1 Create `player_api.js` — extract `loadPlayer()` (line 1803), `loadMatches()` (line 3381), `loadTournaments()` (line 2921), `deleteMatchFromDB()` (line 3565), `saveAndAnalyze()` API subset (line 2072), `analyzeNow()` (line 1828), `loadPartnerPlayers()` (line 2842), `sanitizeEditPlayerNumbers()` (line 2064), `getRoundIndex()` (line 2465) — all use `token` from state
-- [ ] 7.2 Split HTML sections from `player_detail.html` into 6 partials under `templates/partials/`
-- [ ] 7.3 Rebuild `player_detail.html` layout using `{% include 'partials/player_*.html' %}` for each section
-- [ ] 7.4 Wire `player_api.js` import — entry point passes API functions to `init*()` calls
-- [ ] 7.5 Delete original inline fetch calls and HTML sections from `player_detail.html`
-- [ ] 7.6 Run common checklist — focus on API calls working (create match, load data, delete)
+- [ ] 7.1 Pre-flight: verificar architecture contract antes de escribir código
+- [ ] 7.2 Create `player_api.js` — `fetchPlayer`, `fetchMatches`, `fetchTournaments`, `saveMatch`, `updateMatch`, `deleteMatch`. Todas devuelven datos, ninguna toca DOM/state
+- [ ] 7.3 Extract partials (solo bloques grandes): `_player_header`, `_player_stats`, `_player_modals`, `_player_history`, `_player_tournaments`, `_player_analytics`
+- [ ] 7.4 Rebuild `player_detail.html` layout using `{% include %}` for each partial
+- [ ] 7.5 Wire API calls — `loadPlayer()` ahora usa `fetchPlayer()`, `loadMatches()` usa `fetchMatches()`, etc.
+- [ ] 7.6 Refactor `player_detail.js` — entry point orquesta: `initPlayerDetail()` llama a API, setea state, llama a render
+- [ ] 7.7 Delete original inline fetch calls and HTML sections from `player_detail.html`
+- [ ] 7.8 Verify import graph (acíclico, ningún módulo importa a otro)
+- [ ] 7.9 Run common checklist — focus on API calls working (create match, load data, delete)
 
 ---
 
