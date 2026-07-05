@@ -251,24 +251,52 @@ Revisar la tabla. **Solo cuando esté aprobada**, continuar con las tareas de el
 
 ## PR #4 — Visuals (Radar + Power)
 
-**Objective**: Extract `drawRadar()` and all power-level rendering into `player_radar.js` and `player_power.js`.
+**Objective**: Extract `drawRadar()` into `player_radar.js` and all power-level rendering into `player_power.js`. Two independent modules — no shared state, functions, or canvas.
 
-**Definition of Done**: Radar chart identical, dragon balls/golpe/shenron identical, `renderPlayer()` starts using these modules.
+**Definition of Done**: Radar chart identical, dragon balls/golpe/shenron identical, `renderPlayer()` uses the extracted functions.
 
 **Affected files**:
 - CREATE: `app/static/js/player_detail/player_radar.js` (~100 lines)
-- CREATE: `app/static/js/player_detail/player_power.js` (~120 lines)
+- CREATE: `app/static/js/player_detail/player_power.js` (~180 lines)
 - MODIFY: `app/templates/player_detail.html`
 
 **Dependencies**: PR #3.
 
 **Extract → Integrate → Validate → Delete**:
-- [ ] 4.1 Create `player_radar.js` — extract `drawRadar()` (line 1295, 100 lines), split into `drawRadarGrid()`, `drawRadarData()`, `drawRadar()`
-- [ ] 4.2 Create `player_power.js` — extract `animatePower()` (line 1397), `renderDragonBalls()` (line 1535, 78 lines), `renderGolpeDefinitivo()` (line 1619, 85 lines), `renderShenron()` (line 1614)
-- [ ] 4.3 Wire imports in `player_detail.js` entry point — `initRadar()`, power init is called from `playerRender` or directly
-- [ ] 4.4 Delete original function definitions from `player_detail.html`
-- [ ] 4.5 Visual validation: radar labels/data, dragon ball count, golpe text, shenron animation
-- [ ] 4.6 Run common checklist
+
+- [x] 4.1 Create `player_radar.js` — extract `drawRadar(p)` (line 1079, ~102 lines). Classic script, no modules. Function signature stays identical.
+- [x] 4.2 Create `player_power.js` — extract `animatePower(target)` (line 1181), `renderDragonBalls(nivel)` (line 1308), `renderShenron()` (line 1387), `renderGolpeDefinitivo(latest, player)` (line 1392). Classic script. All function signatures stay identical.
+- [x] 4.3 Add script tags to `player_detail.html`:
+  ```html
+  <script src="/static/js/player_detail/player_radar.js"></script>
+  <script src="/static/js/player_detail/player_power.js"></script>
+  ```
+  Loading order: player_radar.js → player_power.js → main inline script (player_radar before player_power since renderGolpeDefinitivo calls renderDragonBalls, but they're independent — player_radar doesn't call player_power and vice versa).
+- [x] 4.4 Delete original function definitions from `player_detail.html`:
+  - `drawRadar(p) { ... }` (lines 1079-1180)
+  - `animatePower(target) { ... }` (lines 1181-1194)
+  - `renderDragonBalls(nivel) { ... }` (lines 1308-1386)
+  - `renderShenron() { ... }` (lines 1387-1391)
+  - `renderGolpeDefinitivo(latest, player) { ... }` (lines 1392-1478)
+- [x] 4.5 Visual validation: radar renders correctly, dragon ball count, golpe text, shenron animation
+- [x] 4.6 Run common checklist + Baseline UAT
+
+**Architecture**:
+```
+player_radar.js         player_power.js
+    drawRadar(p)            animatePower(target)
+                            renderDragonBalls(nivel)
+                            renderShenron()
+                            renderGolpeDefinitivo(latest, player)
+
+renderPlayer() [stays in template] calls both (unchanged signatures)
+```
+
+**No incluido en este PR**:
+- ❌ Mover `renderPlayer()` — diferido a PR #6
+- ❌ Mover modales, CRUD, analytics, search
+- ❌ Cambiar firmas de funciones
+- ❌ Usar `player_dom.js` todavía
 
 ---
 
@@ -418,7 +446,7 @@ Cada PR actualiza esta tabla. El valor **Before** de cada PR es el **After** del
 | 1 | **PR #1** ✅ | → 3410 | 2343 | → **0** | 239 | 5 | 16 | 131 | 24 |
 | 2 | PR #2 | | | 0 | | | | | |
 | 3 | PR #3 | | | 0 | | | | | |
-| 4 | PR #4 | | | 0 | | | | | |
+| 4 | **PR #4** ✅ | → **3055** | → **~1983** | 0 | 239 | 5 | 16 | 131 | 24 |
 | 5 | PR #5 | | | 0 | | | | | |
 | 6A | PR #6A | | | 0 | | | | | |
 | 6B | PR #6B | | | 0 | | | | | |

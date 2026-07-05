@@ -9,8 +9,8 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 | — | Inicial | 3.619 | 2.343 | 210 | 239 | 5 | 16 | 131 | 24 |
 | 1 | **PR #1 — CSS** | → 3.410 | 2.343 | → **0** | 239 | 5 | 16 | 131 | 24 |
 | 2 | **PR #2 — Dead Code + Utils** | 3.335 | 2.269 | 0 | 239 | 5 | 16 | 111 | 24 |
-| 3 | **PR #3 — State + DOM + Entry** | **3.069** | **2.004** | 0 | 239 | 5 | 16 | 111 | **8** |
-| 4 | PR #4 — Radar + Power | | | | | | | | |
+| 3 | **PR #3 — State + DOM + Entry** | 3.069 | 2.004 | 0 | 239 | 5 | 16 | 111 | **8** |
+| 4 | **PR #4 — Radar + Power** | **2.810** | **1.727** | 0 | **104** | **1** | **15** | 96 | 8 |
 | 5 | PR #5 — Modals + Search | | | | | | | | |
 | 6A | PR #6A — Core Render | | | | | | | | |
 | 6B | PR #6B — Match Rendering | | | | | | | | |
@@ -67,3 +67,19 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 | `document.getElementById()` | ~60 | ~60 | 0 |
 
 > **Nota**: player_dom.js NO está conectado todavía. Se usará a partir de PR #6. Los 153 lines son infraestructura preparada, no código activo.
+
+### PR #4 — Radar + Power
+
+| Métrica | Antes | Después | Δ |
+|---------|:-----:|:-------:|:-:|
+| player_detail.html | 3.069 | **2.810** | **−259** |
+| JS inline | 2.004 | **1.727** | **−277** |
+| player_radar.js (nuevo) | — | **105** | +105 |
+| player_power.js (nuevo) | — | **179** | +179 |
+| Función más larga | 239 | **104** | **−135** |
+| Funciones >100 líneas | 5 | **1** | **−4** |
+| Funciones >50 líneas | 16 | **15** | −1 |
+| Globales | 8 | 8 | 0 |
+| `document.getElementById()` | ~60 | ~60 | 0 |
+
+> **Nota**: 5 funciones extraídas verbatim sin cambiar una línea de lógica. drawRadar → player_radar.js, animatePower/renderDragonBalls/renderShenron/renderGolpeDefinitivo → player_power.js.
