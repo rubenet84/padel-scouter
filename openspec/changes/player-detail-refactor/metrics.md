@@ -11,8 +11,8 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 | 2 | **PR #2 — Dead Code + Utils** | 3.335 | 2.269 | 0 | 239 | 5 | 16 | 111 | 24 |
 | 3 | **PR #3 — State + DOM + Entry** | 3.069 | 2.004 | 0 | 239 | 5 | 16 | 111 | **8** |
 | 4 | **PR #4 — Radar + Power** | 2.810 | 1.727 | 0 | 104 | 1 | 15 | 96 | 8 |
-| 5 | **PR #5 — Modals + Search** | **2.606** | **1.524** | 0 | 104 | 1 | 15 | 96 | 6 |
-| 6A | PR #6A — Core Render | | | | | | | | |
+| 5 | **PR #5 — Modals + Search** | 2.606 | 1.524 | 0 | 104 | 1 | 15 | 96 | 6 |
+| 6A | **PR #6A — Core Render** | **2.444** | **1.363** | 0 | **105** | **1** | **14** | 96 | **5** |
 | 6B | PR #6B — Match Rendering | | | | | | | | |
 | 7 | PR #7 — API + Partials | | | | | | | | |
 | 8A | PR #8A — Match CRUD | | | | | | | | |
@@ -96,3 +96,17 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 | Funciones >100 líneas | 1 | 1 | 0 |
 | Globales | 8 | **6** | **−2** |
 | `document.getElementById()` | ~60 | ~60 | 0 |
+
+### PR #6A — Core Render
+
+| Métrica | Antes | Después | Δ |
+|---------|:-----:|:-------:|:-:|
+| player_detail.html | 2.606 | **2.444** | **−162** |
+| JS inline | 1.524 | **1.363** | **−161** |
+| player_render.js (nuevo) | — | **182** | +182 |
+| Función más larga | 104 | **105** | +1 |
+| Funciones >100 líneas | 1 | 1 | 0 |
+| Globales | 6 | **5** | **−1** |
+| `document.getElementById()` | ~60 | **~43** | **−17** |
+
+> **Nota**: Primer PR que conecta `player_dom.js`. Las funciones extraídas usan `window.DOM.*` en lugar de `document.getElementById`. 17 llamadas DOM reemplazadas. renderPlayer, setAvatar, uploadAvatar, findStrongestStatFromPlayer y SCOUTER_STAT_FIELDS ahora viven en player_render.js.

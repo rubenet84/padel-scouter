@@ -324,22 +324,60 @@ renderPlayer() [stays in template] calls both (unchanged signatures)
 
 ## PR #6A — Core Render (`player_render.js`)
 
-**Objective**: Extract the main rendering orchestrator into `player_render.js`.
+**Objective**: Extract `renderPlayer()` and related functions into `player_render.js`. Wire `player_dom.js` BLOCK BY BLOCK — no mass replacement.
 
-**Definition of Done**: Player header, stats, computed stats, avatar, tabs render identically.
+**Definition of Done**: Player header, stats, avatar, category, level, analysis render identically. `player_dom.js` wired for extracted blocks only.
 
 **Affected files**:
 - CREATE: `app/static/js/player_detail/player_render.js` (~250 lines)
 - MODIFY: `app/templates/player_detail.html`
+- MODIFY: `app/static/js/player_detail/player_detail.js` (entry point)
 
 **Dependencies**: PR #3, PR #5.
 
-**Extract → Integrate → Validate → Delete**:
-- [ ] 6A.1 Create `player_render.js` — extract `renderPlayer()` (line 1411, 93 lines), `renderComputedStats()` (line 2812, 85 lines), `setAvatar()` (line 1755), `uploadAvatar()` (line 1706), `findStrongestStatFromPlayer()` (line 1515), `renderMatchesHeader()`, `renderTabs()` — call into radar, power, match rendering modules
-- [ ] 6A.2 Wire `playerRender(dom, state)` into `player_detail.js` entry point
-- [ ] 6A.3 Delete original function definitions from `player_detail.html`
-- [ ] 6A.4 Visual validation: player name, photo, category, level, computed stats, avatar upload
-- [ ] 6A.5 Run common checklist
+**Principio**: migrar `player_dom.js` por bloques funcionales, no por reemplazo masivo. Cada bloque se extrae, integra con DOM.*, valida, y solo entonces se pasa al siguiente.
+
+**Regla nueva**: una función extraída NO puede modificar más nodos del DOM que la función original. Si durante el refactor una función empieza a asumir responsabilidades que antes no tenía, se detecta y se revierte.
+
+**Bloques funcionales** (en orden):
+
+### Bloque 1 — Player Header
+- [x] 6A.1 Wire `DOM.breadcrumbName`, `DOM.playerName`, `DOM.badgeCategory` in `player_dom.js` → already wired (PR #3)
+- [x] 6A.2 Extract header rendering into `player_render.js` renderPlayer() using DOM.* instead of sub-function
+- [x] 6A.3 Replace `document.getElementById('breadcrumb-name')` etc. with `DOM.breadcrumbName()` etc.
+- [x] 6A.4 Delete original header lines from `renderPlayer()` in template
+- [x] 6A.5 Validate: name and badge render identically
+
+### Bloque 2 — Stats Bars
+- [x] 6A.6 Wire bar stats in `player_dom.js` (already mapped: barTecnica, barTecnicaVal, etc.)
+- [x] 6A.7 Extract bars rendering into `player_render.js` renderPlayer() using DOM.* instead of sub-function
+- [x] 6A.8 Replace `document.getElementById('bar-tecnica')` etc. with `DOM.barTecnica()` etc.
+- [x] 6A.9 Delete original bars lines, validate
+
+### Bloque 3 — Stat Values
+- [x] 6A.10 Wire `DOM.valRemate`, `DOM.valBandeja`, `DOM.valVoleaDerecha`, `DOM.valVoleaReves` (already wired)
+- [x] 6A.11 Extract skill values into `player_render.js` renderPlayer() using DOM.* instead of sub-function
+- [x] 6A.12 Replace getElementById calls, delete originals, validate
+
+### Bloque 4 — Power / Analysis
+- [x] 6A.13 Wire power/analysis DOM refs (already wired)
+- [x] 6A.14 Extract power/analysis into `player_render.js` renderPlayer() using DOM.*
+- [x] 6A.15 Replace, delete, validate
+
+### Bloque 5 — Avatar
+- [x] 6A.16 Wire avatar DOM refs (already wired)
+- [x] 6A.17 Extract `setAvatar(url, onload)` and `uploadAvatar(event)` → `player_render.js`
+- [x] 6A.18 Replace DOM.* refs in extracted functions, delete originals, validate
+
+### Bloque 6 — Entry Point
+- [x] 6A.19 Wire `window.DOM = DOM` in `player_detail.js` for classic script access
+- [x] 6A.20 Delete original `renderPlayer()` definition from template (all blocks now in module)
+- [ ] 6A.21 Run common checklist + Baseline UAT (pending on PR merge)
+
+**No incluido en este PR**:
+- ❌ Mover match rendering, tournament rendering (PR #6B)
+- ❌ Mover CRUD, analytics, search (PR #7+)
+- ❌ Reemplazar `document.getElementById` fuera de los bloques extraídos
 
 ---
 
@@ -448,7 +486,7 @@ Cada PR actualiza esta tabla. El valor **Before** de cada PR es el **After** del
 | 3 | PR #3 | | | 0 | | | | | |
 | 4 | **PR #4** ✅ | → **3055** | → **~1983** | 0 | 239 | 5 | 16 | 131 | 24 |
 | 5 | PR #5 | | | 0 | | | | | |
-| 6A | PR #6A | | | 0 | | | | | |
+| 6A | **PR #6A** ✅ | → **~2640** | → **~1797** | 0 | 213 (player_render.js) | 5 | 16 | 131 | 24 |
 | 6B | PR #6B | | | 0 | | | | | |
 | 7 | PR #7 | | | 0 | | | | | |
 | 8A | PR #8A | | | 0 | | | | | |
