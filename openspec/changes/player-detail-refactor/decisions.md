@@ -79,3 +79,43 @@ Solo decisiones arquitectónicas importantes. Cada ADR tiene contexto, decisión
 - El refactor avanza más lento pero con cero regresiones por código mal entendido
 - Se genera documentación de código ambiguo como subproducto
 - Los PRs problemáticos se identifican temprano
+
+---
+
+## ADR-007: DOM Access Count como métrica oficial
+
+**Contexto**: PR #6A reemplazó 17 `document.getElementById()` por `window.DOM.*`. Esta métrica es más útil que contar líneas para medir el progreso real del refactor.
+
+**Decisión**: Incorporar `document.getElementById()` count en el checklist de todos los PRs y en `metrics.md`. Cada PR debe reducir o al menos no aumentar este número.
+
+**Estado**: Aprobada.
+
+---
+
+## ADR-008: PR #6B orden interno — MatchCard primero
+
+**Contexto**: El plan original extraía `renderMatches()` y `renderFullMatchHistory()` como paso 1. El mayor riesgo está en las 131 líneas de match card duplicada en ambas.
+
+**Decisión**: PR #6B extrae primero `renderMatchCard()` → después `renderMatches()` → `renderFullMatchHistory()`. Esto aísla el cambio más riesgoso (template duplicado) al inicio, verificable de inmediato.
+
+**Estado**: Aprobada.
+
+---
+
+## ADR-009: player_render.js size cap a 300 líneas
+
+**Contexto**: player_render.js tiene 182 líneas actualmente. Durante PR #6B y próximos podría crecer sin control.
+
+**Decisión**: player_render.js no superará 300 líneas. Si se necesita más lógica de render, se crea un nuevo módulo.
+
+**Estado**: Aprobada.
+
+---
+
+## ADR-010: Toda plantilla HTML repetida → único lugar
+
+**Contexto**: PR #6B requiere que al finalizar no haya HTML de match card duplicado.
+
+**Decisión**: Extender como regla general para el resto del refactor: cualquier HTML que aparezca más de una vez debe unificarse en ese PR.
+
+**Estado**: Aprobada.

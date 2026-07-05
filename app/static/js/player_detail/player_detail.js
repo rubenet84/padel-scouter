@@ -19,8 +19,9 @@ import { DOM } from './player_dom.js';
 // Se eliminará en PR #8 cuando desaparezcan las referencias legacy.
 window.state = state;
 
-// TEMP: Expuesto para player_render.js (classic script) durante la migración.
-// Se eliminará en PR #8 cuando player_render.js migre a módulo ES.
+// TEMP bridge — player_render.js (classic script) usa window.DOM
+// porque aún no puede importar módulos ES.
+// Remove in PR #8 when every rendering module imports DOM directly.
 window.DOM = DOM;
 
 export function initPlayerDetail() {
