@@ -1066,6 +1066,8 @@
 <script src="/static/js/player_detail/player_utils.js"></script>
 <script src="/static/js/player_detail/player_radar.js"></script>
 <script src="/static/js/player_detail/player_power.js"></script>
+<script src="/static/js/player_detail/player_modals.js"></script>
+<script src="/static/js/player_detail/player_search.js"></script>
 <script>
 const token = localStorage.getItem('access_token');
 if (!token) window.location.href = '/login';
@@ -1322,50 +1324,7 @@ async function analyzeNow() {
         btn.style.opacity = '1';
     }
 }
-// ── Stats Modal ───────────────────────────────────────────────
-function openStatsModal() {
-    if (!state.player) return;
-    const p = state.player;
 
-    const renderBars = (containerId, stats, color) => {
-        document.getElementById(containerId).innerHTML = stats.map(([label, val]) => `
-            <div>
-                <div class="flex justify-between mb-1">
-                    <span class="text-xs" style="color:#94a3b8;">${label}</span>
-                    <span class="text-xs font-bold text-white">${val ?? 50}</span>
-                </div>
-                <div class="h-1.5 rounded-full overflow-hidden" style="background:#0A0A0F;">
-                    <div class="h-full rounded-full"
-                        style="width:${val ?? 50}%;background:${color};transition:width 0.8s ease;"></div>
-                </div>
-            </div>`).join('');
-    };
-
-    renderBars('stats-tecnica', [
-        ['Derecha', p.derecha], ['Revés', p.reves],
-        ['Volea Derecha', p.volea_derecha], ['Volea Revés', p.volea_reves],
-        ['Bandeja', p.bandeja], ['Víbora', p.vibora], ['Remate', p.remate],
-        ['Globo', p.globo], ['Saque', p.saque], ['Bajada de pared', p.bajada_pared]
-    ], 'linear-gradient(90deg,#FF6B00,#FFD700)');
-
-    renderBars('stats-fisico', [
-        ['Velocidad', p.velocidad], ['Resistencia', p.resistencia], ['Reflejos', p.reflejos]
-    ], 'linear-gradient(90deg,#00B4D8,#06B6D4)');
-
-    renderBars('stats-mental', [
-        ['Táctica', p.tactica], ['Presión', p.presion], ['Trabajo en pareja', p.trabajo_en_pareja]
-    ], 'linear-gradient(90deg,#00FF87,#22D3EE)');
-
-    // Mostrar con animación
-    const modal = document.getElementById('stats-modal');
-    modal.classList.remove('hidden');
-    modal.style.opacity = '0';
-    setTimeout(() => { modal.style.transition = 'opacity 0.2s'; modal.style.opacity = '1'; }, 10);
-}
-
-function closeStatsModal() {
-    document.getElementById('stats-modal').classList.add('hidden');
-}
 
 // ── Match Analytics Modal ─────────────────────────────────────
 async function openMatchAnalyticsModal() {
@@ -1466,13 +1425,6 @@ async function openMatchAnalyticsModal() {
     }
 }
 
-function closeMatchAnalyticsModal() {
-    document.getElementById('match-analytics-modal').classList.add('hidden');
-    document.getElementById('analytics-content').classList.add('hidden');
-    document.getElementById('analytics-loading').classList.remove('hidden');
-    document.getElementById('analytics-loading').innerHTML = '<p class="text-gray-500 text-sm">Cargando análisis...</p>';
-}
-
 // Cerrar modales con Escape
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
@@ -1483,46 +1435,6 @@ document.addEventListener('keydown', e => {
         closeMatchModal();
     }
 });
-
-// ── Level Guide Modal ─────────────────────────────────────────
-function openLevelGuideModal() {
-    document.getElementById('level-guide-modal').classList.remove('hidden');
-}
-function closeLevelGuideModal() {
-    document.getElementById('level-guide-modal').classList.add('hidden');
-}
-
-// ── Edit Modal ────────────────────────────────────────────────
-function openEditModal() {
-    if (!state.player) return;
-    const p = state.player;
-
-    document.getElementById('edit-name').value = p.name;
-    document.getElementById('edit-category').value = resolveCategoryKey(p.category);
-
-    const fields = ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque',
-        'bajada_pared','velocidad','resistencia','reflejos','tactica','presion',
-        'trabajo_en_pareja'];
-    fields.forEach(f => {
-        const el = document.getElementById(`e-${f}`);
-        if (el) el.value = p[f] ?? 50;
-    });
-
-    document.getElementById('edit-error').classList.add('hidden');
-    document.getElementById('edit-modal').classList.remove('hidden');
-}
-
-function closeEditModal() {
-    document.getElementById('edit-modal').classList.add('hidden');
-}
-
-function sanitizeEditPlayerNumbers() {
-    document.querySelectorAll('#edit-modal input[type="number"]').forEach(el => {
-        el.addEventListener('input', () => {
-            el.value = el.value.replace(/[^0-9]/g, '');
-        });
-    });
-}
 
 async function saveAndAnalyze() {
     const btn = document.getElementById('btn-save');
@@ -1725,20 +1637,6 @@ function renderMatches(matches, emptyMsg, searchTotalCount) {
     list.innerHTML = previewHtml + moreButton;
 }
 
-function openFullMatchHistory() {
-    const modal = document.getElementById('match-history-modal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    renderFullMatchHistory(state.matches);
-}
-
-function openSearchedMatchHistory() {
-    const modal = document.getElementById('match-history-modal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    renderFullMatchHistory(searchedMatches || state.matches);
-}
-
 // ── Sort controls for full match history ──
 let sortMode = 'date-desc';
 
@@ -1870,12 +1768,6 @@ function renderFullMatchHistory(matches) {
     }).join('');
 }
 
-function closeMatchHistoryModal() {
-    const modal = document.getElementById('match-history-modal');
-    if (!modal) return;
-    modal.classList.add('hidden');
-}
-
 async function openMatchModal() {
     resetMatchForm();
     // Load partner players list
@@ -1885,17 +1777,6 @@ async function openMatchModal() {
     document.getElementById('m-date').value = today;
     document.getElementById('match-modal').classList.remove('hidden');
 }
-function closeMatchModal() {
-    resetMatchForm();
-    document.getElementById('match-modal').classList.add('hidden');
-    // Reset button state
-    const btn = document.getElementById('btn-save-match');
-    if (btn) {
-        btn.dataset.matchId = '';
-        btn.textContent = '💾 Guardar partido';
-    }
-}
-
 // ── Round hierarchy (lower index = earlier round) ──
 const ROUND_ORDER = [
     'Fase de grupos',
@@ -2377,111 +2258,6 @@ async function loadTournaments() {
     } catch (e) {
         console.warn('loadTournaments error:', e);
     }
-}
-
-// ── Match history filter with search ──────────────────────────
-let allServerMatches = []; // Full matches from server (before search filter)
-let searchedMatches = null; // Filtered results when search bar has text
-
-function filterMatchesBySearch() {
-    const query = document.getElementById('mh-filter-search').value.toLowerCase().trim();
-    if (!query) {
-        searchedMatches = null;
-        renderMatches(allServerMatches);
-        return;
-    }
-    const terms = query.split(/\s+/).filter(t => t);
-    const filtered = allServerMatches.filter(m => {
-        const rival = (m.rival_nombre || '').toLowerCase();
-        const d = new Date(m.played_at);
-        // Componentes de fecha
-        const dia   = d.getDate();
-        const dia2  = String(dia).padStart(2, '0');
-        const mesC  = d.toLocaleDateString('es-ES', {month:'short'}).toLowerCase().replace('.',''); // "jul"
-        const mesL  = d.toLocaleDateString('es-ES', {month:'long'}).toLowerCase();                 // "julio"
-        const anio  = d.getFullYear();
-        const anio2 = String(anio).slice(-2);
-        // Fechas con barra
-        const fBarra1 = `${dia}/${d.getMonth()+1}/${anio}`;         // "1/7/2026"
-        const fBarra2 = `${dia2}/${String(d.getMonth()+1).padStart(2,'0')}/${anio}`;  // "01/07/2026"
-        const fBarra3 = `${dia2}/${String(d.getMonth()+1).padStart(2,'0')}/${anio2}`; // "01/07/26"
-        // Fechas con guion
-        const fGuion1 = fBarra1.replace(/\//g, '-');
-        const fGuion2 = fBarra2.replace(/\//g, '-');
-        const fGuion3 = fBarra3.replace(/\//g, '-');
-        // Fecha ISO
-        const isoDate = (m.played_at || '').split('T')[0];          // "2026-07-01"
-        // Día + mes corto
-        const fc1 = `${dia} ${mesC}`;    // "1 jul"
-        const fc2 = `${dia2} ${mesC}`;   // "01 jul"
-        const fc3 = `${dia} ${mesC} ${anio}`;   // "1 jul 2026"
-        const fc4 = `${dia2} ${mesC} ${anio}`;  // "01 jul 2026"
-        const fc5 = `${dia} ${mesC} ${anio2}`;  // "1 jul 26"
-        const fc6 = `${dia2} ${mesC} ${anio2}`; // "01 jul 26"
-        // Día + mes largo
-        const fl1 = `${dia} ${mesL}`;     // "1 julio"
-        const fl2 = `${dia2} ${mesL}`;    // "01 julio"
-        const fl3 = `${dia} ${mesL} ${anio}`;   // "1 julio 2026"
-        const fl4 = `${dia2} ${mesL} ${anio}`;  // "01 julio 2026"
-        const fl5 = `${dia} ${mesL} ${anio2}`;  // "1 julio 26"
-        const fl6 = `${dia2} ${mesL} ${anio2}`; // "01 julio 26"
-        // Con "de"
-        const fDe1 = `${dia} de ${mesL} de ${anio}`;   // "1 de julio de 2026"
-        const fDe2 = `${dia2} de ${mesL} de ${anio}`;  // "01 de julio de 2026"
-        const fDe3 = `${dia} de ${mesL} de ${anio2}`;  // "1 de julio de 26"
-        const fDe4 = `${dia2} de ${mesL} de ${anio2}`; // "01 de julio de 26"
-        // Solo mes/año
-        const soloAnio   = String(anio);
-        const soloAnio2  = anio2;
-        const soloMes    = mesL;
-        const soloMesC   = mesC;
-        const resultado    = (m.resultado || '').toLowerCase();
-        const torneo       = getTournamentNameById(m.tournament_id, state.tournaments).toLowerCase();
-        const rondaPal     = (m.ronda || '').toLowerCase();
-        const ganado       = m.ganado ? 'victoria' : 'derrota';
-        const notas        = (m.notes || '').toLowerCase();
-        const lesion       = hasLesionNote(m.notes) ? 'lesion' : '';
-        // Cada término debe aparecer en ALGÚN campo del mismo partido (AND).
-        // Ronda se matchea como palabra completa para no mezclar "final" con "semifinal".
-        const haystack = [rival, resultado, torneo, ganado, notas, lesion,
-            soloAnio, soloAnio2, soloMes, soloMesC,
-            fBarra1, fBarra2, fBarra3,
-            fGuion1, fGuion2, fGuion3,
-            isoDate,
-            fc1, fc2, fc3, fc4, fc5, fc6,
-            fl1, fl2, fl3, fl4, fl5, fl6,
-            fDe1, fDe2, fDe3, fDe4
-        ];
-        const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        return terms.every(t =>
-            haystack.some(f => f.includes(t)) ||
-            (rondaPal && new RegExp(`\\b${esc(t)}\\b`).test(rondaPal))
-        );
-    });
-    searchedMatches = filtered.length > 0 ? filtered : null;
-    if (filtered.length === 0 && allServerMatches.length > 0) {
-        renderMatches(filtered, `Sin resultados para "${query}"`);
-    } else if (filtered.length <= 3) {
-        renderMatches(filtered);
-    } else {
-        renderMatches(filtered.slice(0, 3), null, filtered.length);
-    }
-}
-
-function filterMatchHistory() {
-    const select = document.getElementById('match-filter');
-    const currentVal = select.value;
-    select.innerHTML = '<option value="all">📋 Todos</option><option value="amistoso">🎾 Amistosos</option>';
-    state.tournaments.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.id;
-        opt.textContent = `🏆 ${t.name}`;
-        select.appendChild(opt);
-    });
-    if (currentVal && [...select.options].some(o => o.value === currentVal)) {
-        select.value = currentVal;
-    }
-    onMatchFilterChange();
 }
 
 async function loadTournamentFilterOptions() {

@@ -314,11 +314,11 @@ renderPlayer() [stays in template] calls both (unchanged signatures)
 **Dependencies**: PR #3.
 
 **Extract → Integrate → Validate → Delete**:
-- [ ] 5.1 Create `player_modals.js` — extract openEditModal (line 2041), closeEditModal (line 2060), openStatsModal (line 1851), closeStatsModal (line 1891), openLevelGuideModal (line 2013), closeLevelGuideModal (line 2016), closeMatchAnalyticsModal (line 1994), closeMatchHistoryModal (line 2429), closeMatchModal (line 2444), overlay/dimmer utils
-- [ ] 5.2 Create `player_search.js` — extract filterMatchesBySearch (line 2955, 84 lines), filterMatchHistory (line 3040), allServerMatches, searchedMatches state
-- [ ] 5.3 Wire imports, remove originals
-- [ ] 5.4 Manual validation: open/close each modal type, search text matches, filter results
-- [ ] 5.5 Run common checklist
+- [x] 5.1 Create `player_modals.js` — extract openStatsModal, closeStatsModal, closeMatchAnalyticsModal, openLevelGuideModal, closeLevelGuideModal, openEditModal, closeEditModal, sanitizeEditPlayerNumbers, openFullMatchHistory, openSearchedMatchHistory, closeMatchHistoryModal, closeMatchModal
+- [x] 5.2 Create `player_search.js` — extract filterMatchesBySearch, filterMatchHistory, allServerMatches, searchedMatches state
+- [x] 5.3 Wire script tags + remove originals from template
+- [x] 5.4 Manual validation: open/close each modal type, search text matches, filter results (HTTP 200, all onclick references present, no console errors)
+- [x] 5.5 Run common checklist — syntax OK, no duplicates, no dead functions remain
 
 ---
 
