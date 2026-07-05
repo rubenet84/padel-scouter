@@ -8,8 +8,8 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 |:-:|----|:------------------:|:---------:|:----------:|:-----------------:|:----------:|:---------:|:-----------:|:--------:|
 | — | Inicial | 3.619 | 2.343 | 210 | 239 | 5 | 16 | 131 | 24 |
 | 1 | **PR #1 — CSS** | → 3.410 | 2.343 | → **0** | 239 | 5 | 16 | 131 | 24 |
-| 2 | **PR #2 — Dead Code + Utils** | → 3.335 | → **2.269** | 0 | 239 | 5 | 16 | 111 | 24 |
-| 3 | PR #3 — State + DOM + Entry | | | | | | | | |
+| 2 | **PR #2 — Dead Code + Utils** | 3.335 | 2.269 | 0 | 239 | 5 | 16 | 111 | 24 |
+| 3 | **PR #3 — State + DOM + Entry** | **3.069** | **2.004** | 0 | 239 | 5 | 16 | 111 | **8** |
 | 4 | PR #4 — Radar + Power | | | | | | | | |
 | 5 | PR #5 — Modals + Search | | | | | | | | |
 | 6A | PR #6A — Core Render | | | | | | | | |
@@ -50,3 +50,20 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 | Funciones >50 líneas | 16 | 16 | 0 |
 | Globales | 24 | 24 | 0 |
 | `document.getElementById()` | ~60 | ~60 | 0 |
+
+### PR #3 — State + Entry Point + DOM
+
+| Métrica | Antes | Después | Δ |
+|---------|:-----:|:-------:|:-:|
+| player_detail.html | 3.335 | **3.069** | **−266** |
+| JS inline | 2.269 | **2.004** | **−265** |
+| player_state.js (nuevo) | — | **22** | +22 |
+| player_constants.js (nuevo) | — | **22** | +22 |
+| player_dom.js (nuevo) | — | **153** | +153 |
+| player_detail.js (nuevo) | — | **33** | +33 |
+| Función más larga | 239 | 239 | 0 |
+| Funciones >100 líneas | 5 | 5 | 0 |
+| Globales | 24 | **8** | **−16** |
+| `document.getElementById()` | ~60 | ~60 | 0 |
+
+> **Nota**: player_dom.js NO está conectado todavía. Se usará a partir de PR #6. Los 153 lines son infraestructura preparada, no código activo.

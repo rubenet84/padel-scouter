@@ -212,28 +212,40 @@ Revisar la tabla. **Solo cuando esté aprobada**, continuar con las tareas de el
 
 ---
 
-## PR #3 — State + Entry Point + DOM
+## PR #3 — State + Entry Point + DOM (infrastructure only)
 
-**Objective**: Create `PlayerState` class, centralized `DOM` object, and `player_detail.js` entry point.
+**Objective**: Create `PlayerState` class, `player_dom.js` (infrastructure, not wired yet), and `player_detail.js` entry point. NO behavior changes.
 
-**Definition of Done**: Zero global variables for state. All `document.getElementById()` in `player_dom.js`. Entry point calls `init*()`.
+**Definition of Done**: Three new files exist. Entry point is wired but calls the same functions. Globals migrated to state ONLY at the end. Zero visual/functional regressions.
 
 **Affected files**:
-- CREATE: `app/static/js/player_detail/player_state.js` (~40 lines)
-- CREATE: `app/static/js/player_detail/player_dom.js` (~60 lines)
-- CREATE: `app/static/js/player_detail/player_detail.js` (~40 lines)
+- CREATE: `app/static/js/player_detail/player_state.js` (~20 lines)
+- CREATE: `app/static/js/player_detail/player_constants.js` (~30 lines)
+- CREATE: `app/static/js/player_detail/player_dom.js` (~160 lines)
+- CREATE: `app/static/js/player_detail/player_detail.js` (~50 lines)
 - MODIFY: `app/templates/player_detail.html`
 
 **Dependencies**: PR #2.
 
-**Extract → Integrate → Validate → Delete**:
-- [ ] 3.1 Create `player_state.js` — `PlayerState` class with properties (player, matches, tournaments, players), getters/setters
-- [ ] 3.2 Create `player_dom.js` — `Object.freeze({...})` with all 30+ `document.getElementById()` references (see design.md §4)
-- [ ] 3.3 Create `player_detail.js` — `initPlayerDetail(playerId)` that loads data via API calls and calls `initRadar()`, `initMatches()`, `initAnalytics()`, `initSearch()`
-- [ ] 3.4 Replace global variables in `player_detail.html` (playerId, playerData, loadedMatches, loadedTournaments, CATEGORY_LEVELS) with `PlayerState` instance
-- [ ] 3.5 Wire ES module imports — use `type="module"` on the entry point script tag
-- [ ] 3.6 Delete original `let`/`const` declarations
-- [ ] 3.7 Run common checklist
+**Fase 1 — Crear infraestructura (sin usar todavía)**:
+- [x] 3.1 Create `player_state.js` — minimal `PlayerState` class with properties only (player, matches, tournaments, players). **No getters/setters**. Export singleton `export const state = new PlayerState()`.
+- [x] 3.2 Create `player_constants.js` — move `CATEGORY_LEVELS` from template to this file. Pure data, no dependencies.
+- [x] 3.3 Create `player_dom.js` — `Object.freeze({...})` with ALL ~110 `document.getElementById()` references mapped. **Do NOT replace any calls yet** — infrastructure only.
+
+**Fase 2 — Conectar entry point**:
+- [x] 3.4 Create `player_detail.js` — `initPlayerDetail(playerId)` entry point with `type="module"`. Creates state, loads data, calls EXACTLY the same existing functions (`loadPlayer`, `loadTournaments`, etc.).
+- [x] 3.5 Wire `player_detail.js` as the module entry point in `player_detail.html`. Keep old `<script>` block running alongside during migration.
+
+**Fase 3 — Migrar estado (solo al final)**:
+- [x] 3.6 Write global values to `state` after each data load (playerData → state.player, loadedMatches → state.matches, etc.). Keep old variables for compatibility.
+- [x] 3.7 **ONLY AFTER validation**: delete `let playerData`, `let loadedMatches`, `let loadedTournaments` from template. Replace reads with `state.player`, `state.matches`, `state.tournaments`.
+- [x] 3.8 Run common checklist + Baseline UAT
+
+**NO incluido en este PR**:
+- ❌ Reemplazar 110 `document.getElementById()` con `DOM.*` (diferido a PR #6+)
+- ❌ Mover render, radar, CRUD, analytics, search, modales
+- ❌ Getters/setters en PlayerState
+- ❌ Cambiar ninguna función existente más allá de migrar globales
 
 ---
 

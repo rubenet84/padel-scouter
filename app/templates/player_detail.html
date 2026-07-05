@@ -1062,25 +1062,18 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="/static/js/player_detail/player_constants.js"></script>
 <script src="/static/js/player_detail/player_utils.js"></script>
 <script>
 const token = localStorage.getItem('access_token');
 if (!token) window.location.href = '/login';
 
 const playerId = window.location.pathname.split('/').pop();
-let playerData = null;
-let loadedMatches = [];
-let loadedTournaments = [];
+// playerData → state.player (migrated to PlayerState)
+// loadedMatches → state.matches (migrated to PlayerState)
+// loadedTournaments → state.tournaments (migrated to PlayerState)
 
-const CATEGORY_LEVELS = {
-    'Iniciación':   { min: 1.0, max: 2.5,  group: 'Iniciación', color: '#22c55e', icon: '🟢' },
-    '5ª Categoría': { min: 2.0, max: 3.0,  group: 'Intermedio', color: '#eab308', icon: '🟡' },
-    '4ª Categoría': { min: 3.0, max: 3.75, group: 'Intermedio', color: '#eab308', icon: '🟡' },
-    '3ª Categoría': { min: 3.75,max: 4.25, group: 'Intermedio', color: '#eab308', icon: '🟡' },
-    '2ª Categoría': { min: 4.25,max: 4.75, group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
-    '1ª Categoría': { min: 4.75,max: 6.0,  group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
-    'Profesional':  { min: 6.0, max: 7.0,  group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
-};
+// CATEGORY_LEVELS lives in player_constants.js — loaded via script tag
 
 // ── Radar Chart ───────────────────────────────────────────────
 function drawRadar(p) {
@@ -1576,9 +1569,9 @@ async function loadPlayer() {
             return;
         }
 
-        playerData = await pRes.json();
+        state.player = await pRes.json();
         const analyses = aRes.ok ? await aRes.json() : [];
-        renderPlayer(playerData, analyses);
+        renderPlayer(state.player, analyses);
 
     } catch (e) {
         document.getElementById('loading-state').classList.add('hidden');
@@ -1611,8 +1604,8 @@ async function analyzeNow() {
 }
 // ── Stats Modal ───────────────────────────────────────────────
 function openStatsModal() {
-    if (!playerData) return;
-    const p = playerData;
+    if (!state.player) return;
+    const p = state.player;
 
     const renderBars = (containerId, stats, color) => {
         document.getElementById(containerId).innerHTML = stats.map(([label, val]) => `
@@ -1781,8 +1774,8 @@ function closeLevelGuideModal() {
 
 // ── Edit Modal ────────────────────────────────────────────────
 function openEditModal() {
-    if (!playerData) return;
-    const p = playerData;
+    if (!state.player) return;
+    const p = state.player;
 
     document.getElementById('edit-name').value = p.name;
     document.getElementById('edit-category').value = resolveCategoryKey(p.category);
@@ -1911,7 +1904,7 @@ async function loadMatches() {
 }
 
 function renderMatches(matches, emptyMsg, searchTotalCount) {
-    loadedMatches = matches || [];
+    state.matches = matches || [];
     const container = document.getElementById('matches-section');
     if (!container) return;
     container.classList.remove('hidden');
@@ -1940,7 +1933,7 @@ function renderMatches(matches, emptyMsg, searchTotalCount) {
         const rival   = escapeHtml(m.rival_nombre) || 'Rival';
         const resultado = escapeHtml(m.resultado || '—');
         const ronda   = m.ronda ? `· ${escapeHtml(m.ronda)}` : '';
-        const tName   = getTournamentNameById(m.tournament_id);
+        const tName   = getTournamentNameById(m.tournament_id, state.tournaments);
         const torneo  = tName ? `· ${escapeHtml(tName)}` : '';
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
         const notas   = m.notes ? escapeHtml(m.notes) : '';
@@ -2016,14 +2009,14 @@ function openFullMatchHistory() {
     const modal = document.getElementById('match-history-modal');
     if (!modal) return;
     modal.classList.remove('hidden');
-    renderFullMatchHistory(loadedMatches);
+    renderFullMatchHistory(state.matches);
 }
 
 function openSearchedMatchHistory() {
     const modal = document.getElementById('match-history-modal');
     if (!modal) return;
     modal.classList.remove('hidden');
-    renderFullMatchHistory(searchedMatches || loadedMatches);
+    renderFullMatchHistory(searchedMatches || state.matches);
 }
 
 // ── Sort controls for full match history ──
@@ -2051,7 +2044,7 @@ function setSortMode(mode) {
     const container = document.getElementById('match-history-list');
     if (!container) return;
     const isSearchActive = searchedMatches && document.getElementById('mh-filter-search').value.trim();
-    renderFullMatchHistory(isSearchActive ? searchedMatches : loadedMatches);
+    renderFullMatchHistory(isSearchActive ? searchedMatches : state.matches);
 }
 
 function sortMatches(matches) {
@@ -2106,7 +2099,7 @@ function renderFullMatchHistory(matches) {
         const rival   = escapeHtml(m.rival_nombre) || 'Rival';
         const resultado = escapeHtml(m.resultado || '—');
         const ronda   = m.ronda ? `· ${escapeHtml(m.ronda)}` : '';
-        const tName   = getTournamentNameById(m.tournament_id);
+        const tName   = getTournamentNameById(m.tournament_id, state.tournaments);
         const torneo  = tName ? `· ${escapeHtml(tName)}` : '';
         const scoring = { 'con_ventaja':'Con Ventaja','star_point':'Star Point','punto_oro':'Punto Oro' }[m.scoring_method] || '';
         const notas   = m.notes ? escapeHtml(m.notes) : '';
@@ -2388,7 +2381,7 @@ async function saveMatch() {
 
         // Regla 1: si hay una derrota en ronda INFERIOR (eliminación), no se puede pasar de esa ronda
         if (!matchId && currentIdx >= 0) {
-            const lowerLoss = loadedMatches.find(m =>
+            const lowerLoss = state.matches.find(m =>
                 m.tournament_id === tournamentId &&
                 m.ganado === false &&
                 getRoundIndex(m.ronda) >= 0 &&
@@ -2405,7 +2398,7 @@ async function saveMatch() {
 
         // Regla 2: si es derrota, no puede haber partidos GANADOS en rondas superiores
         if (ganado === false && currentIdx >= 0) {
-            const higherWins = loadedMatches.filter(m =>
+            const higherWins = state.matches.filter(m =>
                 m.tournament_id === tournamentId &&
                 m.ganado === true &&
                 getRoundIndex(m.ronda) >= 0 &&
@@ -2423,7 +2416,7 @@ async function saveMatch() {
         }
 
         // Regla 3: no duplicar ronda en el mismo torneo
-        const dup = loadedMatches.find(m =>
+        const dup = state.matches.find(m =>
             m.tournament_id === tournamentId &&
             m.ronda === ronda &&
             m.id != matchId
@@ -2649,7 +2642,7 @@ async function loadTournaments() {
         });
         if (!res.ok) return;
         const tournaments = await res.json();
-        loadedTournaments = tournaments;
+        state.tournaments = tournaments;
         const select = document.getElementById('m-torneo-select');
         if (!select) return;
         // Keep the first placeholder option
@@ -2723,7 +2716,7 @@ function filterMatchesBySearch() {
         const soloMes    = mesL;
         const soloMesC   = mesC;
         const resultado    = (m.resultado || '').toLowerCase();
-        const torneo       = getTournamentNameById(m.tournament_id).toLowerCase();
+        const torneo       = getTournamentNameById(m.tournament_id, state.tournaments).toLowerCase();
         const rondaPal     = (m.ronda || '').toLowerCase();
         const ganado       = m.ganado ? 'victoria' : 'derrota';
         const notas        = (m.notes || '').toLowerCase();
@@ -2759,7 +2752,7 @@ function filterMatchHistory() {
     const select = document.getElementById('match-filter');
     const currentVal = select.value;
     select.innerHTML = '<option value="all">📋 Todos</option><option value="amistoso">🎾 Amistosos</option>';
-    loadedTournaments.forEach(t => {
+    state.tournaments.forEach(t => {
         const opt = document.createElement('option');
         opt.value = t.id;
         opt.textContent = `🏆 ${t.name}`;
@@ -2772,7 +2765,7 @@ function filterMatchHistory() {
 }
 
 async function loadTournamentFilterOptions() {
-    // Use loadedTournaments populated by loadTournaments, just refresh the filter
+    // Use state.tournaments populated by loadTournaments, just refresh the filter
     filterMatchHistory();
 }
 
@@ -2824,7 +2817,7 @@ async function createTournamentInline() {
     }
 
     // Si ya existe un torneo con ese nombre y fecha (de cualquier jugador), reusarlo
-    const dup = loadedTournaments.find(t => t.name === name && t.date === date);
+    const dup = state.tournaments.find(t => t.name === name && t.date === date);
     if (dup) {
         cancelNewTournament();
         const select = document.getElementById('m-torneo-select');
@@ -2872,7 +2865,7 @@ async function createTournamentInline() {
         opt.textContent = `🏆 ${tournament.name} — ${dateStr}`;
         select.appendChild(opt);
         select.value = tournament.id;
-        loadedTournaments.push(tournament);
+        state.tournaments.push(tournament);
         onTournamentSelect();
         filterMatchHistory();
 
@@ -2888,7 +2881,7 @@ function getSelectedTournament() {
     const select = document.getElementById('m-torneo-select');
     const tid = select ? select.value : '';
     if (!tid) return null;
-    return loadedTournaments.find(t => t.id === tid) || null;
+    return state.tournaments.find(t => t.id === tid) || null;
 }
 
 function onTournamentSelect() {
@@ -2918,7 +2911,7 @@ function onTournamentSelect() {
     const isEditing = document.getElementById('btn-save-match').dataset.matchId;
     if (!isEditing) {
         unlockPartnerSection();
-        const existingMatch = (loadedMatches || []).find(m =>
+        const existingMatch = (state.matches || []).find(m =>
             m.tournament_id === t.id &&
             (m.partner_id || m.partner_nombre)
         );
@@ -3017,7 +3010,7 @@ async function saveTournamentEdit() {
         if (document.getElementById('match-history-modal')
             && !document.getElementById('match-history-modal').classList.contains('hidden')) {
             await loadMatches();
-            renderFullMatchHistory(loadedMatches);
+            renderFullMatchHistory(state.matches);
         } else {
             await loadMatches();
         }
@@ -3052,7 +3045,7 @@ async function deleteSelectedTournament() {
                 select.value = '';
             }
             // Update local cache
-            loadedTournaments = loadedTournaments.filter(x => x.id !== t.id);
+            state.tournaments = state.tournaments.filter(x => x.id !== t.id);
             onTournamentSelect();
             filterMatchHistory();
             showToast('🗑️ Torneo eliminado', 'success');
@@ -3115,11 +3108,14 @@ loadMatches = async function() {
     }
 };
 
+// ── Init ──────────────────────────────────────────────────────
+// REMOVED: handled by player_detail.js module script
+// sanitizeEditPlayerNumbers() — kept below for side effects
+// loadPlayer() → player_detail.js:initPlayerDetail()
+// loadTournaments().then(...) → player_detail.js:initPlayerDetail()
+// setSortMode('date-desc') → player_detail.js:initPlayerDetail()
+
 sanitizeEditPlayerNumbers();
-loadPlayer();
-loadTournaments().then(() => loadTournamentFilterOptions());
-// Init sort mode button style
-setSortMode('date-desc');
 
 // Ensure save button is bound and won't submit forms accidentally
 (function bindSaveMatchButton(){
@@ -3205,7 +3201,7 @@ async function openEditMatchModal(matchId) {
             // Hide admin row AFTER onTournamentSelect (which shows it)
             document.getElementById('tournament-admin-row').classList.add('hidden');
             // Show tournament name as read-only select
-            const tName = getTournamentNameById(match.tournament_id) || match.torneo || '';
+            const tName = getTournamentNameById(match.tournament_id, state.tournaments) || match.torneo || '';
             const editSelect = document.getElementById('torneo-edit-name-select');
             if (editSelect) {
                 editSelect.innerHTML = `<option>🏆 ${tName}</option>`;
@@ -3306,7 +3302,7 @@ async function deleteMatch(matchId) {
             // Refresh full history modal if it's open
             const historyModal = document.getElementById('match-history-modal');
             if (historyModal && !historyModal.classList.contains('hidden')) {
-                renderFullMatchHistory(loadedMatches);
+                renderFullMatchHistory(state.matches);
             }
         } else if (res.status === 401) {
             localStorage.clear();
@@ -3331,5 +3327,9 @@ document.addEventListener('click', function(e) {
     btn.textContent = video.muted ? '🔇' : '🔊';
     btn.title = video.muted ? 'Activar sonido' : 'Silenciar';
 });
+
+// ── Module Entry Point ─────────────────────────────────────────
+// Handles data loading and initialization. Runs after classic script.
 </script>
+<script type="module" src="/static/js/player_detail/player_detail.js"></script>
 {% endblock %}

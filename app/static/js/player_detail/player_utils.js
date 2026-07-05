@@ -67,9 +67,10 @@ function resolveCategoryKey(categoryValue) {
     return mapping[categoryValue] ?? categoryValue;
 }
 
-function getTournamentNameById(id) {
+function getTournamentNameById(id, tournaments) {
     if (!id) return '';
-    const t = loadedTournaments.find(t => t.id === id);
+    if (!tournaments) return '';
+    const t = tournaments.find(t => t.id === id);
     return t ? t.name : '';
 }
 
