@@ -390,11 +390,16 @@ renderPlayer() [stays in template] calls both (unchanged signatures)
 
 ## PR #6B — Match + Tournament Rendering
 
-**Objective**: Extract match and tournament rendering into `match_renderer.js` and `tournament_renderer.js`, unify duplicate match card template.
+**Objective**: Eliminar la duplicación del componente visual Match Card (131 líneas duplicadas). Extraer match y tournament rendering a `match_renderer.js` y `tournament_renderer.js`.
 
 **Rule**: Toda plantilla HTML repetida debe existir en un único lugar al terminar el PR.
 
-**Definition of Done**: 131 lines of duplicate match card template consolidated into one `renderMatchCard()`. Match lists and tournament display identical.
+**Definition of Done** (5 condiciones):
+- [ ] Existe una única plantilla Match Card (`<div class="match-card"...`)
+- [ ] `renderMatches()` ya no contiene HTML duplicado — usa `renderMatchCard()`
+- [ ] `renderFullMatchHistory()` reutiliza exactamente la misma plantilla
+- [ ] No cambia ni un solo elemento visual de la tarjeta
+- [ ] `tournament_renderer.js` solo renderiza; no carga ni guarda datos
 
 **Affected files**:
 - CREATE: `app/static/js/player_detail/match_renderer.js` (~120 lines)
@@ -403,19 +408,31 @@ renderPlayer() [stays in template] calls both (unchanged signatures)
 
 **Dependencies**: PR #6A.
 
-**Strategy**: Extraer primero el componente MatchCard (131 líneas duplicadas) → después `renderMatches()` → `renderFullMatchHistory()` → `sortMatches()` y helpers. Esto aísla el cambio más riesgoso (duplicación) al inicio del PR.
+**Resumen del alcance**:
 
-**Extract → Integrate → Validate → Delete**:
-- [ ] 6B.1 **MatchCard first**. Extraer `buildMatchCard(match)` o `renderMatchCard(match)` — unificar las 131 líneas duplicadas de template HTML. Eliminar AMBAS copias originales.
-- [ ] 6B.2 Extract `renderMatches()` — usar `renderMatchCard()` internamente
-- [ ] 6B.3 Extract `renderFullMatchHistory()` — usar `renderMatchCard()` internamente
-- [ ] 6B.4 Extract `sortMatches()` + helpers (`setSortMode`, `getRoundIndex`)
-- [ ] 6B.5 Create `tournament_renderer.js` — extraer SOLO render de torneos (sin mezclar con datos/API). `renderTournaments()`, render de modales de torneo
-- [ ] 6B.6 Wire into entry point, remove originals from `player_detail.html`
-- [ ] 6B.7 Visual validation: match cards identical in list and history, tournament list correct
-- [ ] 6B.8 Run common checklist
+```
+match_renderer.js
+ ├── renderMatchCard(match)   # Fase 1: extraer primero, UNIFICAR duplicación
+ ├── renderMatches()           # Fase 2: usa renderMatchCard()
+ ├── renderFullMatchHistory()  # Fase 3: usa renderMatchCard()
+ └── sortMatches() + helpers   # Fase 4: sortMode, getRoundIndex
 
-> ⚠️ **No mezclar responsabilidades**: `renderTournament()` renderiza, `loadTournament()` obtiene datos. Permanecen separados.
+tournament_renderer.js
+ └── renderTournaments()       # Fase 5: SOLO render, sin datos/API/CRUD
+```
+
+**No incluido en PR #6B**:
+- ❌ No lógica de negocio dentro de renderMatchCard (solo template HTML)
+- ❌ No fetch, no API calls
+- ❌ No CRUD (edit/delete/save — esperan PR #8A)
+- ❌ No analytics
+- ❌ match_renderer.js no debe superar ~200-250 líneas
+
+**Validación específica**:
+- [ ] `grep '<div class="match-card"'` → exactamente 1 ocurrencia en todo el proyecto
+- [ ] `grep 'function renderMatchCard\|function buildMatchCard'` → exactamente 1 función
+- [ ] `getElementById` count no aumenta
+- [ ] match_renderer.js ≤250 líneas
 
 ---
 

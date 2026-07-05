@@ -110,3 +110,19 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 | `document.getElementById()` | ~60 | **~43** | **−17** |
 
 > **Nota**: Primer PR que conecta `player_dom.js`. Las funciones extraídas usan `window.DOM.*` en lugar de `document.getElementById`. 17 llamadas DOM reemplazadas. renderPlayer, setAvatar, uploadAvatar, findStrongestStatFromPlayer y SCOUTER_STAT_FIELDS ahora viven en player_render.js.
+
+### PR #6B — Match + Tournament Rendering (target)
+
+| Métrica | Antes | Después | Δ |
+|---------|:-----:|:-------:|:-:|
+| player_detail.html | 2.444 | | |
+| JS inline | 1.363 | | |
+| match_renderer.js (nuevo) | — | | |
+| tournament_renderer.js (nuevo) | — | | |
+| Plantillas Match Card `<div class="match-card"` | **2** | **1** | **−1** |
+| Función más larga | 105 | | |
+| Funciones >100 líneas | 1 | | |
+| Globales | 5 | | |
+| `document.getElementById()` | ~43 | | |
+
+> **Target**: Una única función `renderMatchCard()`. Cero HTML duplicado. tournament_renderer.js sin fetch/CRUD.
