@@ -1,42 +1,47 @@
 /**
  * player_detail.js
  *
- * Entry point for the player detail page.
- * PR #3 — Bridge module. Calls existing global functions from old inline script.
+ * Orchestrator — calls API, sets state, calls render.
+ * PR #7 — Integration phase.
  *
- * Restricciones:
- * - No define funciones de render/CRUD/analytics
- * - Solo orquesta: carga estado, llama a funciones existentes
- * - Las funciones existentes viven en el bloque <script> clásico
+ * Reglas:
+ * - Único archivo que importa módulos ES
+ * - No define render/CRUD
+ * - No importa otro módulo
+ * - API → state → render
  */
 
 import { state } from './player_state.js';
 import { DOM } from './player_dom.js';
 
-// TEMP: Expuesto durante el refactor para mantener compatibilidad
-// con el JS clásico inline que aún no puede importar módulos ES.
-// Las funciones legacy acceden a state a través de window.state.
-// Se eliminará en PR #8 cuando desaparezcan las referencias legacy.
 window.state = state;
-
-// TEMP bridge — player_render.js (classic script) usa window.DOM
-// porque aún no puede importar módulos ES.
-// Remove in PR #8 when every rendering module imports DOM directly.
 window.DOM = DOM;
 
-export function initPlayerDetail() {
+export async function initPlayerDetail() {
     const playerId = window.location.pathname.split('/').pop();
     state.playerId = playerId;
+    window.playerId = playerId;
+    window.token = localStorage.getItem('access_token');
+    if (!window.token) { window.location.href = '/login'; return; }
 
-    // Call existing global functions (defined in classic <script> block)
-    // loadPlayer() internally calls loadMatches() at the end
-    loadPlayer();
-    loadTournaments().then(() => {
-        if (typeof loadTournamentFilterOptions === 'function') {
-            loadTournamentFilterOptions();
-        }
-        if (typeof setSortMode === 'function') {
-            setSortMode('date-desc');
-        }
-    });
+    // Load player + analysis
+    const [player, analyses] = await Promise.all([
+        fetchPlayer(playerId),
+        fetchAnalyses(playerId)
+    ]);
+    state.player = player;
+    renderPlayer(player, analyses);
+
+    // Load matches
+    const matches = await fetchMatches(playerId, currentFilter || 'all');
+    state.matches = matches;
+    allServerMatches = matches;
+    filterMatchesBySearch();
+
+    // Load tournaments
+    const tournaments = await fetchTournaments(playerId);
+    state.tournaments = tournaments;
+    renderTournaments(tournaments, 'm-torneo-select');
+    filterMatchHistory();
+    setSortMode('date-desc');
 }
