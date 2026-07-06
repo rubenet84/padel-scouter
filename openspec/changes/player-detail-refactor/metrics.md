@@ -111,6 +111,20 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 
 > **Nota**: Primer PR que conecta `player_dom.js`. Las funciones extraídas usan `window.DOM.*` en lugar de `document.getElementById`. 17 llamadas DOM reemplazadas. renderPlayer, setAvatar, uploadAvatar, findStrongestStatFromPlayer y SCOUTER_STAT_FIELDS ahora viven en player_render.js.
 
+### PR #7 — Infrastructure (API + Partials)
+
+| Métrica | Antes | Después | Δ |
+|---------|:-----:|:-------:|:-:|
+| player_detail.html | 2.202 | **1.273** | **−929** |
+| JS inline | 1.130 | **~500** | **−630** |
+| player_api.js (nuevo) | — | **152** | +152 |
+| Partials | — | **6 archivos** | +6 |
+| `document.getElementById()` | ~43 | **~43** | 0 |
+| Globales | 5 | **5** | 0 |
+| player_detail.js | 47 ln | 47 ln | 0 |
+
+> **Nota**: PR más transformador. 14 fetch() reemplazados con API module. player_detail.js ahora es orchestrator puro (API → state → render). Partials sin script tags. 6 partials creados, 3 incluidos en template por el sub-agente + los 3 restantes añadidos manualmente (modals, analytics).
+
 ### PR #6B — Match + Tournament Rendering
 
 | Métrica | Antes | Después | Δ |
