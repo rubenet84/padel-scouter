@@ -98,7 +98,7 @@ deleteMatch(matchId)                                 [template inline, line 1371
 | 1 | tipo = torneo && !tournamentId | "Selecciona un torneo" | ✅ |
 | 2 | rival.length > 200 | "Nombre muy largo" (OWASP) | ✅ |
 | 3 | !rival \|\| !resultado | "Rellena el rival y el resultado" | ✅ |
-| 4 | hasLesionNote (⚠️ BUG: ReferenceError) | — | ✅ |
+| 4 | hasLesionNote → player_utils.js | — | ✅ |
 | 5 | validateResultString(resultado) inválido | Mensaje del validador | ✅ |
 | 6 | winner mismatch | "El resultado no indica..." | ✅ |
 | 7 | Torneo: derrota en ronda inferior | "Ya perdió en {ronda}" | ✅ |
@@ -116,7 +116,7 @@ deleteMatch(matchId)                                 [template inline, line 1371
 | **Éxito PUT** | closeMatchModal(), reset btn, loadMatches(), renderComputedStats() |
 | **Error HTTP** | Display error from API response |
 | **Error red** | "Error de conexión" genérico |
-| **ReferenceError** (BUG) | `hasLesionNote` / `getTournamentNameById` not defined |
+| *(sin errores no cubiertos)* | — |
 
 ## 4. DOM Dependencies
 
@@ -167,38 +167,30 @@ state.playerId        → leído por API calls (playerId global)
 
 ---
 
-## 7. Bugs Found
+## 7. Verificación de funciones perdidas (POST-AUDIT)
 
-### Bug #1: `hasLesionNote()` — función faltante
+Durante la auditoría se identificaron referencias a `hasLesionNote()` y `getTournamentNameById()` sin definición visible. Se verificó el código fuente:
 
-- **Origen**: PR #2 (#280328d) — se eliminó del template con nota "moved to player_utils.js"
-- **Realidad**: Nunca se agregó a player_utils.js
-- **Impacto**: saveMatch() lanza ReferenceError en la validación de lesión (línea 697)
-- **Firma original**: `function hasLesionNote(notes) { return (notes || '').toLowerCase().match(/lesi[oó]n|retiro|retirada|abandono/i); }`
-- **Fix**: Agregar a player_utils.js como función pura (0 side effects, 0 DOM)
+```
+Select-String player_utils.js → "hasLesionNote" → ✅ ENCONTRADA (línea 46)
+Select-String player_utils.js → "getTournamentNameById" → ✅ ENCONTRADA (línea 70)
+Select-String page HTML → "hasLesionNote" → ✅ PRESENTE (en player_utils.js script tag)
+```
 
-### Bug #2: `getTournamentNameById()` — función faltante
-
-- **Origen**: PR #2 (#280328d) — se eliminó del template con nota "moved to player_utils.js"
-- **Realidad**: Nunca se agregó a player_utils.js
-- **Impacto**: openEditMatchModal() lanza ReferenceError (línea 1298). match_renderer.js también la llama (línea 32) pero con parámetro extra `state.tournaments`
-- **Firma necesaria**: `function getTournamentNameById(id, tournaments) { if (!id || !tournaments) return ''; const t = tournaments.find(t => t.id == id); return t ? t.name : ''; }`
-- **Nota**: La firma original solo recibía `id` y usaba `loadedTournaments` global. La versión necesitada recibe `(id, tournaments)` con `state.tournaments`
-- **Fix**: Agregar a player_utils.js como función pura con la firma actualizada
+**Ambas funciones SÍ existen en `player_utils.js`** desde PR #2. El falso positivo fue causado por un error en la búsqueda (`-SimpleMatch` con `|` que se interpretó como pipe literal en vez de OR). **No hay bugs.** La página responde correctamente.
 
 ---
 
 ## 8. Orden de Extracción Propuesto
 
 ```
-Paso 1: Fix bugs — agregar hasLesionNote() y getTournamentNameById() a player_utils.js
-Paso 2: Extraer validateResultString() → player_matches.js (pura, 0 side effects)
-Paso 3: Extraer renderComputedStats() → player_matches.js (solo DOM writes, sin fetch)
-Paso 4: Extraer saveMatch() → player_matches.js (toda la lógica + side effects)
-Paso 5: Extraer openEditMatchModal() → player_matches.js (form population)
-Paso 6: Extraer deleteMatch() → player_matches.js (API call + refresh)
-Paso 7: Eliminar funciones originales del template
-Paso 8: UAT completa (crear, editar, eliminar partido; CRUD torneo)
+Paso 1: Extraer validateResultString() → player_matches.js (pura, 0 side effects)
+Paso 2: Extraer renderComputedStats() → player_matches.js (solo DOM writes, sin fetch)
+Paso 3: Extraer saveMatch() → player_matches.js (toda la lógica + side effects)
+Paso 4: Extraer openEditMatchModal() → player_matches.js (form population)
+Paso 5: Extraer deleteMatch() → player_matches.js (API call + refresh)
+Paso 6: Eliminar funciones originales del template
+Paso 7: UAT completa (crear, editar, eliminar partido; CRUD torneo)
 ```
 
 > **Nota**: `resetMatchForm()`, `toggleTorneo()`, `onPartnerSelect()`, `lockPartnerForTournament()`, `unlockPartnerSection()`, y las funciones de torneo (showNewTournamentForm, cancelNewTournament, createTournamentInline, etc.) también deberían migrarse a player_matches.js ya que pertenecen al lifecycle de match CRUD.
