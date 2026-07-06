@@ -1,0 +1,31 @@
+{# _player_history.html — Match list, historial, búsqueda, filtros #}
+{# Dependencias: matches (array) #}
+
+<!-- Historial de combate -->
+<div id="matches-section" class="rounded-2xl card-hover hidden" style="background:#12121A;border:1px solid rgba(168,85,247,0.15);overflow:hidden;">
+    <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
+    <div class="p-6">
+        <div class="flex items-center justify-between mb-5">
+            <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(168,85,247,0.7);">📋 Historial de Combate</span>
+            <button onclick="openMatchModal()" title="Registrar un nuevo partido con rival, ronda y resultado"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                    style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:#a855f7;">
+                + Añadir partido
+            </button>
+        </div>
+        <!-- Filtro de partidos -->
+        <div class="flex items-center gap-3 mb-4">
+            <input id="mh-filter-search" type="text" placeholder="🔍 Buscar por rival, fecha, resultado, ronda..."
+                oninput="filterMatchesBySearch()"
+                class="rounded-lg px-3 py-2 text-sm text-white flex-1 min-w-0"
+                style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+            <select id="match-filter" onchange="onMatchFilterChange()"
+                    class="rounded-lg px-3 py-2 text-sm text-white"
+                    style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                <option value="all">📋 Todos</option>
+                <option value="amistoso">🎾 Amistosos</option>
+            </select>
+        </div>
+        <div id="matches-list" class="space-y-2"></div>
+    </div>
+</div>

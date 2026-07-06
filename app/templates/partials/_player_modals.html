@@ -1,0 +1,463 @@
+{# _player_modals.html — Todos los modales (match CRUD, torneo, confirmación) #}
+{# Dependencias: player (object), tournaments (array) #}
+
+<!-- ── Modal Editar Jugador ────────────────────────────────── -->
+<div id="edit-modal" class="fixed inset-0 flex items-center justify-center p-4 hidden" style="z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
+    <div class="w-full max-w-2xl rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(255,107,0,0.25);max-height:92vh;overflow-y:auto;">
+        <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#FF6B00,transparent);"></div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(255,107,0,0.8);">✏️ Editar Jugador</span>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+
+            <!-- Nombre y categoría -->
+            <div class="grid grid-cols-2 gap-4 mb-5">
+                <div>
+                    <label class="text-xs text-gray-500 mb-1 block">Nombre</label>
+                    <input id="edit-name" type="text"
+                        class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                        style="background:#0A0A0F;border:1px solid rgba(255,107,0,0.2);">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 mb-1 block">Categoría</label>
+                    <select id="edit-category"
+                            class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                            style="background:#0A0A0F;border:1px solid rgba(255,107,0,0.2);">
+                        <option value="Iniciación">🟢 Iniciación (1.0 – 2.5)</option>
+                        <option value="5ª Categoría">🟡 5ª Categoría (2.0 – 3.0)</option>
+                        <option value="4ª Categoría">🟡 4ª Categoría (3.0 – 3.75)</option>
+                        <option value="3ª Categoría">🟡 3ª Categoría (3.75 – 4.25)</option>
+                        <option value="2ª Categoría">🔴 2ª Categoría (4.25 – 4.75)</option>
+                        <option value="1ª Categoría">🔴 1ª Categoría (4.75 – 6.0)</option>
+                        <option value="Profesional">🔴 Profesional (6.0 – 7.0)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Stats técnica -->
+            <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(255,215,0,0.6);">⚡ Técnica (0-100)</p>
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                <div><label class="text-xs text-gray-500">Derecha</label>
+                    <input id="e-derecha" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Revés</label>
+                    <input id="e-reves" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Volea Derecha</label>
+                    <input id="e-volea_derecha" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Volea Revés</label>
+                    <input id="e-volea_reves" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Bandeja</label>
+                    <input id="e-bandeja" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Víbora</label>
+                    <input id="e-vibora" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Remate</label>
+                    <input id="e-remate" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Globo</label>
+                    <input id="e-globo" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Saque</label>
+                    <input id="e-saque" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Bajada pared</label>
+                    <input id="e-bajada_pared" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+            </div>
+
+            <!-- Stats físico -->
+            <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(0,180,216,0.6);">💨 Físico (0-100)</p>
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                <div><label class="text-xs text-gray-500">Velocidad</label>
+                    <input id="e-velocidad" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Resistencia</label>
+                    <input id="e-resistencia" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Reflejos</label>
+                    <input id="e-reflejos" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+            </div>
+
+            <!-- Stats mental -->
+            <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(0,255,135,0.6);">🧠 Mental / Táctico (0-100)</p>
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                <div><label class="text-xs text-gray-500">Táctica</label>
+                    <input id="e-tactica" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Presión</label>
+                    <input id="e-presion" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <div><label class="text-xs text-gray-500">Trabajo en pareja</label>
+                    <input id="e-trabajo_en_pareja" type="number" min="0" max="100"
+                        class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
+                        style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
+                </div>
+            </div>
+
+            <div id="edit-error" class="hidden mb-4 text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
+
+            <button onclick="saveAndAnalyze()" id="btn-save"
+                    class="w-full py-3 rounded-xl font-bold text-sm transition-all"
+                    style="background:rgba(255,107,0,0.2);border:1px solid rgba(255,107,0,0.4);color:#FF6B00;">
+                💾 Guardar y relanzar análisis IA
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal Añadir Partido ────────────────────────────────── -->
+<div id="match-modal" class="fixed inset-0 flex items-center justify-center p-4 hidden" style="z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
+    <div class="w-full max-w-xl rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(168,85,247,0.25);">
+        <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <span id="match-modal-title" class="text-sm font-bold" style="color:#a855f7;">📋 Nuevo partido</span>
+                <button onclick="closeMatchModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Tipo de partido -->
+                <div>
+                    <label class="text-xs text-gray-500 mb-1 block">Tipo de partido</label>
+                    <select id="m-tipo" onchange="toggleTorneo()"
+                            class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                            style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                        <option value="amistoso">🎾 Partido amistoso</option>
+                        <option value="torneo">🏆 Torneo</option>
+                    </select>
+                </div>
+
+                {% include 'partials/_player_tournaments.html' %}
+
+                <!-- Rival (visible for amistoso) -->
+                <div id="amistoso-rival-field">
+                    <label class="text-xs text-gray-500 mb-1 block">Rival</label>
+                    <input id="m-rival" type="text" placeholder="ej: García / López"
+                        class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                        style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                </div>
+
+                <!-- Resultado -->
+                <div>
+                    <label class="text-xs text-gray-500 mb-1 block">Resultado (formato FIP 2026)</label>
+                    <input id="m-resultado" type="text" placeholder="ej: 6-4 6-3"
+                        class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                        style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                    <p class="text-xs mt-1" style="color:#475569;">Sets separados por espacios · Tie-break: 7-6</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">Victoria / Derrota</label>
+                        <select id="m-ganado"
+                                class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                                style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                            <option value="true">✅ Victoria</option>
+                            <option value="false">❌ Derrota</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">Tipo de puntuación</label>
+                        <select id="m-scoring"
+                                class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                                style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);">
+                            <option value="con_ventaja">Con Ventaja</option>
+                            <option value="star_point">Star Point (2026)</option>
+                            <option value="punto_oro">Punto de Oro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Fecha del partido -->
+                <div>
+                    <label class="text-xs text-gray-500 mb-1 block">Fecha del partido <span class="text-gray-600">(opcional, hoy por defecto)</span></label>
+                    <input id="m-date" type="date"
+                        class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
+                        style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);color-scheme:dark;">
+                </div>
+
+                <!-- Notas del partido -->
+                <div>
+                    <label class="text-xs text-gray-500 mb-1 block">Notas <span class="text-gray-600">(lesión, retiro, incidencias...)</span></label>
+                    <textarea id="m-notas" rows="2" placeholder="ej: rival se retiró por lesión en el segundo set"
+                        class="w-full rounded-lg px-3 py-2.5 text-sm text-white resize-none"
+                        style="background:#0A0A0F;border:1px solid rgba(168,85,247,0.2);"></textarea>
+                </div>
+
+                <div id="match-error" class="hidden text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
+
+                <button type="button" id="btn-save-match"
+                        class="w-full py-3 rounded-xl font-bold text-sm transition-all"
+                        style="background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);color:#a855f7;">
+                    💾 Guardar partido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Historial completo de combate ────────────────────────── -->
+<div id="match-history-modal" class="fixed inset-0 flex items-center justify-center p-4 hidden" style="z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
+    <div class="w-full max-w-3xl rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(168,85,247,0.25);max-height:90vh;overflow-y:auto;">
+        <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-bold" style="color:#a855f7;">📜 Historial completo de combate</span>
+                <button onclick="closeMatchHistoryModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+            <!-- Sort controls -->
+            <div class="flex items-center gap-2 mb-4 text-xs">
+                <span class="text-gray-500">Ordenar:</span>
+                <button id="sort-date-desc" onclick="setSortMode('date-desc')"
+                    class="px-2.5 py-1 rounded-lg font-bold transition-all"
+                    style="background:rgba(168,85,247,0.2);border:1px solid rgba(168,85,247,0.3);color:#a855f7;">
+                    📅 Más reciente
+                </button>
+                <button id="sort-date-asc" onclick="setSortMode('date-asc')"
+                    class="px-2.5 py-1 rounded-lg font-bold transition-all"
+                    style="background:rgba(168,85,247,0.05);border:1px solid rgba(42,42,58,0.3);color:#666;">
+                    📅 Más antiguo
+                </button>
+                <button id="sort-round" onclick="setSortMode('round')"
+                    class="px-2.5 py-1 rounded-lg font-bold transition-all"
+                    style="background:rgba(168,85,247,0.05);border:1px solid rgba(42,42,58,0.3);color:#666;">
+                    🔄 Ronda ASC
+                </button>
+                <button id="sort-round-desc" onclick="setSortMode('round-desc')"
+                    class="px-2.5 py-1 rounded-lg font-bold transition-all"
+                    style="background:rgba(168,85,247,0.05);border:1px solid rgba(42,42,58,0.3);color:#666;">
+                    🔄 Ronda DESC
+                </button>
+            </div>
+            <div id="match-history-list" class="space-y-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal: Estadísticas Completas ────────────────────────── -->
+<div id="stats-modal"
+    class="fixed inset-0 flex items-center justify-center p-4 hidden"
+    role="dialog" aria-modal="true"
+    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
+    <div class="w-full max-w-2xl rounded-2xl" style="background:#12121A;border:1px solid rgba(255,107,0,0.2);max-height:85vh;overflow-y:auto;position:relative;">
+        <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#FF6B00,transparent);"></div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(255,107,0,0.8);">📊 Estadísticas Completas</span>
+                <button onclick="closeStatsModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+
+            <!-- Técnica -->
+            <div class="mb-6">
+                <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(255,215,0,0.6);">⚡ Técnica</p>
+                <div class="grid grid-cols-1 gap-2" id="stats-tecnica"></div>
+            </div>
+            <!-- Físico -->
+            <div class="mb-6">
+                <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(0,180,216,0.6);">💨 Físico</p>
+                <div class="grid grid-cols-1 gap-2" id="stats-fisico"></div>
+            </div>
+            <!-- Mental -->
+            <div class="mb-6">
+                <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(0,255,135,0.6);">🧠 Mental / Táctico</p>
+                <div class="grid grid-cols-1 gap-2" id="stats-mental"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Match Analytics Modal ────────────────────────────────── -->
+<div id="match-analytics-modal"
+    class="fixed inset-0 flex items-center justify-center p-4 hidden"
+    role="dialog" aria-modal="true"
+    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
+    onclick="if (event.target===event.currentTarget) closeMatchAnalyticsModal()">
+    <div class="w-full max-w-2xl rounded-2xl" style="background:#12121A;border:1px solid rgba(6,182,212,0.2);max-height:85vh;overflow-y:auto;position:relative;">
+        <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#06B6D4,transparent);"></div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(6,182,212,0.8);">📈 Análisis de Partidos</span>
+                <button onclick="closeMatchAnalyticsModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+
+            <div id="analytics-loading" class="text-center py-12">
+                <p class="text-gray-500 text-sm">Cargando análisis...</p>
+            </div>
+
+            {% include 'partials/_player_analytics.html' %}
+        </div>
+    </div>
+</div>
+
+<!-- ── Level Guide Modal ───────────────────────────────────── -->
+<div id="level-guide-modal"
+    class="fixed inset-0 flex items-center justify-center p-4 hidden"
+    role="dialog" aria-modal="true"
+    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
+    onclick="if (event.target===event.currentTarget) closeLevelGuideModal()">
+    <div class="w-full max-w-[1450px] rounded-2xl" style="background:#12121A;border:1px solid rgba(168,85,247,0.2);max-height:90vh;overflow-y:auto;position:relative;">
+        <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-5">
+                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(168,85,247,0.8);">📖 Guía de Niveles</span>
+                <button onclick="closeLevelGuideModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+
+            <div class="grid grid-cols-4 gap-5 items-stretch">
+                <!-- INICIACIÓN -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(34,197,94,0.2);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(34,197,94,0.08);border-bottom:1px solid rgba(34,197,94,0.1);">
+                        <span class="text-base font-bold" style="color:#22c55e;">🟢 INICIACIÓN</span>
+                        <span class="text-base ml-1.5 font-bold" style="color:#22c55e;">1.0 – 2.5</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Primeros pasos. Reglas, técnica básica y consistencia.</p>
+                            <div class="space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Golpes básicos</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Dificultad en voleas</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Prioriza mantener la bola</div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(34,197,94,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#22c55e;">
+                                <span>🎾</span> Pala redonda · punto dulce amplio
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INTERMEDIO -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(234,179,8,0.2);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(234,179,8,0.08);border-bottom:1px solid rgba(234,179,8,0.1);">
+                        <span class="text-base font-bold" style="color:#eab308;">🟡 INTERMEDIO</span>
+                        <span class="text-base ml-1.5 font-bold" style="color:#eab308;">2.0 – 4.5</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Control, colocación y táctica con consistencia.</p>
+                            <div class="space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Bandeja y víbora</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Lee rebotes y se posiciona</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Controla el ritmo</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Compite con frecuencia</div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(234,179,8,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#eab308;">
+                                <span>🎾</span> Pala híbrida · equilibrio control/potencia
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AVANZADO -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(239,68,68,0.2);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.1);">
+                        <span class="text-base font-bold" style="color:#ef4444;">🔴 AVANZADO</span>
+                        <span class="text-base ml-1.5 font-bold" style="color:#ef4444;">4.25 – 7.0</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Sólido, rápido y agresivo. Domina todos los golpes.</p>
+                            <div class="space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Precisión en golpes complejos</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Gran lectura del partido</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Domina ataque y defensa</div>
+                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Torneos habituales</div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(239,68,68,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#ef4444;">
+                                <span>🎾</span> Pala técnica · alta precisión
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mapa de categorías -->
+                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(59,130,246,0.25);">
+                    <div class="px-5 py-4 text-center" style="background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.1);">
+                        <span class="text-base font-bold" style="color:#3b82f6;">📋 CORRESPONDENCIA</span>
+                    </div>
+                    <div class="px-5 py-4 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Todas las categorías FEP con su rango numérico.</p>
+                            <div class="space-y-2.5">
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟢 Iniciación</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">1.0 – 2.5</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 5ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">2.0 – 3.0</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 4ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.0 – 3.75</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 3ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.75 – 4.25</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 2ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.25 – 4.75</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 1ª Categoría</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.75 – 6.0</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 Profesional</span>
+                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">6.0 – 7.0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(59,130,246,0.15);">
+                            <div class="flex items-center gap-1.5 text-sm" style="color:#3b82f6;">
+                                <span>📋</span> Basado en FEP 2026
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
