@@ -525,7 +525,6 @@ async function loadMatches() {
 // ═══════════════════════════════════════════════════════════════
 
 async function saveMatch() {
-    console.log('saveMatch called');
     const D = window.DOM;
     const tipoEl = D.mTipo?.();
     const tipo = tipoEl ? tipoEl.value : '';
@@ -569,8 +568,6 @@ async function saveMatch() {
         }
         return;
     }
-
-    console.log('saveMatch inputs', { tipo, rival, resultado, ganado, tournamentId, ronda });
 
     if (!rival || !resultado) {
         if (errEl) {
@@ -716,7 +713,6 @@ async function saveMatch() {
             await apiSaveMatch(playerId, body);
         }
 
-        console.log(`saveMatch: ${matchId ? 'updated' : 'saved'} OK`);
         closeMatchModal();
         if (btn) {
             btn.dataset.matchId = '';
@@ -867,7 +863,6 @@ async function deleteMatch(matchId) {
 
     try {
         await apiDeleteMatch(matchId, playerId);
-        console.log('Match deleted successfully');
         await loadMatches();
         renderComputedStats(playerId);
         const historyModal = document.getElementById('match-history-modal');
@@ -889,5 +884,4 @@ async function deleteMatch(matchId) {
     if (!btn) { console.warn('btn-save-match not found when binding saveMatch'); return; }
     btn.type = 'button';
     btn.addEventListener('click', function (e) { e.preventDefault(); saveMatch(); });
-    console.log('btn-save-match listener attached');
 })();
