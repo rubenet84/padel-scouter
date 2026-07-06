@@ -45,3 +45,17 @@ export async function initPlayerDetail() {
     filterMatchHistory();
     setSortMode('date-desc');
 }
+
+async function reloadPlayer() {
+    const playerId = window.playerId;
+    const [player, analyses] = await Promise.all([
+        fetchPlayer(playerId),
+        fetchAnalyses(playerId)
+    ]);
+    state.player = player;
+    renderPlayer(player, analyses);
+    loadMatches();
+}
+
+// Bridge for classic scripts (player_analytics.js)
+window.reloadPlayer = reloadPlayer;

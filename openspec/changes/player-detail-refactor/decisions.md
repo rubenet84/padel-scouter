@@ -150,3 +150,47 @@ Solo decisiones arquitectónicas importantes. Cada ADR tiene contexto, decisión
 5. player_detail.js ≤80 líneas, solo orquestación (fetch → state → render)
 
 **Estado**: Aprobada, aplica desde PR #7.
+
+---
+
+## ADR-013: PR #8B — player_detail.js no contiene lógica de Analytics
+
+**Contexto**: PR #8B extrae las últimas 4 funciones inline del template: `loadPlayer()`, `analyzeNow()`, `openMatchAnalyticsModal()`, `saveAndAnalyze()`. `loadPlayer()` es orquestación pura (API → state → render), las otras 3 son específicas de Analytics. El instinto natural sería poner todas en `player_analytics.js`, pero eso mezclaría orquestación con lógica de feature.
+
+**Decisión**: 
+1. `loadPlayer()` → `reloadPlayer()` va a `player_detail.js` como función de orquestación. Está junto a `initPlayerDetail()` porque ambas coordinan el mismo flujo.
+2. `analyzeNow()`, `saveAndAnalyze()`, `openMatchAnalyticsModal()` van a `player_analytics.js` como funciones de feature.
+3. `player_detail.js` NO contiene lógica específica de Analytics — solo orquesta. "Orquestar" significa llamar API → setear state → llamar render. Nada más.
+
+**Regla PR #8B**: `player_detail.js` únicamente coordina flujos de alto nivel. No contiene lógica específica de Analytics ni de ninguna otra feature.
+
+**Consecuencias**:
+- `player_detail.js` se mantiene en su rol de orquestador (~55 líneas final)
+- `player_analytics.js` contiene feature completa de analytics (trigger → recarga)
+- `reloadPlayer()` es reutilizable por cualquier feature que necesite refrescar datos del jugador
+- Si en el futuro `analyzeNow()` crece, el lugar correcto ya está definido
+
+**Estado**: Aprobada, aplica desde PR #8B.
+
+---
+
+## ADR-014: Bridges `window.state` y `window.DOM` se difieren a cambio independiente
+
+**Contexto**: PR #8B deja el refactor completo. `player_detail.html` pasó de 3.619 ln a ~350 ln con 0 funciones inline. Sin embargo, `player_detail.js` (ES module) exporta `window.state` y `window.DOM` como bridges de compatibilidad para los classic scripts (`player_render.js`, `player_matches.js`, `player_modals.js`, `match_renderer.js`). Estos bridges estaban marcados como "TEMP — eliminar en PR #8 final".
+
+**Decisión**: No eliminar los bridges en este refactor. Se documentan como deuda técnica y se difieren a un cambio independiente. Motivos:
+1. Eliminar bridges requiere migrar classic scripts a ES modules, cambiar onclick handlers inline por listeners, y revisar el ciclo de carga. Eso es otro refactor, no un cleanup.
+2. El objetivo del SDD original ("refactor player_detail.html manteniendo 100% comportamiento") ya está conseguido.
+3. La regla de scope creep pesa más que la perfección arquitectónica en este punto.
+4. El riesgo de regresión justo antes del merge no compensa el beneficio de eliminar dos globals.
+
+**Deuda técnica documentada**:
+- `window.state` (PlayerState singleton) — accedido por player_render.js, player_matches.js, player_modals.js, match_renderer.js
+- `window.DOM` (DOM references) — accedido por player_render.js, player_matches.js
+
+**Para migrar**: Crear cambio `player-detail-esm-migration` con:
+1. Convertir classic scripts a `type="module"` con `import { state } from './player_state.js'` e `import { DOM } from './player_dom.js'`
+2. Sustituir onclick inline por `addEventListener` desde los módulos
+3. Revisar orden de carga y ciclo de inicialización
+
+**Estado**: Deuda técnica aceptada. No se resuelve en este refactor.

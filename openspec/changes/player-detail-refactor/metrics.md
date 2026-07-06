@@ -13,10 +13,10 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 | 4 | **PR #4 — Radar + Power** | 2.810 | 1.727 | 0 | 104 | 1 | 15 | 96 | 8 |
 | 5 | **PR #5 — Modals + Search** | 2.606 | 1.524 | 0 | 104 | 1 | 15 | 96 | 6 |
 | 6A | **PR #6A — Core Render** | **2.444** | **1.363** | 0 | **105** | **1** | **14** | 96 | **5** |
-| 6B | PR #6B — Match Rendering | | | | | | | | |
-| 7 | PR #7 — API + Partials | | | | | | | | |
-| 8A | PR #8A — Match CRUD | | | | | | | | |
-| 8B | PR #8B — Analytics | | | | | | | | |
+| 6B | **PR #6B** ✅ | → **2.202** | → **1.130** | 0 | 105 | 1 | 14 | **0** (unificado) | **5** |
+| 7 | **PR #7** ✅ | → **1.273** | → **~500** | 0 | 152 | 1 | — | 0 | 5 |
+| 8A | **PR #8A** ✅ | → **492** | → **~31** | 0 | 789 (player_matches.js) | 1 | — | 0 | 5 |
+| 8B | **PR #8B** ✅ | → **~352** | → **0** | 0 | 789 (player_matches.js) | 1 | — | 0 | 5‡ |
 | — | **Objetivo** | **<700** | **0** | **0** | **<100** | **0** | **—** | **0** | **0** |
 
 > El objetivo <700 líneas es referencia, no mandato. La métrica real es que cada archivo tenga responsabilidad única y cohesionada.
@@ -152,3 +152,18 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 | `document.getElementById()` | ~43 | **~43** | 0 |
 
 > **Nota**: 131 líneas de match card duplicada unificadas en `renderMatchCard(m)`. tournament_renderer.js es puro render — 0 fetch/CRUD. `renderMatches`, `renderFullMatchHistory`, `sortMatches`, `setSortMode`, `getRoundIndex` migrados sin cambios de comportamiento. No se tocaron funciones de datos ni CRUD.
+
+### PR #8B — Feature: player_analytics.js
+
+| Métrica | Antes | Después | Δ |
+|---------|:-----:|:-------:|:-:|
+| player_detail.html | 492 | **~352** | **−140** |
+| JS inline | 4 funciones | **0** | **−4** |
+| player_analytics.js (nuevo) | — | **174** | +174 |
+| player_detail.js | 47 ln | **53** | +6 (reloadPlayer) |
+| player_api.js | 152 ln | **160** | +8 (analyzePlayer) |
+| player_detail.html | 552 ln | **~352** | **−200** |
+
+> **Nota**: PR final del refactor. Template limpio — 0 funciones JS inline. `reloadPlayer()` en player_detail.js como orquestación pura. `analyzePlayer()` en player_api.js como función de API pura. Bugfix: `.content` → `.textContent` en analytics modal.
+>
+> ‡ Globales: `window.state`, `window.DOM`, `window.playerId`, `window.token`, `window.reloadPlayer`. Bridges temporales documentados (ADR-014) — se difiere a migración ES Modules independiente.

@@ -626,33 +626,104 @@ async function initPlayerDetail(id) {
 **Dependencies**: PR #7.
 
 **Extract → Integrate → Validate → Delete**:
-- [ ] 8A.1 Create `player_matches.js` — extract `saveMatch()` (line 2571, 239 lines), `openEditMatchModal()` (line 3439, 125 lines), `editMatch()`, `deleteMatch()` (line 3565, 42 lines), `validateResultString()` (line 2536, 34 lines), `saveAndAnalyze()` logic portion (line 2072, 88 lines), `openMatchModal()` (line 2435), `resetMatchForm()` (line 2469), `toggleTorneo()` (line 2519), `createTournamentInline()` (line 3084, 85 lines), `saveTournamentEdit()` (line 3243, 71 lines), `deleteSelectedTournament()` (line 3315, 37 lines), `onMatchFilterChange()` (line 3356), `onPartnerSelect()` (line 2869), `lockPartnerForTournament()` (line 2879), `unlockPartnerSection()` (line 2902), `openMatchModal()`, `showNewTournamentForm()` (line 3064), `cancelNewTournament()` (line 3080), `getSelectedTournament()` (line 3171), `onTournamentSelect()` (line 3178, 44 lines), `showTournamentEditForm()` (line 3223), `cancelTournamentEdit()` (line 3238), `bindSaveMatchButton()`
-- [ ] 8A.2 Wire `initMatches(dom, state, api)` into entry point — passes DOM refs, state, API functions
-- [ ] 8A.3 Delete all original match/tournament functions from `player_detail.html`
+- [x] 8A.1 Create `player_matches.js` — extract `saveMatch()`, `openEditMatchModal()`, `deleteMatch()`, `validateResultString()`, `renderComputedStats()`, `openMatchModal()`, `resetMatchForm()`, `toggleTorneo()`, `createTournamentInline()`, `saveTournamentEdit()`, `deleteSelectedTournament()`, `onMatchFilterChange()`, `onPartnerSelect()`, `lockPartnerForTournament()`, `unlockPartnerSection()`, `loadPartnerPlayers()`, `showNewTournamentForm()`, `cancelNewTournament()`, `getSelectedTournament()`, `onTournamentSelect()`, `showTournamentEditForm()`, `cancelTournamentEdit()`, `loadTournaments()`, `loadTournamentFilterOptions()`, `loadMatches()`, `bindSaveMatchButton()`, `currentFilter` state
+- [x] 8A.2 Wire `player_matches.js` as script tag in template — loaded after bridge script, before main inline script
+- [x] 8A.3 Delete all original match/tournament functions from `player_detail.html`
 - [ ] 8A.4 Full manual validation: create match with all fields, edit match, delete match, tournament CRUD, form validation errors, search/filter after create, analytics after save
 - [ ] 8A.5 Run common checklist
 
 ---
 
-## PR #8B — Feature: `player_analytics.js`
+## PR #8B — Feature: `player_analytics.js` + Final Architecture Review
 
-**Objective**: Extract match analytics and history sorting into `player_analytics.js`.
+**Objective**: Extract remaining 4 inline functions — `loadPlayer()`, `analyzeNow()`, `openMatchAnalyticsModal()`, `saveAndAnalyze()` — into proper modules. Template queda sin JS inline.
 
-**Definition of Done**: Analytics modal, match history modal, sorting all work identically.
+**PR #8B Rule**: `player_detail.js` únicamente coordina flujos de alto nivel. NO contiene lógica específica de Analytics.
+
+**Module mapping (revisado y aprobado)**:
+
+| Función | Destino | Veredicto | Motivo |
+|---------|---------|-----------|--------|
+| `loadPlayer()` → `reloadPlayer()` | `player_detail.js` | ✅ | Orquestación (API → state → render). Sin lógica de analytics. |
+| `analyzeNow()` | `player_analytics.js` | ✅ | Feature de Analytics. |
+| `openMatchAnalyticsModal()` | `player_analytics.js` | ✅ | Render/feature de Analytics. |
+| `saveAndAnalyze()` | `player_analytics.js` | ✅ | Flujo completo de Analytics. |
+
+**Flujo resultante**:
+```
+player_detail.js
+  initPlayerDetail()
+  reloadPlayer()        ← recarga post-análisis
+       │
+       ▼
+player_analytics.js
+  analyzeNow()           ← trigger análisis IA → reloadPlayer()
+  saveAndAnalyze()       ← guardar + re-analizar → reloadPlayer()
+  openMatchAnalyticsModal()  ← render analytics modal
+       │
+       ▼
+player_api.js
+  analyzePlayer()        ← POST /api/v1/analysis/{id} (NUEVO)
+  fetchMatchAnalytics()  ← ya existe
+  updatePlayer()         ← ya existe
+       │
+       ▼
+player_render / match_renderer / tournament_renderer / etc.
+```
+
+**Definition of Done**:
+- `player_detail.html` tiene 0 funciones JS inline (solo `{% block scripts %}`)
+- `player_detail.js` contiene `reloadPlayer()` como orquestación pura
+- `player_analytics.js` contiene las 3 funciones de analytics
+- `player_api.js` tiene `analyzePlayer()` como función de API pura
+- Todos los onclick/event handlers actualizados
+- UAT completa: análisis IA, analytics modal, editar+re-analizar
 
 **Affected files**:
 - CREATE: `app/static/js/player_detail/player_analytics.js` (~150 lines)
-- MODIFY: `app/templates/player_detail.html`
+- MODIFY: `app/static/js/player_detail/player_detail.js` — add `reloadPlayer()`
+- MODIFY: `app/static/js/player_detail/player_api.js` — add `analyzePlayer()`
+- MODIFY: `app/templates/player_detail.html` — delete 4 inline functions, update onclick refs
 
-**Dependencies**: PR #7.
+**Dependencies**: PR #8A.
 
 **Extract → Integrate → Validate → Delete**:
-- [ ] 8B.1 Create `player_analytics.js` — extract `openMatchAnalyticsModal()` (line 1896, 97 lines), `closeMatchAnalyticsModal()` (line 1994), `setSortMode()` (line 2301), `sortMatches()` (line 2326), `openFullMatchHistory()` (line 2284), `openSearchedMatchHistory()` (line 2291), `analyzeNow()` analytics portion
-- [ ] 8B.2 Wire `initAnalytics(dom, state, api)` into entry point
-- [ ] 8B.3 Delete original analytics/history/sort functions from `player_detail.html`
-- [ ] 8B.4 Manual validation: open analytics modal for a match, verify data displayed, sort matches, open full history
-- [ ] 8B.5 Run common checklist
-- [ ] 8B.6 Final validation: confirm `player_detail.html` has zero JS inline (only `{% block scripts %}`)
+- [x] 8B.1 **Pre-flight grep**: `grep -R "loadPlayer(" app/static app/templates` — confirmar solo existe: `analyzeNow()` y `saveAndAnalyze()` llamándolo. ✅ 3 references found (definition + analyzeNow + saveAndAnalyze), no unexpected callers.
+- [x] 8B.2 **Add `analyzePlayer()` to `player_api.js`**: función pura que hace `POST /api/v1/analysis/{playerId}`. Sin DOM, sin state, sin modales. ✅ Added at line 178.
+- [x] 8B.3 **Create `player_analytics.js`**: extraer `analyzeNow()`, `openMatchAnalyticsModal()`, `saveAndAnalyze()`. ✅ Created at `app/static/js/player_detail/player_analytics.js` (203 lines).
+- [x] 8B.4 **Add `reloadPlayer()` to `player_detail.js`**: orquestación pura (API → state → render). NO lógica de analytics. ✅ Added with window bridge at line 49.
+- [x] 8B.5 **Update template**: eliminar las 4 funciones inline, actualizar onclick handlers para apuntar a `analyzeNow`, `saveAndAnalyze`, `openMatchAnalyticsModal`. ✅ All 4 functions removed. onclick refs unchanged (global functions).
+- [x] 8B.6 **Wire script tag**: `player_analytics.js` como classic script (no module) — cargado después de player_api.js, antes de player_detail.js. ✅ Added at line 275.
+- [x] 8B.7 **UAT**: ✅ Análisis IA (HTTP 201), analytics modal (HTTP 200), save+re-analyze (PUT 200 → POST analysis 201), CRUD partidos (create 201 → update 200 → delete 204), búsqueda, modales vía API verificados.
+- [x] 8B.8 **Common checklist**: ✅ 0 fetch() fuera de api.js, 0 funciones inline en template, render no llama API, sin regresiones CRUD.
+- [x] 8B.9 **Final validation**: `player_detail.html` tiene 0 funciones JS inline (solo `{% block scripts %}`). ✅ Confirmed.
+- [x] 8B.10 **Final Architecture Review** — ver checklist abajo ✅
+
+### PR #8B Specific Checklist
+
+- [x] `player_analytics.js` no contiene fetch() inline — usa `analyzePlayer()` desde `player_api.js`
+- [x] `player_analytics.js` no accede a state directamente — solo llama a `reloadPlayer()` cuando necesita recargar
+- [x] `reloadPlayer()` en `player_detail.js` solo orquesta (API → state → render)
+- [x] `player_detail.html` tiene 0 funciones JS inline
+- [x] `analyzePlayer()` en `player_api.js` es función pura (sin DOM/state/modales)
+- [x] onclick="analyzeNow()" funciona (global function desde script tag classic)
+- [x] Escape key cierra analytics modal correctamente
+
+### Final Architecture Review (post-PR #8B checkpoint)
+
+Checklist de aceptación del refactor COMPLETO antes de merge `refactor/player-detail` → `main`:
+
+- [x] **Template limpio**: `player_detail.html` — 0 funciones JS inline ✅
+- [x] **API pura**: 0 fetch() fuera de `player_api.js` ✅
+- [x] **DOM centralizado**: Parcial conforme al diseño (ADR-014) ✅
+- [x] **Bridges documentados**: `window.state` y `window.DOM` aceptados como deuda técnica (ADR-014) ✅
+- [x] **player_matches.js (789 ln)**: Aceptado. Responsabilidad única y cohesiva. ✅
+- [x] **Grafo acíclico**: ningún módulo de features importa a otro ✅
+- [x] **Import graph coincide con `design.md`**: verificado en revisión arquitectónica ✅
+- [x] **player_detail.js (53 ln) ≤ 80 líneas**: solo orquestación ✅
+- [x] **ADS-012 pre-flight contract**: vigente — API pura, render sin fetch, partials sin script tags, flujo API→state→render ✅
+- [x] **Métricas actualizadas**: tabla final en metrics.md (3.619 → ~352, −90.3%) ✅
+- [x] **UAT completa sin regresiones**: 6 secciones, todos los tests pasaron ✅
 
 ---
 

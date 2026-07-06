@@ -174,3 +174,12 @@ async function fetchMatchAnalytics(playerId) {
     if (!res.ok) await __throwWithStatus(res);
     return await res.json();
 }
+
+async function analyzePlayer(playerId) {
+    const res = await fetch(`/api/v1/analysis/${playerId}`, {
+        method: 'POST',
+        headers: __apiHeaders()
+    });
+    if (!res.ok) await __throwWithStatus(res);
+    return await res.json();
+}
