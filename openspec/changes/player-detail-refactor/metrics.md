@@ -125,6 +125,18 @@ Evolución de métricas por PR. Actualizar al finalizar cada PR.
 
 > **Nota**: PR más transformador. 14 fetch() reemplazados con API module. player_detail.js ahora es orchestrator puro (API → state → render). Partials sin script tags. 6 partials creados, 3 incluidos en template por el sub-agente + los 3 restantes añadidos manualmente (modals, analytics).
 
+### PR #8A — Feature: player_matches.js
+
+| Métrica | Antes | Después | Δ |
+|---------|:-----:|:-------:|:-:|
+| player_detail.html | 1.273 | **492** | **−781** |
+| player_matches.js (nuevo) | — | **789** | +789 |
+| Funciones inline | 31 | **4** | **−27** |
+| player_detail.js | 47 ln | 47 ln | 0 |
+| Globales | 5 | **5** | 0 |
+
+> **Nota**: PR más transformador después del audit. 27+ funciones extraídas, incluyendo saveMatch(), deleteMatch(), openEditMatchModal(), y todo el CRUD de torneos. player_detail.html ahora tiene solo 4 funciones: loadPlayer, analyzeNow, openMatchAnalyticsModal, saveAndAnalyze (todo PR #8B). Refactor completo: 3.619 → 492 = **86.4% reducido**.
+
 ### PR #6B — Match + Tournament Rendering
 
 | Métrica | Antes | Después | Δ |
