@@ -21,7 +21,7 @@
  */
 
 // ── Match filter state ──────────────────────────────────────────
-let currentFilter = 'all';
+var currentFilter = 'all';
 
 // ═══════════════════════════════════════════════════════════════
 // 1. VALIDATION

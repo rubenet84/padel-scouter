@@ -33,9 +33,9 @@ export async function initPlayerDetail() {
     renderPlayer(player, analyses);
 
     // Load matches
-    const matches = await fetchMatches(playerId, currentFilter || 'all');
+    const matches = await fetchMatches(playerId, window.currentFilter || 'all');
     state.matches = matches;
-    allServerMatches = matches;
+    window.allServerMatches = matches;
     filterMatchesBySearch();
 
     // Load tournaments
@@ -59,3 +59,6 @@ async function reloadPlayer() {
 
 // Bridge for classic scripts (player_analytics.js)
 window.reloadPlayer = reloadPlayer;
+
+// ── Auto-init ────────────────────────────────────────────
+initPlayerDetail();

@@ -11,7 +11,7 @@
  */
 
 // ── Match history filter with search ──────────────────────────
-let allServerMatches = []; // Full matches from server (before search filter)
+var allServerMatches = []; // Full matches from server (before search filter)
 let searchedMatches = null; // Filtered results when search bar has text
 
 function filterMatchesBySearch() {

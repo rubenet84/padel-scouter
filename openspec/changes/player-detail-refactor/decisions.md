@@ -194,3 +194,19 @@ Solo decisiones arquitectónicas importantes. Cada ADR tiene contexto, decisión
 3. Revisar orden de carga y ciclo de inicialización
 
 **Estado**: Deuda técnica aceptada. No se resuelve en este refactor.
+
+---
+
+## ADR-015: Excepción `player_render.uploadAvatar()` — fetch en renderer
+
+**Contexto**: El contrato arquitectónico (ADR-002, ADR-012) establece que los renderers no hacen fetch(). Sin embargo, `player_render.js` contiene `uploadAvatar()` que realiza un `POST /api/v1/players/{id}/avatar` con FormData.
+
+**Decisión**: No mover `uploadAvatar()` a `player_api.js` en este refactor. Se documenta como excepción consciente porque:
+
+1. `uploadAvatar()` no es un renderer puro — es una acción de UI autocontenida que lee un `<input type="file">`, construye FormData, hace un único POST, actualiza el avatar inmediatamente y muestra feedback (spinner/toast).
+2. Extraerlo requeriría cambiar interfaces, mover responsabilidades y tocar dos módulos, reintroduciendo riesgo de regresión para un beneficio marginal.
+3. La regla "no introducir riesgo cuando el beneficio es pequeño" pesa más que la pureza arquitectónica en este punto.
+
+**Excepción documentada**: `player_render.uploadAvatar()` realiza un POST de subida de archivos por ser una interacción de UI autocontenida. Si en el futuro se unifica toda la capa API (ej: migración ES modules), deberá migrarse a `player_api.js`.
+
+**Estado**: Excepción aceptada. No bloquea el merge. Pendiente de backlog como mejora futura.
