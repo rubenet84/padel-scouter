@@ -112,6 +112,9 @@
     font-family: 'Rajdhani', sans-serif;
     color: #00FF87;
     line-height: 1;
+}
+
+.landing-power-level.landing-glow-active {
     animation: landing-glow-pulse 2.5s ease-in-out infinite;
 }
 
