@@ -229,3 +229,575 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 30px rgba(255, 107, 0, 0.5);
 }
+
+/* ---- Fade-in utility (JS scroll-reveal target) ---- */
+
+.landing-fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.landing-fade-in.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    animation: landing-fade-in 0.6s ease-out forwards;
+}
+
+/* ---- Metrics Section ---- */
+
+.landing-metrics-section {
+    background: linear-gradient(135deg, rgba(18, 18, 26, 0.95), rgba(10, 10, 15, 0.98));
+    border: 1px solid rgba(0, 255, 135, 0.1);
+    border-radius: 20px;
+    padding: 2.5rem 1.5rem;
+}
+
+.landing-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .landing-metrics-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.landing-metric-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.landing-metric-value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    font-family: 'Rajdhani', sans-serif;
+    color: #00FF87;
+    line-height: 1;
+}
+
+@media (min-width: 768px) {
+    .landing-metric-value {
+        font-size: 3rem;
+    }
+}
+
+.landing-metric-label {
+    font-size: 0.8rem;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: center;
+}
+
+/* ---- Rankings Section ---- */
+
+.landing-rankings-section {
+    background: linear-gradient(135deg, rgba(18, 18, 26, 0.95), rgba(10, 10, 15, 0.98));
+    border: 1px solid rgba(255, 107, 0, 0.12);
+    border-radius: 20px;
+    padding: 2.5rem 1.5rem;
+}
+
+.landing-rankings-table {
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.landing-rankings-header {
+    display: grid;
+    grid-template-columns: 50px 1fr 100px 80px;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748B;
+}
+
+.landing-rankings-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 100px 80px;
+    gap: 0.5rem;
+    padding: 0.9rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    align-items: center;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+
+.landing-rankings-row:hover {
+    background: rgba(255, 107, 0, 0.04);
+}
+
+.landing-rankings-col-rank {
+    font-weight: 800;
+    color: #FF6B00;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+}
+
+.landing-rankings-col-name {
+    font-weight: 600;
+    color: #fff;
+}
+
+.landing-rankings-col-power {
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    color: #00FF87;
+    text-align: right;
+}
+
+.landing-rankings-col-change {
+    text-align: right;
+}
+
+.landing-change-positive {
+    color: #00FF87;
+    font-weight: 700;
+}
+
+.landing-change-negative {
+    color: #FF2D2D;
+    font-weight: 700;
+}
+
+.landing-change-neutral {
+    color: #94A3B8;
+    font-weight: 700;
+}
+
+.landing-rankings-player-rank {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #94A3B8;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.landing-rankings-player-rank strong {
+    color: #FF6B00;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+}
+
+/* ---- AI Analysis Section ---- */
+
+.landing-ai-section {
+    background: linear-gradient(135deg, rgba(18, 18, 26, 0.95), rgba(10, 10, 15, 0.98));
+    border: 1px solid rgba(0, 255, 135, 0.12);
+    border-radius: 20px;
+    padding: 2.5rem 1.5rem;
+}
+
+.landing-ai-comparison {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+@media (min-width: 768px) {
+    .landing-ai-comparison {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.landing-ai-player {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 1.75rem;
+    text-align: center;
+}
+
+.landing-ai-player-right {
+    border-color: rgba(0, 255, 135, 0.15);
+    background: rgba(0, 255, 135, 0.03);
+}
+
+.landing-ai-player-vs {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #FF6B00, #FF8C38);
+    border-radius: 50%;
+    font-weight: 900;
+    font-size: 0.875rem;
+    color: #fff;
+    z-index: 2;
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
+}
+
+@media (min-width: 768px) {
+    .landing-ai-player-vs {
+        left: auto;
+        right: -24px;
+        transform: translateY(-50%);
+    }
+
+    .landing-ai-player-right .landing-ai-player-vs {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .landing-ai-player-vs {
+        display: none;
+    }
+}
+
+.landing-ai-player-name {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.25rem;
+}
+
+.landing-ai-player-power {
+    font-size: 2.25rem;
+    font-weight: 900;
+    font-family: 'Rajdhani', sans-serif;
+    color: #00FF87;
+    margin-bottom: 1rem;
+}
+
+.landing-ai-player-right .landing-ai-player-power {
+    color: #FF6B00;
+}
+
+.landing-ai-traits {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: left;
+}
+
+.landing-ai-trait-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.landing-ai-trait-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #64748B;
+}
+
+.landing-ai-strengths,
+.landing-ai-weaknesses {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.landing-ai-strengths li {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 8px;
+    background: rgba(0, 255, 135, 0.1);
+    color: #00FF87;
+    border: 1px solid rgba(0, 255, 135, 0.15);
+}
+
+.landing-ai-weaknesses li {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 8px;
+    background: rgba(255, 45, 45, 0.08);
+    color: #FF6B6B;
+    border: 1px solid rgba(255, 45, 45, 0.15);
+}
+
+/* ---- Improvement Plan ---- */
+
+.landing-ai-plan {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 1.75rem;
+}
+
+.landing-ai-plan-item {
+    margin-bottom: 1.25rem;
+}
+
+.landing-ai-plan-item:last-child {
+    margin-bottom: 0;
+}
+
+.landing-ai-plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.landing-ai-plan-area {
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.landing-ai-priority-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.landing-ai-priority-high {
+    background: rgba(255, 45, 45, 0.15);
+    color: #FF6B6B;
+    border: 1px solid rgba(255, 45, 45, 0.25);
+}
+
+.landing-ai-priority-medium {
+    background: rgba(255, 215, 0, 0.12);
+    color: #FFD700;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.landing-ai-priority-low {
+    background: rgba(0, 255, 135, 0.1);
+    color: #00FF87;
+    border: 1px solid rgba(0, 255, 135, 0.15);
+}
+
+.landing-ai-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.landing-ai-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.landing-ai-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF6B00, #FF8C38);
+    border-radius: 99px;
+    transition: width 0.8s ease;
+}
+
+.landing-ai-progress-value {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    color: #94A3B8;
+    min-width: 2.5rem;
+    text-align: right;
+}
+
+/* ---- Mockups Section ---- */
+
+.landing-mockups-section {
+    background: linear-gradient(135deg, rgba(18, 18, 26, 0.95), rgba(10, 10, 15, 0.98));
+    border: 1px solid rgba(0, 180, 216, 0.12);
+    border-radius: 20px;
+    padding: 2.5rem 1.5rem;
+    z-index: 1;
+}
+
+.landing-mockups-showcase {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    justify-items: center;
+}
+
+@media (min-width: 640px) {
+    .landing-mockups-showcase {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .landing-mockups-showcase {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.landing-mockup-frame {
+    position: relative;
+    width: 220px;
+    background: #1a1a2e;
+    border-radius: 32px;
+    padding: 12px 6px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+}
+
+.landing-mockup-notch {
+    width: 120px;
+    height: 22px;
+    background: #0A0A0F;
+    border-radius: 0 0 16px 16px;
+    margin: -12px auto 8px;
+}
+
+.landing-mockup-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+}
+
+.landing-mockup-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 3rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    color: #64748B;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.landing-mockup-fallback-icon {
+    font-size: 2.5rem;
+    opacity: 0.5;
+}
+
+/* ---- Analytics Section ---- */
+
+.landing-analytics-section {
+    background: linear-gradient(135deg, rgba(18, 18, 26, 0.95), rgba(10, 10, 15, 0.98));
+    border: 1px solid rgba(0, 180, 216, 0.12);
+    border-radius: 20px;
+    padding: 2.5rem 1.5rem;
+}
+
+.landing-analytics-charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+@media (min-width: 768px) {
+    .landing-analytics-charts {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.landing-chart-wrapper {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.landing-chart-wrapper canvas {
+    width: 100% !important;
+    max-height: 280px;
+}
+
+.landing-analytics-chart-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #94A3B8;
+    text-align: center;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.landing-chart-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: #64748B;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+}
+
+/* ---- Analytics Stat Bars ---- */
+
+.landing-analytics-bars {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.landing-analytics-bar-item {
+    margin-bottom: 1rem;
+}
+
+.landing-analytics-bar-item:last-child {
+    margin-bottom: 0;
+}
+
+.landing-analytics-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.35rem;
+}
+
+.landing-analytics-bar-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #E2E8F0;
+}
+
+.landing-analytics-bar-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    color: #00B4D8;
+}
+
+.landing-analytics-bar-track {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.landing-analytics-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00B4D8, #00FF87);
+    border-radius: 99px;
+    transition: width 0.8s ease;
+}
