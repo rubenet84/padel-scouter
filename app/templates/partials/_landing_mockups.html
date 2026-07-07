@@ -1,0 +1,18 @@
+<section class="landing-section landing-mockups-section landing-fade-in mb-16">
+    <h2 class="text-3xl font-black text-white text-center mb-3">
+        App <span style="color: #FF6B00;">Padel Scouter</span>
+    </h2>
+    <p class="text-center text-gray-400 mb-8 max-w-xl mx-auto">
+        Descubrí la interfaz de análisis más avanzada para pádel
+    </p>
+
+    <div class="landing-mockups-showcase">
+        {% for img in landing_data.mockups.images|default([]) %}
+        <div class="landing-mockup-frame">
+            <div class="landing-mockup-notch"></div>
+            <img src="{{ img.src|default('', true) }}" alt="{{ img.alt|default('Vista previa', true) }}" loading="lazy"
+                 onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'landing-mockup-fallback\'><div class=\'landing-mockup-fallback-icon\'>📱</div><span>Vista previa no disponible</span></div>'" />
+        </div>
+        {% endfor %}
+    </div>
+</section>

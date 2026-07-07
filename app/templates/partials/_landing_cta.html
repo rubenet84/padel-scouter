@@ -1,0 +1,7 @@
+<section class="landing-section landing-cta-banner mb-16">
+    <h2 class="landing-cta-title">{{ landing_data.cta.title|default('', true) }}</h2>
+    <p class="landing-cta-subtitle">{{ landing_data.cta.subtitle|default('', true) }}</p>
+    <a href="{{ landing_data.cta.button_url|default('#', true) }}" class="landing-cta-button">
+        {{ landing_data.cta.button_text|default('Comenzar', true) }}
+    </a>
+</section>

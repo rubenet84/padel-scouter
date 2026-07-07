@@ -1,0 +1,20 @@
+<section class="landing-section landing-metrics-section landing-fade-in mb-16">
+    <div class="landing-metrics-grid">
+        <div class="landing-metric-item">
+            <span class="landing-metric-value" data-counter="{{ landing_data.metrics.players_analyzed|default(0, true) }}">{{ "{:,}".format(landing_data.metrics.players_analyzed|default(0, true)) }}</span>
+            <span class="landing-metric-label">Jugadores Analizados</span>
+        </div>
+        <div class="landing-metric-item">
+            <span class="landing-metric-value" data-counter="{{ landing_data.metrics.matches_processed|default(0, true) }}">{{ "{:,}".format(landing_data.metrics.matches_processed|default(0, true)) }}</span>
+            <span class="landing-metric-label">Partidos Procesados</span>
+        </div>
+        <div class="landing-metric-item">
+            <span class="landing-metric-value" data-counter="{{ landing_data.metrics.tournaments_tracked|default(0, true) }}">{{ "{:,}".format(landing_data.metrics.tournaments_tracked|default(0, true)) }}</span>
+            <span class="landing-metric-label">Torneos Seguidos</span>
+        </div>
+        <div class="landing-metric-item">
+            <span class="landing-metric-value" data-counter="{{ landing_data.metrics.active_users|default(0, true) }}">{{ "{:,}".format(landing_data.metrics.active_users|default(0, true)) }}</span>
+            <span class="landing-metric-label">Usuarios Activos</span>
+        </div>
+    </div>
+</section>

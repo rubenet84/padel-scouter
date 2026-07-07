@@ -26,6 +26,7 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/static/css/scouter.css">
+    {% block head_styles %}{% endblock %}
 </head>
 <body style="background:#0A0A0F;color:#E2E8F0;min-height:100vh;font-family:'Inter',sans-serif;">
 
@@ -51,11 +52,19 @@
             </div>
 
             <div class="flex items-center gap-4" id="nav-right">
+                {% if show_landing_nav|default(False) %}
+                <a href="/register"
+                class="px-4 py-2 rounded-xl text-sm font-bold transition-all"
+                style="background:rgba(0,255,135,0.15);border:1px solid rgba(0,255,135,0.3);color:#00FF87;">
+                    Empezar
+                </a>
+                {% else %}
                 <a href="/login"
                 class="px-4 py-2 rounded-xl text-sm font-bold transition-all"
                 style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
                     Acceder
                 </a>
+                {% endif %}
             </div>
         </div>
     </nav>
