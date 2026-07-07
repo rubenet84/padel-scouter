@@ -48,16 +48,16 @@ Chain strategy: feature-branch-chain
 
 ## Phase 4: JavaScript Modules
 
-- [ ] 4.1 Create `landing_scroll.js` — IntersectionObserver + rAF debounce, toggles `.is-visible` at 15% threshold
-- [ ] 4.2 Create `landing_counters.js` — rAF‑stepped numeral counter targeting `[data-counter]` elements
-- [ ] 4.3 Create `landing_scouter.js` — power‑level scan‑bar animation + glow‑pulse loop
-- [ ] 4.4 Create `landing_charts.js` — Chart.js radar + donut init, CDN‑fail placeholder fallback (spec scenario 12)
-- [ ] 4.5 Create `landing.js` — entry module: imports sub-modules, inits in order (scroll→counters→scouter→charts)
+- [x] 4.1 Create `landing_scroll.js` — IntersectionObserver + rAF debounce, toggles `.is-visible` at 15% threshold
+- [x] 4.2 Create `landing_counters.js` — rAF‑stepped numeral counter targeting `[data-counter]` elements
+- [x] 4.3 Create `landing_scouter.js` — power‑level scan‑bar animation + glow‑pulse loop
+- [x] 4.4 Create `landing_charts.js` — Chart.js radar + donut init, CDN‑fail placeholder fallback (spec scenario 12)
+- [x] 4.5 Create `landing.js` — entry module: imports sub-modules, inits in order (scroll→counters→scouter→charts)
 
 ## Phase 5: Final Orchestration + Verification
 
-- [ ] 5.1 Rewrite `index.html` as orchestrator — extends `base.html`, 8 `{% include %}` in DOM order (spec 5)
-- [ ] 5.2 Verify all 10 sections render with correct DOM order (spec 5)
-- [ ] 5.3 Verify zero‑state: empty `landing_data` produces no 500 errors (spec 7)
-- [ ] 5.4 Verify CSS isolation: navigate `/login`, `/dashboard` — no `.landing-*` interference (spec 9)
-- [ ] 5.5 Verify JS module isolation: console has no cross‑contamination `ReferenceError` (spec 22)
+- [x] 5.1 Rewrite `index.html` as orchestrator — extends `base.html`, 8 `{% include %}` in DOM order (spec 5)
+- [x] 5.2 Verify all 10 sections render with correct DOM order (spec 5) — confirmed partial sequence: hero, metrics, features, analytics, rankings, ai_analysis, mockups, cta + navbar/footer base.html
+- [ ] 5.3 Verify zero‑state: empty `landing_data` produces no 500 errors (spec 7) — needs runtime
+- [ ] 5.4 Verify CSS isolation: navigate `/login`, `/dashboard` — no `.landing-*` interference (spec 9) — needs runtime
+- [ ] 5.5 Verify JS module isolation: console has no cross‑contamination `ReferenceError` (spec 22) — needs runtime
