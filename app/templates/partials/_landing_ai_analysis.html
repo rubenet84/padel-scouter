@@ -9,13 +9,13 @@
     <div class="landing-ai-comparison">
         <div class="landing-ai-player">
             <div class="landing-ai-player-vs">VS</div>
-            <h3 class="landing-ai-player-name">{{ landing_data.ai_analysis.player1.name }}</h3>
-            <div class="landing-ai-player-power">{{ "{:,}".format(landing_data.ai_analysis.player1.power) }}</div>
+            <h3 class="landing-ai-player-name">{{ landing_data.ai_analysis.player1.name|default('Jugador 1', true) }}</h3>
+            <div class="landing-ai-player-power">{{ "{:,}".format(landing_data.ai_analysis.player1.power|default(0, true)) }}</div>
             <div class="landing-ai-traits">
                 <div class="landing-ai-trait-group">
                     <span class="landing-ai-trait-label">Fortalezas</span>
                     <ul class="landing-ai-strengths">
-                        {% for strength in landing_data.ai_analysis.player1.strengths %}
+                        {% for strength in landing_data.ai_analysis.player1.strengths|default([]) %}
                         <li>{{ strength }}</li>
                         {% endfor %}
                     </ul>
@@ -23,7 +23,7 @@
                 <div class="landing-ai-trait-group">
                     <span class="landing-ai-trait-label">Debilidades</span>
                     <ul class="landing-ai-weaknesses">
-                        {% for weakness in landing_data.ai_analysis.player1.weaknesses %}
+                        {% for weakness in landing_data.ai_analysis.player1.weaknesses|default([]) %}
                         <li>{{ weakness }}</li>
                         {% endfor %}
                     </ul>
@@ -31,13 +31,13 @@
             </div>
         </div>
         <div class="landing-ai-player landing-ai-player-right">
-            <h3 class="landing-ai-player-name">{{ landing_data.ai_analysis.player2.name }}</h3>
-            <div class="landing-ai-player-power">{{ "{:,}".format(landing_data.ai_analysis.player2.power) }}</div>
+            <h3 class="landing-ai-player-name">{{ landing_data.ai_analysis.player2.name|default('Jugador 2', true) }}</h3>
+            <div class="landing-ai-player-power">{{ "{:,}".format(landing_data.ai_analysis.player2.power|default(0, true)) }}</div>
             <div class="landing-ai-traits">
                 <div class="landing-ai-trait-group">
                     <span class="landing-ai-trait-label">Fortalezas</span>
                     <ul class="landing-ai-strengths">
-                        {% for strength in landing_data.ai_analysis.player2.strengths %}
+                        {% for strength in landing_data.ai_analysis.player2.strengths|default([]) %}
                         <li>{{ strength }}</li>
                         {% endfor %}
                     </ul>
@@ -45,7 +45,7 @@
                 <div class="landing-ai-trait-group">
                     <span class="landing-ai-trait-label">Debilidades</span>
                     <ul class="landing-ai-weaknesses">
-                        {% for weakness in landing_data.ai_analysis.player2.weaknesses %}
+                        {% for weakness in landing_data.ai_analysis.player2.weaknesses|default([]) %}
                         <li>{{ weakness }}</li>
                         {% endfor %}
                     </ul>
@@ -56,23 +56,24 @@
 
     <div class="landing-ai-plan">
         <h3 class="text-xl font-bold text-white mb-6 text-center">Plan de Mejora</h3>
-        {% for item in landing_data.ai_analysis.improvement_plan %}
+        {% for item in landing_data.ai_analysis.improvement_plan|default([]) %}
         <div class="landing-ai-plan-item">
             <div class="landing-ai-plan-header">
-                <span class="landing-ai-plan-area">{{ item.area }}</span>
-                {% if item.priority == "Alta" %}
-                <span class="landing-ai-priority-label landing-ai-priority-high">{{ item.priority }}</span>
-                {% elif item.priority == "Media" %}
-                <span class="landing-ai-priority-label landing-ai-priority-medium">{{ item.priority }}</span>
+                <span class="landing-ai-plan-area">{{ item.area|default('', true) }}</span>
+                {% set prio = item.priority|default('Media', true) %}
+                {% if prio == "Alta" %}
+                <span class="landing-ai-priority-label landing-ai-priority-high">{{ prio }}</span>
+                {% elif prio == "Media" %}
+                <span class="landing-ai-priority-label landing-ai-priority-medium">{{ prio }}</span>
                 {% else %}
-                <span class="landing-ai-priority-label landing-ai-priority-low">{{ item.priority }}</span>
+                <span class="landing-ai-priority-label landing-ai-priority-low">{{ prio }}</span>
                 {% endif %}
             </div>
             <div class="landing-ai-progress">
                 <div class="landing-ai-progress-bar">
-                    <div class="landing-ai-progress-fill" style="width: {{ item.progress }}%;" role="progressbar" aria-valuenow="{{ item.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="landing-ai-progress-fill" style="width: {{ item.progress|default(0, true) }}%;" role="progressbar" aria-valuenow="{{ item.progress|default(0, true) }}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                <span class="landing-ai-progress-value">{{ item.progress }}%</span>
+                <span class="landing-ai-progress-value">{{ item.progress|default(0, true) }}%</span>
             </div>
         </div>
         {% endfor %}

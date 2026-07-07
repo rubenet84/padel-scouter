@@ -7,10 +7,10 @@
     </p>
 
     <div class="landing-mockups-showcase">
-        {% for img in landing_data.mockups.images %}
+        {% for img in landing_data.mockups.images|default([]) %}
         <div class="landing-mockup-frame">
             <div class="landing-mockup-notch"></div>
-            <img src="{{ img.src }}" alt="{{ img.alt }}" loading="lazy"
+            <img src="{{ img.src|default('', true) }}" alt="{{ img.alt|default('Vista previa', true) }}" loading="lazy"
                  onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'landing-mockup-fallback\'><div class=\'landing-mockup-fallback-icon\'>📱</div><span>Vista previa no disponible</span></div>'" />
         </div>
         {% endfor %}

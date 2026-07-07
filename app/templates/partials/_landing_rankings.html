@@ -13,13 +13,13 @@
             <span class="landing-rankings-col-power">Poder</span>
             <span class="landing-rankings-col-change">Cambio</span>
         </div>
-        {% for player in landing_data.rankings.top_players %}
+        {% for player in landing_data.rankings.top_players|default([]) %}
         <div class="landing-rankings-row">
-            <span class="landing-rankings-col-rank">{{ player.rank }}</span>
-            <span class="landing-rankings-col-name">{{ player.name }}</span>
-            <span class="landing-rankings-col-power">{{ "{:,}".format(player.power) }}</span>
+            <span class="landing-rankings-col-rank">{{ player.rank|default(0, true) }}</span>
+            <span class="landing-rankings-col-name">{{ player.name|default('', true) }}</span>
+            <span class="landing-rankings-col-power">{{ "{:,}".format(player.power|default(0, true)) }}</span>
             <span class="landing-rankings-col-change">
-                {% set change_str = player.change|string %}
+                {% set change_str = (player.change|default('0', true))|string %}
                 {% if change_str[0] == '+' %}
                 <span class="landing-change-positive">{{ change_str }}</span>
                 {% elif change_str[0] == '-' %}
@@ -33,6 +33,6 @@
     </div>
 
     <div class="landing-rankings-player-rank">
-        Tu rango: <strong>{{ "{:,}".format(landing_data.rankings.player_rank) }}</strong> de <strong>{{ "{:,}".format(landing_data.rankings.total_players) }}</strong> jugadores
+        Tu rango: <strong>{{ "{:,}".format(landing_data.rankings.player_rank|default(0, true)) }}</strong> de <strong>{{ "{:,}".format(landing_data.rankings.total_players|default(0, true)) }}</strong> jugadores
     </div>
 </section>

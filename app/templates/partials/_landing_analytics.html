@@ -19,14 +19,14 @@
 
     <div class="landing-analytics-bars">
         <h4 class="text-lg font-bold text-white mb-4">Estadísticas por Categoría</h4>
-        {% for bar in landing_data.analytics.stat_bars %}
+        {% for bar in landing_data.analytics.stat_bars|default([]) %}
         <div class="landing-analytics-bar-item">
             <div class="landing-analytics-bar-header">
-                <span class="landing-analytics-bar-label">{{ bar.label }}</span>
-                <span class="landing-analytics-bar-value">{{ bar.value }}%</span>
+                <span class="landing-analytics-bar-label">{{ bar.label|default('', true) }}</span>
+                <span class="landing-analytics-bar-value">{{ bar.value|default(0, true) }}%</span>
             </div>
             <div class="landing-analytics-bar-track">
-                <div class="landing-analytics-bar-fill" style="width: {{ bar.value }}%;" role="progressbar" aria-valuenow="{{ bar.value }}" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="landing-analytics-bar-fill" style="width: {{ bar.value|default(0, true) }}%;" role="progressbar" aria-valuenow="{{ bar.value|default(0, true) }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
         </div>
         {% endfor %}

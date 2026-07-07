@@ -6,25 +6,25 @@
         <div class="flex-1 text-center lg:text-left">
             <div class="inline-block">
                 <span class="landing-power-label">Poder de Combate</span>
-                <div class="landing-power-level landing-power-value" data-target="{{ landing_data.hero.power_level }}">0</div>
+                <div class="landing-power-level landing-power-value" data-target="{{ landing_data.hero.power_level|default(0, true) }}">0</div>
             </div>
 
             <h1 class="text-4xl lg:text-5xl font-black text-white mt-6 mb-4 leading-tight">
-                {{ landing_data.hero.title }}
+                {{ landing_data.hero.title|default('', true) }}
             </h1>
             <p class="text-lg lg:text-xl text-gray-400 mb-8 max-w-xl">
-                {{ landing_data.hero.subtitle }}
+                {{ landing_data.hero.subtitle|default('', true) }}
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <a href="{{ landing_data.hero.cta_url }}"
+                <a href="{{ landing_data.hero.cta_url|default('#', true) }}"
                    class="landing-cta-button">
-                    {{ landing_data.hero.cta_text }}
+                    {{ landing_data.hero.cta_text|default('Acceder', true) }}
                 </a>
-                <a href="{{ landing_data.hero.secondary_cta_url }}"
+                <a href="{{ landing_data.hero.secondary_cta_url|default('#', true) }}"
                    class="px-6 py-3 rounded-xl text-sm font-bold transition-all text-center"
                    style="border: 1px solid rgba(255,255,255,0.15); color: #94A3B8;">
-                    {{ landing_data.hero.secondary_cta_text }}
+                    {{ landing_data.hero.secondary_cta_text|default('Ver más', true) }}
                 </a>
             </div>
         </div>

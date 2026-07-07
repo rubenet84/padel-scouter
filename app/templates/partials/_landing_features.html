@@ -7,11 +7,11 @@
     </p>
 
     <div class="landing-feature-grid">
-        {% for feature in landing_data.features %}
+        {% for feature in landing_data.features|default([]) %}
         <div class="landing-feature-card">
-            <div class="landing-feature-icon">{{ feature.icon }}</div>
-            <h3 class="landing-feature-title">{{ feature.title }}</h3>
-            <p class="landing-feature-desc">{{ feature.description }}</p>
+            <div class="landing-feature-icon">{{ feature.icon|default('', true) }}</div>
+            <h3 class="landing-feature-title">{{ feature.title|default('', true) }}</h3>
+            <p class="landing-feature-desc">{{ feature.description|default('', true) }}</p>
         </div>
         {% endfor %}
     </div>
