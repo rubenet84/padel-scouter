@@ -1,0 +1,36 @@
+<section class="landing-section landing-analytics-section landing-fade-in mb-16">
+    <h2 class="text-3xl font-black text-white text-center mb-3">
+        <span style="color: #00B4D8;">Estadísticas</span> Avanzadas
+    </h2>
+    <p class="text-center text-gray-400 mb-8 max-w-xl mx-auto">
+        Métricas detalladas de rendimiento y comparativas
+    </p>
+
+    <div class="landing-analytics-charts">
+        <div class="landing-chart-wrapper">
+            <h4 class="landing-analytics-chart-title">Perfil de Jugador</h4>
+            <canvas id="landing-radar-chart" data-chart="radar"></canvas>
+        </div>
+        <div class="landing-chart-wrapper">
+            <h4 class="landing-analytics-chart-title">Win Rate</h4>
+            <canvas id="landing-donut-chart" data-chart="donut"></canvas>
+        </div>
+    </div>
+
+    <div class="landing-analytics-bars">
+        <h4 class="text-lg font-bold text-white mb-4">Estadísticas por Categoría</h4>
+        {% for bar in landing_data.analytics.stat_bars %}
+        <div class="landing-analytics-bar-item">
+            <div class="landing-analytics-bar-header">
+                <span class="landing-analytics-bar-label">{{ bar.label }}</span>
+                <span class="landing-analytics-bar-value">{{ bar.value }}%</span>
+            </div>
+            <div class="landing-analytics-bar-track">
+                <div class="landing-analytics-bar-fill" style="width: {{ bar.value }}%;" role="progressbar" aria-valuenow="{{ bar.value }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script id="landing-data" type="application/json">{{ landing_data | tojson }}</script>
+</section>

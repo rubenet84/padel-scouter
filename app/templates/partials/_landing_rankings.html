@@ -1,0 +1,38 @@
+<section class="landing-section landing-rankings-section landing-fade-in mb-16">
+    <h2 class="text-3xl font-black text-white text-center mb-3">
+        <span style="color: #FF6B00;">Rankings</span> en Vivo
+    </h2>
+    <p class="text-center text-gray-400 mb-8 max-w-xl mx-auto">
+        Top jugadores con poder de combate actualizado
+    </p>
+
+    <div class="landing-rankings-table">
+        <div class="landing-rankings-header">
+            <span class="landing-rankings-col-rank">#</span>
+            <span class="landing-rankings-col-name">Jugador</span>
+            <span class="landing-rankings-col-power">Poder</span>
+            <span class="landing-rankings-col-change">Cambio</span>
+        </div>
+        {% for player in landing_data.rankings.top_players %}
+        <div class="landing-rankings-row">
+            <span class="landing-rankings-col-rank">{{ player.rank }}</span>
+            <span class="landing-rankings-col-name">{{ player.name }}</span>
+            <span class="landing-rankings-col-power">{{ "{:,}".format(player.power) }}</span>
+            <span class="landing-rankings-col-change">
+                {% set change_str = player.change|string %}
+                {% if change_str[0] == '+' %}
+                <span class="landing-change-positive">{{ change_str }}</span>
+                {% elif change_str[0] == '-' %}
+                <span class="landing-change-negative">{{ change_str }}</span>
+                {% else %}
+                <span class="landing-change-neutral">{{ change_str }}</span>
+                {% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="landing-rankings-player-rank">
+        Tu rango: <strong>{{ "{:,}".format(landing_data.rankings.player_rank) }}</strong> de <strong>{{ "{:,}".format(landing_data.rankings.total_players) }}</strong> jugadores
+    </div>
+</section>
