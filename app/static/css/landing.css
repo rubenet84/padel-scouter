@@ -1,0 +1,231 @@
+/* ============================================================
+   landing.css — Landing page styles (`.landing-*` scoped)
+   Dark theme for Padel Scouter landing sections.
+   ============================================================ */
+
+/* ---- Base section animation ---- */
+
+.landing-section {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.landing-section.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    animation: landing-fade-in 0.6s ease-out forwards;
+}
+
+/* ---- Keyframes ---- */
+
+@keyframes landing-fade-in {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes landing-scan-line {
+    0% {
+        left: -10%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        left: 110%;
+        opacity: 0;
+    }
+}
+
+@keyframes landing-counter-tick {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes landing-glow-pulse {
+    0%, 100% {
+        text-shadow: 0 0 20px rgba(0, 255, 135, 0.4),
+                     0 0 40px rgba(0, 255, 135, 0.2);
+    }
+    50% {
+        text-shadow: 0 0 30px rgba(0, 255, 135, 0.8),
+                     0 0 60px rgba(0, 255, 135, 0.4),
+                     0 0 90px rgba(0, 255, 135, 0.2);
+    }
+}
+
+/* ---- Scouter Panel (Hero) ---- */
+
+.landing-scouter-panel {
+    position: relative;
+    background: linear-gradient(135deg, rgba(18, 18, 26, 0.95), rgba(10, 10, 15, 0.98));
+    border: 1px solid rgba(0, 255, 135, 0.15);
+    border-radius: 24px;
+    padding: 3rem 2rem;
+    overflow: hidden;
+}
+
+.landing-scouter-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(0, 255, 135, 0.3), transparent 40%, transparent 60%, rgba(0, 255, 135, 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.landing-scan-line {
+    position: absolute;
+    top: 0;
+    left: -10%;
+    width: 30%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 135, 0.6), transparent);
+    animation: landing-scan-line 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.landing-power-level {
+    font-size: 4rem;
+    font-weight: 900;
+    font-family: 'Rajdhani', sans-serif;
+    color: #00FF87;
+    line-height: 1;
+    animation: landing-glow-pulse 2.5s ease-in-out infinite;
+}
+
+.landing-power-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(0, 255, 135, 0.5);
+    margin-top: 0.25rem;
+}
+
+/* ---- Feature Cards ---- */
+
+.landing-feature-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .landing-feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .landing-feature-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.landing-feature-card {
+    background: rgba(18, 18, 26, 0.8);
+    border: 1px solid rgba(255, 107, 0, 0.1);
+    border-radius: 16px;
+    padding: 1.75rem;
+    transition: border-color 0.3s, transform 0.3s;
+}
+
+.landing-feature-card:hover {
+    border-color: rgba(255, 107, 0, 0.3);
+    transform: translateY(-3px);
+}
+
+.landing-feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.landing-feature-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.landing-feature-desc {
+    font-size: 0.875rem;
+    color: #94A3B8;
+    line-height: 1.6;
+}
+
+/* ---- CTA Banner ---- */
+
+.landing-cta-banner {
+    position: relative;
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    text-align: center;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.15), rgba(0, 255, 135, 0.1));
+    border: 1px solid rgba(255, 107, 0, 0.2);
+}
+
+.landing-cta-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(255, 107, 0, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.landing-cta-title {
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    position: relative;
+}
+
+.landing-cta-subtitle {
+    font-size: 1.125rem;
+    color: #94A3B8;
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+.landing-cta-button {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 1.125rem;
+    padding: 1rem 2.5rem;
+    border-radius: 14px;
+    color: #fff;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: linear-gradient(135deg, #FF6B00, #FF8C38);
+    box-shadow: 0 4px 20px rgba(255, 107, 0, 0.3);
+}
+
+.landing-cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(255, 107, 0, 0.5);
+}
