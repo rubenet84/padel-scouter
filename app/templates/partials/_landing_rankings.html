@@ -1,38 +1,91 @@
-<section class="landing-section landing-rankings-section landing-fade-in mb-16">
-    <h2 class="text-3xl font-black text-white text-center mb-3">
-        <span style="color: #FF6B00;">Rankings</span> en Vivo
-    </h2>
-    <p class="text-center text-gray-400 mb-8 max-w-xl mx-auto">
-        Top jugadores con poder de combate actualizado
-    </p>
+<section id="rankings" class="relative py-24 md:py-32">
+  <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-scouter-gold/5 rounded-full blur-[120px]"></div>
 
-    <div class="landing-rankings-table">
-        <div class="landing-rankings-header">
-            <span class="landing-rankings-col-rank">#</span>
-            <span class="landing-rankings-col-name">Jugador</span>
-            <span class="landing-rankings-col-power">Poder</span>
-            <span class="landing-rankings-col-change">Cambio</span>
+  <div class="relative max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16 landing-reveal">
+      <div class="inline-flex items-center gap-2 bg-scouter-gold/10 border border-scouter-gold/20 rounded-full px-4 py-1.5 mb-6">
+        <span class="iconify text-scouter-gold text-sm" data-icon="mdi:podium-gold"></span>
+        <span class="text-scouter-gold text-xs font-medium tracking-wider uppercase">Clasificación Guerreros</span>
+      </div>
+      <h2 class="font-orbitron font-bold text-3xl md:text-5xl text-white tracking-tight mb-4">
+        Tabla de <span class="landing-text-gradient-orange">Ranking</span>
+      </h2>
+      <p class="text-neutral-400 font-light text-lg max-w-2xl mx-auto">
+        Los combatientes más poderosos clasificados por su nivel de poder FEP
+      </p>
+    </div>
+
+    <!-- Ranking Table -->
+    <div class="landing-reveal landing-border-gradient landing-glow-pulse overflow-hidden">
+      <!-- Table Header -->
+      <div class="bg-dark-600/50 px-6 py-3 border-b border-white/5 flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <span class="iconify text-scouter-orange text-sm" data-icon="mdi:filter-variant"></span>
+          <span class="text-[10px] text-neutral-400 tracking-widest uppercase">Filtros:</span>
         </div>
-        {% for player in landing_data.rankings.top_players|default([]) %}
-        <div class="landing-rankings-row">
-            <span class="landing-rankings-col-rank">{{ player.rank|default(0, true) }}</span>
-            <span class="landing-rankings-col-name">{{ player.name|default('', true) }}</span>
-            <span class="landing-rankings-col-power">{{ "{:,}".format(player.power|default(0, true)) }}</span>
-            <span class="landing-rankings-col-change">
-                {% set change_str = (player.change|default('0', true))|string %}
-                {% if change_str[0] == '+' %}
-                <span class="landing-change-positive">{{ change_str }}</span>
-                {% elif change_str[0] == '-' %}
-                <span class="landing-change-negative">{{ change_str }}</span>
-                {% else %}
-                <span class="landing-change-neutral">{{ change_str }}</span>
-                {% endif %}
-            </span>
+        <div class="flex gap-2">
+          <span class="text-[10px] bg-scouter-orange/10 text-scouter-orange border border-scouter-orange/20 rounded-md px-2.5 py-1 font-medium">PRIMERA</span>
+          <span class="text-[10px] bg-white/5 text-neutral-400 border border-white/10 rounded-md px-2.5 py-1">Temp. 2024</span>
+          <span class="text-[10px] bg-white/5 text-neutral-400 border border-white/10 rounded-md px-2.5 py-1">Todos</span>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="divide-y divide-white/5">
+        {% for p in landing_data.rankings.top_players %}
+        <div class="px-6 py-4 flex items-center gap-4 hover:bg-scouter-orange/3 transition-colors">
+          <div class="w-8 text-center">
+            {% if p.rank == 1 %}
+            <span class="font-orbitron font-bold text-lg text-scouter-gold">{{ p.rank }}</span>
+            {% elif p.rank == 3 %}
+            <span class="font-orbitron font-bold text-lg text-amber-700">{{ p.rank }}</span>
+            {% else %}
+            <span class="font-orbitron font-bold text-lg text-neutral-400">{{ p.rank }}</span>
+            {% endif %}
+          </div>
+          <div class="w-10 h-10 rounded-lg overflow-hidden {% if p.rank == 1 %}border border-scouter-gold/30{% else %}border border-white/10{% endif %}">
+            <img src="{{ p.avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="font-space font-bold text-white text-sm truncate">{{ p.name }}</div>
+            <div class="text-[10px] text-scouter-{{ p.color }} font-medium tracking-wider">{{ p.category }}</div>
+          </div>
+          <div class="hidden md:flex items-center gap-6">
+            <div class="text-center"><div class="font-orbitron font-bold text-sm text-scouter-orange">{{ p.pts }}</div><div class="text-[8px] text-neutral-500">PTS</div></div>
+            <div class="text-center"><div class="font-orbitron font-bold text-sm text-scouter-neon">{{ p.wins }}</div><div class="text-[8px] text-neutral-500">V</div></div>
+            <div class="text-center"><div class="font-orbitron font-bold text-sm text-scouter-red">{{ p.losses }}</div><div class="text-[8px] text-neutral-500">D</div></div>
+          </div>
+          <div class="w-20">
+            <div class="h-1.5 bg-dark-900 rounded-full overflow-hidden">
+              {% if p.color == 'gold' %}
+              <div class="h-full bg-gradient-to-r from-scouter-gold to-scouter-orange rounded-full" style="width:{{ p.power_bar }}%"></div>
+              {% elif p.color == 'blue' %}
+              <div class="h-full bg-gradient-to-r from-scouter-blue to-scouter-cyan rounded-full" style="width:{{ p.power_bar }}%"></div>
+              {% elif p.color == 'purple' %}
+              <div class="h-full bg-gradient-to-r from-scouter-purple to-pink-400 rounded-full" style="width:{{ p.power_bar }}%"></div>
+              {% elif p.color == 'neon' %}
+              <div class="h-full bg-gradient-to-r from-scouter-neon to-scouter-cyan rounded-full" style="width:{{ p.power_bar }}%"></div>
+              {% endif %}
+            </div>
+          </div>
+          {% if p.icon %}
+          <span class="iconify {% if p.color == 'gold' %}text-scouter-gold{% else %}text-neutral-600{% endif %}" data-icon="{{ p.icon }}"></span>
+          {% endif %}
         </div>
         {% endfor %}
+      </div>
     </div>
 
-    <div class="landing-rankings-player-rank">
-        Tu rango: <strong>{{ "{:,}".format(landing_data.rankings.player_rank|default(0, true)) }}</strong> de <strong>{{ "{:,}".format(landing_data.rankings.total_players|default(0, true)) }}</strong> jugadores
+    <!-- Top Players Cards -->
+    <div class="grid md:grid-cols-3 gap-6 mt-8">
+      {% for card in landing_data.rankings.top_cards %}
+      <div class="landing-reveal {% if card.color == 'gold' %}landing-border-gradient{% elif card.color == 'neon' %}landing-border-gradient-green landing-border-gradient{% elif card.color == 'blue' %}landing-border-gradient-blue landing-border-gradient{% endif %} p-5 text-center">
+        <span class="iconify text-scouter-{{ card.color }} text-2xl mb-2" data-icon="{{ card.icon }}"></span>
+        <div class="text-[10px] text-scouter-{{ card.color }} tracking-widest uppercase font-medium mb-2">{{ card.label }}</div>
+        <div class="font-space font-bold text-white text-sm">{{ card.name }}</div>
+        <div class="font-orbitron font-bold text-xl {% if card.color == 'gold' %}landing-text-gradient-orange{% elif card.color == 'neon' %}landing-text-gradient-green{% elif card.color == 'blue' %}landing-text-gradient-blue{% endif %} mt-1">{{ card.value }}</div>
+      </div>
+      {% endfor %}
     </div>
+  </div>
 </section>

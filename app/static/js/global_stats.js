@@ -29,7 +29,7 @@ function syncUrl() {
     const p = stateToParams();
     const qs = p.toString();
     const url = qs ? window.location.pathname + '?' + qs : window.location.pathname;
-    history.replaceState(null, '', url);
+    history.replaceState(null, '', url + window.location.hash);
 }
 
 function readStateFromUrl() {
@@ -214,6 +214,18 @@ async function loadRanking() {
         }
         renderRanking(json.data);
         syncUrl(); // persist URL state
+        // Si hay hash, scrollear después de renderizar (el contenido asíncrono desplaza)
+        if (window.location.hash) {
+          const targets = { '#ranking-title': 'ranking-container', '#ranking-container': 'ranking-container', '#top-section': 'top-section', '#compare-section': 'compare-section', '#records-section': 'records-section' };
+          const id = targets[window.location.hash];
+          const el = id && document.getElementById(id);
+          if (el) {
+            setTimeout(() => {
+              const rect = el.getBoundingClientRect();
+              window.scrollTo({ top: window.scrollY + rect.top - 64, behavior: 'instant' });
+            }, 250);
+          }
+        }
     } catch {
         tbody.innerHTML = '<tr><td colspan="10" class="p-6 text-center text-red-400">Error de conexión</td></tr>';
     }

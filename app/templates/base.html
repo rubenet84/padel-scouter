@@ -1,40 +1,86 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Padel Scouter{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        db: {
-                            orange: '#FF6B00', gold: '#FFD700',
-                            green: '#00FF87', blue: '#00B4D8',
-                            red: '#FF2D2D', bg: '#0A0A0F',
-                            card: '#12121A', border: '#2A2A3A',
+                        dark: {
+                            900: '#06060a', 800: '#0a0a12', 700: '#0f0f1a',
+                            600: '#161625', 500: '#1e1e30'
+                        },
+                        scouter: {
+                            orange: '#f97316', gold: '#fbbf24', neon: '#22c55e',
+                            blue: '#3b82f6', purple: '#a855f7', red: '#ef4444', cyan: '#06b6d4'
+                        },
+                        purple: {
+                            950: '#0d0520', 900: '#120733', 850: '#180c42',
+                            800: '#1e1050', 700: '#2d1b69', 600: '#3d2a8c',
+                            500: '#5b3fb0', 400: '#7c5fd6', 300: '#a78bfa',
+                            200: '#c4b5fd', 100: '#e0d5ff'
+                        },
+                        accent: {
+                            orange: '#f97316', gold: '#fbbf24', neon: '#22c55e',
+                            blue: '#3b82f6', cyan: '#06b6d4', red: '#ef4444', pink: '#ec4899'
                         }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        space: ['Space Grotesk', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif']
                     }
                 }
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/static/css/scouter.css">
     {% block head_styles %}{% endblock %}
 </head>
-<body style="background:#0A0A0F;color:#E2E8F0;min-height:100vh;font-family:'Inter',sans-serif;">
+<body class="{% if show_landing_nav|default(False) %}landing-noise-overlay landing-grid-bg{% endif %} landing-body">
 
-    <!-- Fixed background effects -->
-    <div class="fixed inset-0 pointer-events-none" style="z-index:0;background:radial-gradient(ellipse at 20% 10%, #FF6B0008 0%, transparent 50%),radial-gradient(ellipse at 80% 90%, #3B82F606 0%, transparent 50%);"></div>
-    <div class="fixed inset-0 pointer-events-none opacity-[0.025]" style="z-index:0;background-image:linear-gradient(#FF6B00 1px,transparent 1px),linear-gradient(90deg,#FF6B00 1px,transparent 1px);background-size:60px 60px;"></div>
-
-    <!-- Navbar -->
+    <!-- === Navbar (landing vs. app) === -->
+    {% if show_landing_nav|default(False) %}
+    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-dark-900/80 border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div class="relative w-9 h-9 flex items-center justify-center">
+                    <div class="absolute inset-0 bg-gradient-to-br from-scouter-orange to-scouter-gold rounded-lg rotate-45 opacity-80"></div>
+                    <span class="iconify relative z-10 text-dark-900 text-lg" data-icon="mdi:radar"></span>
+                </div>
+                <span class="font-orbitron font-bold text-sm tracking-widest text-white">PADEL SCOUTER</span>
+            </a>
+            {% if landing_nav_links|default(True) %}
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#features" class="text-xs font-medium text-neutral-400 hover:text-scouter-orange transition-colors tracking-wide uppercase">Funciones</a>
+                <a href="#analytics" class="text-xs font-medium text-neutral-400 hover:text-scouter-orange transition-colors tracking-wide uppercase">Analytics</a>
+                <a href="#rankings" class="text-xs font-medium text-neutral-400 hover:text-scouter-orange transition-colors tracking-wide uppercase">Rankings</a>
+                <a href="#ai" class="text-xs font-medium text-neutral-400 hover:text-scouter-orange transition-colors tracking-wide uppercase">IA</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/login" class="hidden sm:block text-xs font-medium text-neutral-300 hover:text-white transition-colors px-4 py-2">Iniciar Sesión</a>
+                <a href="/login" class="bg-gradient-to-r from-scouter-orange to-scouter-gold text-dark-900 font-bold text-xs px-5 py-2.5 rounded-lg hover:shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all duration-300 tracking-wide inline-block">
+                    ACCEDER AL SCOUTER
+                </a>
+            </div>
+            {% else %}
+            <div class="flex items-center gap-3">
+                <a href="/login" class="bg-gradient-to-r from-scouter-orange to-scouter-gold text-dark-900 font-bold text-xs px-5 py-2.5 rounded-lg hover:shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all duration-300 tracking-wide inline-block">
+                    ACCEDER AL SCOUTER
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+    {% else %}
     <nav class="relative border-b px-6 py-4 backdrop-blur-md" style="z-index:50;background:rgba(10,10,15,0.85);border-color:rgba(255,107,0,0.15);">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <a href="/" class="flex items-center gap-3">
@@ -45,40 +91,93 @@
                     <span class="text-lg font-light" style="color:#FF6B00;"> SCOUTER</span>
                 </div>
             </a>
-
             <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full" style="border:1px solid rgba(0,255,135,0.2);background:rgba(0,255,135,0.05);">
                 <div class="w-2 h-2 rounded-full animate-pulse" style="background:#00FF87;"></div>
                 <span class="text-xs font-medium" style="color:#00FF87;">SCOUTER ACTIVE</span>
             </div>
-
             <div class="flex items-center gap-4" id="nav-right">
-                {% if show_landing_nav|default(False) %}
-                <a href="/register"
-                class="px-4 py-2 rounded-xl text-sm font-bold transition-all"
-                style="background:rgba(0,255,135,0.15);border:1px solid rgba(0,255,135,0.3);color:#00FF87;">
-                    Empezar
-                </a>
-                {% else %}
                 <a href="/login"
                 class="px-4 py-2 rounded-xl text-sm font-bold transition-all"
                 style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
                     Acceder
                 </a>
-                {% endif %}
             </div>
         </div>
     </nav>
+    {% endif %}
 
+    <!-- === Main content === -->
+    {% if show_landing_nav|default(False) %}
+    <main style="z-index:10;">
+    {% else %}
     <main class="relative max-w-7xl mx-auto px-6 py-8" style="z-index:10;">
+    {% endif %}
         {% block content %}{% endblock %}
     </main>
 
+    {% block landing_footer %}{% if show_landing_nav|default(False) %}
+    <footer class="border-t border-white/5 bg-dark-900/50">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <div class="md:col-span-1">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="relative w-8 h-8 flex items-center justify-center">
+                            <div class="absolute inset-0 bg-gradient-to-br from-scouter-orange to-scouter-gold rounded-lg rotate-45 opacity-80"></div>
+                            <span class="iconify relative z-10 text-dark-900 text-sm" data-icon="mdi:radar"></span>
+                        </div>
+                        <span class="font-orbitron font-bold text-xs tracking-widest text-white">PADEL SCOUTER</span>
+                    </div>
+                    <p class="text-sm text-neutral-500 leading-relaxed">
+                        La app de scouting profesional para jugadores de pádel que quieren analizar, dominar y evolucionar.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-xs font-medium text-white tracking-wider uppercase mb-4">Producto</h4>
+                    <div class="space-y-2.5">
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Funciones</a>
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Analytics</a>
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Rankings</a>
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">IA Scouting</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-medium text-white tracking-wider uppercase mb-4">Comunidad</h4>
+                    <div class="space-y-2.5">
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Blog</a>
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Discord</a>
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Torneos</a>
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Clubes</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-medium text-white tracking-wider uppercase mb-4">Legal</h4>
+                    <div class="space-y-2.5">
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Privacidad</a>
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Términos</a>
+                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Cookies</a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <span class="text-xs text-neutral-600">© 2026 Padel Scouter. Todos los derechos reservados.</span>
+                <div class="flex items-center gap-4">
+                    <a href="#" class="text-neutral-600 hover:text-scouter-orange transition-colors"><span class="iconify text-lg" data-icon="mdi:instagram"></span></a>
+                    <a href="#" class="text-neutral-600 hover:text-scouter-orange transition-colors"><span class="iconify text-lg" data-icon="mdi:twitter"></span></a>
+                    <a href="#" class="text-neutral-600 hover:text-scouter-orange transition-colors"><span class="iconify text-lg" data-icon="mdi:youtube"></span></a>
+                    <a href="#" class="text-neutral-600 hover:text-scouter-orange transition-colors"><span class="iconify text-lg" data-icon="mdi:discord"></span></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% else %}
     <footer class="relative border-t mt-16 py-6" style="z-index:10;border-color:rgba(255,107,0,0.1);">
         <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
             <span class="text-xs" style="color:#334155;">© 2026 Padel Scouter · Reglamento FIP 2026</span>
             <span class="text-xs" style="color:rgba(255,107,0,0.4);">Powered by Saiyan Tech 🔮</span>
         </div>
     </footer>
+    {% endif %}
+    {% endblock %}
 
     <script src="/static/js/main.js"></script>
     <script>

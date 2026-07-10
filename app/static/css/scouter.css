@@ -1,5 +1,7 @@
 /* Fix emojis en todos los navegadores */
-* {
+/* NOTA: Se evita * { font-family } porque pisa los fonts de landing.css y otras secciones.
+   Cada sección declara su propia font-family. */
+body, button, input, select, textarea {
     font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji',
                  'Noto Color Emoji', sans-serif;
 }

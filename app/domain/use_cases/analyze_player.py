@@ -32,7 +32,6 @@ class AnalyzePlayerUseCase:
         # 1. Calcular poder de combate y golpe definitivo base
         power_level = calculate_power_level(
             player.stats,
-            player.category,
             computed_stats=computed_stats,
         )
         stat_key, stat_label, stat_cat, stat_value = find_strongest_stat(player.stats)

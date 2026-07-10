@@ -1,18 +1,161 @@
-<section class="landing-section landing-mockups-section landing-fade-in mb-16">
-    <h2 class="text-3xl font-black text-white text-center mb-3">
-        App <span style="color: #FF6B00;">Padel Scouter</span>
-    </h2>
-    <p class="text-center text-gray-400 mb-8 max-w-xl mx-auto">
-        Descubrí la interfaz de análisis más avanzada para pádel
-    </p>
+<section class="relative py-24 md:py-32 overflow-hidden">
+  <div class="absolute inset-0">
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-gradient-to-t from-scouter-orange/5 to-transparent rounded-full blur-[120px]"></div>
+  </div>
 
-    <div class="landing-mockups-showcase">
-        {% for img in landing_data.mockups.images|default([]) %}
-        <div class="landing-mockup-frame">
-            <div class="landing-mockup-notch"></div>
-            <img src="{{ img.src|default('', true) }}" alt="{{ img.alt|default('Vista previa', true) }}" loading="lazy"
-                 onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'landing-mockup-fallback\'><div class=\'landing-mockup-fallback-icon\'>📱</div><span>Vista previa no disponible</span></div>'" />
-        </div>
-        {% endfor %}
+  <div class="relative max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16 landing-reveal">
+      <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-6">
+        <span class="iconify text-white text-sm" data-icon="mdi:cellphone"></span>
+        <span class="text-white text-xs font-medium tracking-wider uppercase">Diseñada para Guerreros</span>
+      </div>
+      <h2 class="font-orbitron font-bold text-3xl md:text-5xl text-white tracking-tight mb-4">
+        Tu Scouter, <span class="landing-text-gradient-orange">Siempre Contigo</span>
+      </h2>
     </div>
+
+    <!-- Phone Mockups -->
+    <div class="landing-reveal relative flex justify-center">
+      <!-- Background glow -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[600px] bg-scouter-orange/10 rounded-[40px] blur-[80px]"></div>
+
+      <div class="relative grid grid-cols-3 gap-4 md:gap-8 items-end max-w-4xl">
+        <!-- Phone 1: Analysis -->
+        <div class="relative landing-float-delay">
+          <div class="bg-dark-700 rounded-[2rem] p-2 border border-white/10 shadow-2xl">
+            <div class="bg-dark-900 rounded-[1.5rem] overflow-hidden aspect-[9/19]">
+              <div class="h-full bg-gradient-to-b from-dark-800 to-dark-900 p-4 flex flex-col">
+                <div class="flex items-center gap-2 mb-4">
+                  <div class="w-6 h-6 rounded bg-scouter-orange/20 flex items-center justify-center">
+                    <span class="iconify text-scouter-orange text-xs" data-icon="mdi:chart-box"></span>
+                  </div>
+                  <span class="text-[8px] text-neutral-400 font-orbitron">ANÁLISIS</span>
+                </div>
+                <div class="space-y-2 flex-1">
+                  <div class="bg-white/5 rounded-lg p-2">
+                    <div class="text-[7px] text-neutral-500">TOTALS</div>
+                    <div class="text-[10px] text-white font-bold mt-1">8 Partidos</div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <div class="bg-scouter-neon/10 rounded-lg p-2 text-center">
+                      <div class="text-[12px] text-scouter-neon font-bold">6</div>
+                      <div class="text-[6px] text-neutral-500">VICTORIAS</div>
+                    </div>
+                    <div class="bg-scouter-red/10 rounded-lg p-2 text-center">
+                      <div class="text-[12px] text-scouter-red font-bold">2</div>
+                      <div class="text-[6px] text-neutral-500">DERROTAS</div>
+                    </div>
+                  </div>
+                  <div class="bg-scouter-orange/10 rounded-lg p-2 text-center">
+                    <div class="text-[14px] text-scouter-orange font-orbitron font-bold">75%</div>
+                    <div class="text-[6px] text-neutral-500">WIN RATE</div>
+                  </div>
+                  <div class="space-y-1 mt-auto">
+                    <div class="h-1 bg-white/5 rounded-full">
+                      <div class="h-full bg-scouter-orange/50 rounded-full" style="width:75%"></div>
+                    </div>
+                    <div class="h-1 bg-white/5 rounded-full">
+                      <div class="h-full bg-scouter-blue/50 rounded-full" style="width:60%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 2 (Center, Larger): Power Level -->
+        <div class="relative landing-float scale-110 md:scale-125 z-10">
+          <div class="absolute -inset-4 bg-gradient-to-b from-scouter-orange/20 via-scouter-purple/10 to-scouter-blue/20 rounded-[2.5rem] blur-xl"></div>
+          <div class="relative bg-dark-700 rounded-[2rem] p-2 border border-scouter-orange/20 shadow-2xl landing-glow-pulse">
+            <div class="bg-dark-900 rounded-[1.5rem] overflow-hidden aspect-[9/19]">
+              <div class="h-full bg-gradient-to-b from-dark-800 to-dark-900 p-4 flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-[8px] text-scouter-orange font-orbitron tracking-wider">POWER LEVEL</span>
+                  <div class="w-1.5 h-1.5 bg-scouter-neon rounded-full animate-pulse"></div>
+                </div>
+                <div class="text-center py-2">
+                  <div class="text-[8px] text-scouter-red font-bold tracking-wider mb-1">⚠ MUY ALTO</div>
+                  <div class="font-orbitron font-black text-3xl landing-text-gradient-orange">{{ '{:,}'.format(landing_data.hero.power_level|int) }}</div>
+                </div>
+                <div class="flex items-center gap-2 my-3">
+                  <div class="w-8 h-8 rounded-lg overflow-hidden border border-scouter-orange/30">
+                    <img src="{{ landing_data.hero.player_avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
+                  </div>
+                  <div>
+                    <div class="text-[9px] text-white font-bold">{{ landing_data.hero.player_name }}</div>
+                    <div class="text-[7px] text-scouter-gold">1ª CATEGORÍA</div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5 mb-3">
+                  <div class="bg-scouter-orange/10 rounded-lg p-1.5 text-center">
+                    <div class="text-[11px] text-scouter-orange font-bold">{{ landing_data.hero.stats.tecnica }}</div>
+                    <div class="text-[6px] text-neutral-500">TÉC</div>
+                  </div>
+                  <div class="bg-scouter-blue/10 rounded-lg p-1.5 text-center">
+                    <div class="text-[11px] text-scouter-blue font-bold">{{ landing_data.hero.stats.fisico }}</div>
+                    <div class="text-[6px] text-neutral-500">FÍS</div>
+                  </div>
+                  <div class="bg-scouter-purple/10 rounded-lg p-1.5 text-center">
+                    <div class="text-[11px] text-scouter-purple font-bold">{{ landing_data.hero.stats.mental }}</div>
+                    <div class="text-[6px] text-neutral-500">MEN</div>
+                  </div>
+                </div>
+                <div class="flex-1 flex items-center justify-center">
+                  <svg viewBox="0 0 100 100" class="w-full max-w-[140px]">
+                    <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.8"/>
+                    <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="none" stroke="rgba(249,115,22,0.15)" stroke-width="0.8" transform="scale(0.7) translate(21,21)"/>
+                    <polygon points="50,14 80,32 80,68 50,86 20,68 20,32" fill="rgba(249,115,22,0.08)" stroke="#f97316" stroke-width="1"/>
+                    <circle cx="50" cy="14" r="2" fill="#f97316" class="animate-pulse"/>
+                    <circle cx="80" cy="32" r="2" fill="#f97316"/>
+                    <circle cx="80" cy="68" r="2" fill="#f97316"/>
+                    <circle cx="50" cy="86" r="2" fill="#f97316"/>
+                    <circle cx="20" cy="68" r="2" fill="#f97316"/>
+                    <circle cx="20" cy="32" r="2" fill="#f97316"/>
+                  </svg>
+                </div>
+                <div class="bg-scouter-orange/10 border border-scouter-orange/20 rounded-lg p-2 mt-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="iconify text-scouter-orange text-xs" data-icon="mdi:flash"></span>
+                    <span class="text-[7px] text-scouter-orange font-medium">RAYO FULMINANTE DEL SAQUE</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 3: Rankings -->
+        <div class="relative landing-float">
+          <div class="bg-dark-700 rounded-[2rem] p-2 border border-white/10 shadow-2xl">
+            <div class="bg-dark-900 rounded-[1.5rem] overflow-hidden aspect-[9/19]">
+              <div class="h-full bg-gradient-to-b from-dark-800 to-dark-900 p-4 flex flex-col">
+                <div class="flex items-center gap-2 mb-4">
+                  <div class="w-6 h-6 rounded bg-scouter-purple/20 flex items-center justify-center">
+                    <span class="iconify text-scouter-purple text-xs" data-icon="mdi:trophy"></span>
+                  </div>
+                  <span class="text-[8px] text-neutral-400 font-orbitron">RANKING</span>
+                </div>
+                <div class="space-y-2 flex-1">
+                  {% for p in landing_data.rankings.top_players %}
+                  <div class="flex items-center gap-2 {% if p.rank == 1 %}bg-scouter-gold/10 rounded-lg p-2 border border-scouter-gold/20{% else %}bg-white/5 rounded-lg p-2{% endif %}">
+                    <span class="text-[10px] {% if p.rank == 1 %}text-scouter-gold{% else %}text-neutral-500{% endif %} font-orbitron font-bold">{{ p.rank }}</span>
+                    <div class="flex-1">
+                      <div class="text-[8px] text-white font-bold truncate">{{ p.name }}</div>
+                    </div>
+                    <span class="text-[8px] {% if p.rank == 1 %}text-scouter-orange{% else %}text-neutral-400{% endif %} font-mono">{{ p.pts }}</span>
+                  </div>
+                  {% endfor %}
+                </div>
+                <div class="mt-auto bg-scouter-purple/10 rounded-lg p-2 text-center border border-scouter-purple/10">
+                  <div class="text-[7px] text-scouter-purple">COMUNIDAD</div>
+                  <div class="text-[8px] text-white font-bold mt-0.5">🏆 MVP Semana</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>

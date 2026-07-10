@@ -1,18 +1,136 @@
-<section class="landing-section mb-16">
-    <h2 class="text-3xl font-black text-white text-center mb-3">
-        ¿Por qué <span style="color: #FF6B00;">Padel Scouter</span>?
-    </h2>
-    <p class="text-center text-gray-400 mb-10 max-w-xl mx-auto">
-        Todo lo que necesitás para analizar, comparar y mejorar tu juego
-    </p>
+<!-- ============ FEATURES ============ -->
+<section id="features" class="relative py-24 md:py-32">
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-scouter-purple/5 rounded-full blur-[120px]"></div>
 
-    <div class="landing-feature-grid">
-        {% for feature in landing_data.features|default([]) %}
-        <div class="landing-feature-card">
-            <div class="landing-feature-icon">{{ feature.icon|default('', true) }}</div>
-            <h3 class="landing-feature-title">{{ feature.title|default('', true) }}</h3>
-            <p class="landing-feature-desc">{{ feature.description|default('', true) }}</p>
-        </div>
-        {% endfor %}
+  <div class="relative max-w-7xl mx-auto px-6">
+    <!-- Section Header -->
+    <div class="text-center mb-16 landing-reveal">
+      <div class="inline-flex items-center gap-2 bg-scouter-blue/10 border border-scouter-blue/20 rounded-full px-4 py-1.5 mb-6">
+        <span class="iconify text-scouter-blue text-sm" data-icon="mdi:cpu-64-bit"></span>
+        <span class="text-scouter-blue text-xs font-medium tracking-wider uppercase">Sistema de Scouting</span>
+      </div>
+      <h2 class="font-orbitron font-bold text-3xl md:text-5xl text-white tracking-tight mb-4">
+        Arsenal Completo de <span class="landing-text-gradient-orange">Análisis</span>
+      </h2>
+      <p class="text-neutral-400 font-light text-lg max-w-2xl mx-auto">
+        Cada función diseñada como un movimiento especial para dominar la competición
+      </p>
     </div>
+
+    <!-- Feature Cards -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for feature in landing_data.features %}
+      {% if loop.index == 1 %}
+      <!-- Card 1: Power Level -->
+      <div class="landing-reveal landing-border-gradient group hover:scale-[1.02] transition-transform duration-500">
+        <div class="p-6 space-y-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-scouter-orange/20 to-scouter-gold/10 border border-scouter-orange/20 flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(249,115,22,0.2)] transition-shadow">
+            <span class="iconify text-scouter-orange text-2xl" data-icon="{{ feature.icon }}"></span>
+          </div>
+          <h3 class="font-space font-bold text-white text-lg">{{ feature.title }}</h3>
+          <p class="text-sm text-neutral-400 leading-relaxed">{{ feature.desc }}</p>
+          <div class="flex items-center gap-2 pt-2">
+            <div class="h-1.5 flex-1 bg-dark-900 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-scouter-orange to-scouter-gold rounded-full landing-fill-bar" style="--fill: 92%"></div>
+            </div>
+            <span class="font-orbitron text-xs text-scouter-orange font-bold">{{ feature.stat }}</span>
+          </div>
+        </div>
+      </div>
+      {% elif loop.index == 2 %}
+      <!-- Card 2: Análisis de Partidos -->
+      <div class="landing-reveal landing-border-gradient group hover:scale-[1.02] transition-transform duration-500" style="animation-delay: 0.1s">
+        <div class="p-6 space-y-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-scouter-blue/20 to-scouter-cyan/10 border border-scouter-blue/20 flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-shadow">
+            <span class="iconify text-scouter-blue text-2xl" data-icon="{{ feature.icon }}"></span>
+          </div>
+          <h3 class="font-space font-bold text-white text-lg">{{ feature.title }}</h3>
+          <p class="text-sm text-neutral-400 leading-relaxed">{{ feature.desc }}</p>
+          <div class="grid grid-cols-4 gap-2 pt-2">
+            <div class="text-center"><div class="font-orbitron text-sm text-scouter-blue font-bold">8</div><div class="text-[8px] text-neutral-500">TOTAL</div></div>
+            <div class="text-center"><div class="font-orbitron text-sm text-scouter-neon font-bold">6</div><div class="text-[8px] text-neutral-500">WINS</div></div>
+            <div class="text-center"><div class="font-orbitron text-sm text-scouter-red font-bold">2</div><div class="text-[8px] text-neutral-500">LOSS</div></div>
+            <div class="text-center"><div class="font-orbitron text-sm text-scouter-gold font-bold">{{ feature.stat }}</div><div class="text-[8px] text-neutral-500">RATE</div></div>
+          </div>
+        </div>
+      </div>
+      {% elif loop.index == 3 %}
+      <!-- Card 3: Estadísticas Completas -->
+      <div class="landing-reveal landing-border-gradient group hover:scale-[1.02] transition-transform duration-500" style="animation-delay: 0.2s">
+        <div class="p-6 space-y-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-scouter-neon/20 to-scouter-gold/10 border border-scouter-neon/20 flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(34,197,94,0.2)] transition-shadow">
+            <span class="iconify text-scouter-neon text-2xl" data-icon="{{ feature.icon }}"></span>
+          </div>
+          <h3 class="font-space font-bold text-white text-lg">{{ feature.title }}</h3>
+          <p class="text-sm text-neutral-400 leading-relaxed">{{ feature.desc }}</p>
+          <div class="space-y-1.5 pt-2">
+            <div class="flex items-center gap-2"><span class="text-[9px] text-neutral-500 w-16">Derecha</span><div class="flex-1 h-1 bg-dark-900 rounded-full overflow-hidden"><div class="h-full bg-scouter-neon/60 rounded-full landing-fill-bar" style="--fill:80%"></div></div><span class="text-[9px] text-scouter-neon font-mono">80</span></div>
+            <div class="flex items-center gap-2"><span class="text-[9px] text-neutral-500 w-16">Saque</span><div class="flex-1 h-1 bg-dark-900 rounded-full overflow-hidden"><div class="h-full bg-scouter-gold/60 rounded-full landing-fill-bar" style="--fill:100%"></div></div><span class="text-[9px] text-scouter-gold font-mono">100</span></div>
+            <div class="flex items-center gap-2"><span class="text-[9px] text-neutral-500 w-16">Velocidad</span><div class="flex-1 h-1 bg-dark-900 rounded-full overflow-hidden"><div class="h-full bg-scouter-blue/60 rounded-full landing-fill-bar" style="--fill:80%"></div></div><span class="text-[9px] text-scouter-blue font-mono">80</span></div>
+          </div>
+        </div>
+      </div>
+      {% elif loop.index == 4 %}
+      <!-- Card 4: Rankings FEP -->
+      <div class="landing-reveal landing-border-gradient group hover:scale-[1.02] transition-transform duration-500">
+        <div class="p-6 space-y-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-scouter-purple/20 to-pink-500/10 border border-scouter-purple/20 flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-shadow">
+            <span class="iconify text-scouter-purple text-2xl" data-icon="{{ feature.icon }}"></span>
+          </div>
+          <h3 class="font-space font-bold text-white text-lg">{{ feature.title }}</h3>
+          <p class="text-sm text-neutral-400 leading-relaxed">{{ feature.desc }}</p>
+          <div class="bg-dark-900/60 rounded-lg p-2.5 border border-white/5 pt-2">
+            <div class="flex items-center gap-2 text-[10px]">
+              <span class="text-scouter-gold font-orbitron font-bold">#1</span>
+              <span class="text-white font-medium flex-1 truncate">Ruben Rebollo Rua</span>
+              <span class="text-scouter-purple font-mono">{{ feature.stat }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-[10px] mt-1.5">
+              <span class="text-neutral-500 font-orbitron font-bold">#2</span>
+              <span class="text-neutral-300 font-medium flex-1 truncate">Araceli Rodriguez G.</span>
+              <span class="text-neutral-400 font-mono">280 pts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% elif loop.index == 5 %}
+      <!-- Card 5: Fortalezas y Debilidades -->
+      <div class="landing-reveal landing-border-gradient group hover:scale-[1.02] transition-transform duration-500">
+        <div class="p-6 space-y-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-scouter-red/20 to-scouter-orange/10 border border-scouter-red/20 flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] transition-shadow">
+            <span class="iconify text-scouter-red text-2xl" data-icon="{{ feature.icon }}"></span>
+          </div>
+          <h3 class="font-space font-bold text-white text-lg">{{ feature.title }}</h3>
+          <p class="text-sm text-neutral-400 leading-relaxed">{{ feature.desc }}</p>
+          <div class="grid grid-cols-2 gap-2 pt-2">
+            <div class="bg-scouter-neon/5 border border-scouter-neon/10 rounded-lg p-2">
+              <div class="text-[8px] text-scouter-neon tracking-wider uppercase font-medium mb-1">Fortaleza</div>
+              <div class="text-[10px] text-white">Ataque perfecto</div>
+            </div>
+            <div class="bg-scouter-red/5 border border-scouter-red/10 rounded-lg p-2">
+              <div class="text-[8px] text-scouter-red tracking-wider uppercase font-medium mb-1">Debilidad</div>
+              <div class="text-[10px] text-white">Resistencia física</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% elif loop.index == 6 %}
+      <!-- Card 6: Plan de Mejora IA -->
+      <div class="landing-reveal landing-border-gradient group hover:scale-[1.02] transition-transform duration-500">
+        <div class="p-6 space-y-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-scouter-cyan/20 to-scouter-blue/10 border border-scouter-cyan/20 flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-shadow">
+            <span class="iconify text-scouter-cyan text-2xl" data-icon="{{ feature.icon }}"></span>
+          </div>
+          <h3 class="font-space font-bold text-white text-lg">{{ feature.title }}</h3>
+          <p class="text-sm text-neutral-400 leading-relaxed">{{ feature.desc }}</p>
+          <div class="flex items-center gap-2 bg-scouter-cyan/5 border border-scouter-cyan/10 rounded-lg p-2.5 pt-2">
+            <span class="iconify text-scouter-cyan text-lg animate-pulse" data-icon="mdi:brain"></span>
+            <div class="text-[10px] text-scouter-cyan">Generando plan personalizado...</div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
 </section>

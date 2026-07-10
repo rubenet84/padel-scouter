@@ -17,6 +17,7 @@ export const DOM = Object.freeze({
     playerName: () => document.getElementById('player-name'),
     breadcrumbName: () => document.getElementById('breadcrumb-name'),
     badgeCategory: () => document.getElementById('badge-category'),
+    badgeSuggested: () => document.getElementById('badge-suggested'),
     avatarImg: () => document.getElementById('avatar-img'),
     avatarPlaceholder: () => document.getElementById('avatar-placeholder'),
     avatarInput: () => document.getElementById('avatar-input'),

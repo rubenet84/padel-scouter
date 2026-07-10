@@ -11,12 +11,14 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.dependencies import get_current_user
 from app.infrastructure.database.session import get_db
-from app.infrastructure.database.models import PlayerModel, UserModel, MatchModel, TournamentModel
+from sqlalchemy import func, desc as sa_desc
+from app.infrastructure.database.models import PlayerModel, UserModel, MatchModel, TournamentModel, AnalysisModel
 from app.schemas.player import (
     PlayerCreateSchema, PlayerPublicSchema,
     MatchCreateSchema, MatchPublicSchema,
     ComputedStatsSchema, PlayerAnalyticsSchema,
 )
+
 
 from app.domain.value_objects.rounds import ROUND_ORDER, get_round_index
 from app.domain.value_objects.computed_stats import get_computed_stats
@@ -66,9 +68,27 @@ def list_players(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    return db.query(PlayerModel).filter(
+    players = db.query(PlayerModel).filter(
         PlayerModel.owner_id == current_user.id
     ).all()
+
+    # Enriquecer con el último power_level del análisis IA
+    if players:
+        pids = [p.id for p in players]
+        latest = db.query(
+            AnalysisModel.player_id,
+            AnalysisModel.power_level,
+        ).filter(
+            AnalysisModel.player_id.in_(pids)
+        ).order_by(
+            AnalysisModel.player_id,
+            sa_desc(AnalysisModel.created_at)
+        ).distinct(AnalysisModel.player_id).all()
+        power_map = {row.player_id: row.power_level for row in latest}
+        for p in players:
+            p.power_level = power_map.get(p.id)
+
+    return players
 
 
 @router.get("/{player_id}", response_model=PlayerPublicSchema)

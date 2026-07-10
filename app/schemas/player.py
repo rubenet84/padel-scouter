@@ -94,6 +94,7 @@ class PlayerPublicSchema(BaseModel):
     category: PlayerCategory
     owner_id: UUID
     avatar_url: str | None = None
+    power_level: int | None = None
 
     derecha:       int = 50
     reves:         int = 50

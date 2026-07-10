@@ -1,310 +1,395 @@
-{% extends "base.html" %}
-{% block title %}Estadísticas Globales — Padel Scouter{% endblock %}
-
-{% block content %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estadísticas Globales — Padel Scouter</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      purple: { 950:'#0d0520', 900:'#120733', 850:'#180c42', 800:'#1e1050', 700:'#2d1b69', 600:'#3d2a8c', 500:'#5b3fb0', 400:'#7c5fd6', 300:'#a78bfa', 200:'#c4b5fd', 100:'#e0d5ff' },
+      accent: { orange:'#f97316', gold:'#fbbf24', neon:'#22c55e', blue:'#3b82f6', cyan:'#06b6d4', red:'#ef4444', pink:'#ec4899' }
+    },
+    fontFamily: { inter:['Inter','sans-serif'], space:['Space Grotesk','sans-serif'], orbitron:['Orbitron','sans-serif'] }
+  }}
+}
+</script>
+<link rel="stylesheet" href="/static/css/scouter.css">
 <style>
-    .gradient-border { position: relative; }
-    .gradient-border::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        padding: 1px;
-        background: linear-gradient(135deg, #FF6B00, #FFD700, #FF6B00, transparent, transparent);
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        pointer-events: none;
-    }
-    .card-hover { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
-    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 30px #FF6B0015; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#120733}
+::-webkit-scrollbar-thumb{background:#7c5fd6;border-radius:3px}
+
+@keyframes particleFloat{0%{transform:translateY(0) translateX(0) scale(1);opacity:0}15%{opacity:.6}85%{opacity:.6}100%{transform:translateY(-90px) translateX(18px) scale(0);opacity:0}}
+
+.gradient-border { position: relative; }
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, #FF6B00, #FFD700, #FF6B00, transparent, transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+.card-hover { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+.card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 30px #FF6B0015; }
+
+/* Sidebar toggle */
+#sidebar{position:fixed;left:0;top:64px;bottom:0;width:240px;z-index:40;transform:translateX(-100%);transition:transform .35s cubic-bezier(.16,1,.3,1);border-right:1px solid rgba(124,95,214,.08);backdrop-filter:blur(12px);background:rgba(13,5,32,.85);overflow-y:auto}
+#sidebar.open{transform:translateX(0)}
+.sidebar-link{transition:all .2s ease;border-left:2px solid transparent}
+.sidebar-link:hover,.sidebar-link.active{background:rgba(124,95,214,.08);border-left-color:#7c5fd6}
+.sidebar-link.active .link-icon{color:#a78bfa}
+.sidebar-link.active .link-text{color:#e0d5ff}
 </style>
+</head>
+<body>
 
-<div class="max-w-7xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-black mb-2">Estadísticas <span class="text-emerald-400">Globales</span></h1>
-    <p class="text-gray-400 text-sm mb-8">Resumen general de todos tus jugadores</p>
+<!-- ============ BACKGROUND ============ -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden">
+  <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-purple-600/15 via-purple-700/8 to-transparent rounded-full blur-[120px]"></div>
+  <div class="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-t from-pink-600/8 via-purple-700/4 to-transparent rounded-full blur-[100px]"></div>
+  <div class="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-blue-600/6 rounded-full blur-[100px]"></div>
+  <div class="absolute top-1/4 -right-40 w-[400px] h-[400px] bg-orange-500/5 rounded-full blur-[100px]"></div>
+  <div class="absolute inset-0" style="background-image:linear-gradient(rgba(124,95,214,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,95,214,.03) 1px,transparent 1px);background-size:50px 50px"></div>
+  <svg class="absolute inset-0 w-full h-full opacity-[.05]" xmlns="http://www.w3.org/2000/svg">
+    <line x1="20%" y1="0" x2="20%" y2="100%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="80%" y1="0" x2="80%" y2="100%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="0" y1="33%" x2="100%" y2="33%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="0" y1="66%" x2="100%" y2="66%" stroke="#7c5fd6" stroke-width=".5"/>
+  </svg>
+  <div class="absolute top-[12%] left-[15%] w-2 h-2 bg-purple-400/40 rounded-full" style="animation:particleFloat 4s ease-out infinite"></div>
+  <div class="absolute top-[30%] right-[12%] w-2 h-2 bg-pink-400/35 rounded-full" style="animation:particleFloat 5s ease-out 1.2s infinite"></div>
+  <div class="absolute bottom-[30%] left-[22%] w-1.5 h-1.5 bg-blue-400/40 rounded-full" style="animation:particleFloat 4.5s ease-out .6s infinite"></div>
+  <div class="absolute top-[55%] right-[28%] w-1.5 h-1.5 bg-orange-400/35 rounded-full" style="animation:particleFloat 3.8s ease-out 1.8s infinite"></div>
+  <div class="absolute bottom-[40%] left-[60%] w-2 h-2 bg-purple-300/30 rounded-full" style="animation:particleFloat 5.5s ease-out .9s infinite"></div>
+</div>
 
-    <!-- PR #1: Summary Dashboard -->
-    <section id="dashboard-summary" aria-label="Resumen de estadísticas">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="col-span-full text-center text-gray-500 py-12">Cargando...</div>
+<!-- ============ NAVBAR ============ -->
+<nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b border-purple-500/10" style="background:rgba(13,5,32,.88)">
+  <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3 group">
+      <div class="relative w-9 h-9 flex items-center justify-center">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg rotate-45 opacity-90 group-hover:opacity-100 transition-opacity"></div>
+        <span class="iconify relative z-10 text-white text-lg" data-icon="mdi:radar"></span>
+      </div>
+      <span class="font-orbitron font-bold text-sm tracking-widest text-purple-100 hidden sm:block group-hover:text-white transition-colors">PADEL SCOUTER</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <button onclick="document.getElementById('ps-chatbot-toggle')?.click()" title="Abrir reglamento"
+              class="hidden md:flex items-center gap-2 rounded-full px-3 py-1 cursor-pointer transition-all duration-300"
+              style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.15);"
+              onmouseenter="this.style.background='rgba(34,197,94,0.2)';this.style.borderColor='rgba(34,197,94,0.4)'"
+              onmouseleave="this.style.background='rgba(34,197,94,0.1)';this.style.borderColor='rgba(34,197,94,0.15)'">
+        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+        <span class="text-[9px] text-green-400 font-medium tracking-wider uppercase transition-colors">Scouter Active</span>
+      </button>
+      <button class="relative w-9 h-9 rounded-lg bg-purple-800/30 border border-purple-500/15 flex items-center justify-center hover:bg-purple-800/50 transition-colors">
+        <span class="iconify text-purple-300/60 text-lg" data-icon="mdi:bell-outline"></span>
+        <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-accent-red rounded-full border-2 border-purple-950"></div>
+      </button>
+      <div onclick="toggleSidebar()" title="Menú de navegación" class="flex items-center gap-2.5 cursor-pointer group">
+        <div class="w-[52px] h-[52px] rounded-xl overflow-hidden border-2 border-yellow-500/60 group-hover:border-yellow-400 transition-colors flex-shrink-0">
+          <img src="/static/images/logo-usuario.png" alt="User" class="w-full h-full object-cover">
         </div>
-    </section>
-
-    <!-- PR #4: Community Highlights Card -->
-    <div id="community-highlights" class="mt-6 gradient-border rounded-2xl hidden" style="background:#12121A;">
-        <div class="p-4">
-            <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4">🏆 Comunidad</h3>
-            <div id="community-content">
-                <!-- filled by JS -->
-                <div class="animate-pulse space-y-3">
-                    <div class="h-4 bg-[#2A2A3A] rounded w-3/4"></div>
-                    <div class="h-4 bg-[#2A2A3A] rounded w-1/2"></div>
-                    <div class="h-4 bg-[#2A2A3A] rounded w-2/3"></div>
-                    <div class="h-4 bg-[#2A2A3A] rounded w-3/5"></div>
-                </div>
-            </div>
+        <div class="hidden md:block">
+          <div id="nav-username" class="text-base font-bold text-yellow-500/80 group-hover:text-yellow-400 transition-colors font-orbitron">Cuenta</div>
+          <div class="flex items-center gap-1 text-xs text-yellow-500/40 group-hover:text-yellow-300/70 transition-colors">
+            <span class="font-orbitron">Menú ▼</span>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
+</nav>
 
-    <!-- PR #2: Ranking Table -->
-    <section id="ranking-container" class="mt-12" aria-label="Ranking de jugadores">
-        <h2 class="text-2xl font-bold mb-4 text-white">Ranking</h2>
+<!-- ============ MAIN CONTENT ============ -->
+<div class="pt-16 min-h-screen">
+  <main>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
 
-        <!-- Filter Bar -->
+      <h1 class="text-3xl font-black mb-2 text-white">Estadísticas <span class="text-emerald-400">Globales</span></h1>
+      <p class="text-gray-400 text-sm mb-8">Resumen general de todos tus jugadores</p>
+
+      <!-- PR #1: Summary Dashboard -->
+      <section id="dashboard-summary" aria-label="Resumen de estadísticas">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="col-span-full text-center text-gray-500 py-12">Cargando...</div>
+        </div>
+      </section>
+
+      <!-- PR #4: Community Highlights Card -->
+      <div id="community-highlights" class="mt-6 gradient-border rounded-2xl hidden" style="background:#12121A;">
+        <div class="p-4">
+          <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4">🏆 Comunidad</h3>
+          <div id="community-content">
+            <div class="animate-pulse space-y-3">
+              <div class="h-4 bg-[#2A2A3A] rounded w-3/4"></div>
+              <div class="h-4 bg-[#2A2A3A] rounded w-1/2"></div>
+              <div class="h-4 bg-[#2A2A3A] rounded w-2/3"></div>
+              <div class="h-4 bg-[#2A2A3A] rounded w-3/5"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PR #2: Ranking Table -->
+      <section id="ranking-container" class="mt-12" aria-label="Ranking de jugadores" style="scroll-margin-top:100px">
+        <h2 id="ranking-title" class="text-2xl font-bold mb-4 text-white" style="scroll-margin-top:80px">Ranking</h2>
+
         <div id="ranking-filters" class="flex flex-wrap gap-3 mb-6 items-end">
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-category">Categoría</label>
-                <select id="filter-category" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                    <option value="">Todas</option>
-                    <option value="INICIACION">Iniciación</option>
-                    <option value="QUINTA">5ª Categoría</option>
-                    <option value="CUARTA">4ª Categoría</option>
-                    <option value="TERCERA">3ª Categoría</option>
-                    <option value="SEGUNDA">2ª Categoría</option>
-                    <option value="PRIMERA">1ª Categoría</option>
-                    <option value="PRO">Profesional</option>
-                </select>
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-season">Temporada</label>
-                <select id="filter-season" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                    <option value="">Todas</option>
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                    <option value="2023">2023</option>
-                    <option value="2022">2022</option>
-                    <option value="2021">2021</option>
-                    <option value="2020">2020</option>
-                </select>
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-type">Tipo</label>
-                <select id="filter-type" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                    <option value="">Todos</option>
-                    <option value="torneo">Torneo</option>
-                    <option value="amistoso">Amistoso</option>
-                </select>
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-date-from">Desde</label>
-                <input type="date" id="filter-date-from"
-                       class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-date-to">Hasta</label>
-                <input type="date" id="filter-date-to"
-                       class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-            </div>
-            <button id="filter-apply"
-                    class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors">
-                Aplicar
-            </button>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-category">Categoría</label>
+            <select id="filter-category" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+              <option value="">Todas</option>
+              <option value="INICIACION">Iniciación</option>
+              <option value="QUINTA">5ª Categoría</option>
+              <option value="CUARTA">4ª Categoría</option>
+              <option value="TERCERA">3ª Categoría</option>
+              <option value="SEGUNDA">2ª Categoría</option>
+              <option value="PRIMERA">1ª Categoría</option>
+              <option value="PRO">Profesional</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-season">Temporada</label>
+            <select id="filter-season" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+              <option value="">Todas</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-type">Tipo</label>
+            <select id="filter-type" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+              <option value="">Todos</option>
+              <option value="torneo">Torneo</option>
+              <option value="amistoso">Amistoso</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-date-from">Desde</label>
+            <input type="date" id="filter-date-from" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-400 uppercase tracking-wider" for="filter-date-to">Hasta</label>
+            <input type="date" id="filter-date-to" class="bg-[#12121A] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+          </div>
+          <button id="filter-apply" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors">Aplicar</button>
         </div>
 
-        <!-- Ranking Table -->
         <div id="ranking-table-wrapper" class="overflow-x-auto rounded-xl border border-[#2A2A3A]" style="background:#12121A;">
-            <table class="w-full text-sm" id="ranking-table">
-                <thead>
-                    <tr class="border-b border-[#2A2A3A] text-gray-400 text-xs uppercase tracking-wider">
-                        <th class="p-3 text-center w-12">#</th>
-                        <th class="p-3 text-left cursor-pointer hover:text-white transition-colors sortable" data-sort="name">
-                            Jugador <span class="sort-icon"></span>
-                        </th>
-                        <th class="p-3 text-left">Categoría</th>
-                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="points">
-                            Pts <span class="sort-icon"></span>
-                        </th>
-                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="wins">
-                            G <span class="sort-icon"></span>
-                        </th>
-                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="win_pct">
-                            %G <span class="sort-icon"></span>
-                        </th>
-                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="matches">
-                            PJ <span class="sort-icon"></span>
-                        </th>
-                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="sets_won">
-                            Sets <span class="sort-icon"></span>
-                        </th>
-                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="games_won">
-                            Juegos <span class="sort-icon"></span>
-                        </th>
-                        <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="streak">
-                            Rachas <span class="sort-icon"></span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="ranking-body">
-                    <tr><td colspan="10" class="p-6 text-center text-gray-500">Cargando ranking...</td></tr>
-                </tbody>
-            </table>
+          <table class="w-full text-sm" id="ranking-table">
+            <thead>
+              <tr class="border-b border-[#2A2A3A] text-gray-400 text-xs uppercase tracking-wider">
+                <th class="p-3 text-center w-12">#</th>
+                <th class="p-3 text-left cursor-pointer hover:text-white transition-colors sortable" data-sort="name">Jugador <span class="sort-icon"></span></th>
+                <th class="p-3 text-left">Categoría</th>
+                <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="points">Pts <span class="sort-icon"></span></th>
+                <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="wins">G <span class="sort-icon"></span></th>
+                <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="win_pct">%G <span class="sort-icon"></span></th>
+                <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="matches">PJ <span class="sort-icon"></span></th>
+                <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="sets_won">Sets <span class="sort-icon"></span></th>
+                <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="games_won">Juegos <span class="sort-icon"></span></th>
+                <th class="p-3 text-right cursor-pointer hover:text-white transition-colors sortable" data-sort="streak">Rachas <span class="sort-icon"></span></th>
+              </tr>
+            </thead>
+            <tbody id="ranking-body">
+              <tr><td colspan="10" class="p-6 text-center text-gray-500">Cargando ranking...</td></tr>
+            </tbody>
+          </table>
         </div>
 
-        <!-- Pagination -->
-        <div id="ranking-pagination" class="flex justify-center items-center gap-2 mt-4 hidden">
-        </div>
-    </section>
+        <div id="ranking-pagination" class="flex justify-center items-center gap-2 mt-4 hidden"></div>
+      </section>
 
-    <!-- PR #3: Top Jugadores -->
-    <section id="top-section" class="mt-12 hidden" aria-label="Top jugadores">
+      <!-- PR #3: Top Jugadores -->
+      <section id="top-section" class="mt-12 hidden" aria-label="Top jugadores" style="scroll-margin-top:80px">
         <h2 class="text-2xl font-bold mb-1 text-white">Top <span class="text-emerald-400">Jugadores</span></h2>
         <p class="text-gray-400 text-sm mb-6">Los mejores en cada categoría estadística</p>
-        <div id="top-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- filled by JS -->
-        </div>
-    </section>
+        <div id="top-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </section>
 
-    <!-- PR #3: Comparador -->
-    <section id="compare-section" class="mt-12" aria-label="Comparador de jugadores">
+      <!-- PR #3: Comparador -->
+      <section id="compare-section" class="mt-12" aria-label="Comparador de jugadores" style="scroll-margin-top:80px">
         <h2 class="text-2xl font-bold mb-1 text-white">Comparador <span class="text-emerald-400">de Jugadores</span></h2>
         <p class="text-gray-400 text-sm mb-6">Compara estadísticas de dos jugadores cara a cara</p>
-
-        <!-- Player Selector -->
         <div id="compare-selector" class="flex flex-wrap items-end gap-3 mb-6 p-4 rounded-xl border border-[#2A2A3A]" style="background:#12121A;">
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-400 uppercase tracking-wider" for="compare-p1">Jugador A</label>
-                <select id="compare-p1" class="bg-[#0D0D15] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm min-w-[180px] focus:outline-none focus:border-emerald-500">
-                    <option value="">Seleccionar jugador...</option>
-                </select>
-            </div>
-            <div class="text-xl text-gray-500 font-bold pb-2">VS</div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-400 uppercase tracking-wider" for="compare-p2">Jugador B</label>
-                <select id="compare-p2" class="bg-[#0D0D15] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm min-w-[180px] focus:outline-none focus:border-emerald-500">
-                    <option value="">Seleccionar jugador...</option>
-                </select>
-            </div>
-            <button id="compare-btn"
-                    class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors">
-                Comparar
-            </button>
-            <button id="compare-clear"
-                    class="text-gray-400 hover:text-white px-3 py-2 rounded-lg text-sm transition-colors">
-                Limpiar
-            </button>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-400 uppercase tracking-wider" for="compare-p1">Jugador A</label>
+            <select id="compare-p1" class="bg-[#0D0D15] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm min-w-[180px] focus:outline-none focus:border-emerald-500">
+              <option value="">Seleccionar jugador...</option>
+            </select>
+          </div>
+          <div class="text-xl text-gray-500 font-bold pb-2">VS</div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-400 uppercase tracking-wider" for="compare-p2">Jugador B</label>
+            <select id="compare-p2" class="bg-[#0D0D15] border border-[#2A2A3A] text-white rounded-lg px-3 py-2 text-sm min-w-[180px] focus:outline-none focus:border-emerald-500">
+              <option value="">Seleccionar jugador...</option>
+            </select>
+          </div>
+          <button id="compare-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors">Comparar</button>
+          <button id="compare-clear" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg text-sm transition-colors">Limpiar</button>
         </div>
-
-        <!-- Comparison Panel (filled by JS) -->
         <div id="compare-panel" class="hidden"></div>
-    </section>
+      </section>
 
-    <!-- PR #3: Historial H2H -->
-    <section id="h2h-section" class="mt-12 hidden" aria-label="Historial entre jugadores">
-        <div id="h2h-content">
-            <!-- filled by JS -->
-        </div>
-    </section>
+      <!-- PR #3: Historial H2H -->
+      <section id="h2h-section" class="mt-12 hidden" aria-label="Historial entre jugadores">
+        <div id="h2h-content"></div>
+      </section>
 
-    <!-- PR #4: Community Records -->
-    <section id="records-section" class="mt-12 hidden" aria-label="Récords de la comunidad">
+      <!-- PR #4: Community Records -->
+      <section id="records-section" class="mt-12 hidden" aria-label="Récords de la comunidad" style="scroll-margin-top:80px">
         <h2 class="text-2xl font-bold mb-1 text-white">🏆 Récords de la <span class="text-emerald-400">Comunidad</span></h2>
         <p class="text-gray-400 text-sm mb-6">Las mejores marcas de tu club</p>
         <div id="records-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <!-- Skeleton -->
-            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
-                <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
-                <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
-                <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
-            </div>
-            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
-                <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
-                <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
-                <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
-            </div>
-            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
-                <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
-                <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
-                <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
-            </div>
-            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
-                <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
-                <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
-                <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
-            </div>
+          <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+            <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
+            <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
+            <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
+          </div>
+          <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+            <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
+            <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
+            <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
+          </div>
+          <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+            <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
+            <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
+            <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
+          </div>
+          <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+            <div class="h-3 bg-[#2A2A3A] rounded w-20 mb-3"></div>
+            <div class="h-4 bg-[#2A2A3A] rounded w-28 mb-2"></div>
+            <div class="h-3 bg-[#2A2A3A] rounded w-16"></div>
+          </div>
         </div>
-    </section>
+      </section>
 
-    <!-- PR #4: Category Stats -->
-    <section id="categories-section" class="mt-12 hidden" aria-label="Estadísticas por categoría">
+      <!-- PR #4: Category Stats -->
+      <section id="categories-section" class="mt-12 hidden" aria-label="Estadísticas por categoría">
         <h2 class="text-2xl font-bold mb-1 text-white">Estadísticas por <span class="text-emerald-400">Categoría</span></h2>
         <p class="text-gray-400 text-sm mb-6">Resumen detallado de cada categoría</p>
         <div id="categories-content">
-            <!-- Skeleton -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
-                    <div class="h-4 bg-[#2A2A3A] rounded w-24 mb-4"></div>
-                    <div class="h-3 bg-[#2A2A3A] rounded w-full mb-2"></div>
-                    <div class="h-3 bg-[#2A2A3A] rounded w-3/4 mb-2"></div>
-                    <div class="h-3 bg-[#2A2A3A] rounded w-2/3"></div>
-                </div>
-                <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
-                    <div class="h-4 bg-[#2A2A3A] rounded w-24 mb-4"></div>
-                    <div class="h-3 bg-[#2A2A3A] rounded w-full mb-2"></div>
-                    <div class="h-3 bg-[#2A2A3A] rounded w-3/4 mb-2"></div>
-                    <div class="h-3 bg-[#2A2A3A] rounded w-2/3"></div>
-                </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+              <div class="h-4 bg-[#2A2A3A] rounded w-24 mb-4"></div>
+              <div class="h-3 bg-[#2A2A3A] rounded w-full mb-2"></div>
+              <div class="h-3 bg-[#2A2A3A] rounded w-3/4 mb-2"></div>
+              <div class="h-3 bg-[#2A2A3A] rounded w-2/3"></div>
             </div>
+            <div class="animate-pulse rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
+              <div class="h-4 bg-[#2A2A3A] rounded w-24 mb-4"></div>
+              <div class="h-3 bg-[#2A2A3A] rounded w-full mb-2"></div>
+              <div class="h-3 bg-[#2A2A3A] rounded w-3/4 mb-2"></div>
+              <div class="h-3 bg-[#2A2A3A] rounded w-2/3"></div>
+            </div>
+          </div>
         </div>
-    </section>
+      </section>
 
-    <!-- PR #4: Evolution -->
-    <section id="evolution-section" class="mt-12 hidden" aria-label="Evolución de puntos">
+      <!-- PR #4: Evolution -->
+      <section id="evolution-section" class="mt-12 hidden" aria-label="Evolución de puntos">
         <h2 class="text-2xl font-bold mb-1 text-white">Evolución de <span class="text-emerald-400">Puntos</span></h2>
         <p class="text-gray-400 text-sm mb-6">Puntuación actual de cada jugador</p>
         <div id="evolution-content">
-            <!-- Skeleton -->
-            <div class="rounded-xl border border-[#2A2A3A] overflow-x-auto" style="background:#12121A;">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-[#2A2A3A]">
-                            <th class="p-3 text-left text-gray-400 font-semibold">Nombre</th>
-                            <th class="p-3 text-left text-gray-400 font-semibold">Categoría</th>
-                            <th class="p-3 text-right text-gray-400 font-semibold">Puntos</th>
-                            <th class="p-3 text-right text-gray-400 font-semibold">Evolución</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b border-[#2A2A3A] animate-pulse">
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
-                        </tr>
-                        <tr class="border-b border-[#2A2A3A] animate-pulse">
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
-                        </tr>
-                        <tr class="border-b border-[#2A2A3A] animate-pulse">
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
-                        </tr>
-                        <tr class="border-b border-[#2A2A3A] animate-pulse">
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
-                        </tr>
-                        <tr class="border-b border-[#2A2A3A] animate-pulse">
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
-                            <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+          <div class="rounded-xl border border-[#2A2A3A] overflow-x-auto" style="background:#12121A;">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-[#2A2A3A]">
+                  <th class="p-3 text-left text-gray-400 font-semibold">Nombre</th>
+                  <th class="p-3 text-left text-gray-400 font-semibold">Categoría</th>
+                  <th class="p-3 text-right text-gray-400 font-semibold">Puntos</th>
+                  <th class="p-3 text-right text-gray-400 font-semibold">Evolución</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-[#2A2A3A] animate-pulse">
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                </tr>
+                <tr class="border-b border-[#2A2A3A] animate-pulse">
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                </tr>
+                <tr class="border-b border-[#2A2A3A] animate-pulse">
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                </tr>
+                <tr class="border-b border-[#2A2A3A] animate-pulse">
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                </tr>
+                <tr class="border-b border-[#2A2A3A] animate-pulse">
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-28"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-16"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-12 ml-auto"></div></td>
+                  <td class="p-3"><div class="h-4 bg-[#2A2A3A] rounded w-20 ml-auto"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-    </section>
-</div>
-{% endblock %}
+      </section>
 
-{% block scripts %}
+      <div class="h-24"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ SIDEBAR ============ -->
+{% include 'partials/_sidebar_menu_simple.html' %}
+
+<!-- ── Sidebar toggle ─────────────────────────────────── -->
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+</script>
+
+<!-- ── Navbar username ─────────────────────────────────── -->
+<script>
+(function() {
+  const t = localStorage.getItem('access_token');
+  if (!t) return;
+  fetch('/api/v1/auth/me', { headers: {'Authorization': `Bearer ${t}`} })
+    .then(r => r.ok ? r.json() : null)
+    .then(u => {
+      if (u) {
+        const el = document.getElementById('nav-username');
+        if (el) el.textContent = u.username;
+      }
+    }).catch(() => {});
+})();
+</script>
+
 <script src="/static/js/global_stats.js"></script>
-{% endblock %}
+{% include "partials/chatbot_widget.html" %}
+</body>
+</html>

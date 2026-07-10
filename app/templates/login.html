@@ -1,254 +1,695 @@
 {% extends "base.html" %}
 {% block title %}Acceder — Padel Scouter{% endblock %}
 
+{% block head_styles %}
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0d0520; color: #e0d5ff; overflow-x: hidden; min-height: 100vh; }
+  ::selection { background: rgba(124,95,214,0.4); color: #fff; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: #120733; }
+  ::-webkit-scrollbar-thumb { background: #7c5fd6; border-radius: 3px; }
+
+  @keyframes scanLine {
+    0% { top: -2px; opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.7; }
+    100% { top: calc(100% + 2px); opacity: 0; }
+  }
+  .scan-line { animation: scanLine 3.5s ease-in-out infinite; }
+
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 40px rgba(124,95,214,0.25), 0 0 80px rgba(124,95,214,0.1), 0 8px 32px rgba(0,0,0,0.5); }
+    50% { box-shadow: 0 0 55px rgba(124,95,214,0.35), 0 0 100px rgba(124,95,214,0.15), 0 8px 32px rgba(0,0,0,0.5); }
+  }
+  .glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
+
+  @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
+  .float { animation: float 5s ease-in-out infinite; }
+
+  @keyframes radarPulse {
+    0% { transform: scale(0.3); opacity: 0.5; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  .radar-pulse { animation: radarPulse 2.2s ease-out infinite; }
+  .radar-pulse-d { animation: radarPulse 2.2s ease-out 0.8s infinite; }
+
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(14px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .fade-in { animation: fadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .fade-in-d1 { animation: fadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.08s forwards; opacity: 0; }
+  .fade-in-d2 { animation: fadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.16s forwards; opacity: 0; }
+  .fade-in-d3 { animation: fadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.24s forwards; opacity: 0; }
+  .fade-in-d4 { animation: fadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.32s forwards; opacity: 0; }
+  .fade-in-d5 { animation: fadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards; opacity: 0; }
+  .fade-in-d6 { animation: fadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.48s forwards; opacity: 0; }
+
+  @keyframes particleFloat {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+    15% { opacity: 0.7; }
+    85% { opacity: 0.7; }
+    100% { transform: translateY(-100px) translateX(20px) scale(0); opacity: 0; }
+  }
+
+  @keyframes fillPower { 0% { width: 0%; } 100% { width: var(--fill); } }
+  .fill-power { animation: fillPower 2s ease-out 0.6s forwards; width: 0%; }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent 30%, rgba(124,95,214,0.05) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: shimmer 4s ease-in-out infinite;
+  }
+
+  @keyframes energyRing { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .energy-ring { animation: energyRing 12s linear infinite; }
+  .energy-ring-r { animation: energyRing 16s linear infinite reverse; }
+
+  .text-gradient-purple {
+    background: linear-gradient(135deg, #a78bfa, #ec4899);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .text-gradient-orange {
+    background: linear-gradient(135deg, #f97316, #fbbf24);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .border-card {
+    position: relative;
+    background: linear-gradient(170deg, #1a0f3a 0%, #140b30 50%, #180d38 100%);
+    border-radius: 20px;
+  }
+  .border-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 21px;
+    background: linear-gradient(160deg, rgba(124,95,214,0.6) 0%, rgba(124,95,214,0.15) 25%, transparent 50%, rgba(236,72,153,0.2) 75%, rgba(124,95,214,0.3) 100%);
+    z-index: -1;
+  }
+
+  .input-sc {
+    transition: all 0.3s ease;
+    background: rgba(13,5,32,0.6);
+    border: 1px solid rgba(124,95,214,0.15);
+  }
+  .input-sc:focus {
+    border-color: rgba(124,95,214,0.5);
+    box-shadow: 0 0 0 3px rgba(124,95,214,0.1), 0 0 20px rgba(124,95,214,0.08);
+    background: rgba(13,5,32,0.8);
+  }
+  .input-sc::placeholder { color: rgba(167,139,250,0.3); }
+
+  .tab-btn { transition: all 0.3s ease; position: relative; cursor: pointer; }
+  .tab-btn.active { color: #a78bfa; }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 15%; right: 15%;
+    height: 2px;
+    background: linear-gradient(90deg, #7c5fd6, #ec4899);
+    border-radius: 1px;
+    box-shadow: 0 0 10px rgba(124,95,214,0.5);
+  }
+
+  .social-btn {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(124,95,214,0.15);
+    background: rgba(124,95,214,0.05);
+  }
+  .social-btn:hover {
+    border-color: rgba(124,95,214,0.35);
+    background: rgba(124,95,214,0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #7c5fd6, #5b3fb0);
+    box-shadow: 0 4px 25px rgba(124,95,214,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 4px 40px rgba(124,95,214,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .strength-bar { transition: all 0.4s ease; }
+  .view-transition { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+  /* Layout fix — main de base.html no debe agregar padding extra */
+  main.relative.max-w-7xl { max-width: 100% !important; padding: 0 !important; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-md mx-auto mt-16">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8">
-        <div class="text-center mb-8">
-            <div class="text-4xl mb-3">🔮</div>
-            <h2 class="text-2xl font-bold">Acceder</h2>
-            <p class="text-gray-400 text-sm mt-1">Entra a tu cuenta de Padel Scouter</p>
-        </div>
+<!-- ============ BACKGROUND ============ -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden" style="z-index:0;">
+  <!-- Main purple glow -->
+  <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-purple-600/20 via-purple-700/10 to-transparent rounded-full blur-[120px]"></div>
+  <!-- Pink glow bottom -->
+  <div class="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-t from-pink-600/10 via-purple-700/5 to-transparent rounded-full blur-[100px]"></div>
+  <!-- Left blue -->
+  <div class="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-blue-600/8 rounded-full blur-[100px]"></div>
+  <!-- Right orange -->
+  <div class="absolute top-1/4 -right-40 w-[400px] h-[400px] bg-orange-500/6 rounded-full blur-[100px]"></div>
+  <!-- Center ambient -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[80px]"></div>
 
-        <div class="flex bg-gray-800 rounded-lg p-1 mb-6">
-            <button onclick="showTab('login')" id="tab-login"
-                    class="flex-1 py-2 rounded-md text-sm font-medium transition tab-active">
-                Iniciar sesión
-            </button>
-            <button onclick="showTab('register')" id="tab-register"
-                    class="flex-1 py-2 rounded-md text-sm font-medium transition text-gray-400">
-                Registrarse
-            </button>
-        </div>
+  <!-- Grid -->
+  <div class="absolute inset-0" style="background-image: linear-gradient(rgba(124,95,214,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(124,95,214,0.04) 1px, transparent 1px); background-size: 50px 50px;"></div>
 
-        <!-- Login form -->
-        <div id="form-login">
-            <div class="space-y-4">
-                <div>
-                    <label class="text-gray-400 text-xs mb-1 block">Email</label>
-                    <input id="login-email" type="email" placeholder="tu@email.com"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="text-gray-400 text-xs mb-1 block">Contraseña</label>
-                    <div class="relative">
-                        <input id="login-password" type="password" placeholder="Tu contraseña"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
-                        <button type="button" onclick="toggleVisibility('login-password', this)"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
-                            👁
-                        </button>
-                    </div>
-                </div>
-                <button onclick="doLogin()" id="btn-login"
-                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition">
-                    Entrar
-                </button>
-                <div class="text-center">
-                    <a href="/forgot-password"
-                        class="text-gray-400 hover:text-emerald-400 text-sm transition">
-                    ¿Olvidaste tu contraseña?
-                    </a>
-                </div>
-            </div>
-        </div>
+  <!-- Energy lines -->
+  <svg class="absolute inset-0 w-full h-full opacity-[0.08]" xmlns="http://www.w3.org/2000/svg">
+    <line x1="20%" y1="0" x2="20%" y2="100%" stroke="#7c5fd6" stroke-width="0.5"/>
+    <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#7c5fd6" stroke-width="0.5"/>
+    <line x1="80%" y1="0" x2="80%" y2="100%" stroke="#7c5fd6" stroke-width="0.5"/>
+    <line x1="0" y1="25%" x2="100%" y2="25%" stroke="#7c5fd6" stroke-width="0.5"/>
+    <line x1="0" y1="50%" x2="100%" y2="50%" stroke="#7c5fd6" stroke-width="0.5"/>
+    <line x1="0" y1="75%" x2="100%" y2="75%" stroke="#7c5fd6" stroke-width="0.5"/>
+  </svg>
 
-        <!-- Register form -->
-        <div id="form-register" class="hidden">
-            <div class="space-y-4">
-                <div>
-                    <label class="text-gray-400 text-xs mb-1 block">Nombre de usuario</label>
-                    <input id="reg-username" type="text" placeholder="usuario123"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="text-gray-400 text-xs mb-1 block">Email</label>
-                    <input id="reg-email" type="email" placeholder="tu@email.com"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="text-gray-400 text-xs mb-1 block">Contraseña</label>
-                    <div class="relative">
-                        <input id="reg-password" type="password"
-                               placeholder="Mín. 12 chars, mayús, número, especial"
-                               oninput="checkPasswordStrength(this.value)"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
-                        <button type="button" onclick="toggleVisibility('reg-password', this)"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
-                            👁
-                        </button>
-                    </div>
+  <!-- Particles -->
+  <div class="absolute top-[12%] left-[15%] w-2 h-2 bg-purple-400/50 rounded-full" style="animation: particleFloat 4s ease-out infinite"></div>
+  <div class="absolute top-[30%] right-[12%] w-2.5 h-2.5 bg-pink-400/40 rounded-full" style="animation: particleFloat 5s ease-out 1.2s infinite"></div>
+  <div class="absolute bottom-[30%] left-[20%] w-2 h-2 bg-blue-400/50 rounded-full" style="animation: particleFloat 4.5s ease-out 0.6s infinite"></div>
+  <div class="absolute top-[55%] right-[25%] w-1.5 h-1.5 bg-orange-400/40 rounded-full" style="animation: particleFloat 3.8s ease-out 1.8s infinite"></div>
+  <div class="absolute bottom-[40%] left-[55%] w-2 h-2 bg-purple-300/40 rounded-full" style="animation: particleFloat 5.5s ease-out 0.9s infinite"></div>
+  <div class="absolute top-[70%] left-[8%] w-1.5 h-1.5 bg-cyan-400/40 rounded-full" style="animation: particleFloat 4.2s ease-out 2.2s infinite"></div>
+  <div class="absolute top-[20%] right-[40%] w-1.5 h-1.5 bg-yellow-400/30 rounded-full" style="animation: particleFloat 4.8s ease-out 3s infinite"></div>
 
-                    <!-- Barra de fortaleza -->
-                    <div class="mt-2">
-                        <div class="flex justify-between text-xs text-gray-400 mb-1">
-                            <span>Fortaleza:</span>
-                            <span id="strength-label">—</span>
-                        </div>
-                        <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <div id="strength-bar" class="h-full rounded-full transition-all duration-300"
-                                 style="width:0%"></div>
-                        </div>
-                    </div>
+</div>
 
-                    <!-- Requisitos -->
-                    <ul class="mt-3 space-y-1 text-xs" id="password-requirements">
-                        <li id="req-length"   class="text-gray-500">✗ Mínimo 12 caracteres</li>
-                        <li id="req-upper"    class="text-gray-500">✗ Al menos una mayúscula</li>
-                        <li id="req-lower"    class="text-gray-500">✗ Al menos una minúscula</li>
-                        <li id="req-number"   class="text-gray-500">✗ Al menos un número</li>
-                        <li id="req-special"  class="text-gray-500">✗ Al menos un carácter especial (!@#$%...)</li>
-                    </ul>
-                </div>
+<!-- Energy rings behind card area (fixed, outside background container) -->
+  <!-- Aura behind card (fixed — centered via flex) -->
+  <div class="fixed inset-0 flex items-center justify-center pointer-events-none" style="z-index:0;">
+    <div class="w-[620px] h-[620px] bg-gradient-to-br from-purple-500/15 via-pink-500/8 to-blue-500/10 rounded-3xl blur-3xl" style="animation: float 6s ease-in-out infinite"></div>
+  </div>
 
-                <button onclick="doRegister()" id="btn-register"
-                        class="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-600
-                               disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition">
-                    Crear cuenta
-                </button>
-            </div>
-        </div>
-
-        <div id="auth-error" class="hidden mt-4 text-red-400 text-sm text-center p-3 bg-red-900/20 rounded-lg"></div>
-        <div id="auth-success" class="hidden mt-4 text-emerald-400 text-sm text-center p-3 bg-emerald-900/20 rounded-lg"></div>
+  <!-- Energy rings behind card (fixed — centered via flex) -->
+  <div class="fixed inset-0 flex items-center justify-center pointer-events-none" style="z-index:0;">
+    <div class="w-[520px] h-[520px] relative">
+      <div class="absolute inset-0 energy-ring opacity-12">
+        <svg viewBox="0 0 200 200" class="w-full h-full">
+          <circle cx="100" cy="100" r="95" fill="none" stroke="url(#r1)" stroke-width="0.5" stroke-dasharray="10 6"/>
+          <defs><linearGradient id="r1"><stop offset="0%" stop-color="#7c5fd6"/><stop offset="50%" stop-color="#ec4899"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="absolute inset-10 energy-ring-r opacity-8">
+        <svg viewBox="0 0 200 200" class="w-full h-full">
+          <circle cx="100" cy="100" r="90" fill="none" stroke="url(#r2)" stroke-width="0.4" stroke-dasharray="6 12"/>
+          <defs><linearGradient id="r2"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>
+        </svg>
+      </div>
     </div>
+  </div>
+
+<!-- ============ MAIN CONTENT ============ -->
+<div class="relative min-h-screen flex items-center justify-center px-4 py-24" style="z-index:10;">
+  <div class="w-full max-w-[440px] relative z-10">
+
+    <!-- ============ CARD ============ -->
+    <div class="relative border-card glow-pulse overflow-hidden">
+      <!-- Scan line -->
+      <div class="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent scan-line z-10 pointer-events-none"></div>
+      <!-- Shimmer -->
+      <div class="absolute inset-0 shimmer pointer-events-none z-10 rounded-[20px]"></div>
+
+      <!-- Top accent -->
+      <div class="h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
+
+      <div class="p-7 md:p-9 relative z-20">
+
+        <!-- ===== LOGIN VIEW ===== -->
+        <div id="viewLogin" class="view-transition">
+          <div class="text-center mb-7 fade-in">
+            <div class="relative inline-flex items-center justify-center mb-4">
+              <div class="absolute w-20 h-20 rounded-full border border-purple-400/30 radar-pulse"></div>
+              <div class="absolute w-20 h-20 rounded-full border border-purple-400/15 radar-pulse-d"></div>
+              <div class="relative w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500/30 to-pink-500/20 border border-purple-400/30 flex items-center justify-center float">
+                <span class="iconify text-purple-300 text-2xl" data-icon="mdi:radar"></span>
+              </div>
+            </div>
+            <h1 class="font-orbitron font-bold text-2xl text-white tracking-tight mb-1.5">
+              <span class="text-gradient-purple">ACCEDER</span>
+            </h1>
+            <p class="text-sm text-purple-200/60 font-light">Entra a tu cuenta de Padel Scouter</p>
+            <div class="mt-3 flex items-center gap-3 max-w-[180px] mx-auto">
+              <div class="flex-1 h-0.5 bg-purple-950 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-purple-400/60 via-pink-400/50 to-blue-400/50 rounded-full fill-power" style="--fill: 70%"></div>
+              </div>
+              <span class="text-[8px] text-purple-300/40 font-mono tracking-wider">READY</span>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="flex border-b border-purple-500/10 mb-6 fade-in-d1">
+            <button onclick="showView('login')" class="tab-btn active flex-1 pb-3 text-xs font-medium tracking-wider uppercase text-center">Iniciar sesión</button>
+            <button onclick="showView('register')" class="tab-btn flex-1 pb-3 text-xs font-medium tracking-wider uppercase text-center text-purple-300/40 hover:text-purple-300/70 transition-colors">Registrarse</button>
+          </div>
+
+          <!-- Login form -->
+          <form id="form-login" onsubmit="doLogin(); return false;" class="space-y-4">
+            <div class="fade-in-d2">
+              <label class="block text-[10px] text-purple-200/50 tracking-widest uppercase font-medium mb-2 ml-1">Email</label>
+              <div class="relative">
+                <span class="iconify absolute left-4 top-1/2 -translate-y-1/2 text-purple-400/40 text-lg transition-colors duration-300" data-icon="mdi:email-outline"></span>
+                <input id="login-email" type="email" placeholder="tu@email.com" class="input-sc w-full pl-11 pr-4 py-3.5 rounded-xl text-sm text-purple-100 font-light outline-none" required>
+              </div>
+            </div>
+            <div class="fade-in-d3">
+              <label class="block text-[10px] text-purple-200/50 tracking-widest uppercase font-medium mb-2 ml-1">Contraseña</label>
+              <div class="relative">
+                <span class="iconify absolute left-4 top-1/2 -translate-y-1/2 text-purple-400/40 text-lg transition-colors duration-300" data-icon="mdi:lock-outline"></span>
+                <input id="login-password" type="password" placeholder="••••••••" class="input-sc w-full pl-11 pr-12 py-3.5 rounded-xl text-sm text-purple-100 font-light outline-none" required>
+                <button type="button" onclick="togglePw('login-password','loginEye')" class="absolute right-4 top-1/2 -translate-y-1/2 text-purple-400/40 hover:text-purple-300/70 transition-colors">
+                  <span id="loginEye" class="iconify text-lg" data-icon="mdi:eye-off-outline"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1 fade-in-d3">
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" class="w-4 h-4 rounded border-purple-500/20 bg-purple-950/60 accent-purple-500">
+                <span class="text-xs text-purple-200/50 group-hover:text-purple-200/70 transition-colors">Recordarme</span>
+              </label>
+              <button type="button" onclick="showView('forgot')" class="text-xs text-purple-300/60 hover:text-purple-300 transition-colors font-medium">¿Olvidaste tu contraseña?</button>
+            </div>
+
+            <div class="pt-2 fade-in-d4">
+              <button type="submit" id="btn-login" class="btn-primary w-full text-white font-bold text-sm py-4 rounded-xl flex items-center justify-center gap-2.5 tracking-wide">
+                <span class="iconify text-lg" data-icon="mdi:login"></span>
+                <span id="loginBtnText">Entrar</span>
+              </button>
+            </div>
+          </form>
+
+        </div>
+
+        <!-- ===== REGISTER VIEW ===== -->
+        <div id="viewRegister" class="view-transition hidden">
+          <div class="text-center mb-7">
+            <div class="relative inline-flex items-center justify-center mb-4">
+              <div class="absolute w-20 h-20 rounded-full border border-blue-400/30 radar-pulse"></div>
+              <div class="relative w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/30 to-cyan-500/20 border border-blue-400/30 flex items-center justify-center float">
+                <span class="iconify text-blue-300 text-2xl" data-icon="mdi:account-plus-outline"></span>
+              </div>
+            </div>
+            <h1 class="font-orbitron font-bold text-2xl text-white tracking-tight mb-1.5">
+              <span class="text-gradient-purple">CREAR CUENTA</span>
+            </h1>
+            <p class="text-sm text-purple-200/60 font-light">Activa tu scouter de combate</p>
+          </div>
+
+          <div class="flex border-b border-purple-500/10 mb-6">
+            <button onclick="showView('login')" class="tab-btn flex-1 pb-3 text-xs font-medium tracking-wider uppercase text-center text-purple-300/40 hover:text-purple-300/70 transition-colors">Iniciar sesión</button>
+            <button onclick="showView('register')" class="tab-btn active flex-1 pb-3 text-xs font-medium tracking-wider uppercase text-center">Registrarse</button>
+          </div>
+
+          <form id="form-register" onsubmit="doRegister(); return false;" class="space-y-4">
+            <div>
+              <label class="block text-[10px] text-purple-200/50 tracking-widest uppercase font-medium mb-2 ml-1">Usuario</label>
+              <div class="relative">
+                <span class="iconify absolute left-4 top-1/2 -translate-y-1/2 text-purple-400/40 text-lg transition-colors duration-300" data-icon="mdi:account-outline"></span>
+                <input id="reg-username" type="text" placeholder="usuario123" class="input-sc w-full pl-11 pr-4 py-3.5 rounded-xl text-sm text-purple-100 font-light outline-none" required>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] text-purple-200/50 tracking-widest uppercase font-medium mb-2 ml-1">Email</label>
+              <div class="relative">
+                <span class="iconify absolute left-4 top-1/2 -translate-y-1/2 text-purple-400/40 text-lg transition-colors duration-300" data-icon="mdi:email-outline"></span>
+                <input id="reg-email" type="email" placeholder="tu@email.com" class="input-sc w-full pl-11 pr-4 py-3.5 rounded-xl text-sm text-purple-100 font-light outline-none" required>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] text-purple-200/50 tracking-widest uppercase font-medium mb-2 ml-1">Contraseña</label>
+              <div class="relative">
+                <span class="iconify absolute left-4 top-1/2 -translate-y-1/2 text-purple-400/40 text-lg transition-colors duration-300" data-icon="mdi:lock-outline"></span>
+                <input id="reg-password" type="password" placeholder="Min. 12 chars, mayús, número, especial" class="input-sc w-full pl-11 pr-12 py-3.5 rounded-xl text-sm text-purple-100 font-light outline-none" oninput="checkStrength(this.value)" required>
+                <button type="button" onclick="togglePw('reg-password','regEye')" class="absolute right-4 top-1/2 -translate-y-1/2 text-purple-400/40 hover:text-purple-300/70 transition-colors">
+                  <span id="regEye" class="iconify text-lg" data-icon="mdi:eye-off-outline"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Strength -->
+            <div class="space-y-2">
+              <div class="flex gap-1.5">
+                <div class="flex-1 h-1 rounded-full bg-purple-950 overflow-hidden"><div id="str1" class="strength-bar h-full rounded-full" style="width:0%;background:#2d1b69"></div></div>
+                <div class="flex-1 h-1 rounded-full bg-purple-950 overflow-hidden"><div id="str2" class="strength-bar h-full rounded-full" style="width:0%;background:#2d1b69"></div></div>
+                <div class="flex-1 h-1 rounded-full bg-purple-950 overflow-hidden"><div id="str3" class="strength-bar h-full rounded-full" style="width:0%;background:#2d1b69"></div></div>
+                <div class="flex-1 h-1 rounded-full bg-purple-950 overflow-hidden"><div id="str4" class="strength-bar h-full rounded-full" style="width:0%;background:#2d1b69"></div></div>
+              </div>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                <div class="flex items-center gap-1.5" id="ruleLen"><span class="iconify text-xs text-purple-600" data-icon="mdi:circle-small"></span><span class="text-[10px] text-purple-300/30">Mínimo 12 caracteres</span></div>
+                <div class="flex items-center gap-1.5" id="ruleUpper"><span class="iconify text-xs text-purple-600" data-icon="mdi:circle-small"></span><span class="text-[10px] text-purple-300/30">Una mayúscula</span></div>
+                <div class="flex items-center gap-1.5" id="ruleLower"><span class="iconify text-xs text-purple-600" data-icon="mdi:circle-small"></span><span class="text-[10px] text-purple-300/30">Una minúscula</span></div>
+                <div class="flex items-center gap-1.5" id="ruleNum"><span class="iconify text-xs text-purple-600" data-icon="mdi:circle-small"></span><span class="text-[10px] text-purple-300/30">Un número</span></div>
+                <div class="flex items-center gap-1.5" id="ruleSpecial"><span class="iconify text-xs text-purple-600" data-icon="mdi:circle-small"></span><span class="text-[10px] text-purple-300/30">Un carácter especial</span></div>
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <button type="submit" id="btn-register" class="btn-primary w-full text-white font-bold text-sm py-4 rounded-xl flex items-center justify-center gap-2.5 tracking-wide">
+                <span class="iconify text-lg" data-icon="mdi:flash"></span>
+                <span id="regBtnText">Crear cuenta</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ===== FORGOT VIEW ===== -->
+        <div id="viewForgot" class="view-transition hidden">
+          <div class="text-center mb-7">
+            <div class="relative inline-flex items-center justify-center mb-4">
+              <div class="relative w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500/30 to-yellow-500/20 border border-orange-400/30 flex items-center justify-center float">
+                <span class="iconify text-orange-300 text-2xl" data-icon="mdi:lock-question"></span>
+              </div>
+            </div>
+            <h1 class="font-orbitron font-bold text-xl md:text-2xl text-white tracking-tight mb-1.5">
+              ¿OLVIDASTE TU <span class="text-gradient-orange">CONTRASEÑA</span>?
+            </h1>
+            <p class="text-sm text-purple-200/60 font-light max-w-xs mx-auto">Introduce tu email y te enviaremos un enlace para restablecer tu acceso</p>
+          </div>
+
+          <form onsubmit="handleForgot(event)" class="space-y-4">
+            <div>
+              <label class="block text-[10px] text-purple-200/50 tracking-widest uppercase font-medium mb-2 ml-1">Email</label>
+              <div class="relative">
+                <span class="iconify absolute left-4 top-1/2 -translate-y-1/2 text-purple-400/40 text-lg transition-colors duration-300" data-icon="mdi:email-outline"></span>
+                <input type="email" placeholder="tu@email.com" class="input-sc w-full pl-11 pr-4 py-3.5 rounded-xl text-sm text-purple-100 font-light outline-none" required>
+              </div>
+            </div>
+            <div class="pt-2">
+              <button type="submit" id="forgotBtn" class="btn-primary w-full text-white font-bold text-sm py-4 rounded-xl flex items-center justify-center gap-2.5 tracking-wide">
+                <span class="iconify text-lg" data-icon="mdi:send"></span>
+                <span id="forgotBtnText">Enviar enlace</span>
+              </button>
+            </div>
+          </form>
+
+          <div class="text-center mt-6">
+            <button onclick="showView('login')" class="inline-flex items-center gap-2 text-sm text-purple-300/50 hover:text-purple-200 transition-colors font-medium group">
+              <span class="iconify text-lg group-hover:-translate-x-1 transition-transform" data-icon="mdi:arrow-left"></span>
+              Volver al login
+            </button>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="auth-error" class="hidden mt-4 text-red-400 text-sm text-center p-3 bg-red-900/20 rounded-lg border border-red-500/10"></div>
+        <div id="auth-success" class="hidden mt-4 text-emerald-400 text-sm text-center p-3 bg-emerald-900/20 rounded-lg border border-emerald-500/10"></div>
+
+        <!-- Status -->
+        <div class="mt-4 pt-4 border-t border-purple-500/10">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+              <span class="text-[9px] text-purple-300/30 tracking-wider font-mono uppercase">System Online</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-[9px] text-purple-300/20 font-mono" id="clockDisplay">00:00:00</span>
+              <span class="text-[9px] text-purple-300/15">|</span>
+              <span class="text-[9px] text-purple-300/15 font-mono">v2.4.1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="h-px bg-gradient-to-r from-transparent via-pink-500/25 to-transparent"></div>
+    </div>
+
+    <div class="text-center mt-7">
+      <p class="text-[10px] text-white/60">© 2026 Padel Scouter — Todos los derechos reservados</p>
+      <p class="text-[9px] text-white/40 mt-1">Powered by Scouter Technology</p>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-// ── Tab switching ─────────────────────────────────────────────
-function showTab(tab) {
-    document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
-    document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
-    document.getElementById('tab-login').className =
-        'flex-1 py-2 rounded-md text-sm font-medium transition ' +
-        (tab === 'login' ? 'tab-active' : 'text-gray-400');
-    document.getElementById('tab-register').className =
-        'flex-1 py-2 rounded-md text-sm font-medium transition ' +
-        (tab === 'register' ? 'tab-active' : 'text-gray-400');
-    hideMessages();
+// ── View switching (login / register / forgot) ────────────────
+function showView(view) {
+  const views = { login: 'viewLogin', register: 'viewRegister', forgot: 'viewForgot' };
+  Object.entries(views).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (key === view) {
+      el.classList.remove('hidden');
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(12px)';
+      requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      });
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+  const allTabs = document.querySelectorAll('.tab-btn');
+  if (view === 'login') {
+    allTabs[0]?.classList.add('active'); allTabs[0]?.classList.remove('text-purple-300/40');
+    allTabs[1]?.classList.remove('active'); allTabs[1]?.classList.add('text-purple-300/40');
+  } else if (view === 'register') {
+    allTabs[0]?.classList.remove('active'); allTabs[0]?.classList.add('text-purple-300/40');
+    allTabs[1]?.classList.add('active'); allTabs[1]?.classList.remove('text-purple-300/40');
+  }
+  hideMessages();
 }
 
-// ── Toggle password visibility ────────────────────────────────
-function toggleVisibility(inputId, btn) {
-    const input = document.getElementById(inputId);
-    if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = '🙈';
+// ── Toggle password visibility (Iconify icons) ────────────────
+function togglePw(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.setAttribute('data-icon', 'mdi:eye-outline');
+  } else {
+    input.type = 'password';
+    icon.setAttribute('data-icon', 'mdi:eye-off-outline');
+  }
+}
+
+// ── Password strength visual (4 bars + rule checklist) ────────
+function checkStrength(pw) {
+  const rules = {
+    len: pw.length >= 12,
+    upper: /[A-Z]/.test(pw),
+    lower: /[a-z]/.test(pw),
+    num: /[0-9]/.test(pw),
+    special: /[^A-Za-z0-9]/.test(pw)
+  };
+  const map = { len: 'ruleLen', upper: 'ruleUpper', lower: 'ruleLower', num: 'ruleNum', special: 'ruleSpecial' };
+  let score = 0;
+  Object.entries(rules).forEach(([key, pass]) => {
+    const el = document.getElementById(map[key]);
+    if (!el) return;
+    const icon = el.querySelector('.iconify');
+    const text = el.querySelector('span:last-child');
+    if (pass) {
+      score++;
+      icon?.setAttribute('data-icon', 'mdi:check-circle');
+      if (icon) icon.style.color = '#22c55e';
+      if (text) text.style.color = 'rgba(167,139,250,0.7)';
     } else {
-        input.type = 'password';
-        btn.textContent = '👁';
+      icon?.setAttribute('data-icon', 'mdi:circle-small');
+      if (icon) icon.style.color = '#5b21b6';
+      if (text) text.style.color = 'rgba(167,139,250,0.3)';
     }
+  });
+  const colors = ['#ef4444', '#f97316', '#fbbf24', '#22c55e'];
+  const widths = ['25%', '50%', '75%', '100%'];
+  for (let i = 1; i <= 4; i++) {
+    const bar = document.getElementById('str' + i);
+    if (!bar) continue;
+    if (score >= i) {
+      bar.style.width = widths[i - 1];
+      bar.style.background = colors[Math.min(score - 1, 3)];
+    } else {
+      bar.style.width = '0%';
+    }
+  }
+}
+
+// ── Password validation (shared contract with reset_password) ─
+function checkPasswordStrength(pw) {
+  return pw.length >= 12 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+}
+
+// ── Button loading animation ──────────────────────────────────
+function animateBtn(btnId, textId, loadingMsg, successMsg, originalMsg) {
+  const btn = document.getElementById(btnId);
+  const txt = document.getElementById(textId);
+  if (!btn || !txt) return;
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  txt.textContent = loadingMsg;
+  setTimeout(() => {
+    txt.textContent = successMsg;
+    btn.style.opacity = '1';
+    setTimeout(() => {
+      txt.textContent = originalMsg;
+      btn.disabled = false;
+    }, 1500);
+  }, 2000);
 }
 
 // ── Login ─────────────────────────────────────────────────────
 async function doLogin() {
-    const email = document.getElementById('login-email').value.trim().toLowerCase();
-    const password = document.getElementById('login-password').value;
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
 
-    if (!email || !password) {
-        showError('Rellena todos los campos');
-        return;
+  if (!email || !password) {
+    showError('Rellena todos los campos');
+    return;
+  }
+
+  const btn = document.getElementById('btn-login');
+  const txt = document.getElementById('loginBtnText');
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  txt.textContent = 'ANALIZANDO...';
+
+  try {
+    const res = await fetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email, password})
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
+      txt.textContent = 'ACCESO CONCEDIDO';
+      setTimeout(() => { window.location.href = '/dashboard'; }, 500);
+    } else {
+      txt.textContent = 'Entrar';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      showError('Credenciales incorrectas. Comprueba tu email y contraseña.');
     }
-
-    const btn = document.getElementById('btn-login');
-    btn.textContent = 'Entrando...';
-    btn.disabled = true;
-
-    try {
-        const res = await fetch('/api/v1/auth/login', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({email, password})
-        });
-
-        if (res.ok) {
-            const data = await res.json();
-            localStorage.setItem('access_token', data.access_token);
-            localStorage.setItem('refresh_token', data.refresh_token);
-            window.location.href = '/dashboard';
-        } else {
-            const err = await res.json();
-            // OWASP A09 — no revelar información específica
-            showError('Credenciales incorrectas. Comprueba tu email y contraseña.');
-        }
-    } catch {
-        showError('Error de conexión. Comprueba tu conexión a internet.');
-    } finally {
-        btn.textContent = 'Entrar';
-        btn.disabled = false;
-    }
+  } catch {
+    txt.textContent = 'Entrar';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    showError('Error de conexión. Comprueba tu conexión a internet.');
+  }
 }
 
 // ── Register ──────────────────────────────────────────────────
 async function doRegister() {
-    const username = document.getElementById('reg-username').value.trim();
-    const email    = document.getElementById('reg-email').value.trim().toLowerCase();
-    const password = document.getElementById('reg-password').value;
+  const username = document.getElementById('reg-username').value.trim();
+  const email    = document.getElementById('reg-email').value.trim().toLowerCase();
+  const password = document.getElementById('reg-password').value;
 
-    // Validar fortaleza antes de enviar
-    if (!checkPasswordStrength(password)) {
-        showError('La contraseña no cumple todos los requisitos de seguridad.');
-        return;
-    }
+  if (!checkPasswordStrength(password)) {
+    showError('La contraseña no cumple todos los requisitos de seguridad.');
+    return;
+  }
 
-    const btn = document.getElementById('btn-register');
-    btn.textContent = 'Creando cuenta...';
-    btn.disabled = true;
+  const btn = document.getElementById('btn-register');
+  const txt = document.getElementById('regBtnText');
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  txt.textContent = 'ACTIVANDO SCOUTER...';
 
-    try {
-        const res = await fetch('/api/v1/auth/register', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({username, email, password})
-        });
+  try {
+    const res = await fetch('/api/v1/auth/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username, email, password})
+    });
 
-        if (res.ok) {
-            showSuccess('¡Cuenta creada! Ahora puedes iniciar sesión.');
-            showTab('login');
-            document.getElementById('login-email').value = email;
-        } else {
-            const err = await res.json();
-            showError(err.detail || 'Error al registrarse');
-        }
-    } finally {
-        btn.textContent = 'Crear cuenta';
+    if (res.ok) {
+      txt.textContent = 'CUENTA CREADA';
+      setTimeout(() => {
+        showSuccess('¡Cuenta creada! Ahora puedes iniciar sesión.');
+        showView('login');
+        document.getElementById('login-email').value = email;
         btn.disabled = false;
+        btn.style.opacity = '1';
+        txt.textContent = 'Crear cuenta';
+      }, 1500);
+    } else {
+      const err = await res.json();
+      showError(err.detail || 'Error al registrarse');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      txt.textContent = 'Crear cuenta';
     }
+  } catch {
+    showError('Error de conexión. Inténtalo de nuevo.');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    txt.textContent = 'Crear cuenta';
+  }
 }
 
+// ── Forgot password (visual placeholder) ──────────────────────
+function handleForgot(e) {
+  e.preventDefault();
+  animateBtn('forgotBtn', 'forgotBtnText', 'ENVIANDO...', 'ENLACE ENVIADO', 'Enviar enlace');
+}
+
+// ── Messages ──────────────────────────────────────────────────
 function showError(msg) {
-    const el = document.getElementById('auth-error');
-    el.textContent = msg;
-    el.classList.remove('hidden');
-    document.getElementById('auth-success').classList.add('hidden');
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  document.getElementById('auth-success').classList.add('hidden');
 }
 
 function showSuccess(msg) {
-    const el = document.getElementById('auth-success');
-    el.textContent = msg;
-    el.classList.remove('hidden');
-    document.getElementById('auth-error').classList.add('hidden');
+  const el = document.getElementById('auth-success');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  document.getElementById('auth-error').classList.add('hidden');
 }
 
 function hideMessages() {
-    document.getElementById('auth-error').classList.add('hidden');
-    document.getElementById('auth-success').classList.add('hidden');
+  document.getElementById('auth-error').classList.add('hidden');
+  document.getElementById('auth-success').classList.add('hidden');
 }
 
+// ── Clock ─────────────────────────────────────────────────────
+function updateClock() {
+  const n = new Date();
+  const el = document.getElementById('clockDisplay');
+  if (el) el.textContent = [n.getHours(), n.getMinutes(), n.getSeconds()].map(v => String(v).padStart(2, '0')).join(':');
+}
+setInterval(updateClock, 1000);
+updateClock();
 
+// ── Input icon color on focus ─────────────────────────────────
+document.querySelectorAll('.input-sc').forEach(input => {
+  input.addEventListener('focus', function () {
+    const icon = this.parentElement.querySelector('.iconify');
+    if (icon) icon.style.color = 'rgba(167,139,250,0.8)';
+  });
+  input.addEventListener('blur', function () {
+    const icon = this.parentElement.querySelector('.iconify');
+    if (icon) icon.style.color = 'rgba(124,95,214,0.4)';
+  });
+});
+
+// ── Auto-redirect if already logged in ────────────────────────
 const existingToken = localStorage.getItem('access_token');
 if (existingToken) {
-    fetch('/api/v1/auth/me', {
-        headers: {'Authorization': `Bearer ${existingToken}`}
-    }).then(r => {
-        if (r.ok) {
-            window.location.href = '/dashboard';
-        } else {
-            localStorage.clear(); // token inválido, limpiar
-        }
-    }).catch(() => localStorage.clear());
+  fetch('/api/v1/auth/me', {
+    headers: {'Authorization': `Bearer ${existingToken}`}
+  }).then(r => {
+    if (r.ok) window.location.href = '/dashboard';
+    else localStorage.clear();
+  }).catch(() => localStorage.clear());
 }
 </script>
 {% endblock %}
+
+{% block landing_footer %}{% endblock %}

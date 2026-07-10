@@ -28,3 +28,9 @@ app/static/avatars/
 
 # Configuración local de la herramienta Gentle AI
 .atl/
+
+# Test files locales
+_test_*.py
+
+# OpenSpec artifacts
+openspec/

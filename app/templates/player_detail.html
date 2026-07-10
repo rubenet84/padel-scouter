@@ -1,267 +1,634 @@
-{% extends "base.html" %}
-{% block title %}{{ player.name if player.name else "Jugador" }} — Padel Scouter{% endblock %}
-
-{% block content %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ player.name if player.name else "Jugador" }} — Padel Scouter</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      purple: { 950:'#0d0520', 900:'#120733', 850:'#180c42', 800:'#1e1050', 700:'#2d1b69', 600:'#3d2a8c', 500:'#5b3fb0', 400:'#7c5fd6', 300:'#a78bfa', 200:'#c4b5fd', 100:'#e0d5ff' },
+      accent: { orange:'#f97316', gold:'#fbbf24', neon:'#22c55e', blue:'#3b82f6', cyan:'#06b6d4', red:'#ef4444', pink:'#ec4899' }
+    },
+    fontFamily: { inter:['Inter','sans-serif'], space:['Space Grotesk','sans-serif'], orbitron:['Orbitron','sans-serif'] }
+  }}
+}
+</script>
+<link rel="stylesheet" href="/static/css/scouter.css">
 <link rel="stylesheet" href="/static/css/player_detail.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#120733}
+::-webkit-scrollbar-thumb{background:#7c5fd6;border-radius:3px}
 
-<!-- Fixed background -->
-<div class="fixed inset-0 pointer-events-none" style="z-index:0;background:radial-gradient(ellipse at 30% 20%, #FF6B0008 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, #3B82F606 0%, transparent 50%), #0A0A0F;"></div>
-<div class="fixed inset-0 pointer-events-none opacity-[0.025]" style="z-index:0;background-image:linear-gradient(#FF6B00 1px,transparent 1px),linear-gradient(90deg, #FF6B00 1px,transparent 1px);background-size:60px 60px;"></div>
+@keyframes scanLine{0%{top:-2px;opacity:0}10%{opacity:.6}90%{opacity:.6}100%{top:calc(100% + 2px);opacity:0}}
+.scan-line{animation:scanLine 4s ease-in-out infinite}
 
-<div class="relative" style="z-index:10;">
-    <!-- Sub-nav breadcrumb -->
-    <div class="border-b border-white/5 px-6 py-3">
-        <div class="max-w-7xl mx-auto flex items-center gap-2 text-xs" style="color:#475569;">
-            <a href="/dashboard" class="hover:text-orange-400 transition-colors">Dashboard</a>
-            <span>›</span>
-            <span id="breadcrumb-name" style="color:#FF6B00;">Jugador</span>
-        </div>
-    </div>
+@keyframes glowPulse{0%,100%{box-shadow:0 0 25px rgba(124,95,214,.2),0 0 50px rgba(124,95,214,.08)}50%{box-shadow:0 0 35px rgba(124,95,214,.3),0 0 70px rgba(124,95,214,.12)}}
+.glow-pulse{animation:glowPulse 3s ease-in-out infinite}
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+@keyframes glowPulseOrange{0%,100%{box-shadow:0 0 20px rgba(249,115,22,.15)}50%{box-shadow:0 0 30px rgba(249,115,22,.25)}}
+.glow-orange{animation:glowPulseOrange 3s ease-in-out infinite}
+@keyframes glowPulseBlue{0%,100%{box-shadow:0 0 20px rgba(59,130,246,.15)}50%{box-shadow:0 0 30px rgba(59,130,246,.25)}}
+.glow-blue{animation:glowPulseBlue 3s ease-in-out infinite}
+@keyframes glowPulseGreen{0%,100%{box-shadow:0 0 20px rgba(34,197,94,.15)}50%{box-shadow:0 0 30px rgba(34,197,94,.25)}}
+.glow-green{animation:glowPulseGreen 3s ease-in-out infinite}
+@keyframes glowPulseGold{0%,100%{box-shadow:0 0 20px rgba(251,191,36,.15)}50%{box-shadow:0 0 30px rgba(251,191,36,.25)}}
+.glow-gold{animation:glowPulseGold 3s ease-in-out infinite}
+@keyframes glowPulseNeon{0%,100%{box-shadow:0 0 20px rgba(34,197,94,.15)}50%{box-shadow:0 0 30px rgba(34,197,94,.25)}}
+.glow-neon{animation:glowPulseNeon 3s ease-in-out infinite}
+@keyframes glowPulseRed{0%,100%{box-shadow:0 0 20px rgba(239,68,68,.15)}50%{box-shadow:0 0 30px rgba(239,68,68,.25)}}
+.glow-red{animation:glowPulseRed 3s ease-in-out infinite}
+@keyframes glowPulsePink{0%,100%{box-shadow:0 0 20px rgba(236,72,153,.15)}50%{box-shadow:0 0 30px rgba(236,72,153,.25)}}
+.glow-pink{animation:glowPulsePink 3s ease-in-out infinite}
 
-        <!-- Loading state -->
-        <div id="loading-state" class="text-center py-24">
-            <div class="text-4xl mb-4 power-flicker" style="color:#00FF87;">🔮</div>
-            <p style="color:#475569;" class="text-sm">Escaneando jugador...</p>
-        </div>
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.float{animation:float 5s ease-in-out infinite}
+@keyframes radarPulse{0%{transform:scale(.3);opacity:.5}100%{transform:scale(1.6);opacity:0}}
+.radar-pulse{animation:radarPulse 2.5s ease-out infinite}
+.radar-pulse-d{animation:radarPulse 2.5s ease-out .9s infinite}
 
-        <!-- Error state -->
-        <div id="error-state" class="hidden text-center py-24">
-            <div class="text-4xl mb-4">⚠️</div>
-            <p style="color:#ef4444;" class="text-sm">Error al cargar el jugador</p>
-            <a href="/dashboard" class="mt-4 inline-block text-sm" style="color:#FF6B00;">← Volver</a>
-        </div>
+@keyframes particleFloat{0%{transform:translateY(0) translateX(0) scale(1);opacity:0}15%{opacity:.6}85%{opacity:.6}100%{transform:translateY(-90px) translateX(18px) scale(0);opacity:0}}
+@keyframes fillBar{0%{width:0}100%{width:var(--fill)}}
+.fill-bar{animation:fillBar 1.2s ease-out forwards;width:0}
+@keyframes countUp{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+.count-up{animation:countUp .6s ease-out forwards}
 
-        <!-- Main content (hidden until loaded) -->
-        <div id="main-content" class="hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+@keyframes energyRing{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.energy-ring{animation:energyRing 12s linear infinite}
+.energy-ring-r{animation:energyRing 18s linear infinite reverse}
 
-                <!-- LEFT COLUMN -->
-                <div class="lg:col-span-4 space-y-5">
-                    {% include 'partials/_player_header.html' %}
-                </div>
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shimmer{background:linear-gradient(90deg,transparent 30%,rgba(124,95,214,.04) 50%,transparent 70%);background-size:200% 100%;animation:shimmer 4s ease-in-out infinite}
 
-                <!-- RIGHT COLUMN -->
-                <div class="lg:col-span-8 space-y-5">
+.text-gradient-purple{background:linear-gradient(135deg,#a78bfa,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-orange{background:linear-gradient(135deg,#f97316,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-blue{background:linear-gradient(135deg,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-green{background:linear-gradient(135deg,#22c55e,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-gold{background:linear-gradient(135deg,#fbbf24,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-neon{background:linear-gradient(135deg,#22c55e,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-red{background:linear-gradient(135deg,#ef4444,#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-pink{background:linear-gradient(135deg,#ec4899,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
-                <!-- Action buttons -->
-                    <div class="flex gap-3 flex-wrap">
-                         <button onclick="openEditModal()" title="Abrir formulario para editar los datos y estadísticas del jugador"
-                                 class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
-                                 style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
-                            ✏️ Editar jugador
-                        </button>
-                        <button onclick="openLevelGuideModal()" title="Ver la explicación de todas las categorías y niveles de juego"
-                                class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
-                                style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:#a855f7;">
-                            📖 Guía de Niveles
-                        </button>
-                        <a href="/dashboard"
-                        class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
-                        style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:#64748b;">
-                            ← Dashboard
-                        </a>
-                    </div>
-                    {% include 'partials/_player_stats.html' %}
-                    {% include 'partials/_player_history.html' %}
-                    <!-- Strengths & Weaknesses -->
-                    <div id="sw-section" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <!-- Fortalezas -->
-                        <div class="rounded-2xl card-hover" style="background:#12121A;border:1px solid rgba(0,255,135,0.1);overflow:hidden;">
-                            <div class="h-0.5" style="background:linear-gradient(90deg,rgba(0,255,135,0.5),transparent);"></div>
-                            <div class="p-5">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(0,255,135,0.6);">✅ Fortalezas</span>
-                                </div>
-                                <ul id="strengths-list" class="space-y-3"></ul>
-                            </div>
-                        </div>
-                        <!-- Debilidades -->
-                        <div class="rounded-2xl card-hover" style="background:#12121A;border:1px solid rgba(255,45,45,0.1);overflow:hidden;">
-                            <div class="h-0.5" style="background:linear-gradient(90deg,rgba(255,45,45,0.5),transparent);"></div>
-                            <div class="p-5">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(255,45,45,0.6);">⚠️ Debilidades</span>
-                                </div>
-                                <ul id="weaknesses-list" class="space-y-3"></ul>
-                            </div>
-                        </div>
-                    </div>
+.border-card{position:relative;background:linear-gradient(170deg,#1a0f3a 0%,#140b30 50%,#180d38 100%);border-radius:16px}
+.border-card::before{content:'';position:absolute;inset:-1px;border-radius:17px;z-index:-1}
+.border-purple::before{background:linear-gradient(160deg,rgba(124,95,214,.5),rgba(124,95,214,.1) 30%,transparent 55%,rgba(236,72,153,.15) 80%,rgba(124,95,214,.2))}
+.border-orange::before{background:linear-gradient(160deg,rgba(249,115,22,.5),rgba(249,115,22,.1) 30%,transparent 55%,rgba(251,191,36,.15) 80%,rgba(249,115,22,.2))}
+.border-blue::before{background:linear-gradient(160deg,rgba(59,130,246,.5),rgba(59,130,246,.1) 30%,transparent 55%,rgba(6,182,212,.15) 80%,rgba(59,130,246,.2))}
+.border-green::before{background:linear-gradient(160deg,rgba(34,197,94,.5),rgba(34,197,94,.1) 30%,transparent 55%,rgba(74,222,128,.15) 80%,rgba(34,197,94,.2))}
+.border-gold::before{background:linear-gradient(160deg,rgba(251,191,36,.5),rgba(251,191,36,.1) 30%,transparent 55%,rgba(255,215,0,.15) 80%,rgba(251,191,36,.2))}
+.border-neon::before{background:linear-gradient(160deg,rgba(34,197,94,.5),rgba(34,197,94,.1) 30%,transparent 55%,rgba(74,222,128,.15) 80%,rgba(34,197,94,.2))}
+.border-red::before{background:linear-gradient(160deg,rgba(239,68,68,.5),rgba(239,68,68,.1) 30%,transparent 55%,rgba(248,113,113,.15) 80%,rgba(239,68,68,.2))}
+.border-pink::before{background:linear-gradient(160deg,rgba(236,72,153,.5),rgba(236,72,153,.1) 30%,transparent 55%,rgba(244,114,182,.15) 80%,rgba(236,72,153,.2))}
 
-                    <!-- Plan de mejora -->
-                    <div id="plan-card" class="rounded-2xl card-hover hidden" style="background:#12121A;border:1px solid rgba(59,130,246,0.1);overflow:hidden;">
-                        <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#3B82F6,transparent);"></div>
-                        <div class="p-5">
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(59,130,246,0.6);">📋 Plan de Mejora FEP</span>
-                            </div>
-                            <p id="improvement-plan" class="text-sm leading-relaxed" style="color:#94a3b8;"></p>
-                        </div>
-                    </div>
+.reveal{opacity:0;transform:translateY(30px);transition:all .7s cubic-bezier(.16,1,.3,1)}
+.reveal.active{opacity:1;transform:translateY(0)}
 
-                    <!-- No analysis CTA -->
-                    <div id="no-analysis-cta" class="hidden rounded-2xl p-8 text-center" style="background:#12121A;border:1px dashed rgba(255,107,0,0.2);">
-                        <div class="text-4xl mb-3">🔮</div>
-                        <p class="font-bold text-white mb-1">Sin análisis IA todavía</p>
-                        <p class="text-sm mb-4" style="color:#64748b;">Analiza este jugador para obtener su poder de combate, fortalezas y plan de mejora</p>
-                        <button id="btn-analyze" onclick="analyzeNow()"
-                                class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all"
-                                style="background:rgba(255,107,0,0.15);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;">
-                            🔮 Analizar con IA
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+/* Stat bars: usar transition en vez de animation para evitar conflictos con inline style */
+.stat-bar-power,.stat-bar-speed,.stat-bar-accuracy,.stat-bar-resist,.stat-bar-tactics{transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+.fill-animate{animation:none!important}
+
+
+/* Sidebar toggle */
+#sidebar{position:fixed;left:0;top:64px;bottom:0;width:240px;z-index:40;transform:translateX(-100%);transition:transform .35s cubic-bezier(.16,1,.3,1);border-right:1px solid rgba(124,95,214,.08);backdrop-filter:blur(12px);background:rgba(13,5,32,.85);overflow-y:auto}
+#sidebar.open{transform:translateX(0)}
+
+
+.sidebar-link{transition:all .2s ease;border-left:2px solid transparent}
+.sidebar-link:hover,.sidebar-link.active{background:rgba(124,95,214,.08);border-left-color:#7c5fd6}
+.sidebar-link.active .link-icon{color:#a78bfa}
+.sidebar-link.active .link-text{color:#e0d5ff}
+
+/* Player detail card-hover (from scouter.css) */
+.card-hover{transition:border-color .2s,transform .2s}
+.card-hover:hover{transform:translateY(-2px)}
+</style>
+</head>
+<body>
+
+<!-- ============ BACKGROUND ============ -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden">
+  <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-purple-600/15 via-purple-700/8 to-transparent rounded-full blur-[120px]"></div>
+  <div class="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-t from-pink-600/8 via-purple-700/4 to-transparent rounded-full blur-[100px]"></div>
+  <div class="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-blue-600/6 rounded-full blur-[100px]"></div>
+  <div class="absolute top-1/4 -right-40 w-[400px] h-[400px] bg-orange-500/5 rounded-full blur-[100px]"></div>
+  <div class="absolute inset-0" style="background-image:linear-gradient(rgba(124,95,214,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,95,214,.03) 1px,transparent 1px);background-size:50px 50px"></div>
+  <svg class="absolute inset-0 w-full h-full opacity-[.05]" xmlns="http://www.w3.org/2000/svg">
+    <line x1="20%" y1="0" x2="20%" y2="100%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="80%" y1="0" x2="80%" y2="100%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="0" y1="33%" x2="100%" y2="33%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="0" y1="66%" x2="100%" y2="66%" stroke="#7c5fd6" stroke-width=".5"/>
+  </svg>
+  <div class="absolute top-[12%] left-[15%] w-2 h-2 bg-purple-400/40 rounded-full" style="animation:particleFloat 4s ease-out infinite"></div>
+  <div class="absolute top-[30%] right-[12%] w-2 h-2 bg-pink-400/35 rounded-full" style="animation:particleFloat 5s ease-out 1.2s infinite"></div>
+  <div class="absolute bottom-[30%] left-[22%] w-1.5 h-1.5 bg-blue-400/40 rounded-full" style="animation:particleFloat 4.5s ease-out .6s infinite"></div>
+  <div class="absolute top-[55%] right-[28%] w-1.5 h-1.5 bg-orange-400/35 rounded-full" style="animation:particleFloat 3.8s ease-out 1.8s infinite"></div>
+  <div class="absolute bottom-[40%] left-[60%] w-2 h-2 bg-purple-300/30 rounded-full" style="animation:particleFloat 5.5s ease-out .9s infinite"></div>
 </div>
 
-<!-- ── Modals ─────────────────────────────────────────── -->
+<!-- ============ NAVBAR ============ -->
+<nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b border-purple-500/10" style="background:rgba(13,5,32,.88)">
+  <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3 group">
+      <div class="relative w-9 h-9 flex items-center justify-center">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg rotate-45 opacity-90 group-hover:opacity-100 transition-opacity"></div>
+        <span class="iconify relative z-10 text-white text-lg" data-icon="mdi:radar"></span>
+      </div>
+      <span class="font-orbitron font-bold text-sm tracking-widest text-purple-100 hidden sm:block group-hover:text-white transition-colors">PADEL SCOUTER</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <button onclick="document.getElementById('ps-chatbot-toggle')?.click()" title="Abrir reglamento"
+              class="hidden md:flex items-center gap-2 rounded-full px-3 py-1 cursor-pointer transition-all duration-300 group/scout"
+              style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.15);"
+              onmouseenter="this.style.background='rgba(34,197,94,0.2)';this.style.borderColor='rgba(34,197,94,0.4)'"
+              onmouseleave="this.style.background='rgba(34,197,94,0.1)';this.style.borderColor='rgba(34,197,94,0.15)'">
+        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse group-hover/scout:bg-green-300"></span>
+        <span class="text-[9px] text-green-400 group-hover/scout:text-green-300 font-medium tracking-wider uppercase transition-colors">Scouter Active</span>
+      </button>
+      <button class="relative w-9 h-9 rounded-lg bg-purple-800/30 border border-purple-500/15 flex items-center justify-center hover:bg-purple-800/50 transition-colors">
+        <span class="iconify text-purple-300/60 text-lg" data-icon="mdi:bell-outline"></span>
+        <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-accent-red rounded-full border-2 border-purple-950"></div>
+      </button>
+      <div onclick="toggleSidebar()" title="Menú de perfil" class="flex items-center gap-2.5 cursor-pointer group">
+        <div class="w-[52px] h-[52px] rounded-xl overflow-hidden border-2 border-yellow-500/60 group-hover:border-yellow-400 transition-colors flex-shrink-0">
+          <img src="/static/images/logo-usuario.png" alt="User" class="w-full h-full object-cover">
+        </div>
+        <div class="hidden md:block">
+          <div id="nav-username" class="text-base font-bold text-yellow-500/80 group-hover:text-yellow-400 transition-colors font-orbitron">Cuenta</div>
+          <div class="flex items-center gap-1 text-xs text-yellow-500/40 group-hover:text-yellow-300/70 transition-colors">
+            <span class="font-orbitron">Menú ▼</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ LAYOUT ============ -->
+<div class="pt-16 min-h-screen">
+
+  <!-- ============ SIDEBAR ============ -->
+  {% include 'partials/_sidebar_menu.html' %}
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main>
+    <div class="max-w-7xl mx-auto px-6 py-8">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-xs text-purple-300/40 mb-6">
+        <a href="/dashboard" class="hover:text-purple-300 transition-colors">Dashboard</a>
+        <span>›</span>
+        <span id="breadcrumb-name" style="color:#a78bfa;">{{ player.name if player.name else "Jugador" }}</span>
+      </div>
+
+      <!-- Loading state -->
+      <div id="loading-state" class="text-center py-32">
+        <div class="border-card border-purple p-8 max-w-[400px] mx-auto">
+          <div class="text-4xl mb-4">🔮</div>
+          <p class="text-sm text-purple-200/50 font-light">Escaneando jugador...</p>
+          <div class="mt-4 w-16 h-1 bg-purple-800 rounded-full mx-auto overflow-hidden">
+            <div class="h-full bg-purple-400 rounded-full animate-pulse" style="width:40%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error state -->
+      <div id="error-state" class="hidden text-center py-24">
+        <div class="text-4xl mb-4">⚠️</div>
+        <p class="text-sm" style="color:#ef4444;">Error al cargar el jugador</p>
+        <a href="/dashboard" class="mt-4 inline-block text-sm" style="color:#a78bfa;">← Volver</a>
+      </div>
+
+      <!-- Main player content (hidden until loaded) -->
+      <div id="main-content" class="hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          <!-- LEFT COLUMN -->
+          <div class="lg:col-span-4 space-y-5">
+            {% include 'partials/_player_header.html' %}
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="lg:col-span-8 space-y-5">
+
+            <!-- Action buttons -->
+            <div class="flex gap-3 flex-wrap">
+              <button onclick="openEditModal()" title="Abrir formulario para editar los datos y estadísticas del jugador"
+                      class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                      style="background:rgba(124,95,214,0.15);border:1px solid rgba(124,95,214,0.3);color:#a78bfa;">
+                ✏️ Editar jugador
+              </button>
+              <button onclick="openLevelGuideModal()" title="Ver la explicación de todas las categorías y niveles de juego"
+                      class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                      style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:#a855f7;">
+                📖 Guía de Niveles
+              </button>
+              <button onclick="openPowerGuideModal()" title="Ver cómo se calcula el Power Level"
+                      class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                      style="background:rgba(57,255,136,0.08);border:1px solid rgba(57,255,136,0.2);color:#39ff88;">
+                ⚡ Guía de Power Level
+              </button>
+              <a href="/global-stats"
+                 class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                 style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);color:#60a5fa;">
+                📊 Estadísticas Globales
+              </a>
+            </div>
+
+            {% include 'partials/_player_stats.html' %}
+            {% include 'partials/_player_history.html' %}
+
+            <!-- Strengths & Weaknesses -->
+            <div id="sw-section" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div class="rounded-2xl card-hover" style="background:#12121A;border:1px solid rgba(0,255,135,0.1);overflow:hidden;">
+                <div class="h-0.5" style="background:linear-gradient(90deg,rgba(0,255,135,0.5),transparent);"></div>
+                <div class="p-5">
+                  <div class="flex items-center gap-2 mb-4">
+                    <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(0,255,135,0.6);">✅ Fortalezas</span>
+                  </div>
+                  <ul id="strengths-list" class="space-y-3"></ul>
+                </div>
+              </div>
+              <div class="rounded-2xl card-hover" style="background:#12121A;border:1px solid rgba(255,45,45,0.1);overflow:hidden;">
+                <div class="h-0.5" style="background:linear-gradient(90deg,rgba(255,45,45,0.5),transparent);"></div>
+                <div class="p-5">
+                  <div class="flex items-center gap-2 mb-4">
+                    <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(255,45,45,0.6);">⚠️ Debilidades</span>
+                  </div>
+                  <ul id="weaknesses-list" class="space-y-3"></ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Plan de mejora -->
+            <div id="plan-card" class="rounded-2xl card-hover hidden" style="background:#12121A;border:1px solid rgba(59,130,246,0.1);overflow:hidden;">
+              <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#3B82F6,transparent);"></div>
+              <div class="p-5">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-xs font-bold tracking-widest uppercase" style="color:rgba(59,130,246,0.6);">📋 Plan de Mejora FEP</span>
+                </div>
+                <p id="improvement-plan" class="text-sm leading-relaxed" style="color:#94a3b8;"></p>
+              </div>
+            </div>
+
+            <!-- No analysis CTA -->
+            <div id="no-analysis-cta" class="hidden rounded-2xl p-8 text-center" style="background:#12121A;border:1px dashed rgba(124,95,214,0.2);">
+              <div class="text-4xl mb-3">🔮</div>
+              <p class="font-bold text-white mb-1">Sin análisis IA todavía</p>
+              <p class="text-sm mb-4" style="color:#64748b;">Analiza este jugador para obtener su poder de combate, fortalezas y plan de mejora</p>
+              <button id="btn-analyze" onclick="analyzeNow()"
+                      class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all"
+                      style="background:rgba(124,95,214,0.15);border:1px solid rgba(124,95,214,0.3);color:#a78bfa;">
+                🔮 Analizar con IA
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Level Guide Modal (inline, not partial) -->
+      <div id="level-guide-modal"
+          class="fixed inset-0 flex items-center justify-center p-4 hidden"
+          role="dialog" aria-modal="true"
+          style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
+          onclick="if (event.target===event.currentTarget) closeLevelGuideModal()">
+        <div class="w-full max-w-[1450px] rounded-2xl" style="background:#12121A;border:1px solid rgba(168,85,247,0.2);max-height:90vh;overflow-y:auto;position:relative;">
+          <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-5">
+              <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(168,85,247,0.8);">📖 Guía de Niveles</span>
+              <button onclick="closeLevelGuideModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+            <div class="grid grid-cols-4 gap-5 items-stretch">
+              <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(34,197,94,0.2);">
+                <div class="px-5 py-4 text-center" style="background:rgba(34,197,94,0.08);border-bottom:1px solid rgba(34,197,94,0.1);">
+                  <span class="text-base font-bold" style="color:#22c55e;">🟢 INICIACIÓN</span>
+                  <span class="text-base ml-1.5 font-bold" style="color:#22c55e;">1.0 – 2.5</span>
+                </div>
+                <div class="px-5 py-4 flex-1 flex flex-col">
+                  <div class="flex-1">
+                    <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Primeros pasos. Reglas, técnica básica y consistencia.</p>
+                    <div class="space-y-1.5">
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Golpes básicos</div>
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Dificultad en voleas</div>
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Prioriza mantener la bola</div>
+                    </div>
+                  </div>
+                  <div class="pt-4 mt-4" style="border-top:1px solid rgba(34,197,94,0.15);">
+                    <div class="flex items-center gap-1.5 text-sm" style="color:#22c55e;"><span>🎾</span> Pala redonda · punto dulce amplio</div>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(234,179,8,0.2);">
+                <div class="px-5 py-4 text-center" style="background:rgba(234,179,8,0.08);border-bottom:1px solid rgba(234,179,8,0.1);">
+                  <span class="text-base font-bold" style="color:#eab308;">🟡 INTERMEDIO</span>
+                  <span class="text-base ml-1.5 font-bold" style="color:#eab308;">2.0 – 4.5</span>
+                </div>
+                <div class="px-5 py-4 flex-1 flex flex-col">
+                  <div class="flex-1">
+                    <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Control, colocación y táctica con consistencia.</p>
+                    <div class="space-y-1.5">
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Bandeja y víbora</div>
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Lee rebotes y se posiciona</div>
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Controla el ritmo</div>
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Compite con frecuencia</div>
+                    </div>
+                  </div>
+                  <div class="pt-4 mt-4" style="border-top:1px solid rgba(234,179,8,0.15);">
+                    <div class="flex items-center gap-1.5 text-sm" style="color:#eab308;"><span>🎾</span> Pala híbrida · equilibrio control/potencia</div>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(239,68,68,0.2);">
+                <div class="px-5 py-4 text-center" style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.1);">
+                  <span class="text-base font-bold" style="color:#ef4444;">🔴 AVANZADO</span>
+                  <span class="text-base ml-1.5 font-bold" style="color:#ef4444;">4.25 – 7.0</span>
+                </div>
+                <div class="px-5 py-4 flex-1 flex flex-col">
+                  <div class="flex-1">
+                    <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Sólido, rápido y agresivo. Domina todos los golpes.</p>
+                    <div class="space-y-1.5">
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Precisión en golpes complejos</div>
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Gran lectura del partido</div>
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Domina ataque y defensa</div>
+                      <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Torneos habituales</div>
+                    </div>
+                  </div>
+                  <div class="pt-4 mt-4" style="border-top:1px solid rgba(239,68,68,0.15);">
+                    <div class="flex items-center gap-1.5 text-sm" style="color:#ef4444;"><span>🎾</span> Pala técnica · alta precisión</div>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(59,130,246,0.25);">
+                <div class="px-5 py-4 text-center" style="background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.1);">
+                  <span class="text-base font-bold" style="color:#3b82f6;">📋 CORRESPONDENCIA</span>
+                </div>
+                <div class="px-5 py-4 flex-1 flex flex-col">
+                  <div class="flex-1">
+                    <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Todas las categorías FEP con su rango numérico.</p>
+                    <div class="space-y-2.5">
+                      <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                        <span class="text-sm font-bold" style="color:#cbd5e1;">🟢 Iniciación</span>
+                        <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">1.0 – 2.5</span>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                        <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 5ª Categoría</span>
+                        <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">2.0 – 3.0</span>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                        <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 4ª Categoría</span>
+                        <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.0 – 3.75</span>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                        <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 3ª Categoría</span>
+                        <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.75 – 4.25</span>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                        <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 2ª Categoría</span>
+                        <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.25 – 4.75</span>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                        <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 1ª Categoría</span>
+                        <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.75 – 6.0</span>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
+                        <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 Profesional</span>
+                        <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">6.0 – 7.0</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pt-4 mt-4" style="border-top:1px solid rgba(59,130,246,0.15);">
+                    <div class="flex items-center gap-1.5 text-sm" style="color:#3b82f6;"><span>📋</span> Basado en FEP 2026</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⚡ Power Level Guide Modal -->
+      <div id="power-guide-modal"
+          class="fixed inset-0 flex items-center justify-center p-4 hidden"
+          role="dialog" aria-modal="true"
+          style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
+          onclick="if (event.target===event.currentTarget) closePowerGuideModal()">
+        <div class="w-full max-w-[1100px] rounded-2xl" style="background:#12121A;border:1px solid rgba(57,255,136,0.2);max-height:90vh;overflow-y:auto;position:relative;">
+          <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#39ff88,transparent);"></div>
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+              <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(57,255,136,0.8);">⚡ Guía de Power Level</span>
+              <button onclick="closePowerGuideModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+
+            <p class="text-sm mb-6" style="color:#94a3b8;">El Power Level se calcula con <strong class="text-white">4 factores</strong> que ponderan distintas capacidades del jugador. La fórmula base es:</p>
+            <div class="rounded-xl p-4 mb-6 text-center" style="background:rgba(10,10,15,0.6);border:1px solid rgba(57,255,136,0.15);">
+              <span class="text-base font-bold" style="color:#39ff88;">Power Level = Técnica × 45% + Físico × 25% + Mental × 20% + Competitivo × 10%</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+              <!-- ⚡ Técnica -->
+              <div class="rounded-xl overflow-hidden" style="background:rgba(10,10,15,0.6);border:1px solid rgba(124,95,214,0.25);">
+                <div class="px-5 py-3" style="background:rgba(124,95,214,0.08);border-bottom:1px solid rgba(124,95,214,0.1);">
+                  <span class="text-sm font-bold" style="color:#a78bfa;">⚡ Técnica <span class="text-xs text-purple-400/60 font-normal">(45%)</span></span>
+                </div>
+                <div class="p-4">
+                  <p class="text-xs mb-3" style="color:#64748b;">Cada golpe tiene un peso distinto. La suma de todos los pesos es 80%, luego se escala a 100.</p>
+                  <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Derecha</span><span style="color:#a78bfa;">12%</span></div>
+                    <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Revés</span><span style="color:#a78bfa;">10%</span></div>
+                    <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Volea (media)</span><span style="color:#a78bfa;">10%</span></div>
+                    <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Bandeja</span><span style="color:#a78bfa;">10%</span></div>
+                    <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Víbora</span><span style="color:#a78bfa;">8%</span></div>
+                    <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Remate</span><span style="color:#a78bfa;">8%</span></div>
+                    <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Saque</span><span style="color:#a78bfa;">8%</span></div>
+                    <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Bajada de pared</span><span style="color:#a78bfa;">8%</span></div>
+                    <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Globo</span><span style="color:#a78bfa;">6%</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 💪 Físico + 🧠 Mental -->
+              <div class="space-y-5">
+                <div class="rounded-xl overflow-hidden" style="background:rgba(10,10,15,0.6);border:1px solid rgba(57,255,136,0.2);">
+                  <div class="px-5 py-3" style="background:rgba(57,255,136,0.06);border-bottom:1px solid rgba(57,255,136,0.1);">
+                    <span class="text-sm font-bold" style="color:#39ff88;">💪 Físico <span class="text-xs text-green-400/60 font-normal">(25%)</span></span>
+                  </div>
+                  <div class="p-4">
+                    <div class="space-y-1.5">
+                      <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Velocidad</span><span style="color:#39ff88;">35%</span></div>
+                      <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Resistencia</span><span style="color:#39ff88;">35%</span></div>
+                      <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Reflejos</span><span style="color:#39ff88;">30%</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="rounded-xl overflow-hidden" style="background:rgba(10,10,15,0.6);border:1px solid rgba(59,130,246,0.25);">
+                  <div class="px-5 py-3" style="background:rgba(59,130,246,0.06);border-bottom:1px solid rgba(59,130,246,0.1);">
+                    <span class="text-sm font-bold" style="color:#60a5fa;">🧠 Mental <span class="text-xs text-blue-400/60 font-normal">(20%)</span></span>
+                  </div>
+                  <div class="p-4">
+                    <div class="space-y-1.5">
+                      <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Táctica</span><span style="color:#60a5fa;">40%</span></div>
+                      <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Presión</span><span style="color:#60a5fa;">30%</span></div>
+                      <div class="flex justify-between text-xs"><span style="color:#cbd5e1;">Trabajo en pareja</span><span style="color:#60a5fa;">30%</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 🏆 Competitivo -->
+            <div class="rounded-xl overflow-hidden mb-6" style="background:rgba(10,10,15,0.6);border:1px solid rgba(251,191,36,0.2);">
+              <div class="px-5 py-3" style="background:rgba(251,191,36,0.06);border-bottom:1px solid rgba(251,191,36,0.1);">
+                <span class="text-sm font-bold" style="color:#fbbf24;">🏆 Competitivo <span class="text-xs text-yellow-400/60 font-normal">(10%)</span></span>
+              </div>
+              <div class="p-4">
+                <p class="text-xs mb-3" style="color:#64748b;">El factor competitivo se calcula a partir del rendimiento en partidos reales:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-[600px] mx-auto">
+                  <div class="rounded-lg p-3 text-center" style="background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.1);">
+                    <div class="text-lg font-bold" style="color:#fbbf24;">FEP / 10</div>
+                    <div class="text-xs mt-1" style="color:#64748b;">Puntos FEP del jugador divididos entre 10</div>
+                  </div>
+                  <div class="rounded-lg p-3 text-center" style="background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.1);">
+                    <div class="text-lg font-bold" style="color:#fbbf24;">Win Rate × 300</div>
+                    <div class="text-xs mt-1" style="color:#64748b;">Porcentaje de victorias multiplicado por 300</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 📊 Tabla de rangos -->
+            <div class="rounded-xl overflow-hidden" style="background:rgba(10,10,15,0.6);border:1px solid rgba(57,255,136,0.15);">
+              <div class="px-5 py-3" style="background:rgba(57,255,136,0.06);border-bottom:1px solid rgba(57,255,136,0.1);">
+                <span class="text-sm font-bold" style="color:#39ff88;">📊 Correspondencia Power Level → Categoría</span>
+              </div>
+              <div class="p-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                  <div class="rounded-lg p-3 text-center" style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);">
+                    <div class="text-xs font-bold" style="color:#22c55e;">🟢 INICIACIÓN</div>
+                    <div class="text-lg font-bold text-white mt-1">100 – 1.499</div>
+                  </div>
+                  <div class="rounded-lg p-3 text-center" style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.15);">
+                    <div class="text-xs font-bold" style="color:#eab308;">🟡 5ª CATEGORÍA</div>
+                    <div class="text-lg font-bold text-white mt-1">1.500 – 2.999</div>
+                  </div>
+                  <div class="rounded-lg p-3 text-center" style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.15);">
+                    <div class="text-xs font-bold" style="color:#eab308;">🟡 4ª CATEGORÍA</div>
+                    <div class="text-lg font-bold text-white mt-1">3.000 – 4.499</div>
+                  </div>
+                  <div class="rounded-lg p-3 text-center" style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.15);">
+                    <div class="text-xs font-bold" style="color:#eab308;">🟡 3ª CATEGORÍA</div>
+                    <div class="text-lg font-bold text-white mt-1">4.500 – 5.999</div>
+                  </div>
+                  <div class="rounded-lg p-3 text-center" style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);">
+                    <div class="text-xs font-bold" style="color:#ef4444;">🔴 2ª CATEGORÍA</div>
+                    <div class="text-lg font-bold text-white mt-1">6.000 – 7.499</div>
+                  </div>
+                  <div class="rounded-lg p-3 text-center" style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);">
+                    <div class="text-xs font-bold" style="color:#ef4444;">🔴 1ª CATEGORÍA</div>
+                    <div class="text-lg font-bold text-white mt-1">7.500 – 8.999</div>
+                  </div>
+                  <div class="rounded-lg p-3 text-center" style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);">
+                    <div class="text-xs font-bold" style="color:#3b82f6;">🔵 PROFESIONAL</div>
+                    <div class="text-lg font-bold text-white mt-1">9.000 – 9.999</div>
+                  </div>
+                  <div class="rounded-lg p-3 flex items-center justify-center" style="background:rgba(57,255,136,0.04);border:1px dashed rgba(57,255,136,0.15);">
+                    <div class="text-center">
+                      <div class="text-xs" style="color:#39ff88;">Categoría sugerida</div>
+                      <div class="text-[10px] mt-0.5" style="color:#64748b;">según tu Power Level</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 text-center">
+              <p class="text-xs" style="color:#475569;">El Power Level se calcula exclusivamente con stats reales y rendimiento en partidos. La categoría no influye en el resultado — la categoría sugerida se deriva automáticamente del Power Level.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ============ MOBILE BOTTOM NAV ============ -->
+<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t border-purple-500/10" style="background:rgba(13,5,32,.92)">
+  <div class="flex items-center justify-around py-2">
+    <a href="/dashboard" class="flex flex-col items-center gap-0.5 py-1 px-3">
+      <span class="iconify text-purple-300 text-xl" data-icon="mdi:view-dashboard"></span>
+      <span class="text-[9px] text-purple-300/80 font-medium">Dashboard</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-0.5 py-1 px-3">
+      <span class="iconify text-purple-300/40 text-xl" data-icon="mdi:account-group-outline"></span>
+      <span class="text-[9px] text-purple-200/40">Jugadores</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-0.5 py-1 px-3">
+      <span class="iconify text-purple-300/40 text-xl" data-icon="mdi:trophy-outline"></span>
+      <span class="text-[9px] text-purple-200/40">Ranking</span>
+    </a>
+    <a href="/login" onclick="localStorage.clear()" class="flex flex-col items-center gap-0.5 py-1 px-3">
+      <span class="iconify text-purple-300/40 text-xl" data-icon="mdi:logout"></span>
+      <span class="text-[9px] text-purple-200/40">Salir</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ============ MODALS ============ -->
 {% include 'partials/_player_modals.html' %}
 
-<!-- ── Level Guide Modal ────────────────────────────────────── -->
-<div id="level-guide-modal"
-    class="fixed inset-0 flex items-center justify-center p-4 hidden"
-    role="dialog" aria-modal="true"
-    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
-    onclick="if (event.target===event.currentTarget) closeLevelGuideModal()">
-    <div class="w-full max-w-[1450px] rounded-2xl" style="background:#12121A;border:1px solid rgba(168,85,247,0.2);max-height:90vh;overflow-y:auto;position:relative;">
-        <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-5">
-                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(168,85,247,0.8);">📖 Guía de Niveles</span>
-                <button onclick="closeLevelGuideModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
-            </div>
+<!-- ── main.js (shared utilities from base.html) ──────── -->
+<script src="/static/js/main.js"></script>
 
-            <div class="grid grid-cols-4 gap-5 items-stretch">
+<!-- ── Scroll reveal ──────────────────────────────────── -->
+<script>
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
 
-                <!-- INICIACIÓN -->
-                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(34,197,94,0.2);">
-                    <div class="px-5 py-4 text-center" style="background:rgba(34,197,94,0.08);border-bottom:1px solid rgba(34,197,94,0.1);">
-                        <span class="text-base font-bold" style="color:#22c55e;">🟢 INICIACIÓN</span>
-                        <span class="text-base ml-1.5 font-bold" style="color:#22c55e;">1.0 – 2.5</span>
-                    </div>
-                    <div class="px-5 py-4 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Primeros pasos. Reglas, técnica básica y consistencia.</p>
-                            <div class="space-y-1.5">
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Golpes básicos</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Dificultad en voleas</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Prioriza mantener la bola</div>
-                            </div>
-                        </div>
-                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(34,197,94,0.15);">
-                            <div class="flex items-center gap-1.5 text-sm" style="color:#22c55e;">
-                                <span>🎾</span> Pala redonda · punto dulce amplio
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!-- ── Cargar nombre de usuario en navbar + sidebar ──────── -->
+<script>
+(function() {
+  const token = localStorage.getItem('access_token');
+  if (!token) return;
+  fetch('/api/v1/auth/me', {
+    headers: {'Authorization': `Bearer ${token}`}
+  }).then(r => r.ok ? r.json() : null).then(user => {
+    if (user) {
+      const safe = user.username.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const navEl = document.getElementById('nav-username');
+      if (navEl) navEl.textContent = safe;
 
-                <!-- INTERMEDIO -->
-                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(234,179,8,0.2);">
-                    <div class="px-5 py-4 text-center" style="background:rgba(234,179,8,0.08);border-bottom:1px solid rgba(234,179,8,0.1);">
-                        <span class="text-base font-bold" style="color:#eab308;">🟡 INTERMEDIO</span>
-                        <span class="text-base ml-1.5 font-bold" style="color:#eab308;">2.0 – 4.5</span>
-                    </div>
-                    <div class="px-5 py-4 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Control, colocación y táctica con consistencia.</p>
-                            <div class="space-y-1.5">
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Bandeja y víbora</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Lee rebotes y se posiciona</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Controla el ritmo</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Compite con frecuencia</div>
-                            </div>
-                        </div>
-                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(234,179,8,0.15);">
-                            <div class="flex items-center gap-1.5 text-sm" style="color:#eab308;">
-                                <span>🎾</span> Pala híbrida · equilibrio control/potencia
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    }
+  }).catch(() => {});
+})();
+</script>
 
-                <!-- AVANZADO -->
-                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(239,68,68,0.2);">
-                    <div class="px-5 py-4 text-center" style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.1);">
-                        <span class="text-base font-bold" style="color:#ef4444;">🔴 AVANZADO</span>
-                        <span class="text-base ml-1.5 font-bold" style="color:#ef4444;">4.25 – 7.0</span>
-                    </div>
-                    <div class="px-5 py-4 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Sólido, rápido y agresivo. Domina todos los golpes.</p>
-                            <div class="space-y-1.5">
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Precisión en golpes complejos</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Gran lectura del partido</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Domina ataque y defensa</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Torneos habituales</div>
-                            </div>
-                        </div>
-                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(239,68,68,0.15);">
-                            <div class="flex items-center gap-1.5 text-sm" style="color:#ef4444;">
-                                <span>🎾</span> Pala técnica · alta precisión
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!-- ── Player detail scripts ───────────────────────────── -->
+<script>
+// Auth check
+const pToken = localStorage.getItem('access_token');
+if (!pToken) { window.location.href = '/login'; }
+else {
+  fetch('/api/v1/auth/me', {
+    headers: {'Authorization': `Bearer ${pToken}`}
+  }).then(r => { if (r.status === 401) { localStorage.clear(); window.location.href = '/login'; } });
+}
 
-                <!-- Mapa de categorías -->
-                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(59,130,246,0.25);">
-                    <div class="px-5 py-4 text-center" style="background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.1);">
-                        <span class="text-base font-bold" style="color:#3b82f6;">📋 CORRESPONDENCIA</span>
-                    </div>
-                    <div class="px-5 py-4 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Todas las categorías FEP con su rango numérico.</p>
-                            <div class="space-y-2.5">
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟢 Iniciación</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">1.0 – 2.5</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 5ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">2.0 – 3.0</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 4ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.0 – 3.75</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 3ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.75 – 4.25</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 2ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.25 – 4.75</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 1ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.75 – 6.0</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 Profesional</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">6.0 – 7.0</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(59,130,246,0.15);">
-                            <div class="flex items-center gap-1.5 text-sm" style="color:#3b82f6;">
-                                <span>📋</span> Basado en FEP 2026
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div>
-
-{% endblock %}
-
-{% block scripts %}
+const playerId = window.location.pathname.split('/').pop();
+</script>
 <script src="/static/js/player_detail/player_constants.js"></script>
 <script src="/static/js/player_detail/player_utils.js"></script>
 <script src="/static/js/player_detail/player_radar.js"></script>
@@ -274,79 +641,68 @@
 <script src="/static/js/player_detail/player_api.js"></script>
 <script src="/static/js/player_detail/player_analytics.js"></script>
 <script>
-// Bridge: save references before inline script functions override API names
 const apiSaveMatch = saveMatch;
 const apiDeleteMatch = deleteMatch;
 </script>
 <script src="/static/js/player_detail/player_matches.js"></script>
 <script>
-const token = localStorage.getItem('access_token');
-if (!token) window.location.href = '/login';
+// ── Power Guide Modal ────────────────────────────────
+function openPowerGuideModal() {
+  document.getElementById('power-guide-modal').classList.remove('hidden');
+}
+function closePowerGuideModal() {
+  document.getElementById('power-guide-modal').classList.add('hidden');
+}
 
-const playerId = window.location.pathname.split('/').pop();
-// playerData → state.player (migrated to PlayerState)
-// loadedMatches → state.matches (migrated to PlayerState)
-// loadedTournaments → state.tournaments (migrated to PlayerState)
+// ── Sidebar toggle ─────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
 
-// CATEGORY_LEVELS lives in player_constants.js — loaded via script tag
-
-// renderPlayer → player_render.js (PR #6A)
-// setAvatar → player_render.js (PR #6A)
-// uploadAvatar → player_render.js (PR #6A)
-// findStrongestStatFromPlayer → player_render.js (PR #6A)
-
-// ── Load Data (moved to player_detail.js + player_analytics.js) ──
-
-
-// Cerrar modales con Escape
+// Cerrar modales + sidebar con Escape
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        closeStatsModal();
-        closeMatchAnalyticsModal();
-        closeLevelGuideModal();
-        closeEditModal();
-        closeMatchModal();
-    }
+  if (e.key === 'Escape') {
+    closeStatsModal();
+    closeMatchAnalyticsModal();
+    closeLevelGuideModal();
+    closePowerGuideModal();
+    closeEditModal();
+    closeMatchModal();
+    if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+  }
 });
-
-// ── renderMatches, renderFullMatchHistory, sortMatches, setSortMode, getRoundIndex: moved to match_renderer.js ──
-
-// ── Round hierarchy: moved to match_renderer.js ──
 
 sanitizeEditPlayerNumbers();
 
 // Validar inputs numéricos en tiempo real
 document.querySelectorAll('input[type="number"]').forEach(input => {
-    const max = parseInt(input.max) || 100;
-    const min = parseInt(input.min) || 0;
-    input.addEventListener('input', function() {
-        const val = parseInt(this.value);
-        if (!isNaN(val)) {
-            if (val > max) {
-                this.value = max;
-                this.style.borderColor = '#ef4444';
-                setTimeout(() => { this.style.borderColor = ''; }, 1000);
-            }
-            if (val < min) {
-                this.value = min;
-            }
-        }
-    });
+  const max = parseInt(input.max) || 100;
+  const min = parseInt(input.min) || 0;
+  input.addEventListener('input', function() {
+    const val = parseInt(this.value);
+    if (!isNaN(val)) {
+      if (val > max) {
+        this.value = max;
+        this.style.borderColor = '#ef4444';
+        setTimeout(() => { this.style.borderColor = ''; }, 1000);
+      }
+      if (val < min) { this.value = min; }
+    }
+  });
 });
 
 // Mute toggle for Goku video
 document.addEventListener('click', function(e) {
-    const btn = e.target.closest('#unmute-btn');
-    if (!btn) return;
-    const video = document.getElementById('goku-video');
-    if (!video) return;
-    video.muted = !video.muted;
-    btn.textContent = video.muted ? '🔇' : '🔊';
-    btn.title = video.muted ? 'Activar sonido' : 'Silenciar';
+  const btn = e.target.closest('#unmute-btn');
+  if (!btn) return;
+  const video = document.getElementById('goku-video');
+  if (!video) return;
+  video.muted = !video.muted;
+  btn.textContent = video.muted ? '🔇' : '🔊';
+  btn.title = video.muted ? 'Activar sonido' : 'Silenciar';
 });
-
-// ── Module Entry Point ─────────────────────────────────────────
-// Handles data loading and initialization. Runs after classic script.
 </script>
 <script type="module" src="/static/js/player_detail/player_detail.js"></script>
-{% endblock %}
+{% include "partials/chatbot_widget.html" %}
+</body>
+</html>

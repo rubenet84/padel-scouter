@@ -1,20 +1,27 @@
-<section class="landing-section landing-metrics-section landing-fade-in mb-16">
-    <div class="landing-metrics-grid">
-        <div class="landing-metric-item">
-            <span class="landing-metric-value" data-counter="{{ landing_data.metrics.players_analyzed|default(0, true) }}">{{ "{:,}".format(landing_data.metrics.players_analyzed|default(0, true)) }}</span>
-            <span class="landing-metric-label">Jugadores Analizados</span>
-        </div>
-        <div class="landing-metric-item">
-            <span class="landing-metric-value" data-counter="{{ landing_data.metrics.matches_processed|default(0, true) }}">{{ "{:,}".format(landing_data.metrics.matches_processed|default(0, true)) }}</span>
-            <span class="landing-metric-label">Partidos Procesados</span>
-        </div>
-        <div class="landing-metric-item">
-            <span class="landing-metric-value" data-counter="{{ landing_data.metrics.tournaments_tracked|default(0, true) }}">{{ "{:,}".format(landing_data.metrics.tournaments_tracked|default(0, true)) }}</span>
-            <span class="landing-metric-label">Torneos Seguidos</span>
-        </div>
-        <div class="landing-metric-item">
-            <span class="landing-metric-value" data-counter="{{ landing_data.metrics.active_users|default(0, true) }}">{{ "{:,}".format(landing_data.metrics.active_users|default(0, true)) }}</span>
-            <span class="landing-metric-label">Usuarios Activos</span>
+<!-- ============ TRUSTED BY / METRICS BAR ============ -->
+<section class="relative border-y border-white/5 bg-dark-800/50 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-8 items-center">
+            <div class="text-center">
+                <div class="font-orbitron font-bold text-2xl md:text-3xl landing-text-gradient-orange">{{ landing_data.metrics.players.value|default('12K+', true) }}</div>
+                <div class="text-[10px] text-neutral-500 tracking-widest uppercase mt-1">{{ landing_data.metrics.players.label|default('Jugadores Activos', true) }}</div>
+            </div>
+            <div class="text-center">
+                <div class="font-orbitron font-bold text-2xl md:text-3xl landing-text-gradient-blue">{{ landing_data.metrics.matches.value|default('85K+', true) }}</div>
+                <div class="text-[10px] text-neutral-500 tracking-widest uppercase mt-1">{{ landing_data.metrics.matches.label|default('Partidos Analizados', true) }}</div>
+            </div>
+            <div class="text-center">
+                <div class="font-orbitron font-bold text-2xl md:text-3xl landing-text-gradient-green">{{ landing_data.metrics.accuracy.value|default('98.7%', true) }}</div>
+                <div class="text-[10px] text-neutral-500 tracking-widest uppercase mt-1">{{ landing_data.metrics.accuracy.label|default('Precisión IA', true) }}</div>
+            </div>
+            <div class="text-center">
+                <div class="font-orbitron font-bold text-2xl md:text-3xl landing-text-gradient-purple">{{ landing_data.metrics.clubs.value|default('340+', true) }}</div>
+                <div class="text-[10px] text-neutral-500 tracking-widest uppercase mt-1">{{ landing_data.metrics.clubs.label|default('Clubes', true) }}</div>
+            </div>
+            <div class="text-center col-span-2 md:col-span-1">
+                <div class="font-orbitron font-bold text-2xl md:text-3xl text-white">{{ landing_data.metrics.rating.value|default('4.9', true) }}<span class="text-scouter-gold text-lg">★</span></div>
+                <div class="text-[10px] text-neutral-500 tracking-widest uppercase mt-1">{{ landing_data.metrics.rating.label|default('Valoración', true) }}</div>
+            </div>
         </div>
     </div>
 </section>

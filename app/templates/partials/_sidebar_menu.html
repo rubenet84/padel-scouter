@@ -1,0 +1,58 @@
+{# _sidebar_menu.html — Menú lateral deslizable, toggle con avatar #}
+<div id="sidebar">
+  <div class="p-5 space-y-1">
+    <div class="flex justify-end mb-5">
+      <button onclick="toggleSidebar()" class="w-8 h-8 rounded-lg bg-purple-800/30 border border-purple-500/15 flex items-center justify-center hover:bg-purple-800/50 transition-colors">
+        <span class="iconify text-purple-300/60 text-lg" data-icon="mdi:close"></span>
+      </button>
+    </div>
+
+    <div class="text-[9px] text-purple-300/25 tracking-widest uppercase font-medium px-3 mb-2">Principal</div>
+    <a href="/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg">
+      <span class="iconify link-icon text-purple-300/40 text-lg" data-icon="mdi:view-dashboard-outline"></span>
+      <span class="link-text text-sm text-purple-200/50 font-medium">Mi Dashboard</span>
+    </a>
+    <a href="/global-stats#top-section" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg">
+      <span class="iconify link-icon text-purple-300/40 text-lg" data-icon="mdi:account-group-outline"></span>
+      <span class="link-text text-sm text-purple-200/50 font-medium">Top Jugadores</span>
+    </a>
+    <a href="/global-stats#ranking-title" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg">
+      <span class="iconify link-icon text-purple-300/40 text-lg" data-icon="mdi:trophy-outline"></span>
+      <span class="link-text text-sm text-purple-200/50 font-medium">Rankings</span>
+    </a>
+    <a href="/global-stats" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg">
+      <span class="iconify link-icon text-purple-300/40 text-lg" data-icon="mdi:chart-box-outline"></span>
+      <span class="link-text text-sm text-purple-200/50 font-medium">Estadísticas</span>
+    </a>
+
+    <div class="text-[9px] text-purple-300/25 tracking-widest uppercase font-medium px-3 mb-2 mt-6">Análisis</div>
+    <a href="#ai-desc-card" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg">
+      <span class="iconify link-icon text-purple-300/40 text-lg" data-icon="mdi:robot-outline"></span>
+      <span class="link-text text-sm text-purple-200/50 font-medium">Análisis IA</span>
+    </a>
+    <a href="/global-stats#compare-section" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg">
+      <span class="iconify link-icon text-purple-300/40 text-lg" data-icon="mdi:sword-cross"></span>
+      <span class="link-text text-sm text-purple-200/50 font-medium">Comparativas</span>
+    </a>
+    <a href="#plan-card" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg">
+      <span class="iconify link-icon text-purple-300/40 text-lg" data-icon="mdi:clipboard-text-outline"></span>
+      <span class="link-text text-sm text-purple-200/50 font-medium">Planes de Mejora</span>
+    </a>
+
+    <div class="text-[9px] text-purple-300/25 tracking-widest uppercase font-medium px-3 mb-2 mt-6">Social</div>
+    <a href="/global-stats#records-section" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg">
+      <span class="iconify link-icon text-purple-300/40 text-lg" data-icon="mdi:trophy-award"></span>
+      <span class="link-text text-sm text-purple-200/50 font-medium">Récords de la Comunidad</span>
+    </a>
+    <a href="/login" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg" onclick="localStorage.clear()">
+      <span class="iconify link-icon text-purple-300/40 text-lg" data-icon="mdi:logout"></span>
+      <span class="link-text text-sm text-purple-200/50 font-medium">Cerrar Sesión</span>
+    </a>
+  </div>
+  <div class="absolute bottom-0 left-0 right-0 p-5 border-t border-purple-500/8">
+    <div class="flex items-center gap-2">
+      <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+      <span class="text-[8px] text-purple-300/20 font-mono tracking-wider">SYSTEM ONLINE — v2.4.1</span>
+    </div>
+  </div>
+</div>

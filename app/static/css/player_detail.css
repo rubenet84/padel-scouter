@@ -1,9 +1,6 @@
 /* Player Detail — extracted from player_detail.html style block */
 /* PR #1: Pure extraction — no functional or visual changes */
 
-body { background: #0A0A0F !important; }
-main { max-width: 100% !important; padding: 0 !important; }
-
 @keyframes scouterScan {
     0% { top: -2px; opacity: 0; }
     10% { opacity: 1; }
@@ -80,11 +77,27 @@ main { max-width: 100% !important; padding: 0 !important; }
 @keyframes fillBar { from { width: 0%; } }
 .fill-animate { animation: fillBar 1.5s ease-out forwards; }
 
-@keyframes radarPulse {
-    0%, 100% { filter: drop-shadow(0 0 5px #FF6B0066); }
-    50% { filter: drop-shadow(0 0 15px #FF6B00AA); }
+@keyframes radarPulseOpacity {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.7; }
 }
-.radar-glow { animation: radarPulse 3s ease-in-out infinite; }
+.radar-glow {
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+}
+.radar-glow::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, #FF6B0066 0%, #FF6B0015 35%, transparent 55%);
+    animation: radarPulseOpacity 3s ease-in-out infinite;
+    pointer-events: none;
+    will-change: opacity;
+}
 
 .gradient-border { position: relative; }
 .gradient-border::before {

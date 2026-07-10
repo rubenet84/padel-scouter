@@ -1,457 +1,1070 @@
-{% extends "base.html" %}
-{% block title %}Dashboard — Padel Scouter{% endblock %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padel Scouter — Mi Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      purple: { 950:'#0d0520', 900:'#120733', 850:'#180c42', 800:'#1e1050', 700:'#2d1b69', 600:'#3d2a8c', 500:'#5b3fb0', 400:'#7c5fd6', 300:'#a78bfa', 200:'#c4b5fd', 100:'#e0d5ff' },
+      accent: { orange:'#f97316', gold:'#fbbf24', neon:'#22c55e', blue:'#3b82f6', cyan:'#06b6d4', red:'#ef4444', pink:'#ec4899' }
+    },
+    fontFamily: { inter:['Inter','sans-serif'], space:['Space Grotesk','sans-serif'], orbitron:['Orbitron','sans-serif'] }
+  }}
+}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#120733}
+::-webkit-scrollbar-thumb{background:#7c5fd6;border-radius:3px}
 
-{% block content %}
-<div class="flex justify-between items-center mb-8">
-    <div>
-        <h1 class="text-3xl font-black">Mi <span class="text-emerald-400">Dashboard</span></h1>
-        <p class="text-gray-400 text-sm mt-1">Gestiona y analiza tus jugadores</p>
-    </div>
-    <button onclick="openNewPlayerModal()"
-            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-lg flex items-center gap-2">
-        <span>+</span> Nuevo jugador
-    </button>
+@keyframes scanLine{0%{top:-2px;opacity:0}10%{opacity:.6}90%{opacity:.6}100%{top:calc(100% + 2px);opacity:0}}
+.scan-line{animation:scanLine 4s ease-in-out infinite}
+
+@keyframes glowPulse{0%,100%{box-shadow:0 0 25px rgba(124,95,214,.2),0 0 50px rgba(124,95,214,.08)}50%{box-shadow:0 0 35px rgba(124,95,214,.3),0 0 70px rgba(124,95,214,.12)}}
+.glow-pulse{animation:glowPulse 3s ease-in-out infinite}
+
+@keyframes glowPulseOrange{0%,100%{box-shadow:0 0 20px rgba(249,115,22,.15)}50%{box-shadow:0 0 30px rgba(249,115,22,.25)}}
+.glow-orange{animation:glowPulseOrange 3s ease-in-out infinite}
+@keyframes glowPulseBlue{0%,100%{box-shadow:0 0 20px rgba(59,130,246,.15)}50%{box-shadow:0 0 30px rgba(59,130,246,.25)}}
+.glow-blue{animation:glowPulseBlue 3s ease-in-out infinite}
+@keyframes glowPulseGreen{0%,100%{box-shadow:0 0 20px rgba(34,197,94,.15)}50%{box-shadow:0 0 30px rgba(34,197,94,.25)}}
+.glow-green{animation:glowPulseGreen 3s ease-in-out infinite}
+@keyframes glowPulseGold{0%,100%{box-shadow:0 0 20px rgba(251,191,36,.15)}50%{box-shadow:0 0 30px rgba(251,191,36,.25)}}
+.glow-gold{animation:glowPulseGold 3s ease-in-out infinite}
+@keyframes glowPulseNeon{0%,100%{box-shadow:0 0 20px rgba(34,197,94,.15)}50%{box-shadow:0 0 30px rgba(34,197,94,.25)}}
+.glow-neon{animation:glowPulseNeon 3s ease-in-out infinite}
+@keyframes glowPulseRed{0%,100%{box-shadow:0 0 20px rgba(239,68,68,.15)}50%{box-shadow:0 0 30px rgba(239,68,68,.25)}}
+.glow-red{animation:glowPulseRed 3s ease-in-out infinite}
+@keyframes glowPulsePink{0%,100%{box-shadow:0 0 20px rgba(236,72,153,.15)}50%{box-shadow:0 0 30px rgba(236,72,153,.25)}}
+.glow-pink{animation:glowPulsePink 3s ease-in-out infinite}
+
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.float{animation:float 5s ease-in-out infinite}
+@keyframes radarPulse{0%{transform:scale(.3);opacity:.5}100%{transform:scale(1.6);opacity:0}}
+.radar-pulse{animation:radarPulse 2.5s ease-out infinite}
+.radar-pulse-d{animation:radarPulse 2.5s ease-out .9s infinite}
+
+@keyframes particleFloat{0%{transform:translateY(0) translateX(0) scale(1);opacity:0}15%{opacity:.6}85%{opacity:.6}100%{transform:translateY(-90px) translateX(18px) scale(0);opacity:0}}
+@keyframes fillBar{0%{width:0}100%{width:var(--fill)}}
+.fill-bar{animation:fillBar 1.2s ease-out forwards;width:0}
+@keyframes countUp{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+.count-up{animation:countUp .6s ease-out forwards}
+
+@keyframes energyRing{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.energy-ring{animation:energyRing 12s linear infinite}
+.energy-ring-r{animation:energyRing 18s linear infinite reverse}
+
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shimmer{background:linear-gradient(90deg,transparent 30%,rgba(124,95,214,.04) 50%,transparent 70%);background-size:200% 100%;animation:shimmer 4s ease-in-out infinite}
+
+.text-gradient-purple{background:linear-gradient(135deg,#a78bfa,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-orange{background:linear-gradient(135deg,#f97316,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-blue{background:linear-gradient(135deg,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-green{background:linear-gradient(135deg,#22c55e,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-gold{background:linear-gradient(135deg,#fbbf24,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-neon{background:linear-gradient(135deg,#22c55e,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-red{background:linear-gradient(135deg,#ef4444,#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-gradient-pink{background:linear-gradient(135deg,#ec4899,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.border-card{position:relative;background:linear-gradient(170deg,#1a0f3a 0%,#140b30 50%,#180d38 100%);border-radius:16px}
+.border-card::before{content:'';position:absolute;inset:-1px;border-radius:17px;z-index:-1}
+.border-purple::before{background:linear-gradient(160deg,rgba(124,95,214,.5),rgba(124,95,214,.1) 30%,transparent 55%,rgba(236,72,153,.15) 80%,rgba(124,95,214,.2))}
+.border-orange::before{background:linear-gradient(160deg,rgba(249,115,22,.5),rgba(249,115,22,.1) 30%,transparent 55%,rgba(251,191,36,.15) 80%,rgba(249,115,22,.2))}
+.border-blue::before{background:linear-gradient(160deg,rgba(59,130,246,.5),rgba(59,130,246,.1) 30%,transparent 55%,rgba(6,182,212,.15) 80%,rgba(59,130,246,.2))}
+.border-green::before{background:linear-gradient(160deg,rgba(34,197,94,.5),rgba(34,197,94,.1) 30%,transparent 55%,rgba(74,222,128,.15) 80%,rgba(34,197,94,.2))}
+.border-gold::before{background:linear-gradient(160deg,rgba(251,191,36,.5),rgba(251,191,36,.1) 30%,transparent 55%,rgba(255,215,0,.15) 80%,rgba(251,191,36,.2))}
+.border-neon::before{background:linear-gradient(160deg,rgba(34,197,94,.5),rgba(34,197,94,.1) 30%,transparent 55%,rgba(74,222,128,.15) 80%,rgba(34,197,94,.2))}
+.border-red::before{background:linear-gradient(160deg,rgba(239,68,68,.5),rgba(239,68,68,.1) 30%,transparent 55%,rgba(248,113,113,.15) 80%,rgba(239,68,68,.2))}
+.border-pink::before{background:linear-gradient(160deg,rgba(236,72,153,.5),rgba(236,72,153,.1) 30%,transparent 55%,rgba(244,114,182,.15) 80%,rgba(236,72,153,.2))}
+
+.reveal{opacity:0;transform:translateY(30px);transition:all .7s cubic-bezier(.16,1,.3,1)}
+.reveal.active{opacity:1;transform:translateY(0)}
+
+.btn-ai{background:linear-gradient(135deg,#7c5fd6,#5b3fb0);box-shadow:0 4px 20px rgba(124,95,214,.3),inset 0 1px 0 rgba(255,255,255,.08);transition:all .3s ease}
+.btn-ai:hover{box-shadow:0 4px 35px rgba(124,95,214,.45),inset 0 1px 0 rgba(255,255,255,.08);transform:translateY(-1px)}
+.btn-ai:active{transform:translateY(0)}
+
+.btn-new{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 20px rgba(34,197,94,.3),inset 0 1px 0 rgba(255,255,255,.1);transition:all .3s ease}
+.btn-new:hover{box-shadow:0 4px 35px rgba(34,197,94,.45);transform:translateY(-1px)}
+.btn-new:active{transform:translateY(0)}
+
+.player-card{transition:all .4s cubic-bezier(.16,1,.3,1);cursor:pointer}
+.player-card:hover{transform:translateY(-6px) scale(1.01)}
+
+.sidebar-link{transition:all .2s ease;border-left:2px solid transparent}
+.sidebar-link:hover,.sidebar-link.active{background:rgba(124,95,214,.08);border-left-color:#7c5fd6}
+.sidebar-link.active .link-icon{color:#a78bfa}
+.sidebar-link.active .link-text{color:#e0d5ff}
+
+/* Sidebar toggle */
+#sidebar{position:fixed;left:0;top:64px;bottom:0;width:240px;z-index:40;transform:translateX(-100%);transition:transform .35s cubic-bezier(.16,1,.3,1);border-right:1px solid rgba(124,95,214,.08);backdrop-filter:blur(12px);background:rgba(13,5,32,.85);overflow-y:auto}
+#sidebar.open{transform:translateX(0)}
+
+/* Modal overlay */
+.modal-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;display:none;align-items:center;justify-content:center;padding:16px;z-index:99999;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);}
+.modal-card{background:#140b30;border:1px solid rgba(124,95,214,0.2);border-radius:20px;padding:32px;width:100%;max-width:1024px;max-height:85vh;overflow-y:auto;box-shadow:0 0 80px rgba(124,95,214,0.08);}
+.input-dash{width:100%;background:rgba(13,5,32,0.6);border:1px solid rgba(124,95,214,0.15);border-radius:12px;padding:12px 16px;color:#e0d5ff;font-size:14px;outline:none;transition:all .3s ease;margin-top:4px}
+.input-dash:focus{border-color:rgba(124,95,214,0.5);box-shadow:0 0 0 3px rgba(124,95,214,0.1);background:rgba(13,5,32,0.8)}
+.input-dash::placeholder{color:rgba(167,139,250,0.3)}
+.input-dash-num{width:100%;background:rgba(13,5,32,0.6);border:1px solid rgba(124,95,214,0.15);border-radius:10px;padding:10px 12px;color:#e0d5ff;font-size:13px;outline:none;transition:all .3s ease;margin-top:4px}
+.input-dash-num:focus{border-color:rgba(124,95,214,0.5);box-shadow:0 0 0 3px rgba(124,95,214,0.1)}
+</style>
+</head>
+<body>
+
+<!-- ============ BACKGROUND ============ -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden">
+  <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-purple-600/15 via-purple-700/8 to-transparent rounded-full blur-[120px]"></div>
+  <div class="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-t from-pink-600/8 via-purple-700/4 to-transparent rounded-full blur-[100px]"></div>
+  <div class="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-blue-600/6 rounded-full blur-[100px]"></div>
+  <div class="absolute top-1/4 -right-40 w-[400px] h-[400px] bg-orange-500/5 rounded-full blur-[100px]"></div>
+  <div class="absolute inset-0" style="background-image:linear-gradient(rgba(124,95,214,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,95,214,.03) 1px,transparent 1px);background-size:50px 50px"></div>
+  <svg class="absolute inset-0 w-full h-full opacity-[.05]" xmlns="http://www.w3.org/2000/svg">
+    <line x1="20%" y1="0" x2="20%" y2="100%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="80%" y1="0" x2="80%" y2="100%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="0" y1="33%" x2="100%" y2="33%" stroke="#7c5fd6" stroke-width=".5"/>
+    <line x1="0" y1="66%" x2="100%" y2="66%" stroke="#7c5fd6" stroke-width=".5"/>
+  </svg>
+  <div class="absolute top-[12%] left-[15%] w-2 h-2 bg-purple-400/40 rounded-full" style="animation:particleFloat 4s ease-out infinite"></div>
+  <div class="absolute top-[30%] right-[12%] w-2 h-2 bg-pink-400/35 rounded-full" style="animation:particleFloat 5s ease-out 1.2s infinite"></div>
+  <div class="absolute bottom-[30%] left-[22%] w-1.5 h-1.5 bg-blue-400/40 rounded-full" style="animation:particleFloat 4.5s ease-out .6s infinite"></div>
+  <div class="absolute top-[55%] right-[28%] w-1.5 h-1.5 bg-orange-400/35 rounded-full" style="animation:particleFloat 3.8s ease-out 1.8s infinite"></div>
+  <div class="absolute bottom-[40%] left-[60%] w-2 h-2 bg-purple-300/30 rounded-full" style="animation:particleFloat 5.5s ease-out .9s infinite"></div>
 </div>
 
-<!-- Lista de jugadores -->
-<div id="players-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div class="text-gray-500 text-center py-20 col-span-3">
-        <div class="text-4xl mb-3">🎾</div>
-        <p>Cargando jugadores...</p>
-    </div>
-</div>
-
-{% endblock %}
-
-{% block scripts %}
-<!-- MODAL AL FINAL DEL BODY -->
-<div id="modal-nuevo"
-     style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0A0A0F;z-index:99999;align-items:center;justify-content:center;padding:16px;"
-     onclick="if (event.target === event.currentTarget) closeNewPlayerModal()">
-    <div style="background:#0f172a;border:2px solid #10b981;border-radius:16px;padding:32px;width:100%;max-width:1024px;max-height:85vh;overflow-y:auto;box-shadow:0 0 80px rgba(0,0,0,0.9);">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold">Nuevo Jugador</h2>
-            <button onclick="closeNewPlayerModal()"
-                    class="text-gray-400 hover:text-white text-2xl">&times;</button>
+<!-- ============ NAVBAR ============ -->
+<nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b border-purple-500/10" style="background:rgba(13,5,32,.88)">
+  <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3 group">
+      <div class="relative w-9 h-9 flex items-center justify-center">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg rotate-45 opacity-90 group-hover:opacity-100 transition-opacity"></div>
+        <span class="iconify relative z-10 text-white text-lg" data-icon="mdi:radar"></span>
+      </div>
+      <span class="font-orbitron font-bold text-sm tracking-widest text-purple-100 hidden sm:block group-hover:text-white transition-colors">PADEL SCOUTER</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <button onclick="document.getElementById('ps-chatbot-toggle')?.click()" title="Abrir reglamento"
+              class="hidden md:flex items-center gap-2 rounded-full px-3 py-1 cursor-pointer transition-all duration-300"
+              style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.15);"
+              onmouseenter="this.style.background='rgba(34,197,94,0.2)';this.style.borderColor='rgba(34,197,94,0.4)'"
+              onmouseleave="this.style.background='rgba(34,197,94,0.1)';this.style.borderColor='rgba(34,197,94,0.15)'">
+        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+        <span class="text-[9px] text-green-400 font-medium tracking-wider uppercase transition-colors">Scouter Active</span>
+      </button>
+      <button class="relative w-9 h-9 rounded-lg bg-purple-800/30 border border-purple-500/15 flex items-center justify-center hover:bg-purple-800/50 transition-colors">
+        <span class="iconify text-purple-300/60 text-lg" data-icon="mdi:bell-outline"></span>
+        <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-accent-red rounded-full border-2 border-purple-950"></div>
+      </button>
+      <div onclick="toggleSidebar()" title="Menú de navegación" class="flex items-center gap-2.5 cursor-pointer group">
+        <div class="w-[52px] h-[52px] rounded-xl overflow-hidden border-2 border-yellow-500/60 group-hover:border-yellow-400 transition-colors flex-shrink-0">
+          <img src="/static/images/logo-usuario.png" alt="User" class="w-full h-full object-cover">
         </div>
-
-        <div class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="text-gray-400 text-xs font-medium tracking-wide uppercase">Nombre del jugador</label>
-                    <input id="p-name" type="text" placeholder="Ej: Martin Di Nenno"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-emerald-500 focus:outline-none mt-1">
-                </div>
-                <div>
-                    <label class="text-gray-400 text-xs font-medium tracking-wide uppercase">Categoria</label>
-                    <select id="p-category"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-emerald-500 focus:outline-none mt-1 appearance-none">
-                        <option value="Iniciación">🟢 Iniciación (1.0 – 2.5)</option>
-                        <option value="5ª Categoría">🟡 5ª Categoría (2.0 – 3.0)</option>
-                        <option value="4ª Categoría">🟡 4ª Categoría (3.0 – 3.75)</option>
-                        <option value="3ª Categoría" selected>🟡 3ª Categoría (3.75 – 4.25)</option>
-                        <option value="2ª Categoría">🔴 2ª Categoría (4.25 – 4.75)</option>
-                        <option value="1ª Categoría">🔴 1ª Categoría (4.75 – 6.0)</option>
-                        <option value="Profesional">🔴 Profesional (6.0 – 7.0)</option>
-                    </select>
-                    <p class="text-gray-600 text-xs mt-3"><span class="text-green-400">🟢 Iniciación</span> → <span class="text-yellow-400">🟡 Intermedio</span> → <span class="text-red-400">🔴 Avanzado / Profesional</span></p>
-                    <button onclick="openLevelGuideModal()" title="Haz clic aquí para ver la guía de niveles"
-                            class="text-xs font-medium mt-3 px-2.5 py-1 rounded-lg transition"
-                            style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:#a855f7;">
-                        📖 Guía de Niveles
-                    </button>
-                </div>
-            </div>
-
-            <div id="create-error" class="hidden text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
-
-            <div>
-                <p class="text-emerald-400 font-semibold text-sm mb-1 border-b border-gray-800 pb-2">🎾 Estadisticas Tecnicas</p>
-                <p class="text-gray-600 text-xs mb-3">Valora cada golpe de <strong class="text-gray-300">0</strong> a <strong class="text-gray-300">100</strong> segun el nivel del jugador</p>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-4">
-                    {% for stat in ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared'] %}
-                    <div>
-                        <label class="text-gray-400 text-xs capitalize block truncate" title="Valor de 0 a 100">{{ stat.replace('_',' ') }}</label>
-                        <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
-                               class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2.5 text-white text-sm mt-1 focus:border-emerald-500 focus:outline-none"
-                               oninput="clampStat(this)">
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <p class="text-emerald-400 font-semibold text-sm mb-1 border-b border-gray-800 pb-2">💪 Fisico & Mental</p>
-                <p class="text-gray-600 text-xs mb-3">Capacidades fisicas y mentales del jugador, tambien de <strong class="text-gray-300">0</strong> a <strong class="text-gray-300">100</strong></p>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-4">
-                    {% for stat in ['velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja'] %}
-                    <div>
-                        <label class="text-gray-400 text-xs capitalize block truncate" title="Valor de 0 a 100">{{ stat.replace('_',' ') }}</label>
-                        <input id="s-{{ stat }}" type="number" value="50" min="0" max="100"
-                               class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2.5 text-white text-sm mt-1 focus:border-emerald-500 focus:outline-none"
-                               oninput="clampStat(this)">
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="flex gap-3 pt-2">
-                <button onclick="createPlayer()"
-                        class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition">
-                    Crear Jugador
-                </button>
-                <button onclick="closeNewPlayerModal()"
-                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition">
-                    Cancelar
-                </button>
-            </div>
+        <div class="hidden md:block">
+          <div id="nav-username" class="text-base font-bold text-yellow-500/80 group-hover:text-yellow-400 transition-colors font-orbitron">Cuenta</div>
+          <div class="flex items-center gap-1 text-xs text-yellow-500/40 group-hover:text-yellow-300/70 transition-colors font-orbitron">
+            <span>Menú ▼</span>
+          </div>
         </div>
+      </div>
     </div>
-</div>
+  </div>
+</nav>
 
-<!-- Guía de Niveles -->
-<div id="level-guide-modal"
-    class="fixed inset-0 flex items-center justify-center p-4 hidden"
-    role="dialog" aria-modal="true"
-    style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
-    onclick="if (event.target===event.currentTarget) closeLevelGuideModal()">
-    <div class="w-full max-w-[1450px] rounded-2xl" style="background:#12121A;border:1px solid rgba(168,85,247,0.2);max-height:90vh;overflow-y:auto;position:relative;">
-        <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#a855f7,transparent);"></div>
-        <div class="p-6">
+<!-- ============ LAYOUT ============ -->
+<div class="pt-16 min-h-screen">
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main>
+    <div class="max-w-[1100px] mx-auto px-6 py-8">
+
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 reveal">
+        <div>
+          <div class="flex items-center gap-3 mb-1">
+            <h1 class="font-orbitron font-bold text-2xl md:text-3xl text-white tracking-tight">MI <span class="text-gradient-purple">DASHBOARD</span></h1>
+          </div>
+          <p class="text-sm text-purple-200/50 font-light">Gestiona tus jugadores y activa el análisis de combate</p>
+        </div>
+        <button onclick="openNewPlayerModal()" class="btn-new text-white font-bold text-sm px-6 py-3 rounded-xl flex items-center gap-2.5 tracking-wide whitespace-nowrap self-start sm:self-auto">
+          <span class="iconify text-lg" data-icon="mdi:plus"></span>
+          Nuevo jugador
+        </button>
+      </div>
+
+      <!-- Stats Summary -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 reveal" style="transition-delay:.1s">
+        <div class="border-card border-purple p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="iconify text-purple-400 text-sm" data-icon="mdi:account-group"></span>
+            <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Jugadores</span>
+          </div>
+          <div class="font-orbitron font-bold text-2xl text-purple-200 count-up" id="stat-players">0</div>
+        </div>
+        <div class="border-card border-orange p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="iconify text-accent-orange text-sm" data-icon="mdi:chart-box"></span>
+            <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Partidos</span>
+          </div>
+          <div class="font-orbitron font-bold text-2xl text-accent-orange count-up" id="stat-matches">0</div>
+        </div>
+        <div class="border-card border-blue p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="iconify text-accent-blue text-sm" data-icon="mdi:trophy"></span>
+            <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Torneos</span>
+          </div>
+          <div class="font-orbitron font-bold text-2xl text-accent-blue count-up" id="stat-tournaments">0</div>
+        </div>
+        <div class="border-card border-green p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="iconify text-accent-neon text-sm" data-icon="mdi:handshake"></span>
+            <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Amistosos</span>
+          </div>
+          <div class="font-orbitron font-bold text-2xl text-accent-neon count-up" id="stat-friendlies">0</div>
+        </div>
+      </div>
+
+      <!-- Section Title -->
+      <div class="flex items-center gap-3 mb-6 reveal" style="transition-delay:.2s">
+        <span class="iconify text-purple-400 text-lg" data-icon="mdi:sword-cross"></span>
+        <h2 class="font-space font-bold text-lg text-white tracking-tight">Mis Combatientes</h2>
+        <button onclick="openRatingGuideModal()" title="Guía de colores y niveles"
+                class="w-6 h-6 rounded-full bg-purple-600/20 border border-purple-500/25 flex items-center justify-center hover:bg-purple-600/40 transition-colors text-xs font-bold text-purple-300/70 hover:text-purple-200 flex-shrink-0">
+          ?
+        </button>
+        <div class="flex-1 h-px bg-gradient-to-r from-purple-500/15 to-transparent"></div>
+        <span class="text-[10px] text-purple-200/30 font-mono" id="player-count-label">0 jugadores</span>
+      </div>
+
+      <!-- Player Cards Grid -->
+      <div id="players-grid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mb-10">
+        <div class="text-purple-200/40 text-center py-20 col-span-3">
+          <span class="iconify text-4xl text-purple-400/30 mb-3" data-icon="mdi:radar"></span>
+          <p class="text-sm">Cargando combatientes...</p>
+        </div>
+      </div>
+
+      <!-- Quick Insights -->
+      <div class="reveal" style="transition-delay:.55s">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="iconify text-accent-gold text-lg" data-icon="mdi:lightbulb-on-outline"></span>
+          <h2 class="font-space font-bold text-lg text-white tracking-tight">Resumen de Rendimiento</h2>
+          <div class="flex-1 h-px bg-gradient-to-r from-accent-gold/15 to-transparent"></div>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="border-card border-purple p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-lg bg-accent-orange/15 border border-accent-orange/20 flex items-center justify-center">
+                <span class="iconify text-accent-orange text-lg" data-icon="mdi:fire"></span>
+              </div>
+              <div>
+                <div class="text-xs text-white font-medium">Mejor Racha</div>
+                <div class="text-[10px] text-purple-200/40" id="insight-streak">—</div>
+              </div>
+            </div>
+            <div class="flex items-end gap-1 h-8" id="insight-streak-bars">
+              <div class="flex-1 bg-purple-600/30 rounded-sm" style="height:30%"></div>
+              <div class="flex-1 bg-purple-600/30 rounded-sm" style="height:40%"></div>
+              <div class="flex-1 bg-purple-600/30 rounded-sm" style="height:50%"></div>
+              <div class="flex-1 bg-purple-600/30 rounded-sm" style="height:60%"></div>
+              <div class="flex-1 bg-purple-600/30 rounded-sm" style="height:45%"></div>
+              <div class="flex-1 bg-purple-600/30 rounded-sm" style="height:55%"></div>
+              <div class="flex-1 bg-purple-600/30 rounded-sm" style="height:65%"></div>
+              <div class="flex-1 bg-purple-600/30 rounded-sm" style="height:70%"></div>
+            </div>
+          </div>
+          <div class="border-card border-green p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-lg bg-accent-neon/15 border border-accent-neon/20 flex items-center justify-center">
+                <span class="iconify text-accent-neon text-lg" data-icon="mdi:trending-up"></span>
+              </div>
+              <div>
+                <div class="text-xs text-white font-medium">Mayor Progresión</div>
+                <div class="text-[10px] text-purple-200/40" id="insight-progress">—</div>
+              </div>
+            </div>
+            <div class="flex items-end gap-1 h-8" id="insight-progress-bars">
+              <div class="flex-1 bg-accent-blue/20 rounded-sm" style="height:20%"></div>
+              <div class="flex-1 bg-accent-blue/25 rounded-sm" style="height:30%"></div>
+              <div class="flex-1 bg-accent-blue/30 rounded-sm" style="height:35%"></div>
+              <div class="flex-1 bg-accent-blue/35 rounded-sm" style="height:45%"></div>
+              <div class="flex-1 bg-accent-blue/40 rounded-sm" style="height:55%"></div>
+              <div class="flex-1 bg-accent-blue/45 rounded-sm" style="height:65%"></div>
+              <div class="flex-1 bg-accent-blue/50 rounded-sm" style="height:80%"></div>
+              <div class="flex-1 bg-accent-blue/60 rounded-sm" style="height:100%"></div>
+            </div>
+          </div>
+          <div class="border-card border-pink p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-lg bg-purple-500/15 border border-purple-500/20 flex items-center justify-center">
+                <span class="iconify text-purple-300 text-lg" data-icon="mdi:lightning-bolt"></span>
+              </div>
+              <div>
+                <div class="text-xs text-white font-medium">🔍 Detector de Anomalías</div>
+                <div class="text-[10px] text-purple-200/40" id="insight-anomaly-label">Analizando...</div>
+              </div>
+            </div>
+            <div class="space-y-2" id="insight-anomaly-detail">
+              <div class="text-[10px] text-purple-300/40 text-center py-4">Cargando datos...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rating Guide Modal -->
+      <div id="rating-guide-modal"
+          class="fixed inset-0 flex items-center justify-center p-4 hidden"
+          role="dialog" aria-modal="true"
+          style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
+          onclick="if (event.target===event.currentTarget) closeRatingGuideModal()">
+        <div class="w-full max-w-[600px] rounded-2xl" style="background:#12121A;border:1px solid rgba(124,95,214,0.2);max-height:90vh;overflow-y:auto;position:relative;">
+          <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#7c5fd6,transparent);"></div>
+          <div class="p-6">
             <div class="flex items-center justify-between mb-5">
-                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(168,85,247,0.8);">📖 Guía de Niveles</span>
-                <button onclick="closeLevelGuideModal()" class="text-gray-500 hover:text-white text-xl">&times;</button>
+              <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(124,95,214,0.8);">📊 Guía de Colores y Niveles</span>
+              <button onclick="closeRatingGuideModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
             </div>
 
-            <div class="grid grid-cols-4 gap-5 items-stretch">
+            <p class="text-sm mb-5" style="color:#94a3b8;">Cada jugador tiene un nivel general que se calcula como la media de sus stats de <strong class="text-white">Técnica</strong>, <strong class="text-white">Físico</strong> y <strong class="text-white">Mental</strong>. Según ese promedio, se asigna un color y una badge.</p>
 
-                <!-- INICIACIÓN -->
-                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(34,197,94,0.2);">
-                    <div class="px-5 py-4 text-center" style="background:rgba(34,197,94,0.08);border-bottom:1px solid rgba(34,197,94,0.1);">
-                        <span class="text-base font-bold" style="color:#22c55e;">🟢 INICIACIÓN</span>
-                        <span class="text-base ml-1.5 font-bold" style="color:#22c55e;">1.0 – 2.5</span>
-                    </div>
-                    <div class="px-5 py-4 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Primeros pasos. Reglas, técnica básica y consistencia.</p>
-                            <div class="space-y-1.5">
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Golpes básicos</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Dificultad en voleas</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">✔</span> Prioriza mantener la bola</div>
-                            </div>
-                        </div>
-                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(34,197,94,0.15);">
-                            <div class="flex items-center gap-1.5 text-sm" style="color:#22c55e;">
-                                <span>🎾</span> Pala redonda · punto dulce amplio
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- INTERMEDIO -->
-                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(234,179,8,0.2);">
-                    <div class="px-5 py-4 text-center" style="background:rgba(234,179,8,0.08);border-bottom:1px solid rgba(234,179,8,0.1);">
-                        <span class="text-base font-bold" style="color:#eab308;">🟡 INTERMEDIO</span>
-                        <span class="text-base ml-1.5 font-bold" style="color:#eab308;">2.0 – 4.5</span>
-                    </div>
-                    <div class="px-5 py-4 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Control, colocación y táctica con consistencia.</p>
-                            <div class="space-y-1.5">
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Bandeja y víbora</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Lee rebotes y se posiciona</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Controla el ritmo</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">✔</span> Compite con frecuencia</div>
-                            </div>
-                        </div>
-                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(234,179,8,0.15);">
-                            <div class="flex items-center gap-1.5 text-sm" style="color:#eab308;">
-                                <span>🎾</span> Pala híbrida · equilibrio control/potencia
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- AVANZADO -->
-                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(239,68,68,0.2);">
-                    <div class="px-5 py-4 text-center" style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.1);">
-                        <span class="text-base font-bold" style="color:#ef4444;">🔴 AVANZADO</span>
-                        <span class="text-base ml-1.5 font-bold" style="color:#ef4444;">4.25 – 7.0</span>
-                    </div>
-                    <div class="px-5 py-4 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Sólido, rápido y agresivo. Domina todos los golpes.</p>
-                            <div class="space-y-1.5">
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Precisión en golpes complejos</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Gran lectura del partido</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Domina ataque y defensa</div>
-                                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">✔</span> Torneos habituales</div>
-                            </div>
-                        </div>
-                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(239,68,68,0.15);">
-                            <div class="flex items-center gap-1.5 text-sm" style="color:#ef4444;">
-                                <span>🎾</span> Pala técnica · alta precisión
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mapa de categorías -->
-                <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(10,10,15,0.6);border:1px solid rgba(59,130,246,0.25);">
-                    <div class="px-5 py-4 text-center" style="background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.1);">
-                        <span class="text-base font-bold" style="color:#3b82f6;">📋 CORRESPONDENCIA</span>
-                    </div>
-                    <div class="px-5 py-4 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Todas las categorías FEP con su rango numérico.</p>
-                            <div class="space-y-2.5">
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟢 Iniciación</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">1.0 – 2.5</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 5ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">2.0 – 3.0</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 4ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.0 – 3.75</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🟡 3ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.75 – 4.25</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 2ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.25 – 4.75</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 1ª Categoría</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.75 – 6.0</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;">
-                                    <span class="text-sm font-bold" style="color:#cbd5e1;">🔴 Profesional</span>
-                                    <span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">6.0 – 7.0</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pt-4 mt-4" style="border-top:1px solid rgba(59,130,246,0.15);">
-                            <div class="flex items-center gap-1.5 text-sm" style="color:#3b82f6;">
-                                <span>📋</span> Basado en FEP 2026
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="space-y-2 mb-6">
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);">
+                <span class="text-sm font-bold" style="color:#fbbf24;"><span style="font-size:1.8em;line-height:1;vertical-align:-3px;">●</span> PERFECTO</span>
+                <span class="text-xs" style="color:#64748b;">100 pts — todas las stats al máximo</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.15);">
+                <span class="text-sm font-bold" style="color:#f97316;"><span style="font-size:1.8em;line-height:1;vertical-align:-3px;">●</span> MUY ALTO</span>
+                <span class="text-xs" style="color:#64748b;">80 – 99 pts</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);">
+                <span class="text-sm font-bold" style="color:#22c55e;"><span style="font-size:1.8em;line-height:1;vertical-align:-3px;">●</span> ALTO</span>
+                <span class="text-xs" style="color:#64748b;">60 – 79 pts</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);">
+                <span class="text-sm font-bold" style="color:#3b82f6;"><span style="font-size:1.8em;line-height:1;vertical-align:-3px;">●</span> MEDIO</span>
+                <span class="text-xs" style="color:#64748b;">40 – 59 pts</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);">
+                <span class="text-sm font-bold" style="color:#ef4444;"><span style="font-size:1.8em;line-height:1;vertical-align:-3px;">●</span> BAJO</span>
+                <span class="text-xs" style="color:#64748b;">20 – 39 pts</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(236,72,153,0.06);border:1px solid rgba(236,72,153,0.15);">
+                <span class="text-sm font-bold" style="color:#ec4899;"><span style="font-size:1.8em;line-height:1;vertical-align:-3px;">●</span> MUY BAJO</span>
+                <span class="text-xs" style="color:#64748b;">0 – 19 pts</span>
+              </div>
             </div>
+
+            <div class="rounded-lg p-4" style="background:rgba(10,10,15,0.5);border:1px solid rgba(255,255,255,0.05);">
+              <p class="text-sm font-bold text-white mb-2">📐 ¿Cómo se calcula?</p>
+              <p class="text-xs mb-3" style="color:#94a3b8;">Los números que ves debajo del Power Level en cada card son la media de cada rama:</p>
+              <div class="space-y-1.5 text-xs" style="color:#cbd5e1;">
+                <div><span class="text-accent-orange">⚡ Técnica</span> = (derecha + revés + volea derecha + volea revés + bandeja + víbora + remate + globo + saque + bajada) / 10</div>
+                <div><span class="text-accent-neon">💪 Físico</span> = (velocidad + resistencia + reflejos) / 3</div>
+                <div><span class="text-accent-blue">🧠 Mental</span> = (táctica + presión + trabajo en pareja) / 3</div>
+              </div>
+              <div class="mt-3 text-xs" style="color:#64748b;">El color de la card se determina por el promedio de las 3 ramas.</div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div class="h-24"></div>
     </div>
+  </main>
+</div>
+
+<!-- ============ SIDEBAR ============ -->
+{% include 'partials/_sidebar_menu_simple.html' %}
+
+<!-- ============ MOBILE BOTTOM NAV ============ -->
+<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t border-purple-500/10" style="background:rgba(13,5,32,.92)">
+  <div class="flex items-center justify-around py-2">
+    <a href="/dashboard" class="flex flex-col items-center gap-0.5 py-1 px-3">
+      <span class="iconify text-purple-300 text-xl" data-icon="mdi:view-dashboard"></span>
+      <span class="text-[9px] text-purple-300/80 font-medium">Dashboard</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-0.5 py-1 px-3">
+      <span class="iconify text-purple-300/40 text-xl" data-icon="mdi:account-group-outline"></span>
+      <span class="text-[9px] text-purple-200/40">Jugadores</span>
+    </a>
+    <button onclick="openNewPlayerModal()" class="relative flex flex-col items-center gap-0.5 py-1 px-3 -mt-4">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+        <span class="iconify text-white text-2xl" data-icon="mdi:plus"></span>
+      </div>
+    </button>
+    <a href="#" class="flex flex-col items-center gap-0.5 py-1 px-3">
+      <span class="iconify text-purple-300/40 text-xl" data-icon="mdi:trophy-outline"></span>
+      <span class="text-[9px] text-purple-200/40">Ranking</span>
+    </a>
+    <a href="/login" onclick="localStorage.clear()" class="flex flex-col items-center gap-0.5 py-1 px-3">
+      <span class="iconify text-purple-300/40 text-xl" data-icon="mdi:logout"></span>
+      <span class="text-[9px] text-purple-200/40">Salir</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ============ MODAL: Nuevo Jugador ============ -->
+<div id="modal-nuevo" class="modal-overlay" onclick="if (event.target === event.currentTarget) closeNewPlayerModal()">
+  <div class="modal-card">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-white">Nuevo Jugador</h2>
+      <button onclick="closeNewPlayerModal()" class="text-purple-300/40 hover:text-white text-2xl">&times;</button>
+    </div>
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-purple-200/50 text-xs font-medium tracking-wide uppercase">Nombre del jugador</label>
+          <input id="p-name" type="text" placeholder="Ej: Martin Di Nenno" class="input-dash">
+        </div>
+        <div>
+          <label class="text-purple-200/50 text-xs font-medium tracking-wide uppercase">Categoria</label>
+          <select id="p-category" class="input-dash">
+            <option value="Iniciación">&#127794; Iniciación (1.0 – 2.5)</option>
+            <option value="5ª Categoría">&#128993; 5ª Categoría (2.0 – 3.0)</option>
+            <option value="4ª Categoría">&#128993; 4ª Categoría (3.0 – 3.75)</option>
+            <option value="3ª Categoría" selected>&#128993; 3ª Categoría (3.75 – 4.25)</option>
+            <option value="2ª Categoría">&#128308; 2ª Categoría (4.25 – 4.75)</option>
+            <option value="1ª Categoría">&#128308; 1ª Categoría (4.75 – 6.0)</option>
+            <option value="Profesional">&#128308; Profesional (6.0 – 7.0)</option>
+          </select>
+          <p class="text-purple-300/20 text-xs mt-3">&#127794; Iniciación → &#128993; Intermedio → &#128308; Avanzado / Profesional</p>
+          <button onclick="openLevelGuideModal()" class="text-xs font-medium mt-3 px-2.5 py-1 rounded-lg transition" style="background:rgba(124,95,214,0.1);border:1px solid rgba(124,95,214,0.2);color:#a78bfa;">
+            &#128214; Guía de Niveles
+          </button>
+        </div>
+      </div>
+
+      <div id="create-error" class="hidden text-sm p-3 rounded-lg" style="color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);"></div>
+
+      <div>
+        <p class="text-accent-neon font-semibold text-sm mb-1 border-b border-purple-500/10 pb-2">&#127934; Estadisticas Tecnicas</p>
+        <p class="text-purple-300/30 text-xs mb-3">Valora cada golpe de <strong class="text-purple-200/60">0</strong> a <strong class="text-purple-200/60">100</strong> segun el nivel del jugador</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-4">
+          {% for stat in ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared'] %}
+          <div>
+            <label class="text-purple-200/40 text-xs capitalize block truncate" title="Valor de 0 a 100">{{ stat.replace('_',' ') }}</label>
+            <input id="s-{{ stat }}" type="number" value="50" min="0" max="100" class="input-dash-num" oninput="clampStat(this)">
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <p class="text-accent-neon font-semibold text-sm mb-1 border-b border-purple-500/10 pb-2">&#128170; Fisico & Mental</p>
+        <p class="text-purple-300/30 text-xs mb-3">Capacidades fisicas y mentales del jugador, tambien de <strong class="text-purple-200/60">0</strong> a <strong class="text-purple-200/60">100</strong></p>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-4">
+          {% for stat in ['velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja'] %}
+          <div>
+            <label class="text-purple-200/40 text-xs capitalize block truncate" title="Valor de 0 a 100">{{ stat.replace('_',' ') }}</label>
+            <input id="s-{{ stat }}" type="number" value="50" min="0" max="100" class="input-dash-num" oninput="clampStat(this)">
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button onclick="createPlayer()" class="flex-1 btn-new text-white font-bold py-3 rounded-xl transition">Crear Jugador</button>
+        <button onclick="closeNewPlayerModal()" class="flex-1 bg-purple-800/30 hover:bg-purple-800/50 text-purple-200 font-bold py-3 rounded-xl transition">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Guía de Niveles ============ -->
+<div id="level-guide-modal" class="modal-overlay" onclick="if (event.target===event.currentTarget) closeLevelGuideModal()">
+  <div class="w-full max-w-[1450px]" style="background:#140b30;border:1px solid rgba(124,95,214,0.2);border-radius:20px;max-height:90vh;overflow-y:auto;position:relative;">
+    <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#7c5fd6,transparent);"></div>
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-5">
+        <span class="text-sm font-bold tracking-widest uppercase" style="color:#a78bfa;">&#128214; Guía de Niveles</span>
+        <button onclick="closeLevelGuideModal()" class="text-purple-300/40 hover:text-white text-xl">&times;</button>
+      </div>
+      <div class="grid grid-cols-4 gap-5 items-stretch">
+        <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(13,5,32,0.6);border:1px solid rgba(34,197,94,0.2);">
+          <div class="px-5 py-4 text-center" style="background:rgba(34,197,94,0.08);border-bottom:1px solid rgba(34,197,94,0.1);">
+            <span class="text-base font-bold" style="color:#22c55e;">&#127794; INICIACIÓN</span>
+            <span class="text-base ml-1.5 font-bold" style="color:#22c55e;">1.0 – 2.5</span>
+          </div>
+          <div class="px-5 py-4 flex-1 flex flex-col">
+            <div class="flex-1">
+              <p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Primeros pasos. Reglas, técnica básica y consistencia.</p>
+              <div class="space-y-1.5">
+                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">&#10004;</span> Golpes básicos</div>
+                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">&#10004;</span> Dificultad en voleas</div>
+                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#22c55e;">&#10004;</span> Prioriza mantener la bola</div>
+              </div>
+            </div>
+            <div class="pt-4 mt-4" style="border-top:1px solid rgba(34,197,94,0.15);">
+              <div class="flex items-center gap-1.5 text-sm" style="color:#22c55e;">&#127934; Pala redonda · punto dulce amplio</div>
+            </div>
+          </div>
+        </div>
+        <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(13,5,32,0.6);border:1px solid rgba(234,179,8,0.2);">
+          <div class="px-5 py-4 text-center" style="background:rgba(234,179,8,0.08);border-bottom:1px solid rgba(234,179,8,0.1);">
+            <span class="text-base font-bold" style="color:#eab308;">&#128993; INTERMEDIO</span>
+            <span class="text-base ml-1.5 font-bold" style="color:#eab308;">2.0 – 4.5</span>
+          </div>
+          <div class="px-5 py-4 flex-1 flex flex-col">
+            <div class="flex-1"><p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Control, colocación y táctica con consistencia.</p>
+              <div class="space-y-1.5">
+                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">&#10004;</span> Bandeja y víbora</div>
+                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">&#10004;</span> Lee rebotes y se posiciona</div>
+                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">&#10004;</span> Controla el ritmo</div>
+                <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#eab308;">&#10004;</span> Compite con frecuencia</div>
+              </div>
+            </div>
+            <div class="pt-4 mt-4" style="border-top:1px solid rgba(234,179,8,0.15);"><div class="flex items-center gap-1.5 text-sm" style="color:#eab308;">&#127934; Pala híbrida · equilibrio control/potencia</div></div>
+          </div>
+        </div>
+        <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(13,5,32,0.6);border:1px solid rgba(239,68,68,0.2);">
+          <div class="px-5 py-4 text-center" style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.1);">
+            <span class="text-base font-bold" style="color:#ef4444;">&#128308; AVANZADO</span>
+            <span class="text-base ml-1.5 font-bold" style="color:#ef4444;">4.25 – 7.0</span>
+          </div>
+          <div class="px-5 py-4 flex-1 flex flex-col"><div class="flex-1"><p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Sólido, rápido y agresivo. Domina todos los golpes.</p>
+            <div class="space-y-1.5">
+              <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">&#10004;</span> Precisión en golpes complejos</div>
+              <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">&#10004;</span> Gran lectura del partido</div>
+              <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">&#10004;</span> Domina ataque y defensa</div>
+              <div class="flex items-start gap-1.5 text-sm" style="color:#cbd5e1;"><span style="color:#ef4444;">&#10004;</span> Torneos habituales</div>
+            </div></div>
+            <div class="pt-4 mt-4" style="border-top:1px solid rgba(239,68,68,0.15);"><div class="flex items-center gap-1.5 text-sm" style="color:#ef4444;">&#127934; Pala técnica · alta precisión</div></div>
+          </div>
+        </div>
+        <div class="rounded-xl overflow-hidden flex flex-col h-full" style="background:rgba(13,5,32,0.6);border:1px solid rgba(59,130,246,0.25);">
+          <div class="px-5 py-4 text-center" style="background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.1);"><span class="text-base font-bold" style="color:#3b82f6;">&#128203; CORRESPONDENCIA</span></div>
+          <div class="px-5 py-4 flex-1 flex flex-col"><div class="flex-1"><p class="text-sm leading-relaxed mb-4" style="color:#94a3b8;">Todas las categorías FEP con su rango numérico.</p>
+            <div class="space-y-2.5">
+              <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;"><span class="text-sm font-bold" style="color:#cbd5e1;">&#127794; Iniciación</span><span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">1.0 – 2.5</span></div>
+              <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;"><span class="text-sm font-bold" style="color:#cbd5e1;">&#128993; 5ª Categoría</span><span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">2.0 – 3.0</span></div>
+              <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;"><span class="text-sm font-bold" style="color:#cbd5e1;">&#128993; 4ª Categoría</span><span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.0 – 3.75</span></div>
+              <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;"><span class="text-sm font-bold" style="color:#cbd5e1;">&#128993; 3ª Categoría</span><span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">3.75 – 4.25</span></div>
+              <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;"><span class="text-sm font-bold" style="color:#cbd5e1;">&#128308; 2ª Categoría</span><span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.25 – 4.75</span></div>
+              <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;"><span class="text-sm font-bold" style="color:#cbd5e1;">&#128308; 1ª Categoría</span><span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">4.75 – 6.0</span></div>
+              <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;"><span class="text-sm font-bold" style="color:#cbd5e1;">&#128308; Profesional</span><span class="text-sm font-mono font-bold" style="color:#64748b;text-align:right;">6.0 – 7.0</span></div>
+            </div></div>
+            <div class="pt-4 mt-4" style="border-top:1px solid rgba(59,130,246,0.15);"><div class="flex items-center gap-1.5 text-sm" style="color:#3b82f6;">&#128203; Basado en FEP 2026</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
+// ── Auth check ───────────────────────────────────────────────
 const token = localStorage.getItem('access_token');
-if (!token) {
-    window.location.href = '/login';
-} else {
-    // Verificar que el token es válido antes de continuar
-    fetch('/api/v1/auth/me', {
-        headers: {'Authorization': `Bearer ${token}`}
-    }).then(r => {
-        if (r.status === 401) {
-            localStorage.clear();
-            window.location.href = '/login';
-        }
-    });
+if (!token) { window.location.href = '/login'; }
+else {
+  fetch('/api/v1/auth/me', {
+    headers: {'Authorization': `Bearer ${token}`}
+  }).then(r => { if (r.status === 401) { localStorage.clear(); window.location.href = '/login'; } });
 }
 
+// ── Constants ────────────────────────────────────────────────
 const STATS = [
-    'derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared',
-    'velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja'
+  'derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque','bajada_pared',
+  'velocidad','resistencia','reflejos','tactica','presion','trabajo_en_pareja'
 ];
 
 const CATEGORY_COLORS = {
-    'Iniciación': '#6b7280',
-    '5ª Categoría': '#3b82f6',
-    '4ª Categoría': '#8b5cf6',
-    '3ª Categoría': '#10b981',
-    '2ª Categoría': '#f59e0b',
-    '1ª Categoría': '#ef4444',
-    'Profesional': '#fbbf24',
+  'Iniciación': '#6b7280', '5ª Categoría': '#3b82f6', '4ª Categoría': '#8b5cf6',
+  '3ª Categoría': '#10b981', '2ª Categoría': '#f59e0b', '1ª Categoría': '#ef4444', 'Profesional': '#fbbf24',
 };
 
 const CATEGORY_LEVELS = {
-    'Iniciación':   { min: 1.0, max: 2.5,  group: 'Iniciación', color: '#22c55e', icon: '🟢' },
-    '5ª Categoría': { min: 2.0, max: 3.0,  group: 'Intermedio', color: '#eab308', icon: '🟡' },
-    '4ª Categoría': { min: 3.0, max: 3.75, group: 'Intermedio', color: '#eab308', icon: '🟡' },
-    '3ª Categoría': { min: 3.75,max: 4.25, group: 'Intermedio', color: '#eab308', icon: '🟡' },
-    '2ª Categoría': { min: 4.25,max: 4.75, group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
-    '1ª Categoría': { min: 4.75,max: 6.0,  group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
-    'Profesional':  { min: 6.0, max: 7.0,  group: 'Avanzado',  color: '#ef4444', icon: '🔴' },
+  'Iniciación':   { min: 1.0, max: 2.5,  group: 'Iniciación', color: '#22c55e', icon: '\u{1F7E2}' },
+  '5ª Categoría': { min: 2.0, max: 3.0,  group: 'Intermedio', color: '#eab308', icon: '\u{1F7E1}' },
+  '4ª Categoría': { min: 3.0, max: 3.75, group: 'Intermedio', color: '#eab308', icon: '\u{1F7E1}' },
+  '3ª Categoría': { min: 3.75,max: 4.25, group: 'Intermedio', color: '#eab308', icon: '\u{1F7E1}' },
+  '2ª Categoría': { min: 4.25,max: 4.75, group: 'Avanzado',  color: '#ef4444', icon: '\u{1F534}' },
+  '1ª Categoría': { min: 4.75,max: 6.0,  group: 'Avanzado',  color: '#ef4444', icon: '\u{1F534}' },
+  'Profesional':  { min: 6.0, max: 7.0,  group: 'Avanzado',  color: '#ef4444', icon: '\u{1F534}' },
 };
 
+// ── Modal controls ───────────────────────────────────────────
 function openNewPlayerModal() {
-    resetNewPlayerForm();
-    document.getElementById('modal-nuevo').style.display = 'flex';
+  resetNewPlayerForm();
+  document.getElementById('modal-nuevo').style.display = 'flex';
 }
-
 function closeNewPlayerModal() {
-    document.getElementById('modal-nuevo').style.display = 'none';
+  document.getElementById('modal-nuevo').style.display = 'none';
 }
-
 function resetNewPlayerForm() {
-    document.getElementById('p-name').value = '';
-    document.getElementById('p-category').value = '3ª Categoría';
-    STATS.forEach(s => {
-        document.getElementById(`s-${s}`).value = '50';
-    });
-    const errEl = document.getElementById('create-error');
-    errEl.classList.add('hidden');
-    errEl.textContent = '';
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-category').value = '3ª Categoría';
+  STATS.forEach(s => { document.getElementById(`s-${s}`).value = '50'; });
+  const errEl = document.getElementById('create-error');
+  errEl.classList.add('hidden');
+  errEl.textContent = '';
 }
-
 function clampStat(el) {
-    // Solo numeros
-    el.value = el.value.replace(/[^0-9]/g, '');
-    // Maximo 3 digitos
-    if (el.value.length > 3) el.value = el.value.slice(0, 3);
-    // Dentro de rango 0-100
-    const num = Number(el.value);
-    if (el.value !== '' && !Number.isFinite(num)) {
-        el.value = '50';
-    } else if (num > 100) {
-        el.value = '100';
-    }
-    // Feedback visual si esta fuera de rango
-    if (num < 0 || num > 100) {
-        el.style.borderColor = '#ef4444';
-    } else {
-        el.style.borderColor = '';
-    }
+  el.value = el.value.replace(/[^0-9]/g, '');
+  if (el.value.length > 3) el.value = el.value.slice(0, 3);
+  const num = Number(el.value);
+  if (el.value !== '' && !Number.isFinite(num)) { el.value = '50'; }
+  else if (num > 100) { el.value = '100'; }
 }
-
 function openLevelGuideModal() {
-    document.getElementById('level-guide-modal').classList.remove('hidden');
+  document.getElementById('level-guide-modal').style.display = 'flex';
+}
+function closeLevelGuideModal() {
+  document.getElementById('level-guide-modal').style.display = 'none';
 }
 
-function closeLevelGuideModal() {
-    document.getElementById('level-guide-modal').classList.add('hidden');
+// ── Stats helpers ────────────────────────────────────────────
+function avgStats(stats) {
+  const vals = Object.values(stats).filter(v => typeof v === 'number');
+  if (!vals.length) return 0;
+  return Math.round(vals.reduce((a,b) => a+b, 0) / vals.length);
 }
+
+// ── Compute power level ──────────────────────────────────────
+function computePowerLevel(stats) {
+  const avg = avgStats(stats);
+  return Math.round(avg * 1.2);
+}
+
+// ── Load dashboard stats ─────────────────────────────────────
+async function loadStats() {
+  try {
+    const res = await fetch('/api/v1/stats/summary', {
+      headers: {'Authorization': `Bearer ${token}`}
+    });
+    if (!res.ok) return;
+    const json = await res.json();
+    if (!json.success || !json.data) return;
+    const s = json.data;
+    document.getElementById('stat-players').textContent = s.total_players ?? 0;
+    document.getElementById('stat-matches').textContent = s.total_matches ?? 0;
+    document.getElementById('stat-tournaments').textContent = s.total_tournaments ?? 0;
+    document.getElementById('stat-friendlies').textContent = s.total_friendlies ?? 0;
+  } catch (_) {}
+}
+
+// ── Load & render players ────────────────────────────────────
+let allPlayers = [];
 
 async function loadPlayers() {
+  try {
     const res = await fetch('/api/v1/players/', {
-        headers: {'Authorization': `Bearer ${token}`}
+      headers: {'Authorization': `Bearer ${token}`}
     });
     if (res.status === 401) { window.location.href = '/login'; return; }
     const players = await res.json();
+    allPlayers = players;
     renderPlayers(players);
+    detectAnomaly(players);
+    loadStreak();
+    loadProgression();
+  } catch (e) {
+    document.getElementById('players-grid').innerHTML =
+      '<div class="text-purple-200/40 text-center py-20 col-span-3">' +
+      '<span class="iconify text-4xl text-purple-400/30 mb-3" data-icon="mdi:cloud-off-outline"></span>' +
+      '<p class="text-sm">Error al cargar combatientes. Verifica tu conexión.</p></div>';
+  }
+}
+
+function detectAnomaly(players) {
+  const labelEl = document.getElementById('insight-anomaly-label');
+  const detailEl = document.getElementById('insight-anomaly-detail');
+  
+  if (!players || players.length === 0) {
+    labelEl.textContent = 'Sin jugadores';
+    detailEl.innerHTML = '<div class="text-[10px] text-purple-300/40 text-center py-4">Crea jugadores para detectar anomalías</div>';
+    return;
+  }
+  
+  let bestAnomaly = null; // { player, gap, maxStat, minStat }
+  let bestPlayer = null;  // { player, avg }
+  
+  for (const p of players) {
+    const stats = {
+      'Técnica': Math.round(((p.derecha||50)+(p.reves||50)+(p.volea_derecha||50)+(p.volea_reves||50)+(p.bandeja||50)+(p.vibora||50)+(p.remate||50)+(p.globo||50)+(p.saque||50)+(p.bajada_pared||50)) / 10),
+      'Físico': Math.round(((p.velocidad||50)+(p.resistencia||50)+(p.reflejos||50)) / 3),
+      'Mental': Math.round(((p.tactica||50)+(p.presion||50)+(p.trabajo_en_pareja||50)) / 3),
+    };
+    
+    let maxS = { name: '', value: 0 };
+    let minS = { name: '', value: 100 };
+    let total = 0;
+    for (const [name, value] of Object.entries(stats)) {
+      total += value;
+      if (value > maxS.value) { maxS = { name, value }; }
+      if (value < minS.value) { minS = { name, value }; }
+    }
+    
+    const gap = maxS.value - minS.value;
+    if (gap > (bestAnomaly?.gap || 0)) {
+      bestAnomaly = { player: p, gap, max: maxS, min: minS };
+    }
+    
+    const avg = Math.round(total / 3);
+    if (!bestPlayer || avg > bestPlayer.avg) bestPlayer = { player: p, avg };
+  }
+  
+  // Mostrar la anomalía más impactante
+  if (bestAnomaly && bestAnomaly.gap >= 25) {
+    const p = bestAnomaly.player;
+    const safeName = (p.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    labelEl.textContent = `${safeName} — ${bestAnomaly.min.name} ${bestAnomaly.min.value} vs ${bestAnomaly.max.name} ${bestAnomaly.max.value}`;
+    detailEl.innerHTML = `
+      <div class="bg-purple-950/30 rounded-lg p-3 border border-purple-500/8">
+        <div class="flex items-center justify-between text-xs mb-2">
+          <span class="text-red-400">⬇ ${bestAnomaly.min.name} ${bestAnomaly.min.value}</span>
+          <span class="text-purple-300/30 text-[10px]">gap ${bestAnomaly.gap}pts</span>
+          <span class="text-green-400">⬆ ${bestAnomaly.max.name} ${bestAnomaly.max.value}</span>
+        </div>
+        <div class="w-full h-1.5 bg-purple-950 rounded-full overflow-hidden">
+          <div class="h-full rounded-full" style="width:${bestAnomaly.max.value}%;background:linear-gradient(90deg,${bestAnomaly.max.value > 75 ? '#22c55e' : '#f97316'},${bestAnomaly.max.value > 75 ? '#4ade80' : '#fbbf24'})"></div>
+        </div>
+        <div class="text-[10px] text-purple-300/40 mt-2">Diferencia de ${bestAnomaly.gap} puntos — ¿entrenamiento específico?</div>
+        <a href="/player/${p.id}" class="block text-center text-[10px] text-accent-blue hover:text-white mt-2 transition-colors">Ver perfil →</a>
+      </div>`;
+  } else if (bestAnomaly && bestAnomaly.gap >= 15) {
+    const p = bestAnomaly.player;
+    const safeName = (p.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    labelEl.textContent = `${safeName} — desequilibrio moderado`;
+    detailEl.innerHTML = `
+      <div class="bg-purple-950/30 rounded-lg p-3 border border-purple-500/8 text-center">
+        <span class="text-xs text-purple-200/60">${safeName}: ${bestAnomaly.min.name} ${bestAnomaly.min.value} / ${bestAnomaly.max.name} ${bestAnomaly.max.value}</span>
+        <div class="text-[10px] text-purple-300/40 mt-1">Diferencia de ${bestAnomaly.gap} puntos</div>
+      </div>`;
+  } else if (bestPlayer) {
+    const p = bestPlayer.player;
+    const safeName = (p.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    labelEl.textContent = `✅ Todo en orden — ${safeName} lidera con ${bestPlayer.avg} pts`;
+    detailEl.innerHTML = `
+      <div class="bg-purple-950/30 rounded-lg p-3 border border-purple-500/8 text-center">
+        <span class="text-accent-neon text-xs font-bold">🏆 Sin anomalías destacadas</span>
+        <div class="text-[10px] text-purple-300/40 mt-1">Todos los jugadores están equilibrados</div>
+      </div>`;
+  }
+}
+
+// ── Mejor Racha ───────────────────────────────────────
+async function loadStreak() {
+  const label = document.getElementById('insight-streak');
+  const bars = document.getElementById('insight-streak-bars');
+  try {
+    const res = await fetch('/api/v1/stats/ranking?sort_by=streak&order=desc&page_size=1', {
+      headers: {'Authorization': `Bearer ${token}`}
+    });
+    if (!res.ok) { label.textContent = '—'; return; }
+    const json = await res.json();
+    if (!json.success || !json.data?.players?.length) { label.textContent = 'Sin rachas'; return; }
+    const top = json.data.players[0];
+    if (top.streak <= 0) { label.textContent = 'Sin rachas activas'; return; }
+    const safeName = top.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    label.textContent = `${safeName} — ${top.streak} ${top.streak === 1 ? 'victoria' : 'victorias'} consecutivas`;
+    // Bars decorativas: más barras llenas = racha más larga
+    const barCount = Math.min(top.streak, 10);
+    bars.innerHTML = '';
+    for (let i = 0; i < barCount; i++) {
+      const h = 30 + (i / barCount) * 50;
+      bars.innerHTML += `<div class="flex-1 bg-accent-orange/40 rounded-sm" style="height:${h}%"></div>`;
+    }
+  } catch {
+    label.textContent = '—';
+  }
+}
+
+// ── Mayor Progresión ──────────────────────────────────
+async function loadProgression() {
+  const label = document.getElementById('insight-progress');
+  const bars = document.getElementById('insight-progress-bars');
+  try {
+    if (!allPlayers.length) { label.textContent = '—'; return; }
+    // Fetch analyses for each player en paralelo
+    const results = await Promise.allSettled(
+      allPlayers.map(p =>
+        fetch(`/api/v1/analysis/${p.id}`, {
+          headers: {'Authorization': `Bearer ${token}`}
+        }).then(r => r.ok ? r.json() : null)
+      )
+    );
+    let bestGain = 0;
+    let bestPlayer = null;
+    for (let i = 0; i < results.length; i++) {
+      const r = results[i];
+      if (r.status !== 'fulfilled' || !r.value) continue;
+      const analyses = r.value;
+      if (!Array.isArray(analyses) || analyses.length < 2) continue;
+      const sorted = [...analyses].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      const prev = sorted[sorted.length - 2].power_level || 0;
+      const curr = sorted[sorted.length - 1].power_level || 0;
+      const gain = curr - prev;
+      if (gain > bestGain) {
+        bestGain = gain;
+        bestPlayer = allPlayers[i];
+      }
+    }
+    if (bestGain > 0 && bestPlayer) {
+      const safeName = bestPlayer.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      label.textContent = `${safeName} +${bestGain} pts`;
+      // Bars: hasta 10 escalones según la ganancia
+      const steps = Math.min(Math.round(bestGain / 100), 10);
+      bars.innerHTML = '';
+      for (let i = 0; i < Math.max(steps, 3); i++) {
+        const h = 20 + (i / Math.max(steps, 3)) * 80;
+        bars.innerHTML += `<div class="flex-1 bg-accent-neon/30 rounded-sm" style="height:${h}%"></div>`;
+      }
+    } else {
+      label.textContent = 'Sin datos de progresión';
+      bars.innerHTML = '';
+      for (let i = 1; i <= 4; i++) {
+        bars.innerHTML += `<div class="flex-1 bg-purple-600/20 rounded-sm" style="height:${15 + i * 8}%"></div>`;
+      }
+    }
+  } catch {
+    label.textContent = '—';
+  }
 }
 
 function renderPlayers(players) {
-    const grid = document.getElementById('players-grid');
-    if (players.length === 0) {
-        grid.innerHTML = `
-            <div class="text-gray-500 text-center py-20 col-span-3">
-                <div class="text-4xl mb-3">🎾</div>
-                <p>No tienes jugadores aún.</p>
-                <p class="text-sm mt-1">Crea el primero con el botón de arriba.</p>
-            </div>`;
-        return;
-    }
-    grid.innerHTML = players.map(p => {
-        const safeName = p.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-        return `
-        <div class="bg-gray-900 border border-gray-800 hover:border-emerald-500/50
-                    rounded-xl p-6 cursor-pointer transition"
-             onclick="window.location.href='/player/${p.id}'">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h3 class="font-bold text-lg">${safeName}</h3>
-                    <span class="text-xs px-2 py-1 rounded-full mt-1 inline-block"
-                          style="background:${CATEGORY_COLORS[p.category]}22;
-                                 color:${CATEGORY_COLORS[p.category]}">
-                        ${p.category}
-                    </span>
+  const grid = document.getElementById('players-grid');
+  const countEl = document.getElementById('player-count-label');
+
+  if (!players || players.length === 0) {
+    grid.innerHTML = '<div class="text-purple-200/40 text-center py-20 col-span-3">' +
+      '<span class="iconify text-4xl text-purple-400/30 mb-3" data-icon="mdi:radar"></span>' +
+      '<p class="text-sm">No tienes combatientes aún. Crea el primero con el botón de arriba.</p></div>';
+    countEl.textContent = '0 jugadores';
+    document.getElementById('stat-players').textContent = '0';
+    return;
+  }
+
+  countEl.textContent = `${players.length} jugadores`;
+  document.getElementById('stat-players').textContent = players.length;
+
+  function getPlayerBadge(avg) {
+    if (avg >= 100) return { label: 'PERFECTO', color: 'gold' };
+    if (avg >= 80)  return { label: 'MUY ALTO', color: 'orange' };
+    if (avg >= 60)  return { label: 'ALTO', color: 'neon' };
+    if (avg >= 40)  return { label: 'MEDIO', color: 'blue' };
+    if (avg >= 20)  return { label: 'BAJO', color: 'red' };
+    return { label: 'MUY BAJO', color: 'pink' };
+  }
+
+  const fillPctList = [];
+  grid.innerHTML = players.map((p, i) => {
+    // Ajustar stats planas del schema (vienen en root, no anidadas en .stats)
+    const playerStats = {
+      derecha: p.derecha ?? 50, reves: p.reves ?? 50,
+      volea_derecha: p.volea_derecha ?? 50, volea_reves: p.volea_reves ?? 50,
+      bandeja: p.bandeja ?? 50, vibora: p.vibora ?? 50,
+      remate: p.remate ?? 50, globo: p.globo ?? 50,
+      saque: p.saque ?? 50, bajada_pared: p.bajada_pared ?? 50,
+      velocidad: p.velocidad ?? 50, resistencia: p.resistencia ?? 50,
+      reflejos: p.reflejos ?? 50, tactica: p.tactica ?? 50,
+      presion: p.presion ?? 50, trabajo_en_pareja: p.trabajo_en_pareja ?? 50,
+    };
+    const safeName = p.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    // Power level: usar el del análisis IA, o calcular uno básico si no existe
+    const level = p.power_level ?? computePowerLevel(playerStats);
+    const tec = Math.round((playerStats.derecha + playerStats.reves + playerStats.volea_derecha + playerStats.volea_reves + playerStats.bandeja + playerStats.vibora + playerStats.remate + playerStats.globo + playerStats.saque + playerStats.bajada_pared) / 10);
+    const fis = Math.round((playerStats.velocidad + playerStats.resistencia + playerStats.reflejos) / 3);
+    const men = Math.round((playerStats.tactica + playerStats.presion + playerStats.trabajo_en_pareja) / 3);
+    // Badge según media de Técnica + Físico + Mental
+    const overallAvg = Math.round((tec + fis + men) / 3);
+    const { label: badge, color: theme } = getPlayerBadge(overallAvg);
+    // Gradientes de barra por color de nivel
+    const barColors = {
+      gold: '#fbbf24,#ffd700,#fbbf24',
+      orange: '#f97316,#fbbf24,#22c55e',
+      neon: '#22c55e,#4ade80,#22c55e',
+      blue: '#3b82f6,#06b6d4,#3b82f6',
+      red: '#ef4444,#f87171,#ef4444',
+      pink: '#ec4899,#f472b6,#ec4899'
+    };
+    // barra escala 0-9999 para power level IA
+    const fillPct = Math.min(Math.round((level / 9999) * 100), 100);
+    fillPctList.push(fillPct);
+
+    return `<div class="player-card reveal" style="transition-delay:${0.25 + i*0.1}s" onclick="window.location.href='/player/${p.id}'">
+      <div class="border-card border-${theme} glow-${theme} overflow-hidden">
+        <div class="shimmer absolute inset-0 pointer-events-none rounded-[16px]"></div>
+        <div class="h-px bg-gradient-to-r from-transparent via-accent-${theme}/40 to-transparent"></div>
+        <div class="p-5 relative z-10">
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <div class="w-14 h-14 rounded-xl overflow-hidden border-2 border-accent-${theme}/50">
+                  ${p.avatar_url
+                    ? `<img src="${p.avatar_url}" alt="" class="w-full h-full object-cover">`
+                    : `<div class="w-full h-full flex items-center justify-center text-accent-${theme} font-black text-lg" style="background:rgba(255,255,255,0.04)">${safeName.charAt(0).toUpperCase()}</div>`
+                  }
                 </div>
-                <span class="text-2xl">🎾</span>
+              </div>
+              <div>
+                <div class="font-space font-bold text-white text-sm">${safeName}</div>
+                <div class="text-[10px] text-accent-${theme}/80 font-medium tracking-wider uppercase mt-0.5">${p.category || 'Sin categoría'}</div>
+              </div>
             </div>
-            <button onclick="event.stopPropagation(); analyzePlayer('${p.id}')"
-                    class="w-full bg-emerald-600/20 hover:bg-emerald-600/40 border
-                           border-emerald-500/30 text-emerald-400 text-sm py-2 rounded-lg transition mt-2">
-                🔮 Analizar con IA
-            </button>
-        </div>`;
-    }).join('');
+            <span class="text-[8px] bg-accent-${theme}/15 text-accent-${theme} border border-accent-${theme}/20 rounded-full px-2 py-0.5 font-bold tracking-wider">${badge}</span>
+          </div>
+          <div class="bg-purple-950/40 rounded-xl p-3 border border-accent-${theme}/10 mb-4">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Power Level</span>
+            </div>
+            <div class="font-orbitron font-black text-3xl text-gradient-${theme} mb-2">${level.toLocaleString()}</div>
+            <div class="h-1.5 bg-purple-950 rounded-full overflow-hidden">
+              <div id="pbar-${p.id}" class="h-full rounded-full" style="width:0%;background:linear-gradient(90deg,${barColors[theme]});transition:width 1.5s cubic-bezier(.16,1,.3,1)"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <div class="bg-purple-950/30 rounded-lg p-2 text-center border border-purple-500/8">
+              <div class="font-orbitron font-bold text-sm text-accent-${theme}">${tec}</div>
+              <div class="text-[8px] text-purple-200/30 tracking-wider uppercase">Técnica</div>
+            </div>
+            <div class="bg-purple-950/30 rounded-lg p-2 text-center border border-purple-500/8">
+              <div class="font-orbitron font-bold text-sm text-accent-blue">${fis}</div>
+              <div class="text-[8px] text-purple-200/30 tracking-wider uppercase">Físico</div>
+            </div>
+            <div class="bg-purple-950/30 rounded-lg p-2 text-center border border-purple-500/8">
+              <div class="font-orbitron font-bold text-sm text-purple-300">${men}</div>
+              <div class="text-[8px] text-purple-200/30 tracking-wider uppercase">Mental</div>
+            </div>
+          </div>
+          <button onclick="event.stopPropagation(); analyzePlayer('${p.id}')" class="btn-ai w-full text-white font-bold text-sm py-3.5 rounded-xl flex items-center justify-center gap-2.5 tracking-wide">
+            <span class="iconify text-lg" data-icon="mdi:robot-outline"></span>
+            Analizar con IA
+          </button>
+        </div>
+        <div class="h-px bg-gradient-to-r from-transparent via-accent-${theme}/20 to-transparent"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Observar los nuevos .reveal elements
+  grid.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+  // Animar barras de poder — arrancan en width:0%, transición CSS las expande
+  requestAnimationFrame(() => {
+    players.forEach((p, i) => {
+      const bar = document.getElementById(`pbar-${p.id}`);
+      if (bar) bar.style.width = (fillPctList[i] || 0) + '%';
+    });
+  });
 }
 
+// ── Create player ────────────────────────────────────────────
 async function createPlayer() {
-    const errEl = document.getElementById('create-error');
-    errEl.classList.add('hidden');
-    errEl.textContent = '';
+  const errEl = document.getElementById('create-error');
+  errEl.classList.add('hidden');
+  errEl.textContent = '';
 
-    const name = document.getElementById('p-name').value.trim();
-    if (!name) {
-        errEl.textContent = 'El nombre del jugador es obligatorio.';
-        errEl.classList.remove('hidden');
-        return;
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) { errEl.textContent = 'El nombre del jugador es obligatorio.'; errEl.classList.remove('hidden'); return; }
+
+  const stats = {};
+  for (const s of STATS) {
+    const raw = document.getElementById(`s-${s}`)?.value ?? '';
+    const value = Number(raw);
+    if (!Number.isFinite(value) || raw.trim() === '' || !Number.isInteger(value)) {
+      errEl.textContent = `El valor de ${s.replace('_', ' ')} debe ser un número entero válido.`;
+      errEl.classList.remove('hidden');
+      return;
     }
-
-    const stats = {};
-    for (const s of STATS) {
-        const raw = document.getElementById(`s-${s}`)?.value ?? '';
-        const value = Number(raw);
-
-        if (!Number.isFinite(value) || raw.trim() === '' || !Number.isInteger(value)) {
-            errEl.textContent = `El valor de ${s.replace('_', ' ')} debe ser un número entero válido.`;
-            errEl.classList.remove('hidden');
-            return;
-        }
-
-        if (value < 0 || value > 100) {
-            errEl.textContent = `El valor de ${s.replace('_', ' ')} debe estar entre 0 y 100.`;
-            errEl.classList.remove('hidden');
-            return;
-        }
-
-        stats[s] = value;
+    if (value < 0 || value > 100) {
+      errEl.textContent = `El valor de ${s.replace('_', ' ')} debe estar entre 0 y 100.`;
+      errEl.classList.remove('hidden');
+      return;
     }
+    stats[s] = value;
+  }
 
-    const body = {
-        name,
-        category: document.getElementById('p-category').value,
-        stats
-    };
-    const res = await fetch('/api/v1/players/', {
-        method: 'POST',
-        headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
-        body: JSON.stringify(body)
-    });
-    if (res.ok) {
-        closeNewPlayerModal();
-        loadPlayers();
-    } else {
-        const err = await res.json();
-        errEl.textContent = typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail);
-        errEl.classList.remove('hidden');
-    }
+  const body = { name, category: document.getElementById('p-category').value, stats };
+  const res = await fetch('/api/v1/players/', {
+    method: 'POST',
+    headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  });
+  if (res.ok) {
+    closeNewPlayerModal();
+    loadPlayers();
+  } else {
+    const err = await res.json();
+    errEl.textContent = typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail);
+    errEl.classList.remove('hidden');
+  }
 }
 
 async function analyzePlayer(playerId) {
-    const btn = event.target;
-    btn.textContent = '⏳ Analizando...';
-    btn.disabled = true;
-    const res = await fetch(`/api/v1/analysis/${playerId}`, {
-        method: 'POST',
-        headers: {'Authorization': `Bearer ${token}`}
-    });
-    if (res.ok) {
-        window.location.href = `/player/${playerId}`;
-    } else {
-        btn.textContent = '🔮 Analizar con IA';
-        btn.disabled = false;
-        alert('Error al analizar. Comprueba tu API key de Google.');
-    }
+  const btn = event.target.closest('button') || event.target;
+  btn.textContent = 'Analizando...';
+  btn.disabled = true;
+  const res = await fetch(`/api/v1/analysis/${playerId}`, {
+    method: 'POST',
+    headers: {'Authorization': `Bearer ${token}`}
+  });
+  if (res.ok) {
+    window.location.href = `/player/${playerId}`;
+  } else {
+    btn.innerHTML = '<span class="iconify text-lg" data-icon="mdi:robot-outline"></span> Analizar con IA';
+    btn.disabled = false;
+    alert('Error al analizar. Comprueba tu API key de Google.');
+  }
 }
 
+// ── Scroll reveal (IntersectionObserver) ─────────────────────
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) { entry.target.classList.add('active'); }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+// ── Sidebar active state ─────────────────────────────────────
+document.querySelectorAll('.sidebar-link').forEach(link => {
+  link.addEventListener('click', function() {
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ── Sidebar toggle ─────────────────────────────────────
+// ── Rating Guide Modal ────────────────────────────────
+function openRatingGuideModal() {
+  document.getElementById('rating-guide-modal').classList.remove('hidden');
+}
+function closeRatingGuideModal() {
+  document.getElementById('rating-guide-modal').classList.add('hidden');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeRatingGuideModal();
+});
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ── Navbar username ─────────────────────────────────────────
+(function() {
+  const t = localStorage.getItem('access_token');
+  if (!t) return;
+  fetch('/api/v1/auth/me', { headers: {'Authorization': `Bearer ${t}`} })
+    .then(r => r.ok ? r.json() : null)
+    .then(u => {
+      if (u) {
+        const el = document.getElementById('nav-username');
+        if (el) el.textContent = u.username;
+      }
+    }).catch(() => {});
+})();
+
+// ── Init ─────────────────────────────────────────────────────
+loadStats();
 loadPlayers();
 </script>
-{% endblock %}
+{% include "partials/chatbot_widget.html" %}
+</body>
+</html>

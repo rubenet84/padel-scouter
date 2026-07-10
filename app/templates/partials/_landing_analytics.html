@@ -1,36 +1,161 @@
-<section class="landing-section landing-analytics-section landing-fade-in mb-16">
-    <h2 class="text-3xl font-black text-white text-center mb-3">
-        <span style="color: #00B4D8;">Estadísticas</span> Avanzadas
-    </h2>
-    <p class="text-center text-gray-400 mb-8 max-w-xl mx-auto">
-        Métricas detalladas de rendimiento y comparativas
-    </p>
+<section id="analytics" class="relative py-24 md:py-32 bg-dark-800/30">
+  <div class="absolute inset-0">
+    <div class="absolute top-1/2 left-0 w-[500px] h-[500px] bg-scouter-orange/3 rounded-full blur-[150px] -translate-y-1/2"></div>
+    <div class="absolute top-1/2 right-0 w-[500px] h-[500px] bg-scouter-blue/3 rounded-full blur-[150px] -translate-y-1/2"></div>
+  </div>
 
-    <div class="landing-analytics-charts">
-        <div class="landing-chart-wrapper">
-            <h4 class="landing-analytics-chart-title">Perfil de Jugador</h4>
-            <canvas id="landing-radar-chart" data-chart="radar"></canvas>
-        </div>
-        <div class="landing-chart-wrapper">
-            <h4 class="landing-analytics-chart-title">Win Rate</h4>
-            <canvas id="landing-donut-chart" data-chart="donut"></canvas>
-        </div>
+  <div class="relative max-w-7xl mx-auto px-6">
+    <!-- Section Header -->
+    <div class="text-center mb-16 landing-reveal">
+      <div class="inline-flex items-center gap-2 bg-scouter-neon/10 border border-scouter-neon/20 rounded-full px-4 py-1.5 mb-6">
+        <span class="iconify text-scouter-neon text-sm" data-icon="mdi:chart-timeline-variant-shimmer"></span>
+        <span class="text-scouter-neon text-xs font-medium tracking-wider uppercase">Centro de Analítica</span>
+      </div>
+      <h2 class="font-orbitron font-bold text-3xl md:text-5xl text-white tracking-tight mb-4">
+        Dashboard de <span class="landing-text-gradient-green">Rendimiento</span>
+      </h2>
+      <p class="text-neutral-400 font-light text-lg max-w-2xl mx-auto">
+        Visualiza cada dimensión de tu juego como un mapa de poder táctico
+      </p>
     </div>
 
-    <div class="landing-analytics-bars">
-        <h4 class="text-lg font-bold text-white mb-4">Estadísticas por Categoría</h4>
-        {% for bar in landing_data.analytics.stat_bars|default([]) %}
-        <div class="landing-analytics-bar-item">
-            <div class="landing-analytics-bar-header">
-                <span class="landing-analytics-bar-label">{{ bar.label|default('', true) }}</span>
-                <span class="landing-analytics-bar-value">{{ bar.value|default(0, true) }}%</span>
+    <!-- Dashboard Grid -->
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Left: Radar Chart -->
+      <div class="lg:col-span-1 landing-reveal">
+        <div class="landing-border-gradient h-full">
+          <div class="p-5 space-y-4 h-full flex flex-col">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-white tracking-wider uppercase">Perfil de Combate</span>
+              <span class="iconify text-scouter-orange" data-icon="mdi:hexagon-outline"></span>
             </div>
-            <div class="landing-analytics-bar-track">
-                <div class="landing-analytics-bar-fill" style="width: {{ bar.value|default(0, true) }}%;" role="progressbar" aria-valuenow="{{ bar.value|default(0, true) }}" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="flex-1 flex items-center justify-center relative">
+              <svg viewBox="0 0 200 200" class="w-full max-w-[220px]">
+                <polygon points="100,20 170,55 170,135 100,170 30,135 30,55" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+                <polygon points="100,40 150,65 150,125 100,150 50,125 50,65" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+                <polygon points="100,60 130,75 130,115 100,130 70,115 70,75" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+                <polygon points="100,80 115,87 115,107 100,114 85,107 85,87" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+                <line x1="100" y1="20" x2="100" y2="170" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
+                <line x1="30" y1="55" x2="170" y2="135" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
+                <line x1="170" y1="55" x2="30" y2="135" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
+                <polygon points="100,28 158,62 162,128 100,155 45,118 38,62" fill="rgba(249,115,22,0.1)" stroke="#f97316" stroke-width="1.5"/>
+                <circle cx="100" cy="28" r="3" fill="#f97316" class="animate-pulse"/>
+                <circle cx="158" cy="62" r="3" fill="#f97316"/>
+                <circle cx="162" cy="128" r="3" fill="#f97316"/>
+                <circle cx="100" cy="155" r="3" fill="#f97316"/>
+                <circle cx="45" cy="118" r="3" fill="#f97316"/>
+                <circle cx="38" cy="62" r="3" fill="#f97316"/>
+                <text x="100" y="12" text-anchor="middle" fill="#f97316" font-size="8" font-family="Orbitron">SAQUE</text>
+                <text x="182" y="58" text-anchor="start" fill="#3b82f6" font-size="8" font-family="Orbitron">DERECHA</text>
+                <text x="182" y="140" text-anchor="start" fill="#a855f7" font-size="8" font-family="Orbitron">REVÉS</text>
+                <text x="100" y="188" text-anchor="middle" fill="#22c55e" font-size="8" font-family="Orbitron">RED</text>
+                <text x="18" y="130" text-anchor="end" fill="#06b6d4" font-size="8" font-family="Orbitron">VEL.</text>
+                <text x="18" y="58" text-anchor="end" fill="#fbbf24" font-size="8" font-family="Orbitron">MENTAL</text>
+              </svg>
             </div>
+          </div>
         </div>
-        {% endfor %}
-    </div>
+      </div>
 
-    <script id="landing-data" type="application/json">{{ landing_data | tojson }}</script>
+      <!-- Right: Stats Breakdown -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Stats Bars -->
+        <div class="landing-reveal landing-border-gradient">
+          <div class="p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-white tracking-wider uppercase">Estadísticas Detalladas</span>
+              <span class="text-[10px] text-scouter-neon font-medium flex items-center gap-1">
+                <span class="iconify" data-icon="mdi:check-circle"></span> Actualizado
+              </span>
+            </div>
+
+            <div class="space-y-4">
+              {% for cat in landing_data.analytics.categories %}
+              <div{% if not loop.first %} class="pt-2 border-t border-white/5"{% endif %}>
+                <div class="flex items-center gap-2 mb-2.5">
+                  <span class="iconify text-scouter-{{ cat.color }} text-sm" data-icon="{{ cat.icon }}"></span>
+                  <span class="text-[10px] text-scouter-{{ cat.color }} tracking-widest uppercase font-medium">{{ cat.label }}</span>
+                </div>
+                <div class="space-y-2 pl-1">
+                  {% for item in cat['items'] %}
+                  <div class="flex items-center gap-3">
+                    <span class="text-[11px] text-neutral-400 w-28">{{ item.label }}</span>
+                    <div class="flex-1 h-2 bg-dark-900 rounded-full overflow-hidden">
+                      {% if item.color == 'gold' %}
+                      <div class="h-full bg-gradient-to-r from-scouter-gold to-scouter-neon rounded-full landing-fill-bar" style="--fill:{{ item.value }}%"></div>
+                      {% elif item.color == 'orange' %}
+                      <div class="h-full bg-gradient-to-r from-scouter-orange to-scouter-gold rounded-full landing-fill-bar" style="--fill:{{ item.value }}%"></div>
+                      {% elif item.color == 'blue' %}
+                      <div class="h-full bg-gradient-to-r from-scouter-blue to-scouter-cyan rounded-full landing-fill-bar" style="--fill:{{ item.value }}%"></div>
+                      {% elif item.color == 'purple' %}
+                      <div class="h-full bg-gradient-to-r from-scouter-purple to-pink-400 rounded-full landing-fill-bar" style="--fill:{{ item.value }}%"></div>
+                      {% endif %}
+                    </div>
+                    <span class="font-mono text-xs text-scouter-{{ item.color }} w-8 text-right">{{ item.value }}</span>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row: Match Performance + Win Rate -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Match Performance Chart -->
+          <div class="landing-reveal landing-border-gradient-green landing-border-gradient">
+            <div class="p-5 space-y-3">
+              <span class="text-xs font-medium text-white tracking-wider uppercase">Racha de Combate</span>
+              <div class="flex items-end gap-2 h-28">
+                {% for match in landing_data.analytics.match_performance %}
+                <div class="flex-1 flex flex-col items-center gap-1">
+                  <div class="w-full {% if match.win %}bg-scouter-neon/70{% else %}bg-scouter-red/50{% endif %} rounded-t-sm landing-grow-bar" style="--h: {{ match.value }}%; animation-delay: {{ '0.%d'|format(loop.index0*100) }}s"></div>
+                  <span class="text-[8px] text-neutral-500">{{ match.label }}</span>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="flex items-center justify-between text-[9px]">
+                <span class="text-neutral-500">Últimos {{ landing_data.analytics.total_matches|default(8) }} partidos</span>
+                <span class="text-scouter-neon font-medium">{{ landing_data.analytics.wins|default(6) }}V - {{ landing_data.analytics.losses|default(2) }}D</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Win Rate Donut -->
+          <div class="landing-reveal landing-border-gradient-purple landing-border-gradient">
+            <div class="p-5 space-y-3">
+              <span class="text-xs font-medium text-white tracking-wider uppercase">Tasa de Victoria</span>
+              <div class="flex items-center gap-4">
+                <div class="relative w-24 h-24">
+                  <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="url(#winGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="188.5 251.3" class="transition-all duration-1000"/>
+                    <defs><linearGradient id="winGrad"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient></defs>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="font-orbitron font-bold text-xl text-white">{{ landing_data.analytics.win_rate|default(75) }}%</span>
+                  </div>
+                </div>
+                <div class="space-y-2 flex-1">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-sm bg-scouter-neon"></div><span class="text-[11px] text-neutral-300">Victorias</span></div>
+                    <span class="font-mono text-xs text-white">{{ landing_data.analytics.wins|default(6) }}</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-sm bg-scouter-red"></div><span class="text-[11px] text-neutral-300">Derrotas</span></div>
+                    <span class="font-mono text-xs text-white">{{ landing_data.analytics.losses|default(2) }}</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-sm bg-scouter-blue"></div><span class="text-[11px] text-neutral-300">Sets Win</span></div>
+                    <span class="font-mono text-xs text-white">{{ landing_data.analytics.sets_won|default(12) }}/{{ landing_data.analytics.sets_total|default(16) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>

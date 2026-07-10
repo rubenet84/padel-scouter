@@ -33,9 +33,8 @@ function renderPlayer(p, analyses) {
     // Avatar
     setAvatar(p.avatar_url);
 
-    // Aggregate bars
-    const voleaAvg = Math.round(((p.volea_derecha||50)+(p.volea_reves||50))/2);
-    const tecnica = Math.round(((p.derecha||50)+(p.reves||50)+voleaAvg+(p.bandeja||50)+(p.vibora||50)+(p.remate||50)+(p.globo||50)+(p.saque||50)+(p.bajada_pared||50)) / 9);
+    // Aggregate bars (misma fórmula que dashboard: 10 stats, voleas separadas)
+    const tecnica = Math.round(((p.derecha||50)+(p.reves||50)+(p.volea_derecha||50)+(p.volea_reves||50)+(p.bandeja||50)+(p.vibora||50)+(p.remate||50)+(p.globo||50)+(p.saque||50)+(p.bajada_pared||50)) / 10);
     const fisico  = Math.round(((p.velocidad||50)+(p.resistencia||50)+(p.reflejos||50)) / 3);
     const mental  = Math.round(((p.tactica||50)+(p.presion||50)+(p.trabajo_en_pareja||50)) / 3);
 
@@ -66,6 +65,23 @@ function renderPlayer(p, analyses) {
         const power = latest.power_level;
         animatePower(power);
         D.powerBar().style.width = Math.min((power / 9999) * 100, 100) + '%';
+
+        // Categoría sugerida según power level (misma tabla que classify_by_power)
+        const suggestedEl = D.badgeSuggested();
+        if (suggestedEl) {
+          const ranges = [
+            { max: 1500, label: 'Iniciación' },
+            { max: 3000, label: '5ª Categoría' },
+            { max: 4500, label: '4ª Categoría' },
+            { max: 6000, label: '3ª Categoría' },
+            { max: 7500, label: '2ª Categoría' },
+            { max: 9000, label: '1ª Categoría' },
+            { max: Infinity, label: 'Profesional' },
+          ];
+          const suggested = ranges.find(r => power < r.max)?.label || 'Profesional';
+          suggestedEl.textContent = `Sugerida: ${suggested}`;
+          suggestedEl.classList.remove('hidden');
+        }
 
         // AI description
         D.aiDescCard().classList.remove('hidden');
