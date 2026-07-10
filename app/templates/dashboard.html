@@ -768,7 +768,7 @@ function detectAnomaly(players) {
   if (bestAnomaly && bestAnomaly.gap >= 25) {
     const p = bestAnomaly.player;
     const safeName = (p.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    labelEl.textContent = `${safeName} — ${bestAnomaly.min.name} ${bestAnomaly.min.value} vs ${bestAnomaly.max.name} ${bestAnomaly.max.value}`;
+    labelEl.innerHTML = `${safeName}<br>${bestAnomaly.min.name} ${bestAnomaly.min.value} vs ${bestAnomaly.max.name} ${bestAnomaly.max.value}`;
     detailEl.innerHTML = `
       <div class="bg-purple-950/40 rounded-lg p-3 border border-purple-500/5">
         <div class="flex items-center justify-between text-xs mb-2">
@@ -785,7 +785,7 @@ function detectAnomaly(players) {
   } else if (bestAnomaly && bestAnomaly.gap >= 15) {
     const p = bestAnomaly.player;
     const safeName = (p.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    labelEl.textContent = `${safeName} — desequilibrio moderado`;
+    labelEl.innerHTML = `${safeName}<br>Desequilibrio moderado`;
     detailEl.innerHTML = `
       <div class="bg-purple-950/40 rounded-lg p-3 border border-purple-500/5 text-center">
         <span class="text-xs text-purple-200/60">${safeName}: ${bestAnomaly.min.name} ${bestAnomaly.min.value} / ${bestAnomaly.max.name} ${bestAnomaly.max.value}</span>
@@ -794,7 +794,7 @@ function detectAnomaly(players) {
   } else if (bestPlayer) {
     const p = bestPlayer.player;
     const safeName = (p.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    labelEl.textContent = `Todo en orden - ${safeName} lidera con ${bestPlayer.avg} pts`;
+    labelEl.innerHTML = `Todo en orden<br>${safeName} lidera con ${bestPlayer.avg} pts`;
     detailEl.innerHTML = `
       <div class="bg-purple-950/40 rounded-lg p-3 border border-purple-500/5 text-center">
         <span class="text-accent-neon text-xs font-bold">🏆 Sin anomalías destacadas</span>
@@ -817,7 +817,7 @@ async function loadStreak() {
     const top = json.data.players[0];
     if (top.streak <= 0) { label.textContent = 'Sin rachas activas'; return; }
     const safeName = top.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    label.textContent = `${safeName} — ${top.streak} ${top.streak === 1 ? 'victoria' : 'victorias'} consecutivas`;
+    label.innerHTML = `${safeName}<br>${top.streak} ${top.streak === 1 ? 'victoria' : 'victorias'} consecutivas`;
     // Bars decorativas: más barras llenas = racha más larga
     const barCount = Math.min(top.streak, 10);
     bars.innerHTML = '';
@@ -862,7 +862,7 @@ async function loadProgression() {
     }
     if (bestGain > 0 && bestPlayer) {
       const safeName = bestPlayer.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      label.textContent = `${safeName} +${bestGain} pts`;
+      label.innerHTML = `${safeName}<br>+${bestGain} pts`;
       // Bars: hasta 10 escalones según la ganancia
       const steps = Math.min(Math.round(bestGain / 100), 10);
       bars.innerHTML = '';
