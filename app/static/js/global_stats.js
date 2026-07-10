@@ -144,7 +144,7 @@ function renderSummary(data) {
     container.innerHTML = `
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="summary-cards">
             ${cards.map(c => `
-                <div class="gradient-border rounded-2xl card-hover" style="background:#12121A;" role="region" aria-label="${escHtml(c.label)}">
+                <div class="rounded-xl border border-[#2A2A3A] card-hover" style="background:#12121A;" role="region" aria-label="${escHtml(c.label)}">
                     <div class="p-4">
                         <div class="flex items-center gap-2 mb-2">
                             <span aria-hidden="true">${c.icon}</span>
@@ -157,7 +157,7 @@ function renderSummary(data) {
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div class="gradient-border rounded-2xl card-hover" style="background:#12121A;" role="region" aria-label="Líder del Ranking">
+            <div class="rounded-xl border border-[#2A2A3A] card-hover" style="background:#12121A;" role="region" aria-label="Líder del Ranking">
                 <div class="p-4">
                     <div class="flex items-center gap-2 mb-2">
                         <span aria-hidden="true">👑</span>
@@ -169,7 +169,7 @@ function renderSummary(data) {
                         : '<div class="text-gray-500">Sin datos</div>'}
                 </div>
             </div>
-            <div class="gradient-border rounded-2xl card-hover" style="background:#12121A;" role="region" aria-label="Mejor porcentaje de victorias">
+            <div class="rounded-xl border border-[#2A2A3A] card-hover" style="background:#12121A;" role="region" aria-label="Mejor porcentaje de victorias">
                 <div class="p-4">
                     <div class="flex items-center gap-2 mb-2">
                         <span aria-hidden="true">⭐</span>
