@@ -791,7 +791,7 @@ function detectAnomaly(players) {
   } else if (bestPlayer) {
     const p = bestPlayer.player;
     const safeName = (p.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    labelEl.textContent = `✅ Todo en orden — ${safeName} lidera con ${bestPlayer.avg} pts`;
+    labelEl.textContent = `Todo en orden - ${safeName} lidera con ${bestPlayer.avg} pts`;
     detailEl.innerHTML = `
       <div class="bg-purple-950/30 rounded-lg p-3 border border-purple-500/8 text-center">
         <span class="text-accent-neon text-xs font-bold">🏆 Sin anomalías destacadas</span>
