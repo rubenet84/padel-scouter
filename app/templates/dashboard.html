@@ -241,7 +241,7 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
           ?
         </button>
         <div class="flex-1 h-px bg-gradient-to-r from-purple-500/15 to-transparent"></div>
-        <span class="text-[10px] text-purple-200/30 font-mono" id="player-count-label">0 jugadores</span>
+        <span class="font-orbitron font-bold text-lg text-gradient-pink" id="player-count-label">0 jugadores</span>
       </div>
 
       <!-- Player Cards Grid -->
@@ -273,8 +273,8 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
                 <span class="iconify text-accent-orange text-lg" data-icon="mdi:fire"></span>
               </div>
               <div>
-                <div class="text-xs font-medium" style="color:#f97316;">Mejor Racha</div>
-                <div class="text-[10px] text-purple-200/40" id="insight-streak">—</div>
+                <div class="text-sm font-medium" style="color:#f97316;">Mejor Racha</div>
+                <div class="text-xs text-purple-200/40" id="insight-streak">—</div>
               </div>
             </div>
             <div class="flex items-end gap-1 h-8" id="insight-streak-bars">
@@ -294,8 +294,8 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
                 <span class="iconify text-accent-neon text-lg" data-icon="mdi:trending-up"></span>
               </div>
               <div>
-                <div class="text-xs font-medium" style="color:#22c55e;">Mayor Progresión</div>
-                <div class="text-[10px] text-purple-200/40" id="insight-progress">—</div>
+                <div class="text-sm font-medium" style="color:#22c55e;">Mayor Progresión</div>
+                <div class="text-xs text-purple-200/40" id="insight-progress">—</div>
               </div>
             </div>
             <div class="flex items-end gap-1 h-8" id="insight-progress-bars">
@@ -315,12 +315,12 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
                 <span class="iconify text-purple-300 text-lg" data-icon="mdi:lightning-bolt"></span>
               </div>
               <div>
-                <div class="text-xs font-medium" style="color:#a78bfa;">🔍 Detector de Anomalías</div>
-                <div class="text-[10px] text-purple-200/40" id="insight-anomaly-label">Analizando...</div>
+                <div class="text-sm font-medium" style="color:#a78bfa;">🔍 Detector de Anomalías</div>
+                <div class="text-xs text-purple-200/40" id="insight-anomaly-label">Analizando...</div>
               </div>
             </div>
             <div class="space-y-2" id="insight-anomaly-detail">
-              <div class="text-[10px] text-purple-300/40 text-center py-4">Cargando datos...</div>
+              <div class="text-xs text-purple-300/40 text-center py-4">Cargando datos...</div>
             </div>
           </div>
         </div>
@@ -732,7 +732,7 @@ function detectAnomaly(players) {
   
   if (!players || players.length === 0) {
     labelEl.textContent = 'Sin jugadores';
-    detailEl.innerHTML = '<div class="text-[10px] text-purple-300/40 text-center py-4">Crea jugadores para detectar anomalías</div>';
+    detailEl.innerHTML = '<div class="text-xs text-purple-300/40 text-center py-4">Crea jugadores para detectar anomalías</div>';
     return;
   }
   
@@ -779,8 +779,8 @@ function detectAnomaly(players) {
         <div class="w-full h-1.5 bg-purple-950 rounded-full overflow-hidden">
           <div class="h-full rounded-full" style="width:${bestAnomaly.max.value}%;background:linear-gradient(90deg,${bestAnomaly.max.value > 75 ? '#22c55e' : '#f97316'},${bestAnomaly.max.value > 75 ? '#4ade80' : '#fbbf24'})"></div>
         </div>
-        <div class="text-[10px] text-purple-300/40 mt-2">Diferencia de ${bestAnomaly.gap} puntos — ¿entrenamiento específico?</div>
-        <a href="/player/${p.id}" class="block text-center text-[10px] text-accent-blue hover:text-white mt-2 transition-colors">Ver perfil →</a>
+        <div class="text-xs text-purple-300/40 mt-2">Diferencia de ${bestAnomaly.gap} puntos — ¿entrenamiento específico?</div>
+        <a href="/player/${p.id}" class="block text-center text-xs text-accent-blue hover:text-white mt-2 transition-colors">Ver perfil →</a>
       </div>`;
   } else if (bestAnomaly && bestAnomaly.gap >= 15) {
     const p = bestAnomaly.player;
@@ -789,7 +789,7 @@ function detectAnomaly(players) {
     detailEl.innerHTML = `
       <div class="bg-purple-950/40 rounded-lg p-3 border border-purple-500/5 text-center">
         <span class="text-xs text-purple-200/60">${safeName}: ${bestAnomaly.min.name} ${bestAnomaly.min.value} / ${bestAnomaly.max.name} ${bestAnomaly.max.value}</span>
-        <div class="text-[10px] text-purple-300/40 mt-1">Diferencia de ${bestAnomaly.gap} puntos</div>
+        <div class="text-xs text-purple-300/40 mt-1">Diferencia de ${bestAnomaly.gap} puntos</div>
       </div>`;
   } else if (bestPlayer) {
     const p = bestPlayer.player;
@@ -798,7 +798,7 @@ function detectAnomaly(players) {
     detailEl.innerHTML = `
       <div class="bg-purple-950/40 rounded-lg p-3 border border-purple-500/5 text-center">
         <span class="text-accent-neon text-xs font-bold">🏆 Sin anomalías destacadas</span>
-        <div class="text-[10px] text-purple-300/40 mt-1">Todos los jugadores están equilibrados</div>
+        <div class="text-xs text-purple-300/40 mt-1">Todos los jugadores están equilibrados</div>
       </div>`;
   }
 }
