@@ -89,7 +89,7 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
 .reveal.active{opacity:1;transform:translateY(0)}
 
 .btn-ai{background:linear-gradient(135deg,#7c5fd6,#5b3fb0);box-shadow:0 4px 20px rgba(124,95,214,.3),inset 0 1px 0 rgba(255,255,255,.08);transition:all .3s ease}
-.btn-ai:hover{box-shadow:0 4px 35px rgba(124,95,214,.45),inset 0 1px 0 rgba(255,255,255,.08);transform:translateY(-1px)}
+.btn-ai:hover{box-shadow:0 4px 35px rgba(124,95,214,.45),0 0 0 2px #FACC15,inset 0 1px 0 rgba(255,255,255,.08);transform:translateY(-2px)}
 .btn-ai:active{transform:translateY(0)}
 
 .btn-new{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 20px rgba(34,197,94,.3),inset 0 1px 0 rgba(255,255,255,.1);transition:all .3s ease}
@@ -257,6 +257,10 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
         <div class="flex items-center gap-3 mb-5">
           <span class="iconify text-accent-gold text-lg" data-icon="mdi:lightbulb-on-outline"></span>
           <h2 class="font-space font-bold text-lg text-white tracking-tight">Resumen de Rendimiento</h2>
+          <button onclick="openResumenGuideModal()" title="Explicación de las cards"
+                  class="w-6 h-6 rounded-full bg-purple-600/20 border border-purple-500/25 flex items-center justify-center hover:bg-purple-600/40 transition-colors text-xs font-bold text-purple-300/70 hover:text-purple-200 flex-shrink-0">
+            ?
+          </button>
           <div class="flex-1 h-px bg-gradient-to-r from-accent-gold/15 to-transparent"></div>
         </div>
         <div class="grid md:grid-cols-3 gap-4">
@@ -314,6 +318,52 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
             </div>
             <div class="space-y-2" id="insight-anomaly-detail">
               <div class="text-[10px] text-purple-300/40 text-center py-4">Cargando datos...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen Guide Modal -->
+      <div id="resumen-guide-modal"
+          class="fixed inset-0 flex items-center justify-center p-4 hidden"
+          role="dialog" aria-modal="true"
+          style="z-index:100000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);"
+          onclick="if (event.target===event.currentTarget) closeResumenGuideModal()">
+        <div class="w-full max-w-[650px] rounded-2xl" style="background:#12121A;border:1px solid rgba(251,191,36,0.2);max-height:90vh;overflow-y:auto;position:relative;">
+          <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#fbbf24,transparent);"></div>
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-5">
+              <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(251,191,36,0.8);">💡 Resumen de Rendimiento</span>
+              <button onclick="closeResumenGuideModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+
+            <div class="space-y-5">
+              <div class="rounded-xl p-4" style="background:rgba(10,10,15,0.5);border:1px solid rgba(249,115,22,0.15);">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-lg">🔥</span>
+                  <span class="text-sm font-bold text-white">Mejor Racha</span>
+                </div>
+                <p class="text-xs" style="color:#94a3b8;">Busca en el historial de todos tus jugadores la <strong class="text-white">racha más larga de victorias consecutivas</strong>. Si un jugador ganó 3 partidos seguidos, su mejor racha es 3. Las derrotas reinician el contador.</p>
+                <p class="text-xs mt-2" style="color:#64748b;">📊 Datos: resultados de partidos registrados en la plataforma.</p>
+              </div>
+
+              <div class="rounded-xl p-4" style="background:rgba(10,10,15,0.5);border:1px solid rgba(34,197,94,0.15);">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-lg">📈</span>
+                  <span class="text-sm font-bold text-white">Mayor Progresión</span>
+                </div>
+                <p class="text-xs" style="color:#94a3b8;">Compara el <strong class="text-white">power level del último análisis IA</strong> con el penúltimo de cada jugador. Si un jugador mejoró sus stats y se relanzó el análisis, su progresión se refleja aquí.</p>
+                <p class="text-xs mt-2" style="color:#64748b;">📊 Datos: análisis IA (se genera al guardar cambios o al clickear "Analizar con IA").</p>
+              </div>
+
+              <div class="rounded-xl p-4" style="background:rgba(10,10,15,0.5);border:1px solid rgba(236,72,153,0.15);">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-lg">🔍</span>
+                  <span class="text-sm font-bold text-white">Detector de Anomalías</span>
+                </div>
+                <p class="text-xs" style="color:#94a3b8;">Analiza las stats de todos tus jugadores y detecta <strong class="text-white">desequilibrios importantes</strong> entre Técnica, Físico y Mental. Por ejemplo: un jugador con 85 de técnica pero 35 de físico. Si todo está equilibrado, muestra el jugador con mejor media general.</p>
+                <p class="text-xs mt-2" style="color:#64748b;">📊 Datos: stats actuales de cada jugador (no requiere análisis IA).</p>
+              </div>
             </div>
           </div>
         </div>
@@ -1032,6 +1082,12 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
 
 // ── Sidebar toggle ─────────────────────────────────────
 // ── Rating Guide Modal ────────────────────────────────
+function openResumenGuideModal() {
+  document.getElementById('resumen-guide-modal').classList.remove('hidden');
+}
+function closeResumenGuideModal() {
+  document.getElementById('resumen-guide-modal').classList.add('hidden');
+}
 function openRatingGuideModal() {
   document.getElementById('rating-guide-modal').classList.remove('hidden');
 }
@@ -1040,7 +1096,7 @@ function closeRatingGuideModal() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeRatingGuideModal();
+  if (e.key === 'Escape') { closeResumenGuideModal(); closeRatingGuideModal(); }
 });
 
 function toggleSidebar() {
