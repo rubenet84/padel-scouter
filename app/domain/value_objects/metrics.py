@@ -51,21 +51,17 @@ def compute_player_match_metrics(
                 except ValueError:
                     continue
 
-        # Streak: consecutive wins/losses from most recent match
-        streak = 0
-        counting = False
-        for m in pms:  # already ordered by played_at DESC
-            if not counting:
-                counting = True
-                streak = 1 if m.ganado else -1
+        # Best streak: longest winning run
+        best_streak = 0
+        current = 0
+        for m in pms:  # ordered by played_at DESC (most recent first)
+            if m.ganado:
+                current += 1
+                if current > best_streak:
+                    best_streak = current
             else:
-                same_direction = (streak > 0 and m.ganado) or (
-                    streak < 0 and not m.ganado
-                )
-                if same_direction:
-                    streak += 1 if m.ganado else -1
-                else:
-                    break
+                current = 0
+        streak = best_streak
 
         result[pid] = {
             "wins": wins,
