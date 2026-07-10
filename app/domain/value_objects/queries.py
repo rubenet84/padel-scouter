@@ -98,7 +98,7 @@ def fetch_match_rows(
             FROM matches m
             LEFT JOIN tournaments t ON m.tournament_id = t.id
             WHERE {where_clause}
-            ORDER BY m.played_at DESC
+            ORDER BY m.played_at DESC, m.id DESC
         """),
         params,
     ).fetchall()

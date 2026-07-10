@@ -15,14 +15,15 @@ function drawRadar(p) {
     const canvas = document.getElementById('radarChart');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    const SIZE = 320;
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = 280 * dpr;
-    canvas.height = 280 * dpr;
-    canvas.style.width = '280px';
-    canvas.style.height = '280px';
+    canvas.width = SIZE * dpr;
+    canvas.height = SIZE * dpr;
+    canvas.style.width = SIZE + 'px';
+    canvas.style.height = SIZE + 'px';
     ctx.scale(dpr, dpr);
 
-    const cx = 140, cy = 140, maxR = 105;
+    const cx = SIZE / 2, cy = SIZE / 2, maxR = 105;
     const labels = ['DERECHA','VOLEA','BANDEJA','REMATE','VELOCIDAD','TÁCTICA'];
     const values = [
         p.derecha || 50, Math.round(((p.volea_derecha||50)+(p.volea_reves||50))/2) || 50, p.bandeja || 50,
@@ -102,7 +103,7 @@ function drawRadar(p) {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (let i = 0; i < N; i++) {
         const a = start + step * i;
-        const lR = maxR + 24;
+        const lR = maxR + 30;
         const x = cx + Math.cos(a) * lR;
         const y = cy + Math.sin(a) * lR;
         ctx.font = '600 8px Inter'; ctx.fillStyle = 'rgba(148,163,184,0.7)';
