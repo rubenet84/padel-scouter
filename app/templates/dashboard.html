@@ -235,7 +235,7 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
       <!-- Section Title -->
       <div class="flex items-center gap-3 mb-6 reveal" style="transition-delay:.2s">
         <span class="iconify text-purple-400 text-lg" data-icon="mdi:sword-cross"></span>
-        <h2 class="font-space font-bold text-lg text-white tracking-tight">Mis Combatientes</h2>
+        <h2 class="font-orbitron font-bold text-lg text-white tracking-tight">Mis Combatientes</h2>
         <button onclick="openRatingGuideModal()" title="Guía de colores y niveles"
                 class="w-6 h-6 rounded-full bg-purple-600/20 border border-purple-500/25 flex items-center justify-center hover:bg-purple-600/40 transition-colors text-xs font-bold text-purple-300/70 hover:text-purple-200 flex-shrink-0">
           ?
@@ -256,9 +256,12 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
       <div class="reveal" style="transition-delay:.55s">
         <div class="flex items-center gap-3 mb-5">
           <span class="iconify text-accent-gold text-lg" data-icon="mdi:lightbulb-on-outline"></span>
-          <h2 class="font-space font-bold text-lg text-white tracking-tight">Resumen de Rendimiento</h2>
+          <h2 class="font-orbitron font-bold text-lg text-white tracking-tight">Resumen de Rendimiento</h2>
           <button onclick="openResumenGuideModal()" title="Explicación de las cards"
-                  class="w-6 h-6 rounded-full bg-purple-600/20 border border-purple-500/25 flex items-center justify-center hover:bg-purple-600/40 transition-colors text-xs font-bold text-purple-300/70 hover:text-purple-200 flex-shrink-0">
+                  class="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 text-xs font-bold flex-shrink-0"
+                  style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;"
+                  onmouseenter="this.style.background='rgba(251,191,36,0.25)';this.style.borderColor='rgba(251,191,36,0.5)'"
+                  onmouseleave="this.style.background='rgba(251,191,36,0.15)';this.style.borderColor='rgba(251,191,36,0.3)'">
             ?
           </button>
           <div class="flex-1 h-px bg-gradient-to-r from-accent-gold/15 to-transparent"></div>
@@ -338,28 +341,28 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
             </div>
 
             <div class="space-y-5">
-              <div class="rounded-xl p-4" style="background:rgba(10,10,15,0.5);border:1px solid rgba(249,115,22,0.15);">
+              <div class="rounded-xl p-4" style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.25);">
                 <div class="flex items-center gap-2 mb-2">
                   <span class="text-lg">🔥</span>
-                  <span class="text-sm font-bold text-white">Mejor Racha</span>
+                  <span class="text-sm font-bold" style="color:#f97316;">Mejor Racha</span>
                 </div>
                 <p class="text-xs" style="color:#94a3b8;">Busca en el historial de todos tus jugadores la <strong class="text-white">racha más larga de victorias consecutivas</strong>. Si un jugador ganó 3 partidos seguidos, su mejor racha es 3. Las derrotas reinician el contador.</p>
                 <p class="text-xs mt-2" style="color:#64748b;">📊 Datos: resultados de partidos registrados en la plataforma.</p>
               </div>
 
-              <div class="rounded-xl p-4" style="background:rgba(10,10,15,0.5);border:1px solid rgba(34,197,94,0.15);">
+              <div class="rounded-xl p-4" style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.25);">
                 <div class="flex items-center gap-2 mb-2">
                   <span class="text-lg">📈</span>
-                  <span class="text-sm font-bold text-white">Mayor Progresión</span>
+                  <span class="text-sm font-bold" style="color:#22c55e;">Mayor Progresión</span>
                 </div>
                 <p class="text-xs" style="color:#94a3b8;">Compara el <strong class="text-white">power level del último análisis IA</strong> con el penúltimo de cada jugador. Si un jugador mejoró sus stats y se relanzó el análisis, su progresión se refleja aquí.</p>
                 <p class="text-xs mt-2" style="color:#64748b;">📊 Datos: análisis IA (se genera al guardar cambios o al clickear "Analizar con IA").</p>
               </div>
 
-              <div class="rounded-xl p-4" style="background:rgba(10,10,15,0.5);border:1px solid rgba(236,72,153,0.15);">
+              <div class="rounded-xl p-4" style="background:rgba(124,95,214,0.06);border:1px solid rgba(124,95,214,0.25);">
                 <div class="flex items-center gap-2 mb-2">
                   <span class="text-lg">🔍</span>
-                  <span class="text-sm font-bold text-white">Detector de Anomalías</span>
+                  <span class="text-sm font-bold" style="color:#a78bfa;">Detector de Anomalías</span>
                 </div>
                 <p class="text-xs" style="color:#94a3b8;">Analiza las stats de todos tus jugadores y detecta <strong class="text-white">desequilibrios importantes</strong> entre Técnica, Físico y Mental. Por ejemplo: un jugador con 85 de técnica pero 35 de físico. Si todo está equilibrado, muestra el jugador con mejor media general.</p>
                 <p class="text-xs mt-2" style="color:#64748b;">📊 Datos: stats actuales de cada jugador (no requiere análisis IA).</p>
