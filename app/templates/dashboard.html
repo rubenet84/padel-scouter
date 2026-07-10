@@ -194,7 +194,7 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
           </div>
           <p class="text-sm text-purple-200/50 font-light">Gestiona tus jugadores y activa el análisis de combate</p>
         </div>
-        <button onclick="openNewPlayerModal()" class="btn-new text-white font-bold text-sm px-6 py-3 rounded-xl flex items-center gap-2.5 tracking-wide whitespace-nowrap self-start sm:self-auto">
+        <button onclick="openNewPlayerModal()" class="btn-new text-white font-bold text-sm px-6 py-3 rounded-xl flex items-center gap-2.5 tracking-wide whitespace-nowrap self-start sm:self-auto font-orbitron">
           <span class="iconify text-lg" data-icon="mdi:plus"></span>
           Nuevo jugador
         </button>
@@ -205,28 +205,28 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
         <div class="border-card border-purple p-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="iconify text-purple-400 text-sm" data-icon="mdi:account-group"></span>
-            <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Jugadores</span>
+            <span class="text-[13px] text-purple-200/40 tracking-widest uppercase">Jugadores</span>
           </div>
           <div class="font-orbitron font-bold text-2xl text-purple-200 count-up" id="stat-players">0</div>
         </div>
         <div class="border-card border-orange p-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="iconify text-accent-orange text-sm" data-icon="mdi:chart-box"></span>
-            <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Partidos</span>
+            <span class="text-[13px] text-purple-200/40 tracking-widest uppercase">Partidos</span>
           </div>
           <div class="font-orbitron font-bold text-2xl text-accent-orange count-up" id="stat-matches">0</div>
         </div>
         <div class="border-card border-blue p-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="iconify text-accent-blue text-sm" data-icon="mdi:trophy"></span>
-            <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Torneos</span>
+            <span class="text-[13px] text-purple-200/40 tracking-widest uppercase">Torneos</span>
           </div>
           <div class="font-orbitron font-bold text-2xl text-accent-blue count-up" id="stat-tournaments">0</div>
         </div>
         <div class="border-card border-green p-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="iconify text-accent-neon text-sm" data-icon="mdi:handshake"></span>
-            <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Amistosos</span>
+            <span class="text-[13px] text-purple-200/40 tracking-widest uppercase">Amistosos</span>
           </div>
           <div class="font-orbitron font-bold text-2xl text-accent-neon count-up" id="stat-friendlies">0</div>
         </div>
@@ -235,7 +235,7 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
       <!-- Section Title -->
       <div class="flex items-center gap-3 mb-6 reveal" style="transition-delay:.2s">
         <span class="iconify text-purple-400 text-lg" data-icon="mdi:sword-cross"></span>
-        <h2 class="font-orbitron font-bold text-lg text-white tracking-tight">Mis Combatientes</h2>
+        <h2 class="font-orbitron font-bold text-lg text-white tracking-tight">Mis <span class="text-gradient-purple">Combatientes</span></h2>
         <button onclick="openRatingGuideModal()" title="Guía de colores y niveles"
                 class="w-6 h-6 rounded-full bg-purple-600/20 border border-purple-500/25 flex items-center justify-center hover:bg-purple-600/40 transition-colors text-xs font-bold text-purple-300/70 hover:text-purple-200 flex-shrink-0">
           ?
@@ -256,7 +256,7 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
       <div class="reveal" style="transition-delay:.55s">
         <div class="flex items-center gap-3 mb-5">
           <span class="iconify text-accent-gold text-lg" data-icon="mdi:lightbulb-on-outline"></span>
-          <h2 class="font-orbitron font-bold text-lg text-white tracking-tight">Resumen de Rendimiento</h2>
+          <h2 class="font-orbitron font-bold text-lg text-white tracking-tight">Resumen de <span class="text-gradient-purple">Rendimiento</span></h2>
           <button onclick="openResumenGuideModal()" title="Explicación de las cards"
                   class="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 text-xs font-bold flex-shrink-0"
                   style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;"
@@ -346,8 +346,8 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
                   <span class="text-lg">🔥</span>
                   <span class="text-sm font-bold" style="color:#f97316;">Mejor Racha</span>
                 </div>
-                <p class="text-xs" style="color:#94a3b8;">Busca en el historial de todos tus jugadores la <strong class="text-white">racha más larga de victorias consecutivas</strong>. Si un jugador ganó 3 partidos seguidos, su mejor racha es 3. Las derrotas reinician el contador.</p>
-                <p class="text-xs mt-2" style="color:#64748b;">📊 Datos: resultados de partidos registrados en la plataforma.</p>
+                <p class="text-xs" style="color:#e0a060;">Busca en el historial de todos tus jugadores la <strong style="color:#f97316;">racha más larga de victorias consecutivas</strong>. Si un jugador ganó 3 partidos seguidos, su mejor racha es 3. Las derrotas reinician el contador.</p>
+                <p class="text-xs mt-2" style="color:#b8863a;">📊 Datos: resultados de partidos registrados en la plataforma.</p>
               </div>
 
               <div class="rounded-xl p-4" style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.25);">
@@ -355,8 +355,8 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
                   <span class="text-lg">📈</span>
                   <span class="text-sm font-bold" style="color:#22c55e;">Mayor Progresión</span>
                 </div>
-                <p class="text-xs" style="color:#94a3b8;">Compara el <strong class="text-white">power level del último análisis IA</strong> con el penúltimo de cada jugador. Si un jugador mejoró sus stats y se relanzó el análisis, su progresión se refleja aquí.</p>
-                <p class="text-xs mt-2" style="color:#64748b;">📊 Datos: análisis IA (se genera al guardar cambios o al clickear "Analizar con IA").</p>
+                <p class="text-xs" style="color:#6bb87b;">Compara el <strong style="color:#22c55e;">power level del último análisis IA</strong> con el penúltimo de cada jugador. Si un jugador mejoró sus stats y se relanzó el análisis, su progresión se refleja aquí.</p>
+                <p class="text-xs mt-2" style="color:#4a8a55;">📊 Datos: análisis IA (se genera al guardar cambios o al clickear "Analizar con IA").</p>
               </div>
 
               <div class="rounded-xl p-4" style="background:rgba(124,95,214,0.06);border:1px solid rgba(124,95,214,0.25);">
@@ -364,8 +364,8 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
                   <span class="text-lg">🔍</span>
                   <span class="text-sm font-bold" style="color:#a78bfa;">Detector de Anomalías</span>
                 </div>
-                <p class="text-xs" style="color:#94a3b8;">Analiza las stats de todos tus jugadores y detecta <strong class="text-white">desequilibrios importantes</strong> entre Técnica, Físico y Mental. Por ejemplo: un jugador con 85 de técnica pero 35 de físico. Si todo está equilibrado, muestra el jugador con mejor media general.</p>
-                <p class="text-xs mt-2" style="color:#64748b;">📊 Datos: stats actuales de cada jugador (no requiere análisis IA).</p>
+                <p class="text-xs" style="color:#b8a0d8;">Analiza las stats de todos tus jugadores y detecta <strong style="color:#a78bfa;">desequilibrios importantes</strong> entre Técnica, Físico y Mental. Por ejemplo: un jugador con 85 de técnica pero 35 de físico. Si todo está equilibrado, muestra el jugador con mejor media general.</p>
+                <p class="text-xs mt-2" style="color:#8a70aa;">📊 Datos: stats actuales de cada jugador (no requiere análisis IA).</p>
               </div>
             </div>
           </div>
@@ -958,15 +958,15 @@ function renderPlayers(players) {
                 </div>
               </div>
               <div>
-                <div class="font-space font-bold text-white text-sm">${safeName}</div>
-                <div class="text-[10px] text-accent-${theme}/80 font-medium tracking-wider uppercase mt-0.5">${p.category || 'Sin categoría'}</div>
+                <div class="font-orbitron font-bold text-white text-sm">${safeName}</div>
+                <div class="text-[12px] text-accent-${theme}/80 font-medium tracking-wider uppercase mt-0.5">${p.category || 'Sin categoría'}</div>
               </div>
             </div>
-            <span class="text-[8px] bg-accent-${theme}/15 text-accent-${theme} border border-accent-${theme}/20 rounded-full px-2 py-0.5 font-bold tracking-wider">${badge}</span>
+            <span class="text-[10px] bg-accent-${theme}/15 text-accent-${theme} border border-accent-${theme}/20 rounded-full px-2 py-0.5 font-bold tracking-wider">${badge}</span>
           </div>
           <div class="bg-purple-950/40 rounded-xl p-3 border border-accent-${theme}/10 mb-4">
             <div class="flex items-center justify-between mb-1.5">
-              <span class="text-[9px] text-purple-200/40 tracking-widest uppercase">Power Level</span>
+              <span class="text-[11px] text-purple-200/40 tracking-widest uppercase">Power Level</span>
             </div>
             <div class="font-orbitron font-black text-3xl text-gradient-${theme} mb-2">${level.toLocaleString()}</div>
             <div class="h-1.5 bg-purple-950 rounded-full overflow-hidden">
@@ -976,18 +976,18 @@ function renderPlayers(players) {
           <div class="grid grid-cols-3 gap-2 mb-4">
             <div class="bg-purple-950/30 rounded-lg p-2 text-center border border-purple-500/8">
               <div class="font-orbitron font-bold text-sm text-accent-${theme}">${tec}</div>
-              <div class="text-[8px] text-purple-200/30 tracking-wider uppercase">Técnica</div>
+              <div class="text-[10px] text-purple-200/30 tracking-wider uppercase">Técnica</div>
             </div>
             <div class="bg-purple-950/30 rounded-lg p-2 text-center border border-purple-500/8">
               <div class="font-orbitron font-bold text-sm text-accent-blue">${fis}</div>
-              <div class="text-[8px] text-purple-200/30 tracking-wider uppercase">Físico</div>
+              <div class="text-[10px] text-purple-200/30 tracking-wider uppercase">Físico</div>
             </div>
             <div class="bg-purple-950/30 rounded-lg p-2 text-center border border-purple-500/8">
               <div class="font-orbitron font-bold text-sm text-purple-300">${men}</div>
-              <div class="text-[8px] text-purple-200/30 tracking-wider uppercase">Mental</div>
+              <div class="text-[10px] text-purple-200/30 tracking-wider uppercase">Mental</div>
             </div>
           </div>
-          <button onclick="event.stopPropagation(); analyzePlayer('${p.id}')" class="btn-ai w-full text-white font-bold text-sm py-3.5 rounded-xl flex items-center justify-center gap-2.5 tracking-wide">
+          <button onclick="event.stopPropagation(); analyzePlayer('${p.id}')" class="btn-ai w-full text-white font-bold text-sm py-3.5 rounded-xl flex items-center justify-center gap-2.5 tracking-wide font-orbitron">
             <span class="iconify text-lg" data-icon="mdi:robot-outline"></span>
             Analizar con IA
           </button>
