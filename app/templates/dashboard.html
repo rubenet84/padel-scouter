@@ -947,7 +947,7 @@ function renderPlayers(players) {
         <div class="shimmer absolute inset-0 pointer-events-none rounded-[16px]"></div>
         <div class="h-px bg-gradient-to-r from-transparent via-accent-${theme}/40 to-transparent"></div>
         <div class="p-5 relative z-10">
-          <div class="flex items-start justify-between mb-4">
+          <div class="flex items-start justify-between gap-2 mb-4">
             <div class="flex items-center gap-3">
               <div class="relative">
                 <div class="w-14 h-14 rounded-xl overflow-hidden border-2 border-accent-${theme}/50">
@@ -962,7 +962,7 @@ function renderPlayers(players) {
                 <div class="text-[12px] text-accent-${theme}/80 font-medium tracking-wider uppercase mt-0.5">${p.category || 'Sin categoría'}</div>
               </div>
             </div>
-            <span class="text-[10px] bg-accent-${theme}/15 text-accent-${theme} border border-accent-${theme}/20 rounded-full px-2 py-0.5 font-bold tracking-wider">${badge}</span>
+            <span class="text-[10px] bg-accent-${theme}/15 text-accent-${theme} border border-accent-${theme}/20 rounded-full px-2 py-0.5 font-bold tracking-wider flex-shrink-0 whitespace-nowrap">${badge}</span>
           </div>
           <div class="bg-purple-950/40 rounded-xl p-3 border border-accent-${theme}/10 mb-4">
             <div class="flex items-center justify-between mb-1.5">
