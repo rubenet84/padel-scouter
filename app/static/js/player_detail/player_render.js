@@ -132,9 +132,9 @@ function renderPlayer(p, analyses) {
           
           // Render objectives
           const objColors = [
-            { bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.25)', text: '#f97316', line: 'rgba(249,115,22,0.4)', nameColor: '#f97316' },
-            { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.2)', text: '#60a5fa', line: 'rgba(59,130,246,0.4)', nameColor: '#60a5fa' },
-            { bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.25)', text: '#a78bfa', line: 'rgba(168,85,247,0.4)', nameColor: '#a78bfa' },
+            { bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.25)', text: '#f97316', line: 'rgba(249,115,22,0.4)', nameColor: '#f97316', detailColor: 'rgba(249,115,22,0.6)' },
+            { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.2)', text: '#60a5fa', line: 'rgba(59,130,246,0.4)', nameColor: '#60a5fa', detailColor: 'rgba(59,130,246,0.6)' },
+            { bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.25)', text: '#a78bfa', line: 'rgba(168,85,247,0.4)', nameColor: '#a78bfa', detailColor: 'rgba(168,85,247,0.6)' },
           ];
           objContainer.innerHTML = objSections.map((sec, i) => {
             const lines = sec.trim().split('\n').map(l => l.trim()).filter(Boolean);
