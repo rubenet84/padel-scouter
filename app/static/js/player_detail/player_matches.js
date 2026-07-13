@@ -161,6 +161,7 @@ function toggleTorneo() {
         if (amistosoRivalField) amistosoRivalField.classList.remove('hidden');
         const newForm = document.getElementById('new-tournament-form');
         if (newForm) newForm.classList.add('hidden');
+        unlockPartnerSection();
     }
 }
 
