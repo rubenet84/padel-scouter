@@ -132,9 +132,9 @@ function renderPlayer(p, analyses) {
           
           // Render objectives
           const objColors = [
-            { bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.25)', text: '#f97316', line: 'rgba(249,115,22,0.4)' },
-            { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.2)', text: '#60a5fa', line: 'rgba(59,130,246,0.4)' },
-            { bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.25)', text: '#a78bfa', line: 'rgba(168,85,247,0.4)' },
+            { bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.25)', text: '#f97316', line: 'rgba(249,115,22,0.4)', nameColor: '#f97316' },
+            { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.2)', text: '#60a5fa', line: 'rgba(59,130,246,0.4)', nameColor: '#60a5fa' },
+            { bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.25)', text: '#a78bfa', line: 'rgba(168,85,247,0.4)', nameColor: '#a78bfa' },
           ];
           objContainer.innerHTML = objSections.map((sec, i) => {
             const lines = sec.trim().split('\n').map(l => l.trim()).filter(Boolean);
@@ -148,7 +148,7 @@ function renderPlayer(p, analyses) {
                 <div class="flex gap-4 p-4">
                   <div class="w-10 h-10 rounded-xl flex items-center justify-center font-orbitron font-black text-base flex-shrink-0" style="background:${c.bg};border:1px solid ${c.border};color:${c.text};">${num}</div>
                   <div class="min-w-0 flex-1">
-                    <div class="text-sm font-bold text-white font-orbitron">${escapeHtml(name)}</div>
+                    <div class="text-sm font-bold font-orbitron" style="color:${c.nameColor};">${escapeHtml(name)}</div>
                     <div class="text-xs mt-1.5 leading-relaxed" style="color:#94a3b8;">${escapeHtml(detail)}</div>
                   </div>
                 </div>
