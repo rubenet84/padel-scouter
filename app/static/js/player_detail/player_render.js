@@ -143,9 +143,17 @@ function renderPlayer(p, analyses) {
             const rawDetail = lines.slice(2).join(' ') || 'Ejercicio específico';
             const c = objColors[i] || objColors[objColors.length - 1];
             // Separar frecuencia del texto descriptivo
-            const freqMatch = rawDetail.match(/(\d+\s+sesiones?\/semana\s*(?:\([^)]*\)\s*)?[—–−‐\-─]\s*)/i);
-            const detail = freqMatch ? rawDetail.replace(freqMatch[1], '') : rawDetail;
-            const freq = freqMatch ? freqMatch[1].trim() : '';
+            let detail = rawDetail;
+            let freq = '';
+            if (/^\d+\s+sesiones?\/semana/i.test(rawDetail)) {
+              const emDash = rawDetail.indexOf('\u2014');
+              const enDash = rawDetail.indexOf('\u2013');
+              const sepIdx = emDash > 0 ? emDash : (enDash > 0 ? enDash : -1);
+              if (sepIdx > 0) {
+                freq = rawDetail.substring(0, sepIdx + 1).trim();
+                detail = rawDetail.substring(sepIdx + 1).trim();
+              }
+            }
             return `
               <div class="rounded-2xl overflow-hidden card-hover" style="background:#12121A;border:1px solid ${c.border};">
                 <div class="h-0.5" style="background:linear-gradient(90deg,transparent,${c.line},transparent);"></div>
