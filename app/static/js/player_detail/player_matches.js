@@ -187,10 +187,9 @@ async function loadPartnerPlayers() {
         const currentValue = select.value;
         select.innerHTML = '<option value="">— Seleccionar jugador —</option>';
         players.forEach(p => {
-            if (p.id === playerId) return;
             const opt = document.createElement('option');
             opt.value = p.id;
-            opt.textContent = p.name + ' (' + p.category + ')';
+            opt.textContent = p.name + (p.id === playerId ? ' (tú)' : ' (' + p.category + ')');
             if (p.id === currentValue) opt.selected = true;
             select.appendChild(opt);
         });
@@ -803,15 +802,9 @@ async function openEditMatchModal(matchId) {
         const partnerSelect = D.mPartnerSelect?.();
         const partnerInput = D.mPartnerName?.();
         if (match.partner_id && partnerSelect) {
-            if (match.partner_id === playerId) {
-                // El compañero soy yo mismo — mostrar nombre en el input de texto
-                if (partnerInput) partnerInput.value = match.partner_nombre || 'Yo';
-                partnerSelect.value = '';
-            } else {
-                partnerSelect.value = match.partner_id;
-                if (partnerInput) partnerInput.value = '';
-                onPartnerSelect();
-            }
+            partnerSelect.value = match.partner_id;
+            if (partnerInput) partnerInput.value = '';
+            onPartnerSelect();
         } else if (match.partner_nombre && partnerInput) {
             partnerInput.value = match.partner_nombre;
             if (partnerSelect) partnerSelect.value = '';
