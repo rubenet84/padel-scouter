@@ -517,23 +517,29 @@ def update_match(
         if data.ronda:
             round_idx = get_round_index(data.ronda)
             if round_idx >= 0:
-                # Regla 1: si cambió de ronda y hay derrota en ronda INFERIOR, no se puede pasar después
-                if data.ronda != match.ronda:
-                    lower_loss = db.query(MatchModel).filter(
-                        _player_filter(player_id),
-                        MatchModel.tournament_id == data.tournament_id,
-                        MatchModel.ganado == False,
-                        MatchModel.ronda.in_(ROUND_ORDER[:round_idx]),
-                        MatchModel.id != match_id,
-                    ).first()
-                    if lower_loss:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"Este jugador ya perdió en {lower_loss.ronda}. No puede haber partidos en rondas posteriores.",
-                        )
+                # Regla 1: si hay derrota en ronda INFERIOR (o en esta misma ronda si es derrota), no se puede pasar después
+                constraining_rounds = ROUND_ORDER[:round_idx + 1] if data.ganado is False else ROUND_ORDER[:round_idx]
+                lower_loss = db.query(MatchModel).filter(
+                    _player_filter(player_id),
+                    MatchModel.tournament_id == data.tournament_id,
+                    MatchModel.ganado == False,
+                    MatchModel.ronda.in_(constraining_rounds),
+                    MatchModel.id != match_id,
+                ).first()
+                if lower_loss:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Este jugador ya perdió en {lower_loss.ronda}. No puede haber partidos en rondas posteriores.",
+                    )
+                # Si el partido actual es derrota y se mueve a ronda superior, también bloquear
+                if data.ganado is False and data.ronda != match.ronda and ROUND_ORDER.index(match.ronda) < round_idx:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Este partido es una derrota en {match.ronda}. No se puede subir a {data.ronda}.",
+                    )
 
                 # Regla 2: si se cambia a derrota, no puede haber partidos GANADOS en rondas superiores
-                if data.ganado is False and match.ganado is not False:
+                if data.ganado is False and data.ronda != match.ronda:
                     higher_win = db.query(MatchModel).filter(
                         _player_filter(player_id),
                         MatchModel.tournament_id == data.tournament_id,
