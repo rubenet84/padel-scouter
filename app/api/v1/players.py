@@ -358,7 +358,7 @@ def add_match(
                     _player_filter(player_id),
                     MatchModel.tournament_id == data.tournament_id,
                 ).first()
-                if existing_any and round_idx > 0 and data.ganado is not False:
+                if existing_any and round_idx > 0:
                     prev_round = ROUND_ORDER[round_idx - 1]
                     prev_win = db.query(MatchModel).filter(
                         _player_filter(player_id),
@@ -578,7 +578,7 @@ def update_match(
                     MatchModel.tournament_id == data.tournament_id,
                     MatchModel.id != match_id,
                 ).first()
-                if other_exists and round_idx > 0 and data.ganado is not False and data.ronda != match.ronda:
+                if other_exists and round_idx > 0 and data.ronda != match.ronda:
                     prev_round = ROUND_ORDER[round_idx - 1]
                     prev_win = db.query(MatchModel).filter(
                         _player_filter(player_id),
