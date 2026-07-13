@@ -193,7 +193,7 @@ async function saveAndAnalyze() {
         await reloadPlayer();
 
     } catch(e) {
-        errEl.textContent = 'Error de conexión: ' + e.message;
+        errEl.textContent = e.message || 'Error de conexión';
         errEl.classList.remove('hidden');
     } finally {
         btn.textContent = '💾 Guardar y relanzar análisis IA';

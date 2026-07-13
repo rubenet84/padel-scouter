@@ -341,7 +341,7 @@ async function createTournamentInline() {
 
         showToast('\u2705 Torneo creado', 'success');
     } catch (e) {
-        errEl.textContent = 'Error de conexión al crear torneo';
+        errEl.textContent = e.message || 'Error de conexión al crear torneo';
         errEl.classList.remove('hidden');
     }
 }
@@ -471,7 +471,7 @@ async function saveTournamentEdit() {
         }
         showToast('\u2705 Torneo actualizado', 'success');
     } catch (e) {
-        errEl.textContent = 'Error de conexión al actualizar torneo';
+        errEl.textContent = e.message || 'Error de conexión al actualizar torneo';
         errEl.classList.remove('hidden');
     }
 }
@@ -497,7 +497,7 @@ async function deleteSelectedTournament() {
         filterMatchHistory();
         showToast('\uD83D\uDDD1\uFE0F Torneo eliminado', 'success');
     } catch (e) {
-        showToast('Error de conexión al eliminar torneo', 'error');
+        showToast(e.message || 'Error al eliminar torneo', 'error');
     }
 }
 
@@ -724,7 +724,7 @@ async function saveMatch() {
     } catch (e) {
         console.error('saveMatch exception', e);
         if (errEl) {
-            errEl.textContent = 'Error de conexión';
+            errEl.textContent = e.message || 'Error de conexión';
             errEl.classList.remove('hidden');
         }
     } finally {
@@ -868,7 +868,7 @@ async function deleteMatch(matchId) {
         }
     } catch (e) {
         console.error('deleteMatch error:', e);
-        alert('Error de conexión al eliminar el partido');
+        alert(e.message || 'Error al eliminar el partido');
     }
 }
 
