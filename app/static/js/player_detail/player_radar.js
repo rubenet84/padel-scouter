@@ -109,7 +109,7 @@ function drawRadar(p) {
         const y = cy + Math.sin(a) * lR;
         ctx.font = '700 8px Orbitron'; ctx.fillStyle = labelColors[i];
         ctx.fillText(labels[i], x, y - 5);
-        ctx.font = '800 11px Inter'; ctx.fillStyle = '#FF6B00';
+        ctx.font = '900 11px Inter'; ctx.fillStyle = labelColors[i];
         ctx.fillText(values[i], x, y + 7);
     }
 }

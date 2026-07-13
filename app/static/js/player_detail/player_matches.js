@@ -803,9 +803,15 @@ async function openEditMatchModal(matchId) {
         const partnerSelect = D.mPartnerSelect?.();
         const partnerInput = D.mPartnerName?.();
         if (match.partner_id && partnerSelect) {
-            partnerSelect.value = match.partner_id;
-            if (partnerInput) partnerInput.value = '';
-            onPartnerSelect();
+            if (match.partner_id === playerId) {
+                // El compañero soy yo mismo — mostrar nombre en el input de texto
+                if (partnerInput) partnerInput.value = match.partner_nombre || 'Yo';
+                partnerSelect.value = '';
+            } else {
+                partnerSelect.value = match.partner_id;
+                if (partnerInput) partnerInput.value = '';
+                onPartnerSelect();
+            }
         } else if (match.partner_nombre && partnerInput) {
             partnerInput.value = match.partner_nombre;
             if (partnerSelect) partnerSelect.value = '';
