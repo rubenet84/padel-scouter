@@ -99,16 +99,17 @@ function drawRadar(p) {
         ctx.fillStyle = '#fff'; ctx.fill();
     }
 
-    // Labels
+    // Labels (colores por vértice como la página principal)
+    const labelColors = ['#3b82f6', '#a855f7', '#22c55e', '#f97316', '#06b6d4', '#fbbf24'];
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (let i = 0; i < N; i++) {
         const a = start + step * i;
         const lR = maxR + 30;
         const x = cx + Math.cos(a) * lR;
         const y = cy + Math.sin(a) * lR;
-        ctx.font = '600 8px Inter'; ctx.fillStyle = 'rgba(148,163,184,0.7)';
-        ctx.fillText(labels[i], x, y - 5);
-        ctx.font = '800 11px Inter'; ctx.fillStyle = '#FF6B00';
-        ctx.fillText(values[i], x, y + 7);
+        ctx.font = '700 9px Orbitron'; ctx.fillStyle = labelColors[i];
+        ctx.fillText(labels[i], x, y - 6);
+        ctx.font = '800 12px Orbitron'; ctx.fillStyle = labelColors[i];
+        ctx.fillText(values[i], x, y + 8);
     }
 }
