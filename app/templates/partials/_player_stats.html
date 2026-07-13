@@ -74,12 +74,16 @@
                     <div class="grid grid-cols-2 gap-2 pt-2 col-span-2">
                         <button onclick="openStatsModal()"
                                 class="flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-xs font-bold transition-all font-orbitron"
-                                style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.2);color:#FF6B00;">
+                                style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.2);color:#FF6B00;"
+                                onmouseenter="this.style.background='rgba(255,107,0,0.18)';this.style.borderColor='rgba(255,107,0,0.4)'"
+                                onmouseleave="this.style.background='rgba(255,107,0,0.08)';this.style.borderColor='rgba(255,107,0,0.2)'">
                             📊 Estadísticas Jugador
                         </button>
                         <button onclick="openMatchAnalyticsModal()"
                                 class="flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-xs font-bold transition-all font-orbitron"
-                                style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);color:#06B6D4;">
+                                style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);color:#06B6D4;"
+                                onmouseenter="this.style.background='rgba(6,182,212,0.18)';this.style.borderColor='rgba(6,182,212,0.45)'"
+                                onmouseleave="this.style.background='rgba(6,182,212,0.08)';this.style.borderColor='rgba(6,182,212,0.25)'">
                             📈 Análisis de partidos
                         </button>
                     </div>

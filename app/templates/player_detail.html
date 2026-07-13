@@ -222,22 +222,30 @@ body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;o
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
               <button onclick="openEditModal()" title="Abrir formulario para editar los datos y estadísticas del jugador"
                        class="flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs transition-all font-orbitron"
-                      style="background:rgba(124,95,214,0.15);border:1px solid rgba(124,95,214,0.3);color:#a78bfa;">
+                      style="background:rgba(124,95,214,0.15);border:1px solid rgba(124,95,214,0.3);color:#a78bfa;"
+                      onmouseenter="this.style.background='rgba(124,95,214,0.3)';this.style.borderColor='rgba(124,95,214,0.5)'"
+                      onmouseleave="this.style.background='rgba(124,95,214,0.15)';this.style.borderColor='rgba(124,95,214,0.3)'">
                 ✏️ Editar jugador
               </button>
               <button onclick="openLevelGuideModal()" title="Ver la explicación de todas las categorías y niveles de juego"
                        class="flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs transition-all font-orbitron"
-                      style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:#a855f7;">
+                      style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:#a855f7;"
+                      onmouseenter="this.style.background='rgba(168,85,247,0.25)';this.style.borderColor='rgba(168,85,247,0.45)'"
+                      onmouseleave="this.style.background='rgba(168,85,247,0.12)';this.style.borderColor='rgba(168,85,247,0.25)'">
                 📖 Guía de Niveles
               </button>
               <button onclick="openPowerGuideModal()" title="Ver cómo se calcula el Power Level"
                        class="flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs transition-all font-orbitron"
-                      style="background:rgba(57,255,136,0.08);border:1px solid rgba(57,255,136,0.2);color:#39ff88;">
+                      style="background:rgba(57,255,136,0.08);border:1px solid rgba(57,255,136,0.2);color:#39ff88;"
+                      onmouseenter="this.style.background='rgba(57,255,136,0.2)';this.style.borderColor='rgba(57,255,136,0.4)'"
+                      onmouseleave="this.style.background='rgba(57,255,136,0.08)';this.style.borderColor='rgba(57,255,136,0.2)'">
                 ⚡ Guía de Power Level
               </button>
               <a href="/global-stats"
                  class="flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs transition-all font-orbitron"
-                 style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);color:#60a5fa;">
+                 style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);color:#60a5fa;"
+                 onmouseenter="this.style.background='rgba(59,130,246,0.2)';this.style.borderColor='rgba(59,130,246,0.4)'"
+                 onmouseleave="this.style.background='rgba(59,130,246,0.08)';this.style.borderColor='rgba(59,130,246,0.2)'">
                 📊 Estadísticas Globales
               </a>
             </div>
