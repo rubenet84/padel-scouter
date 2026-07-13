@@ -276,18 +276,16 @@ body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;o
                 </div>
                 <p id="improvement-plan" class="text-sm leading-relaxed" style="color:#94a3b8;"></p>
                 <div id="plan-objectives" class="space-y-3 mt-4"></div>
-                <div id="plan-projection" class="hidden mt-5 rounded-xl p-4" style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <div class="text-[10px] font-bold tracking-widest uppercase font-orbitron" style="color:rgba(59,130,246,0.7);">⚡ Proyección Power Level</div>
-                      <div id="plan-projection-text" class="text-lg font-bold text-white font-orbitron mt-1">—</div>
-                      <div class="text-[10px] mt-1" style="color:#64748b;" id="plan-projection-note">En 8 semanas siguiendo el plan</div>
+                <div id="plan-projection" class="hidden mt-5 rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(59,130,246,0.12);">
+                  <div class="h-0.5" style="background:linear-gradient(90deg,transparent,#3B82F6,transparent);"></div>
+                  <div class="p-5 text-center">
+                    <div class="text-[10px] font-bold tracking-widest uppercase font-orbitron mb-3" style="color:rgba(59,130,246,0.7);">⚡ Proyección Power Level</div>
+                    <div class="flex items-center justify-center gap-4">
+                      <span id="plan-current-pl" class="font-orbitron font-black text-xl text-white">—</span>
+                      <span class="text-2xl text-purple-400/30 font-bold">→</span>
+                      <span id="plan-target-pl" class="font-orbitron font-black text-3xl" style="color:#f97316;">—</span>
                     </div>
-                    <div id="plan-projection-visual" class="flex items-center gap-2">
-                      <span id="plan-current-pl" class="font-orbitron font-bold text-sm text-white">—</span>
-                      <span class="text-purple-400/40">→</span>
-                      <span id="plan-target-pl" class="font-orbitron font-bold text-lg" style="color:#3b82f6;">—</span>
-                    </div>
+                    <div class="text-xs mt-2" style="color:#64748b;" id="plan-projection-note">En 8 semanas siguiendo el plan</div>
                   </div>
                 </div>
               </div>

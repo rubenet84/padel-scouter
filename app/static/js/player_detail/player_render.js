@@ -135,14 +135,15 @@ function renderPlayer(p, analyses) {
             const lines = sec.trim().split('\n').map(l => l.trim()).filter(Boolean);
             const num = lines[0] || (i + 1).toString();
             const name = lines[1] || 'Objetivo';
-            const detail = lines.slice(2).join(' — ') || 'Ejercicio específico';
+            const detail = lines.slice(2).join(' ') || 'Ejercicio específico';
             return `
-              <div class="rounded-xl overflow-hidden" style="background:rgba(10,10,15,0.5);border:1px solid rgba(59,130,246,0.12);">
+              <div class="rounded-2xl overflow-hidden card-hover" style="background:#12121A;border:1px solid rgba(59,130,246,0.12);">
+                <div class="h-0.5" style="background:linear-gradient(90deg,transparent,rgba(59,130,246,0.4),transparent);"></div>
                 <div class="flex gap-4 p-4">
-                  <div class="w-8 h-8 rounded-lg flex items-center justify-center font-orbitron font-black text-sm flex-shrink-0" style="background:rgba(59,130,246,0.12);color:#60a5fa;">${num}</div>
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center font-orbitron font-black text-base flex-shrink-0" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:#60a5fa;">${num}</div>
                   <div class="min-w-0 flex-1">
                     <div class="text-sm font-bold text-white font-orbitron">${escapeHtml(name)}</div>
-                    <div class="text-xs mt-1.5" style="color:#94a3b8;">${escapeHtml(detail)}</div>
+                    <div class="text-xs mt-1.5 leading-relaxed" style="color:#94a3b8;">${escapeHtml(detail)}</div>
                   </div>
                 </div>
               </div>`;
@@ -151,7 +152,6 @@ function renderPlayer(p, analyses) {
           // Parse projection section
           if (projectionSection) {
             const projLines = projectionSection.trim().split('\n').map(l => l.trim()).filter(Boolean);
-            // Expected: "Proyección Power Level", "CURRENT → TARGET", "En 8 semanas..."
             if (projLines.length >= 2) {
               const projMatch = projLines[1]?.match(/(\d[\d,.]*)\s*→\s*(\d[\d,.]*)/);
               if (projMatch) {
@@ -159,14 +159,11 @@ function renderPlayer(p, analyses) {
                 const target = projMatch[2];
                 document.getElementById('plan-current-pl').textContent = current;
                 document.getElementById('plan-target-pl').textContent = target;
-                projText.textContent = `${current} → ${target}`;
-              } else {
-                projText.textContent = projLines[1];
+                projContainer.classList.remove('hidden');
+                // Update visual with proper styling
+                document.getElementById('plan-current-pl').style.cssText = 'font-orbitron;font-weight:900;font-size:1.25rem;color:white';
+                document.getElementById('plan-target-pl').style.cssText = 'font-orbitron;font-weight:900;font-size:1.5rem';
               }
-              if (projLines.length >= 3) {
-                document.getElementById('plan-projection-note').textContent = projLines[projLines.length - 1];
-              }
-              projContainer.classList.remove('hidden');
             }
           }
         } else {
