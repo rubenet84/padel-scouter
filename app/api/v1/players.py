@@ -353,7 +353,26 @@ def add_match(
                             detail=f"No se puede marcar como derrota porque hay partidos ganados en rondas superiores. Eliminá primero esos partidos.",
                         )
 
-            # Regla 3: no duplicar ronda en el mismo torneo
+                # Regla 3: no saltar rondas — si ya hay partidos en el torneo, la ronda debe ser consecutiva
+                existing_any = db.query(MatchModel).filter(
+                    _player_filter(player_id),
+                    MatchModel.tournament_id == data.tournament_id,
+                ).first()
+                if existing_any and round_idx > 0 and data.ganado is not False:
+                    prev_round = ROUND_ORDER[round_idx - 1]
+                    prev_win = db.query(MatchModel).filter(
+                        _player_filter(player_id),
+                        MatchModel.tournament_id == data.tournament_id,
+                        MatchModel.ronda == prev_round,
+                        MatchModel.ganado == True,
+                    ).first()
+                    if not prev_win:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"No se puede jugar {data.ronda} sin haber ganado {prev_round} antes. Las rondas deben ser consecutivas.",
+                        )
+
+            # Regla 4: no duplicar ronda en el mismo torneo (excluyendo este partido en update)
             existing = db.query(MatchModel).filter(
                 _player_filter(player_id),
                 MatchModel.tournament_id == data.tournament_id,
@@ -553,7 +572,28 @@ def update_match(
                             detail=f"No se puede marcar como derrota porque hay partidos ganados en rondas superiores. Eliminá primero esos partidos.",
                         )
 
-            # Regla 3: no duplicar ronda en el mismo torneo (excluyendo este partido)
+                # Regla 3: no saltar rondas — si hay otros partidos en el torneo, la ronda debe ser consecutiva
+                other_exists = db.query(MatchModel).filter(
+                    _player_filter(player_id),
+                    MatchModel.tournament_id == data.tournament_id,
+                    MatchModel.id != match_id,
+                ).first()
+                if other_exists and round_idx > 0 and data.ganado is not False and data.ronda != match.ronda:
+                    prev_round = ROUND_ORDER[round_idx - 1]
+                    prev_win = db.query(MatchModel).filter(
+                        _player_filter(player_id),
+                        MatchModel.tournament_id == data.tournament_id,
+                        MatchModel.ronda == prev_round,
+                        MatchModel.ganado == True,
+                        MatchModel.id != match_id,
+                    ).first()
+                    if not prev_win:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"No se puede jugar {data.ronda} sin haber ganado {prev_round} antes. Las rondas deben ser consecutivas.",
+                        )
+
+            # Regla 4: no duplicar ronda en el mismo torneo (excluyendo este partido)
             if data.ronda != match.ronda or data.tournament_id != match.tournament_id:
                 existing = db.query(MatchModel).filter(
                     _player_filter(player_id),
