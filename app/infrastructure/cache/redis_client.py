@@ -23,15 +23,17 @@ class RedisCache:
         hash_val = hashlib.sha256(raw.encode()).hexdigest()[:16]
         return f"{prefix}:{hash_val}"
 
+    VERSION = "v2"  # incrementar cuando cambie el prompt de IA
+
     def get(self, prefix: str, data: dict) -> dict | None:
-        key = self._make_key(prefix, data)
+        key = self._make_key(f"{prefix}:{self.VERSION}", data)
         value = self._client.get(key)
         if value:
             return json.loads(value)
         return None
 
     def set(self, prefix: str, data: dict, result: dict, ttl: int = 86400) -> None:
-        key = self._make_key(prefix, data)
+        key = self._make_key(f"{prefix}:{self.VERSION}", data)
         self._client.setex(key, ttl, json.dumps(result))
 
     def ping(self) -> bool:
