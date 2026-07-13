@@ -187,9 +187,10 @@ async function loadPartnerPlayers() {
         const currentValue = select.value;
         select.innerHTML = '<option value="">— Seleccionar jugador —</option>';
         players.forEach(p => {
+            if (p.id === playerId) return;
             const opt = document.createElement('option');
             opt.value = p.id;
-            opt.textContent = p.name + (p.id === playerId ? ' (tú)' : ' (' + p.category + ')');
+            opt.textContent = p.name + ' (' + p.category + ')';
             if (p.id === currentValue) opt.selected = true;
             select.appendChild(opt);
         });
@@ -694,14 +695,15 @@ async function saveMatch() {
         const matchId = btn?.dataset?.matchId;
         const partnerSelect = D.mPartnerSelect?.();
         const partnerInput = D.mPartnerName?.();
+        const selfPartnerId = btn?.dataset?.selfPartnerId || null;
         const body = {
             rival_nombre: rival,
             resultado: resultado,
             ganado: ganado,
             tournament_id: tipo === 'torneo' ? tournamentId : null,
             ronda: tipo === 'torneo' ? ronda : null,
-            partner_id: partnerSelect ? (partnerSelect.value || null) : null,
-            partner_nombre: partnerInput ? (partnerInput.value.trim() || null) : null,
+            partner_id: selfPartnerId || (partnerSelect ? (partnerSelect.value || null) : null),
+            partner_nombre: selfPartnerId ? null : (partnerInput ? (partnerInput.value.trim() || null) : null),
             scoring_method: D.mScoring?.()?.value || 'con_ventaja',
             notes: (D.mNotas?.()?.value || '').trim() || null,
             fecha_partido: D.mDate?.()?.value || null,
@@ -716,6 +718,7 @@ async function saveMatch() {
         closeMatchModal();
         if (btn) {
             btn.dataset.matchId = '';
+            btn.dataset.selfPartnerId = '';
             btn.textContent = '\uD83D\uDCBE Guardar partido';
         }
         await loadMatches();
@@ -802,9 +805,17 @@ async function openEditMatchModal(matchId) {
         const partnerSelect = D.mPartnerSelect?.();
         const partnerInput = D.mPartnerName?.();
         if (match.partner_id && partnerSelect) {
-            partnerSelect.value = match.partner_id;
-            if (partnerInput) partnerInput.value = '';
-            onPartnerSelect();
+            if (match.partner_id === playerId) {
+                // Soy el compañero — guardar ID para preservarlo al guardar
+                const btn = D.btnSaveMatch?.();
+                if (btn) btn.dataset.selfPartnerId = match.partner_id;
+                if (partnerInput) partnerInput.value = match.partner_nombre || 'Yo';
+                partnerSelect.value = '';
+            } else {
+                partnerSelect.value = match.partner_id;
+                if (partnerInput) partnerInput.value = '';
+                onPartnerSelect();
+            }
         } else if (match.partner_nombre && partnerInput) {
             partnerInput.value = match.partner_nombre;
             if (partnerSelect) partnerSelect.value = '';
