@@ -131,16 +131,22 @@ function renderPlayer(p, analyses) {
           const projectionSection = sections[sections.length - 1];
           
           // Render objectives
+          const objColors = [
+            { bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.25)', text: '#f97316', line: 'rgba(249,115,22,0.4)' },
+            { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.2)', text: '#60a5fa', line: 'rgba(59,130,246,0.4)' },
+            { bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.25)', text: '#a78bfa', line: 'rgba(168,85,247,0.4)' },
+          ];
           objContainer.innerHTML = objSections.map((sec, i) => {
             const lines = sec.trim().split('\n').map(l => l.trim()).filter(Boolean);
             const num = lines[0] || (i + 1).toString();
             const name = lines[1] || 'Objetivo';
             const detail = lines.slice(2).join(' ') || 'Ejercicio específico';
+            const c = objColors[i] || objColors[objColors.length - 1];
             return `
-              <div class="rounded-2xl overflow-hidden card-hover" style="background:#12121A;border:1px solid rgba(59,130,246,0.12);">
-                <div class="h-0.5" style="background:linear-gradient(90deg,transparent,rgba(59,130,246,0.4),transparent);"></div>
+              <div class="rounded-2xl overflow-hidden card-hover" style="background:#12121A;border:1px solid ${c.border};">
+                <div class="h-0.5" style="background:linear-gradient(90deg,transparent,${c.line},transparent);"></div>
                 <div class="flex gap-4 p-4">
-                  <div class="w-10 h-10 rounded-xl flex items-center justify-center font-orbitron font-black text-base flex-shrink-0" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:#60a5fa;">${num}</div>
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center font-orbitron font-black text-base flex-shrink-0" style="background:${c.bg};border:1px solid ${c.border};color:${c.text};">${num}</div>
                   <div class="min-w-0 flex-1">
                     <div class="text-sm font-bold text-white font-orbitron">${escapeHtml(name)}</div>
                     <div class="text-xs mt-1.5 leading-relaxed" style="color:#94a3b8;">${escapeHtml(detail)}</div>
