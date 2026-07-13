@@ -68,6 +68,7 @@ function renderMatchCard(m) {
             </div>
             <div class="text-right flex-shrink-0 flex items-center gap-2">
                 <p class="text-sm font-bold text-white mr-2">${resultado}</p>
+                ${playerId === m.player1_id ? `
                 <button onclick="openEditMatchModal('${m.id}')" 
                         class="px-2 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
                         style="background:rgba(255,107,0,0.2);border:1px solid rgba(255,107,0,0.3);color:#FF6B00;"
@@ -76,6 +77,7 @@ function renderMatchCard(m) {
                         class="px-2 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
                         style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;"
                         title="Eliminar partido">🗑️</button>
+                ` : ''}
             </div>
         </div>`;
 }
