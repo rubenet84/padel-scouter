@@ -145,7 +145,7 @@ function renderPlayer(p, analyses) {
             let detail = rawDetail;
             let freq = '';
             // Separar frecuencia del texto descriptivo (buscar patrón "X sesión/es/semana")
-            const freqMatch = rawDetail.match(/(\d+\s+sesi[oó]nes?\/semana(?:\s*\([^)]*\))?\s*[—––\-]?\s*)/i);
+            const freqMatch = rawDetail.match(/(\d+\s+sesi(?:o\u0301|[oó])nes?\/semana(?:\s*\([^)]*\))?\s*(?:[—–\-─]\s*)?)/i);
             if (freqMatch) {
               freq = freqMatch[1].trim();
               detail = rawDetail.replace(freqMatch[1], '').trim();
@@ -297,4 +297,5 @@ function setAvatar(url, onload) {
         if (onload) onload();
     }
 }
+
 
