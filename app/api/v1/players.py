@@ -571,14 +571,10 @@ def update_match(
             MatchModel.partner_id.isnot(None),
             MatchModel.id != match_id,
         ).first()
-        if existing_partner_match:
-            if existing_partner_match.partner_id == player_id:
-                # Current player was the partner → swap
-                match.partner_id = existing_partner_match.player1_id
-                match.partner_nombre = existing_partner_match.player1.name if existing_partner_match.player1 else existing_partner_match.partner_nombre
-            else:
-                match.partner_id = existing_partner_match.partner_id
-                match.partner_nombre = existing_partner_match.partner_nombre
+        if existing_partner_match and existing_partner_match.id != match.id:
+            # Preservar el compañero original del torneo, sin intercambiar roles
+            match.partner_id = existing_partner_match.partner_id
+            match.partner_nombre = existing_partner_match.partner_nombre
         else:
             # First tournament match without partner yet — allow setting it
             partner_id = data.partner_id
