@@ -140,8 +140,12 @@ function renderPlayer(p, analyses) {
             const lines = sec.trim().split('\n').map(l => l.trim()).filter(Boolean);
             const num = lines[0] || (i + 1).toString();
             const name = lines[1] || 'Objetivo';
-            const detail = lines.slice(2).join(' ') || 'Ejercicio específico';
+            const rawDetail = lines.slice(2).join(' ') || 'Ejercicio específico';
             const c = objColors[i] || objColors[objColors.length - 1];
+            // Separar frecuencia del texto descriptivo
+            const freqMatch = rawDetail.match(/(\d+\s+sesiones?\/semana\s*[—–\-─]?\s*)/i);
+            const detail = freqMatch ? rawDetail.replace(freqMatch[1], '') : rawDetail;
+            const freq = freqMatch ? freqMatch[1].trim() : '';
             return `
               <div class="rounded-2xl overflow-hidden card-hover" style="background:#12121A;border:1px solid ${c.border};">
                 <div class="h-0.5" style="background:linear-gradient(90deg,transparent,${c.line},transparent);"></div>
@@ -149,8 +153,8 @@ function renderPlayer(p, analyses) {
                   <div class="w-10 h-10 rounded-xl flex items-center justify-center font-orbitron font-black text-base flex-shrink-0" style="background:${c.bg};border:1px solid ${c.border};color:${c.text};">${num}</div>
                   <div class="min-w-0 flex-1">
                     <div class="text-sm font-bold font-orbitron" style="color:${c.nameColor};">${escapeHtml(name)}</div>
-                    <div class="text-xs mt-1.5 leading-relaxed" style="color:#E2E8F0;">${escapeHtml(detail.replace(/^\d+\s+sesiones?\/semana\s*[—–\-]?\s*/, ''))}</div>
-                    <div class="text-[10px] mt-1 font-medium" style="color:${c.freqColor};">${escapeHtml((detail.match(/^\d+\s+sesiones?\/semana\s*[—–\-]?\s*/) || [''])[0].trim() || '')}</div>
+                    <div class="text-xs mt-1.5 leading-relaxed" style="color:#E2E8F0;">${escapeHtml(detail)}</div>
+                    ${freq ? `<div class="text-[10px] mt-1 font-medium" style="color:${c.freqColor};">${escapeHtml(freq)}</div>` : ''}
                   </div>
                 </div>
               </div>`;
