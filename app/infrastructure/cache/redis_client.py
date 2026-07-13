@@ -23,7 +23,7 @@ class RedisCache:
         hash_val = hashlib.sha256(raw.encode()).hexdigest()[:16]
         return f"{prefix}:{hash_val}"
 
-    VERSION = "v2"  # incrementar cuando cambie el prompt de IA
+    VERSION = "v4"  # incrementar cuando cambie el prompt de IA
 
     def get(self, prefix: str, data: dict) -> dict | None:
         key = self._make_key(f"{prefix}:{self.VERSION}", data)

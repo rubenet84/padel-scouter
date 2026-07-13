@@ -53,7 +53,7 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:
   "descripcion_epica": "Descripción narrativa épica del jugador (2-3 frases emocionantes)",
   "fortalezas": ["fortaleza 1", "fortaleza 2", "fortaleza 3"],
   "debilidades": ["debilidad 1", "debilidad 2"],
-  "plan_mejora": "Plan de mejora generado con el siguiente formato:\n\n[TEXTO DESCRIPTIVO del plan de mejora (2-3 frases)]\n\n---\n1\n[NOMBRE del área de mejora]\n[FRECUENCIA semanal ej: 3 sesiones/semana — Ejercicio detallado]\n\n---\n2\n[NOMBRE del área de mejora]\n[FRECUENCIA semanal — Ejercicio detallado]\n\n---\n3\n[NOMBRE del área de mejora]\n[FRECUENCIA semanal — Ejercicio detallado]\n\n---\nProyección Power Level\n{power_level} → [PROYECCIÓN A 8 SEMANAS]\nEn 8 semanas siguiendo el plan",
+  "plan_mejora": "Plan de mejora generado con el siguiente formato exacto:\n\n[PARRAFO DESCRIPTIVO del plan de mejora (2-3 frases)]\n\n---\n1\n[NOMBRE del área de mejora]\n[FRECUENCIA semanal ej: 3 sesiones/semana —] [DESCRIPCIÓN del ejercicio]\n\n---\n2\n[NOMBRE del área de mejora]\n[FRECUENCIA semanal ej: 2 sesiones/semana —] [DESCRIPCIÓN del ejercicio]\n\n---\n3\n[NOMBRE del área de mejora]\n[FRECUENCIA semanal ej: 1 sesión/semana —] [DESCRIPCIÓN del ejercicio]\n\n---\nProyección Power Level\n{power_level} → [PROYECCIÓN A 8 SEMANAS]\nEn 8 semanas siguiendo el plan",
   "golpe_definitivo": "Nombre épico estilo Dragon Ball para el golpe basado en {golpe_stat_label} (ej: Kamehameha de Bandeja, Remate del Infinito)",
   "descripcion_golpe": "Descripción cinematográfica de 2-3 frases estilo Dragon Ball del golpe {golpe_stat_label}, mencionando su poder destructivo, aura de energía y sensación de amenaza nivel {nivel_amenaza}. Sé espectacular y dramático."
 }}
