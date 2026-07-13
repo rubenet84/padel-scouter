@@ -112,9 +112,67 @@ function renderPlayer(p, analyses) {
                 <p class="text-sm text-white">${escapeHtml(w)}</p>
             </li>`).join('');
 
-        // Improvement plan
+        // Improvement plan + objectives + projection
         D.planCard().classList.remove('hidden');
-        D.improvementPlan().textContent = latest.improvement_plan;
+        const planText = latest.improvement_plan || '';
+        const descEl = D.improvementPlan();
+        const objContainer = document.getElementById('plan-objectives');
+        const projContainer = document.getElementById('plan-projection');
+        const projText = document.getElementById('plan-projection-text');
+        
+        // Parse structured plan: sections separated by ---
+        const sections = planText.split(/\n---\n/);
+        if (sections.length >= 2) {
+          // First section is the description text
+          descEl.textContent = sections[0].trim();
+          
+          // Middle sections are objectives (1, 2, 3)
+          const objSections = sections.slice(1, -1);
+          const projectionSection = sections[sections.length - 1];
+          
+          // Render objectives
+          objContainer.innerHTML = objSections.map((sec, i) => {
+            const lines = sec.trim().split('\n').map(l => l.trim()).filter(Boolean);
+            const num = lines[0] || (i + 1).toString();
+            const name = lines[1] || 'Objetivo';
+            const detail = lines.slice(2).join(' — ') || 'Ejercicio específico';
+            return `
+              <div class="rounded-xl overflow-hidden" style="background:rgba(10,10,15,0.5);border:1px solid rgba(59,130,246,0.12);">
+                <div class="flex gap-4 p-4">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center font-orbitron font-black text-sm flex-shrink-0" style="background:rgba(59,130,246,0.12);color:#60a5fa;">${num}</div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-bold text-white font-orbitron">${escapeHtml(name)}</div>
+                    <div class="text-xs mt-1.5" style="color:#94a3b8;">${escapeHtml(detail)}</div>
+                  </div>
+                </div>
+              </div>`;
+          }).join('');
+          
+          // Parse projection section
+          if (projectionSection) {
+            const projLines = projectionSection.trim().split('\n').map(l => l.trim()).filter(Boolean);
+            // Expected: "Proyección Power Level", "CURRENT → TARGET", "En 8 semanas..."
+            if (projLines.length >= 2) {
+              const projMatch = projLines[1]?.match(/(\d[\d,.]*)\s*→\s*(\d[\d,.]*)/);
+              if (projMatch) {
+                const current = projMatch[1];
+                const target = projMatch[2];
+                document.getElementById('plan-current-pl').textContent = current;
+                document.getElementById('plan-target-pl').textContent = target;
+                projText.textContent = `${current} → ${target}`;
+              } else {
+                projText.textContent = projLines[1];
+              }
+              if (projLines.length >= 3) {
+                document.getElementById('plan-projection-note').textContent = projLines[projLines.length - 1];
+              }
+              projContainer.classList.remove('hidden');
+            }
+          }
+        } else {
+          // No structured format, just show text
+          descEl.textContent = planText;
+        }
 
     } else {
         D.powerDisplay().textContent = '???';
