@@ -142,8 +142,8 @@ function renderPlayer(p, analyses) {
             const name = lines[1] || 'Objetivo';
             const rawDetail = lines.slice(2).join(' ') || 'Ejercicio específico';
             const c = objColors[i] || objColors[objColors.length - 1];
-            // Separar frecuencia del texto descriptivo
-            const freqMatch = rawDetail.match(/(\d+\s+sesiones?\/semana\s*[—–\-─]?\s*)/i);
+            // Separar frecuencia del texto descriptivo (capturar hasta — o –)
+            const freqMatch = rawDetail.match(/(\d+\s+sesiones?\/semana\s*(?:\([^)]*\)\s*)?[—–]?\s*)/i);
             const detail = freqMatch ? rawDetail.replace(freqMatch[1], '') : rawDetail;
             const freq = freqMatch ? freqMatch[1].trim() : '';
             return `
