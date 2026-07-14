@@ -109,7 +109,7 @@ function renderMatches(matches, emptyMsg, searchTotalCount) {
         moreButton = `
             <div class="pt-3 text-center">
                 <button onclick="${onclick}"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all font-orbitron"
                         style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:#a855f7;">
                     ${label}
                 </button>
