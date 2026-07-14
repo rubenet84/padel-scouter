@@ -148,7 +148,7 @@ function setSortMode(mode) {
         } else {
             btn.style.background = 'rgba(168,85,247,0.05)';
             btn.style.border = '1px solid rgba(42,42,58,0.3)';
-            btn.style.color = '#666';
+            btn.style.color = '#5F5285';
         }
     });
     // Re-render if modal is open
