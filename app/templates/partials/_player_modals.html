@@ -3,7 +3,7 @@
 
 <!-- ── Modal Editar Jugador ────────────────────────────────── -->
 <div id="edit-modal" class="fixed inset-0 flex items-center justify-center p-4 hidden" style="z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);" onclick="if(event.target===event.currentTarget)closeEditModal()">
-    <div class="w-full max-w-2xl rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(124,95,214,0.3);max-height:92vh;overflow-y:auto;">
+    <div class="w-full max-w-2xl rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(124,95,214,0.3);max-height:92vh;overflow-y:auto;scrollbar-color:#7c5fd6 transparent;scrollbar-width:thin;">
         <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#7c5fd6,transparent);"></div>
         <div class="p-6">
             <div class="flex items-center justify-between mb-4">
@@ -101,7 +101,7 @@
             </div>
 
             <!-- Stats físico -->
-            <p class="text-xs font-bold tracking-widest uppercase mb-3 font-orbitron" style="color:rgba(0,180,216,0.6);">💪 Físico (0-100)</p>
+            <p class="text-xs font-bold tracking-widest uppercase mb-3 font-orbitron" style="color:rgba(0,180,216,0.6);padding-top:16px;">💪 Físico (0-100)</p>
             <div class="grid grid-cols-3 gap-3 mb-5">
                 <div><label class="text-xs font-bold" style="color:rgba(0,180,216,0.6);">Velocidad</label>
                     <input id="e-velocidad" type="number" min="0" max="100"
@@ -121,7 +121,7 @@
             </div>
 
             <!-- Stats mental -->
-            <p class="text-xs font-bold tracking-widest uppercase mb-3 font-orbitron" style="color:rgba(0,255,135,0.6);">🧠 Mental / Táctico (0-100)</p>
+            <p class="text-xs font-bold tracking-widest uppercase mb-3 font-orbitron" style="color:rgba(0,255,135,0.6);padding-top:16px;">🧠 Mental / Táctico (0-100)</p>
             <div class="grid grid-cols-3 gap-3 mb-5">
                 <div><label class="text-xs font-bold" style="color:rgba(0,255,135,0.6);">Táctica</label>
                     <input id="e-tactica" type="number" min="0" max="100"
