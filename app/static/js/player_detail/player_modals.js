@@ -25,8 +25,8 @@ function openStatsModal() {
         document.getElementById(containerId).innerHTML = stats.map(([label, val]) => `
             <div>
                 <div class="flex justify-between mb-1">
-                    <span class="text-xs font-orbitron" style="color:#94a3b8;">${label}</span>
-                    <span class="text-xs font-bold font-orbitron" style="color:${valColor};">${val ?? 50}</span>
+                    <span class="text-xs" style="color:#94a3b8;">${label}</span>
+                    <span class="text-xs font-bold" style="color:${valColor};">${val ?? 50}</span>
                 </div>
                 <div class="h-1.5 rounded-full overflow-hidden" style="background:#0A0A0F;">
                     <div class="h-full rounded-full"
