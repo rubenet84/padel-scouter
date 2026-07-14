@@ -7,20 +7,20 @@
         <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#FF6B00,transparent);"></div>
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
-                <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(255,107,0,0.8);">✏️ Editar Jugador</span>
+                <span class="text-sm font-bold tracking-widest uppercase font-orbitron" style="color:rgba(255,107,0,0.8);">✏️ Editar Jugador</span>
                 <button onclick="closeEditModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
             </div>
 
             <!-- Nombre y categoría -->
             <div class="grid grid-cols-2 gap-4 mb-5">
                 <div>
-                    <label class="text-xs text-gray-500 mb-1 block">Nombre</label>
+                    <label class="text-xs mb-1 block font-orbitron" style="color:#f97316;">Nombre</label>
                     <input id="edit-name" type="text"
                         class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
                         style="background:#0A0A0F;border:1px solid rgba(255,107,0,0.2);">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-500 mb-1 block">Categoría</label>
+                    <label class="text-xs mb-1 block font-orbitron" style="color:#f97316;">Categoría</label>
                     <select id="edit-category"
                             class="w-full rounded-lg px-3 py-2.5 text-sm text-white"
                             style="background:#0A0A0F;border:1px solid rgba(255,107,0,0.2);">
@@ -36,54 +36,54 @@
             </div>
             
             <!-- Stats técnica -->
-            <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(255,215,0,0.6);">⚡ Técnica (0-100)</p>
+            <p class="text-xs font-bold tracking-widest uppercase mb-3 font-orbitron" style="color:rgba(255,215,0,0.6);">⚡ Técnica (0-100)</p>
             <div class="grid grid-cols-3 gap-3 mb-5">
-                <div><label class="text-xs text-gray-500">Derecha</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Derecha</label>
                     <input id="e-derecha" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Revés</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Revés</label>
                     <input id="e-reves" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Volea Derecha</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Volea Derecha</label>
                     <input id="e-volea_derecha" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Volea Revés</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Volea Revés</label>
                     <input id="e-volea_reves" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Bandeja</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Bandeja</label>
                     <input id="e-bandeja" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Víbora</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Víbora</label>
                     <input id="e-vibora" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Remate</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Remate</label>
                     <input id="e-remate" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Globo</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Globo</label>
                     <input id="e-globo" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Saque</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Saque</label>
                     <input id="e-saque" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Bajada pared</label>
+                <div><label class="text-xs font-orbitron" style="color:#FFD700;">Bajada pared</label>
                     <input id="e-bajada_pared" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
@@ -91,19 +91,19 @@
             </div>
 
             <!-- Stats físico -->
-            <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(0,180,216,0.6);">💨 Físico (0-100)</p>
+            <p class="text-xs font-bold tracking-widest uppercase mb-3 font-orbitron" style="color:rgba(0,180,216,0.6);">💨 Físico (0-100)</p>
             <div class="grid grid-cols-3 gap-3 mb-5">
-                <div><label class="text-xs text-gray-500">Velocidad</label>
+                <div><label class="text-xs font-orbitron" style="color:#3b82f6;">Velocidad</label>
                     <input id="e-velocidad" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Resistencia</label>
+                <div><label class="text-xs font-orbitron" style="color:#3b82f6;">Resistencia</label>
                     <input id="e-resistencia" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Reflejos</label>
+                <div><label class="text-xs font-orbitron" style="color:#3b82f6;">Reflejos</label>
                     <input id="e-reflejos" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
@@ -111,19 +111,19 @@
             </div>
 
             <!-- Stats mental -->
-            <p class="text-xs font-bold tracking-widest uppercase mb-3" style="color:rgba(0,255,135,0.6);">🧠 Mental / Táctico (0-100)</p>
+            <p class="text-xs font-bold tracking-widest uppercase mb-3 font-orbitron" style="color:rgba(0,255,135,0.6);">🧠 Mental / Táctico (0-100)</p>
             <div class="grid grid-cols-3 gap-3 mb-5">
-                <div><label class="text-xs text-gray-500">Táctica</label>
+                <div><label class="text-xs font-orbitron" style="color:#22c55e;">Táctica</label>
                     <input id="e-tactica" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Presión</label>
+                <div><label class="text-xs font-orbitron" style="color:#22c55e;">Presión</label>
                     <input id="e-presion" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
                 </div>
-                <div><label class="text-xs text-gray-500">Trabajo en pareja</label>
+                <div><label class="text-xs font-orbitron" style="color:#22c55e;">Trabajo en pareja</label>
                     <input id="e-trabajo_en_pareja" type="number" min="0" max="100"
                         class="w-full rounded-lg px-3 py-2 text-sm text-white mt-1"
                         style="background:#0A0A0F;border:1px solid rgba(255,255,255,0.08);">
