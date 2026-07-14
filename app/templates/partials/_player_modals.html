@@ -2,11 +2,11 @@
 {# Dependencias: player (object), tournaments (array) #}
 
 <!-- ── Modal Editar Jugador ────────────────────────────────── -->
-<div id="edit-modal" class="fixed inset-0 flex items-center justify-center p-4 hidden" style="z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
+<div id="edit-modal" class="fixed inset-0 flex items-center justify-center p-4 hidden" style="z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);" onclick="if(event.target===event.currentTarget)closeEditModal()">
     <div class="w-full max-w-2xl rounded-2xl overflow-hidden" style="background:#12121A;border:1px solid rgba(124,95,214,0.3);max-height:92vh;overflow-y:auto;">
         <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#7c5fd6,transparent);"></div>
         <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-2">
                 <span class="text-sm font-bold tracking-widest uppercase font-orbitron" style="color:rgba(124,95,214,0.8);">✏️ Editar Jugador</span>
                 <span onclick="openLevelGuideModal()" title="Guía de niveles"
@@ -19,7 +19,7 @@
             </div>
 
             <!-- Datos del Jugador -->
-            <p class="text-xs font-bold tracking-widest uppercase mb-4 font-orbitron" style="color:rgba(255,107,0,0.8);">📋 Datos del Jugador</p>
+            <p class="text-xs font-bold tracking-widest uppercase mb-4 font-orbitron" style="color:rgba(255,107,0,0.8);padding-top:20px;">📋 Datos del Jugador</p>
 
             <!-- Nombre y categoría -->
             <div class="grid grid-cols-2 gap-4 mb-6">
@@ -46,7 +46,7 @@
             </div>
             
             <!-- Stats técnica -->
-            <p class="text-xs font-bold tracking-widest uppercase mb-3 font-orbitron" style="color:rgba(255,215,0,0.6);">⚡ Técnica (0-100)</p>
+            <p class="text-xs font-bold tracking-widest uppercase mb-3 font-orbitron" style="color:rgba(255,215,0,0.6);padding-top:16px;">⚡ Técnica (0-100)</p>
             <div class="grid grid-cols-3 gap-3 mb-5">
                 <div><label class="text-xs font-bold" style="color:rgba(255,215,0,0.6);">Derecha</label>
                     <input id="e-derecha" type="number" min="0" max="100"
