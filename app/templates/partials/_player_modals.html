@@ -7,17 +7,22 @@
         <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#7c5fd6,transparent);"></div>
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
-                <span class="text-sm font-bold tracking-widest uppercase font-orbitron" style="color:rgba(255,107,0,0.8);">✏️ Editar Jugador</span>
-              <span onclick="openLevelGuideModal()" title="Guía de niveles"
-                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold cursor-pointer transition-all flex-shrink-0"
-                    style="background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);color:#a855f7;"
-                    onmouseenter="this.style.background='rgba(168,85,247,0.3)';this.style.borderColor='rgba(168,85,247,0.5)'"
-                    onmouseleave="this.style.background='rgba(168,85,247,0.15)';this.style.borderColor='rgba(168,85,247,0.3)'">?</span>
-                <button onclick="closeEditModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-bold tracking-widest uppercase font-orbitron" style="color:rgba(124,95,214,0.8);">✏️ Editar Jugador</span>
+                <span onclick="openLevelGuideModal()" title="Guía de niveles"
+                      class="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full text-[11px] font-bold cursor-pointer transition-all"
+                      style="background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);color:#a855f7;"
+                      onmouseenter="this.style.background='rgba(168,85,247,0.3)';this.style.borderColor='rgba(168,85,247,0.5)'"
+                      onmouseleave="this.style.background='rgba(168,85,247,0.15)';this.style.borderColor='rgba(168,85,247,0.3)'">?</span>
+              </div>
+              <button onclick="closeEditModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
             </div>
 
+            <!-- Datos del Jugador -->
+            <p class="text-xs font-bold tracking-widest uppercase mb-4 font-orbitron" style="color:rgba(255,107,0,0.8);">📋 Datos del Jugador</p>
+
             <!-- Nombre y categoría -->
-            <div class="grid grid-cols-2 gap-4 mb-5">
+            <div class="grid grid-cols-2 gap-4 mb-6">
                 <div>
                     <label class="text-xs mb-1 block font-bold" style="color:rgba(255,107,0,0.8);">Nombre</label>
                     <input id="edit-name" type="text"
