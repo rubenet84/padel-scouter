@@ -116,8 +116,8 @@ async function openMatchAnalyticsModal() {
         if (scoringEntries.length > 0) {
             scoringList.innerHTML = scoringEntries.map(([label, count]) => `
                 <div class="text-center p-3 rounded-lg" style="background:rgba(10,10,15,0.6);border:1px solid rgba(42,42,58,0.4);">
-                    <p class="text-lg font-bold text-white">${count}</p>
-                    <p class="text-xs uppercase tracking-wider" style="color:#475569;">${label}</p>
+                    <p class="text-lg font-bold text-white font-orbitron">${count}</p>
+                    <p class="text-xs uppercase tracking-wider font-orbitron" style="color:#475569;">${label}</p>
                 </div>
             `).join('');
         } else {
