@@ -382,11 +382,11 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
           <div class="h-0.5 w-full" style="background:linear-gradient(90deg,transparent,#7c5fd6,transparent);"></div>
           <div class="p-6">
             <div class="flex items-center justify-between mb-5">
-              <span class="text-sm font-bold tracking-widest uppercase" style="color:rgba(124,95,214,0.8);">📊 Guía de Colores y Niveles</span>
+              <span class="text-sm font-bold tracking-widest uppercase font-orbitron" style="color:rgba(124,95,214,0.8);">📊 Guía de Colores y Niveles</span>
               <button onclick="closeRatingGuideModal()" class="text-gray-500 hover:text-white text-xl">✕</button>
             </div>
 
-            <p class="text-sm mb-5" style="color:#94a3b8;">Cada jugador tiene un nivel general que se calcula como la media de sus stats de <strong class="text-white">Técnica</strong>, <strong class="text-white">Físico</strong> y <strong class="text-white">Mental</strong>. Según ese promedio, se asigna un color y una badge.</p>
+            <p class="text-sm mb-5" style="color:#a78bfa;">Cada jugador tiene un nivel general que se calcula como la media de sus stats de Técnica, Físico y Mental. Según ese promedio, se asigna un color y una badge.</p>
 
             <div class="space-y-2 mb-6">
               <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);">
@@ -419,9 +419,9 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
               <p class="text-sm font-bold text-white mb-2">📐 ¿Cómo se calcula?</p>
               <p class="text-xs mb-3" style="color:#94a3b8;">Los números que ves debajo del Power Level en cada card son la media de cada rama:</p>
               <div class="space-y-1.5 text-xs" style="color:#cbd5e1;">
-                <div><span class="text-accent-orange">⚡ Técnica</span> = (derecha + revés + volea derecha + volea revés + bandeja + víbora + remate + globo + saque + bajada) / 10</div>
-                <div><span class="text-accent-neon">💪 Físico</span> = (velocidad + resistencia + reflejos) / 3</div>
-                <div><span class="text-accent-blue">🧠 Mental</span> = (táctica + presión + trabajo en pareja) / 3</div>
+                <div><span style="color:#f97316;">⚡ Técnica</span> = (derecha + revés + volea derecha + volea revés + bandeja + víbora + remate + globo + saque + bajada) / 10</div>
+                <div><span style="color:#22c55e;">💪 Físico</span> = (velocidad + resistencia + reflejos) / 3</div>
+                <div><span style="color:#3b82f6;">🧠 Mental</span> = (táctica + presión + trabajo en pareja) / 3</div>
               </div>
               <div class="mt-3 text-xs" style="color:#64748b;">El color de la card se determina por el promedio de las 3 ramas.</div>
             </div>
@@ -779,8 +779,8 @@ function detectAnomaly(players) {
         <div class="w-full h-1.5 bg-purple-950 rounded-full overflow-hidden">
           <div class="h-full rounded-full" style="width:${bestAnomaly.max.value}%;background:linear-gradient(90deg,${bestAnomaly.max.value > 75 ? '#22c55e' : '#f97316'},${bestAnomaly.max.value > 75 ? '#4ade80' : '#fbbf24'})"></div>
         </div>
-        <div class="text-xs font-bold text-purple-300/40 mt-2">Diferencia de ${bestAnomaly.gap} puntos<br><span class="block mt-0.5">¿Entrenamiento específico?</span></div>
-        <a href="/player/${p.id}" class="block text-center text-xs font-bold text-accent-blue hover:text-white mt-2 transition-colors">Ver perfil →</a>
+        <div class="text-xs text-gradient-pink mt-2">Diferencia de ${bestAnomaly.gap} puntos<br><span class="block mt-0.5">¿Entrenamiento específico?</span></div>
+        <a href="/player/${p.id}" class="block text-center text-xs font-bold font-orbitron text-accent-blue hover:text-white mt-2 transition-colors uppercase tracking-wider">VER PERFIL →</a>
       </div>`;
   } else if (bestAnomaly && bestAnomaly.gap >= 15) {
     const p = bestAnomaly.player;
