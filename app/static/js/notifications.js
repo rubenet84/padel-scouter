@@ -13,6 +13,11 @@
     let pollingId = null;
 
     function init() {
+        // CSS inline para el dropdown
+        const style = document.createElement('style');
+        style.textContent = '#notif-dropdown.open{display:block!important}';
+        document.head.appendChild(style);
+
         bell = document.querySelector(BELL_SEL);
         count = document.querySelector(COUNT_SEL);
         dropdown = document.querySelector(DROP_SEL);
@@ -24,8 +29,9 @@
         // Toggle dropdown al click
         bell.addEventListener('click', function (e) {
             e.stopPropagation();
-            const open = dropdown.classList.toggle('open');
-            if (open) {
+            const isOpen = !dropdown.classList.contains('open');
+            dropdown.classList.toggle('open');
+            if (isOpen) {
                 markAllRead();
                 loadNotifications();
             }
