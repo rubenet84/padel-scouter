@@ -702,8 +702,8 @@ function renderComparison(data) {
                         return v + suffix;
                     }
 
-                    const barColorA = valA >= valB ? 'bg-emerald-500' : 'bg-gray-600';
-                    const barColorB = valB >= valA ? 'bg-emerald-500' : 'bg-gray-600';
+                    const barColorA = valA >= valB ? 'bg-emerald-500' : 'bg-blue-500';
+                    const barColorB = valB >= valA ? 'bg-emerald-500' : 'bg-blue-500';
 
                     return `
                         <div>
