@@ -62,12 +62,21 @@
         updateCount();
         // Polling
         pollingId = setInterval(updateCount, POLL_INTERVAL);
+        // Actualizar timestamps "hace X" cada 30s
+        setInterval(refreshTimestamps, 30000);
         // Actualizar al volver a la pestaña
         document.addEventListener('visibilitychange', function () {
             if (!document.hidden) updateCount();
         });
         // Actualizar al navegar (SPA / volver atrás)
         window.addEventListener('focus', updateCount);
+    }
+
+    function refreshTimestamps() {
+        document.querySelectorAll('#notif-list [data-ts]').forEach(function (el) {
+            var ts = el.getAttribute('data-ts');
+            if (ts) el.textContent = timeAgo(ts);
+        });
     }
 
     async function updateCount() {
@@ -114,7 +123,7 @@
                    style="${n.is_read ? 'opacity:0.55;' : 'border-left:2px solid #a78bfa;'}">
                     <div class="text-xs font-bold" style="color:#e2e8f0;">${escHtml(n.title)}</div>
                     <div class="text-[11px] mt-0.5" style="color:#cbd5e1;">${n.message || ''}</div>
-                    <div class="text-[9px] mt-1" style="color:#3b82f6;">${timeAgo(n.created_at)}</div>
+                    <div class="text-[9px] mt-1" style="color:#3b82f6;" data-ts="${n.created_at}">${timeAgo(n.created_at)}</div>
                 </a>
             `).join('');
         } catch (_) {
