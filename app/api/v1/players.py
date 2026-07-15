@@ -452,8 +452,8 @@ def add_match(
         notif = NotificationModel(
             user_id=current_user.id,
             type="match_added",
-            title="Nuevo partido registrado",
-            message=f"{player.name} ha añadido un partido de {tipo} en el que apareces — {resultado}",
+            title=f"{player.name} te ha añadido como compañero",
+            message=f"{tipo.upper()} — {resultado} vs {data.rival_nombre}",
             related_url=f"/player/{player_id}",
         )
         db.add(notif)
