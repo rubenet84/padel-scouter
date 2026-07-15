@@ -454,6 +454,7 @@ def add_match(
         notif = NotificationModel(
             user_id=current_user.id,
             player_id=partner_id,
+            match_id=match.id,
             type="match_added",
             title=f"{player.name} te ha añadido como compañero",
             message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>",
@@ -732,12 +733,10 @@ def delete_match(
             detail="Partido no encontrado o no tenés permiso para eliminarlo. Solo vos o tu compañero pueden eliminar este partido.",
         )
 
-    # Limpiar notificaciones relacionadas con este partido
+    # Limpiar notificaciones de este partido específico
     from app.infrastructure.database.models import NotificationModel
-    notif_msg = f"/player/{player_id}"
     db.query(NotificationModel).filter(
-        NotificationModel.user_id == current_user.id,
-        NotificationModel.related_url == notif_msg,
+        NotificationModel.match_id == match_id,
     ).delete()
     db.delete(match)
     db.commit()
