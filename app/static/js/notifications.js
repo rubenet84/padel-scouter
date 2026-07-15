@@ -43,20 +43,23 @@
             const isOpen = !dropdown.classList.contains('open');
             dropdown.classList.toggle('open');
             if (isOpen) {
-                markAllRead();
                 loadNotifications();
+            } else {
+                markAllRead();
             }
         });
         // Cerrar dropdown al click fuera
         document.addEventListener('click', function () {
-            dropdown.classList.remove('open');
+            if (dropdown.classList.contains('open')) {
+                dropdown.classList.remove('open');
+                markAllRead();
+            }
         });
         dropdown.addEventListener('click', function (e) {
             e.stopPropagation();
         });
-        // Cargar inicial
+        // Cargar contador inicial
         updateCount();
-        loadNotifications();
         // Polling
         pollingId = setInterval(updateCount, POLL_INTERVAL);
     }
