@@ -114,7 +114,7 @@
                    style="${n.is_read ? 'opacity:0.55;' : 'border-left:2px solid #a78bfa;'}">
                     <div class="text-xs font-bold" style="color:#e2e8f0;">${escHtml(n.title)}</div>
                     <div class="text-[11px] mt-0.5" style="color:#cbd5e1;">${n.message || ''}</div>
-                    <div class="text-[9px] mt-1" style="color:#64748b;">${timeAgo(n.created_at)}</div>
+                    <div class="text-[9px] mt-1" style="color:#3b82f6;">${timeAgo(n.created_at)}</div>
                 </a>
             `).join('');
         } catch (_) {
