@@ -449,6 +449,7 @@ def add_match(
         from app.infrastructure.database.models import NotificationModel
         rivalText = data.rival_nombre or "Rival"
         safeRival = rivalText.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+        fechaStr = match.played_at.strftime('%d/%m/%Y') if match.played_at else ''
         tipoBadge = '<span style="background:rgba(255,215,0,0.1);color:#FFD700;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">TORNEO</span>' if data.tournament_id else '<span style="background:rgba(255,107,0,0.1);color:#FF6B00;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">AMISTOSO</span>'
         resultBadge = '<span style="background:rgba(0,255,135,0.1);color:#00FF87;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">VICTORIA</span>' if data.ganado else '<span style="background:rgba(255,45,45,0.1);color:#FF2D2D;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">DERROTA</span>'
         notif = NotificationModel(
@@ -457,7 +458,7 @@ def add_match(
             match_id=match.id,
             type="match_added",
             title=f"{player.name} te ha añadido como compañero",
-            message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>",
+            message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>  {data.resultado or ''}  <span style=\"color:#64748b;font-size:9px;\">{fechaStr}</span>",
             related_url=f"/player/{player_id}",
         )
         db.add(notif)
