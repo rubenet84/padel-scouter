@@ -457,6 +457,14 @@ def add_match(
             related_url=f"/player/{player_id}",
         )
         db.add(notif)
+        # Mantener solo las últimas 50 notificaciones
+        all_ids = db.query(NotificationModel.id).filter(
+            NotificationModel.user_id == current_user.id,
+        ).order_by(NotificationModel.created_at.desc()).offset(50).all()
+        if all_ids:
+            db.query(NotificationModel).filter(
+                NotificationModel.id.in_([r[0] for r in all_ids])
+            ).delete(synchronize_session=False)
         db.commit()
 
     return match
@@ -721,5 +729,12 @@ def delete_match(
             detail="Partido no encontrado o no tenés permiso para eliminarlo. Solo vos o tu compañero pueden eliminar este partido.",
         )
 
+    # Limpiar notificaciones relacionadas con este partido
+    from app.infrastructure.database.models import NotificationModel
+    notif_msg = f"/player/{player_id}"
+    db.query(NotificationModel).filter(
+        NotificationModel.user_id == current_user.id,
+        NotificationModel.related_url == notif_msg,
+    ).delete()
     db.delete(match)
     db.commit()

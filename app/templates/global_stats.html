@@ -97,13 +97,13 @@ body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;o
         <span class="text-[10px] text-green-400 font-medium tracking-wider uppercase transition-colors font-orbitron">Scouter Active</span>
       </button>
             <div class="relative" id="notif-bell">
-        <button class="relative w-10 h-10 rounded-lg bg-purple-800/30 border border-purple-500/15 flex items-center justify-center hover:bg-purple-800/50 transition-colors cursor-pointer">
-          <span class="iconify text-purple-300/60 text-lg" data-icon="mdi:bell-outline"></span>
+        <button class="relative w-11 h-11 rounded-lg transition-all duration-300 cursor-pointer" style="background:rgba(124,95,214,0.15);border:1px solid rgba(124,95,214,0.15);" onmouseenter="this.style.background='rgba(124,95,214,0.4)';this.style.borderColor='rgba(124,95,214,0.4)';this.style.boxShadow='0 0 15px rgba(124,95,214,0.2)'" onmouseleave="this.style.background='rgba(124,95,214,0.15)';this.style.borderColor='rgba(124,95,214,0.15)';this.style.boxShadow='none'"">
+          <span class="iconify text-purple-300/70 text-xl" data-icon="mdi:bell-outline"></span>
           <div id="notif-count" class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-accent-red hidden flex items-center justify-center text-[9px] font-bold text-white px-1" style="box-shadow:0 0 6px rgba(239,68,68,0.6);">0</div>
         </button>
-        <div id="notif-dropdown" class="absolute top-full right-0 mt-2 w-[320px] rounded-xl overflow-hidden hidden" style="background:rgba(18,18,26,0.96);border:1px solid rgba(124,95,214,0.2);backdrop-filter:blur(12px);z-index:9999;max-height:400px;overflow-y:auto;">
+        <div id="notif-dropdown" class="absolute top-full right-0 mt-2 w-[360px] rounded-xl overflow-hidden hidden" style="background:rgba(18,18,26,0.96);border:1px solid rgba(124,95,214,0.25);backdrop-filter:blur(12px);z-index:9999;max-height:450px;overflow-y:auto;">
           <div class="p-3 border-b border-purple-500/10 flex items-center justify-between">
-            <span class="text-[10px] font-bold tracking-widest uppercase font-orbitron" style="color:#a78bfa;">Notificaciones</span>
+            <span class="text-xs font-bold tracking-widest uppercase font-orbitron" style="color:#a78bfa;">Notificaciones</span>
           </div>
           <div id="notif-list" class="divide-y divide-white/5"></div>
         </div>
