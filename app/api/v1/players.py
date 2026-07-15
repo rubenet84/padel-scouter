@@ -450,7 +450,7 @@ def add_match(
         rivalText = data.rival_nombre or "Rival"
         safeRival = rivalText.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
         tipoBadge = '<span style="background:rgba(255,215,0,0.1);color:#FFD700;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">TORNEO</span>' if data.tournament_id else '<span style="background:rgba(255,107,0,0.1);color:#FF6B00;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">AMISTOSO</span>'
-        resultBadge = '<span style="color:#22c55e;font-weight:bold;">Victoria</span>' if data.ganado else '<span style="color:#ef4444;font-weight:bold;">Derrota</span>'
+        resultBadge = '<span style="background:rgba(0,255,135,0.1);color:#00FF87;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">VICTORIA</span>' if data.ganado else '<span style="background:rgba(255,45,45,0.1);color:#FF2D2D;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">DERROTA</span>'
         notif = NotificationModel(
             user_id=current_user.id,
             type="match_added",
