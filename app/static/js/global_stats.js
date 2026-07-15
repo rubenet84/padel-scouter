@@ -195,7 +195,10 @@ async function loadRanking() {
         return;
     }
 
-    tbody.innerHTML = '<tr><td colspan="10" class="p-6 text-center text-gray-500"><span class="animate-pulse">Cargando ranking...</span></td></tr>';
+    const isReload = tbody.querySelector('tr td[colspan="10"]') === null;
+    if (!isReload) {
+        tbody.innerHTML = '<tr><td colspan="10" class="p-6 text-center text-gray-500"><span class="animate-pulse">Cargando ranking...</span></td></tr>';
+    }
 
     const url = buildRankingUrl();
 
