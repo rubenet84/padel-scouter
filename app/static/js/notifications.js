@@ -65,7 +65,8 @@
         try {
             const t = localStorage.getItem('access_token');
             if (!t) return;
-            const url = '/api/v1/notifications/unread-count?' + playerQuery();
+            const q = playerQuery();
+            const url = '/api/v1/notifications/unread-count' + (q ? '?' + q : '');
             const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${t}` }
             });
@@ -88,7 +89,8 @@
         try {
             const t = localStorage.getItem('access_token');
             if (!t) return;
-            const url = '/api/v1/notifications?limit=20&' + playerQuery();
+            const q = playerQuery();
+            const url = '/api/v1/notifications?limit=20' + (q ? '&' + q : '');
             const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${t}` }
             });
