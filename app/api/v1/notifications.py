@@ -14,14 +14,17 @@ router = APIRouter(prefix="/notifications", tags=["notifications"])
 @router.get("")
 def list_notifications(
     unread_only: bool = Query(False, description="Solo no leídas"),
+    player_id: str | None = Query(None, description="Filtrar por jugador"),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Lista notificaciones del usuario, no leídas primero."""
+    """Lista notificaciones del usuario, opcionalmente filtradas por jugador."""
     q = db.query(NotificationModel).filter(
         NotificationModel.user_id == current_user.id
     )
+    if player_id:
+        q = q.filter(NotificationModel.player_id == player_id)
     if unread_only:
         q = q.filter(NotificationModel.is_read == False)
     q = q.order_by(NotificationModel.is_read.asc(),
@@ -35,6 +38,7 @@ def list_notifications(
             "title": n.title,
             "message": n.message,
             "related_url": n.related_url,
+            "player_id": str(n.player_id) if n.player_id else None,
             "is_read": n.is_read,
             "created_at": n.created_at.isoformat(),
         }
@@ -44,14 +48,18 @@ def list_notifications(
 
 @router.get("/unread-count")
 def unread_count(
+    player_id: str | None = Query(None, description="Filtrar por jugador"),
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
     """Contador rápido de no leídas (para polling ligero)."""
-    count = db.query(NotificationModel).filter(
+    q = db.query(NotificationModel).filter(
         NotificationModel.user_id == current_user.id,
         NotificationModel.is_read == False,
-    ).count()
+    )
+    if player_id:
+        q = q.filter(NotificationModel.player_id == player_id)
+    count = q.count()
     return {"count": count}
 
 
@@ -76,13 +84,17 @@ def mark_read(
 
 @router.put("/read-all")
 def mark_all_read(
+    player_id: str | None = Query(None, description="Filtrar por jugador"),
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
     """Marca todas las notificaciones como leídas."""
-    db.query(NotificationModel).filter(
+    q = db.query(NotificationModel).filter(
         NotificationModel.user_id == current_user.id,
         NotificationModel.is_read == False,
-    ).update({"is_read": True})
+    )
+    if player_id:
+        q = q.filter(NotificationModel.player_id == player_id)
+    q.update({"is_read": True})
     db.commit()
     return {"success": True}

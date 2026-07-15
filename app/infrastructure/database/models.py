@@ -149,6 +149,7 @@ class NotificationModel(Base):
 
     id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    player_id   = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=True)
     type        = Column(String(30),  nullable=False)
     title       = Column(String(200), nullable=False)
     message     = Column(Text, nullable=True)

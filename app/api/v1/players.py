@@ -453,6 +453,7 @@ def add_match(
         resultBadge = '<span style="background:rgba(0,255,135,0.1);color:#00FF87;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">VICTORIA</span>' if data.ganado else '<span style="background:rgba(255,45,45,0.1);color:#FF2D2D;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">DERROTA</span>'
         notif = NotificationModel(
             user_id=current_user.id,
+            player_id=partner_id,
             type="match_added",
             title=f"{player.name} te ha añadido como compañero",
             message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>",

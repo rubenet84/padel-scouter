@@ -12,6 +12,17 @@
     let bell, count, dropdown, list;
     let pollingId = null;
 
+    /** Detecta si estamos en una página de jugador (/player/{uuid}) */
+    function getPlayerId() {
+        const m = window.location.pathname.match(/^\/player\/([a-f0-9\-]+)/i);
+        return m ? m[1] : null;
+    }
+
+    function playerQuery() {
+        const pid = getPlayerId();
+        return pid ? 'player_id=' + pid : '';
+    }
+
     function init() {
         // CSS inline para el dropdown
         const style = document.createElement('style');
@@ -54,7 +65,8 @@
         try {
             const t = localStorage.getItem('access_token');
             if (!t) return;
-            const res = await fetch('/api/v1/notifications/unread-count', {
+            const url = '/api/v1/notifications/unread-count?' + playerQuery();
+            const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${t}` }
             });
             if (!res.ok) return;
@@ -76,7 +88,8 @@
         try {
             const t = localStorage.getItem('access_token');
             if (!t) return;
-            const res = await fetch('/api/v1/notifications?limit=20', {
+            const url = '/api/v1/notifications?limit=20&' + playerQuery();
+            const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${t}` }
             });
             if (!res.ok) return;
