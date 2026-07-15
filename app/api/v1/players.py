@@ -443,6 +443,22 @@ def add_match(
     db.add(match)
     db.commit()
     db.refresh(match)
+
+    # ── Notificar al compañero si está registrado ────────────────
+    if partner_id and partner_id != player_id:
+        from app.infrastructure.database.models import NotificationModel
+        tipo = "torneo" if data.tournament_id else "amistoso"
+        resultado = "Victoria" if data.ganado else "Derrota"
+        notif = NotificationModel(
+            user_id=current_user.id,
+            type="match_added",
+            title="Nuevo partido registrado",
+            message=f"{player.name} ha añadido un partido de {tipo} en el que apareces — {resultado}",
+            related_url=f"/player/{player_id}",
+        )
+        db.add(notif)
+        db.commit()
+
     return match
 
 

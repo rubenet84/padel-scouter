@@ -152,10 +152,19 @@ body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;o
         <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse group-hover/scout:bg-green-300"></span>
         <span class="text-[10px] text-green-400 group-hover/scout:text-green-300 font-medium tracking-wider uppercase transition-colors font-orbitron">Scouter Active</span>
       </button>
-      <button class="relative w-10 h-10 rounded-lg bg-purple-800/30 border border-purple-500/15 flex items-center justify-center hover:bg-purple-800/50 transition-colors">
-        <span class="iconify text-purple-300/60 text-lg" data-icon="mdi:bell-outline"></span>
-        <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-accent-red rounded-full border-2 border-purple-950"></div>
-      </button>
+      <div class="relative" id="notif-bell">
+        <button class="relative w-10 h-10 rounded-lg bg-purple-800/30 border border-purple-500/15 flex items-center justify-center hover:bg-purple-800/50 transition-colors cursor-pointer">
+          <span class="iconify text-purple-300/60 text-lg" data-icon="mdi:bell-outline"></span>
+          <div id="notif-count" class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-accent-red hidden flex items-center justify-center text-[9px] font-bold text-white px-1" style="box-shadow:0 0 6px rgba(239,68,68,0.6);">0</div>
+        </button>
+        <!-- Dropdown -->
+        <div id="notif-dropdown" class="absolute top-full right-0 mt-2 w-[320px] rounded-xl overflow-hidden hidden" style="background:rgba(18,18,26,0.96);border:1px solid rgba(124,95,214,0.2);backdrop-filter:blur(12px);z-index:9999;max-height:400px;overflow-y:auto;">
+          <div class="p-3 border-b border-purple-500/10 flex items-center justify-between">
+            <span class="text-[10px] font-bold tracking-widest uppercase font-orbitron" style="color:#a78bfa;">Notificaciones</span>
+          </div>
+          <div id="notif-list" class="divide-y divide-white/5"></div>
+        </div>
+      </div>
       <div onclick="toggleSidebar()" title="Menú de perfil" class="flex items-center gap-2.5 cursor-pointer group">
         <div class="w-[52px] h-[52px] rounded-xl overflow-hidden border-2 border-yellow-500/60 group-hover:border-yellow-400 transition-colors flex-shrink-0">
           <img src="/static/images/logo-usuario.png" alt="User" class="w-full h-full object-cover">
@@ -722,5 +731,6 @@ document.addEventListener('click', function(e) {
 </script>
 <script type="module" src="/static/js/player_detail/player_detail.js"></script>
 {% include "partials/chatbot_widget.html" %}
+<script src="/static/js/notifications.js"></script>
 </body>
 </html>

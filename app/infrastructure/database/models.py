@@ -136,3 +136,22 @@ class MatchModel(Base):
     player2    = relationship("PlayerModel", foreign_keys="MatchModel.player2_id")
     tournament = relationship("TournamentModel", back_populates="matches")
     partner    = relationship("PlayerModel", foreign_keys="MatchModel.partner_id")
+
+
+# ── Notification types ──────────────────────────────────────────
+NOTIF_MATCH_ADDED = "match_added"
+NOTIF_TYPES = [NOTIF_MATCH_ADDED]
+
+
+# ── Notification ────────────────────────────────────────────────
+class NotificationModel(Base):
+    __tablename__ = "notifications"
+
+    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    user_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    type        = Column(String(30),  nullable=False)
+    title       = Column(String(200), nullable=False)
+    message     = Column(Text, nullable=True)
+    related_url = Column(String(300), nullable=True)
+    is_read     = Column(Boolean, default=False, nullable=False)
+    created_at  = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
