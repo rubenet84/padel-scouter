@@ -447,13 +447,15 @@ def add_match(
     # ── Notificar al compañero si está registrado ────────────────
     if partner_id and partner_id != player_id:
         from app.infrastructure.database.models import NotificationModel
-        tipo = "torneo" if data.tournament_id else "amistoso"
-        resultado = "Victoria" if data.ganado else "Derrota"
+        rivalText = data.rival_nombre or "Rival"
+        safeRival = rivalText.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+        tipoBadge = '<span style="background:rgba(255,215,0,0.1);color:#FFD700;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">TORNEO</span>' if data.tournament_id else '<span style="background:rgba(255,107,0,0.1);color:#FF6B00;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">AMISTOSO</span>'
+        resultBadge = '<span style="color:#22c55e;font-weight:bold;">Victoria</span>' if data.ganado else '<span style="color:#ef4444;font-weight:bold;">Derrota</span>'
         notif = NotificationModel(
             user_id=current_user.id,
             type="match_added",
             title=f"{player.name} te ha añadido como compañero",
-            message=f"{tipo.upper()} — {resultado} vs {data.rival_nombre}",
+            message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>",
             related_url=f"/player/{player_id}",
         )
         db.add(notif)
