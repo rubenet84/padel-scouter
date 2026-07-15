@@ -785,7 +785,7 @@ function detectAnomaly(players) {
         <div class="w-full h-1.5 bg-purple-950 rounded-full overflow-hidden">
           <div class="h-full rounded-full" style="width:${bestAnomaly.max.value}%;background:linear-gradient(90deg,${bestAnomaly.max.value > 75 ? '#22c55e' : '#f97316'},${bestAnomaly.max.value > 75 ? '#4ade80' : '#fbbf24'})"></div>
         </div>
-        <div class="text-xs text-gradient-pink mt-2 font-bold">Diferencia de ${bestAnomaly.gap} puntos<br><span class="block mt-0.5">¿Entrenamiento específico?</span></div>
+        <div class="text-xs text-gradient-pink font-bold" style="padding:12px 0;">Diferencia de ${bestAnomaly.gap} puntos<br><span class="block mt-1">¿Entrenamiento específico?</span></div>
         <a href="/player/${p.id}" class="block text-center text-xs font-bold font-orbitron text-accent-blue hover:text-white mt-2 transition-colors uppercase tracking-wider">VER PERFIL →</a>
       </div>`;
   } else if (bestAnomaly && bestAnomaly.gap >= 15) {
