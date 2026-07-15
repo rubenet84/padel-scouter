@@ -774,7 +774,7 @@ function detectAnomaly(players) {
   if (bestAnomaly && bestAnomaly.gap >= 25) {
     const p = bestAnomaly.player;
     const safeName = (p.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    labelEl.innerHTML = `<strong>${safeName}</strong><br><span class="block mt-0.5" style="color:#a78bfa;">${bestAnomaly.min.name} ${bestAnomaly.min.value} vs ${bestAnomaly.max.name} ${bestAnomaly.max.value}</span>`;
+    labelEl.innerHTML = `<strong>${safeName}</strong><br><span class="block mt-0.5 font-bold" style="color:#a78bfa;">${bestAnomaly.min.name} ${bestAnomaly.min.value} vs ${bestAnomaly.max.name} ${bestAnomaly.max.value}</span>`;
     detailEl.innerHTML = `
       <div class="bg-purple-950/40 rounded-lg p-3 border border-purple-500/5">
         <div class="flex items-center justify-between text-xs mb-2">
@@ -785,13 +785,13 @@ function detectAnomaly(players) {
         <div class="w-full h-1.5 bg-purple-950 rounded-full overflow-hidden">
           <div class="h-full rounded-full" style="width:${bestAnomaly.max.value}%;background:linear-gradient(90deg,${bestAnomaly.max.value > 75 ? '#22c55e' : '#f97316'},${bestAnomaly.max.value > 75 ? '#4ade80' : '#fbbf24'})"></div>
         </div>
-        <div class="text-xs text-gradient-pink mt-2">Diferencia de ${bestAnomaly.gap} puntos<br><span class="block mt-0.5">¿Entrenamiento específico?</span></div>
+        <div class="text-xs text-gradient-pink mt-2 font-bold">Diferencia de ${bestAnomaly.gap} puntos<br><span class="block mt-0.5">¿Entrenamiento específico?</span></div>
         <a href="/player/${p.id}" class="block text-center text-xs font-bold font-orbitron text-accent-blue hover:text-white mt-2 transition-colors uppercase tracking-wider">VER PERFIL →</a>
       </div>`;
   } else if (bestAnomaly && bestAnomaly.gap >= 15) {
     const p = bestAnomaly.player;
     const safeName = (p.name || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    labelEl.innerHTML = `<strong>${safeName}</strong><br><span class="block mt-0.5" style="color:#a78bfa;">Desequilibrio moderado</span>`;
+    labelEl.innerHTML = `<strong>${safeName}</strong><br><span class="block mt-0.5 font-bold" style="color:#a78bfa;">Desequilibrio moderado</span>`;
     detailEl.innerHTML = `
       <div class="bg-purple-950/40 rounded-lg p-3 border border-purple-500/5 text-center">
         <span class="text-xs text-purple-200/60">${safeName}: ${bestAnomaly.min.name} ${bestAnomaly.min.value} / ${bestAnomaly.max.name} ${bestAnomaly.max.value}</span>
@@ -823,7 +823,7 @@ async function loadStreak() {
     const top = json.data.players[0];
     if (top.streak <= 0) { label.textContent = 'Sin rachas activas'; return; }
     const safeName = top.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    label.innerHTML = `<strong>${safeName}</strong><br><span class="block mt-0.5" style="color:#f97316;">${top.streak} ${top.streak === 1 ? 'victoria' : 'victorias'} consecutivas</span>`;
+    label.innerHTML = `<strong>${safeName}</strong><br><span class="block mt-0.5 font-bold" style="color:#f97316;">${top.streak} ${top.streak === 1 ? 'victoria' : 'victorias'} consecutivas</span>`;
     // Bars decorativas: más barras llenas = racha más larga
     const barCount = Math.min(top.streak, 10);
     bars.innerHTML = '';
@@ -868,7 +868,7 @@ async function loadProgression() {
     }
     if (bestGain > 0 && bestPlayer) {
       const safeName = bestPlayer.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      label.innerHTML = `<strong>${safeName}</strong><br><span class="block mt-0.5" style="color:#22c55e;">+${bestGain} pts</span>`;
+      label.innerHTML = `<strong>${safeName}</strong><br><span class="block mt-0.5 font-bold" style="color:#22c55e;">+${bestGain} pts</span>`;
       // Bars: hasta 10 escalones según la ganancia
       const steps = Math.min(Math.round(bestGain / 100), 10);
       bars.innerHTML = '';
