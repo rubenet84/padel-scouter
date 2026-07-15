@@ -7,7 +7,7 @@
     const COUNT_SEL = '#notif-count';
     const DROP_SEL = '#notif-dropdown';
     const LIST_SEL = '#notif-list';
-    const POLL_INTERVAL = 45000; // 45s
+    const POLL_INTERVAL = 10000; // 10s
 
     let bell, count, dropdown, list;
     let pollingId = null;
@@ -62,6 +62,12 @@
         updateCount();
         // Polling
         pollingId = setInterval(updateCount, POLL_INTERVAL);
+        // Actualizar al volver a la pestaña
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) updateCount();
+        });
+        // Actualizar al navegar (SPA / volver atrás)
+        window.addEventListener('focus', updateCount);
     }
 
     async function updateCount() {

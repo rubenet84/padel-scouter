@@ -458,7 +458,7 @@ def add_match(
             match_id=match.id,
             type="match_added",
             title=f"{player.name} te ha añadido como compañero",
-            message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>  {data.resultado or ''}  <span style=\"color:#64748b;font-size:9px;\">{fechaStr}</span>",
+            message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>  {data.resultado or ''}  <span style=\"color:#fbbf24;font-size:9px;\">{fechaStr}</span>",
             related_url=f"/player/{player_id}",
         )
         db.add(notif)
