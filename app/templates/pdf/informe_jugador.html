@@ -17,9 +17,8 @@
 
   /* ── Layout: 2 pages side by side for preview, print splits them ── */
   .page {
-    width: 210mm;
+    width: 100%;
     min-height: 297mm;
-    padding: 12mm 12mm 10mm 12mm;
     background: #fff;
     position: relative;
     page-break-after: always;
@@ -361,9 +360,9 @@
   /* ── FOOTER ── */
   .footer {
     position: absolute;
-    bottom: 8mm;
-    left: 12mm;
-    right: 12mm;
+    bottom: 14mm;
+    left: 14mm;
+    right: 14mm;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -385,6 +384,11 @@
   @media print {
     body { margin: 0; }
     .page { margin: 0; box-shadow: none; }
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm 14mm 12mm 14mm;
   }
 </style>
 </head>
