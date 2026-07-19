@@ -428,16 +428,16 @@ def export_player_pdf_weasy(
 
     import json
     player_dict = {c.name: getattr(player, c.name) for c in player.__table__.columns}
-    player_dict["category"] = player.category.name if hasattr(player.category, "name") else str(player.category)
+    player_dict["category"] = player.category.value if hasattr(player.category, "value") else str(player.category)
 
     analysis_dict = {}
     if analysis:
         analysis_dict = {
             "power_level": analysis.power_level,
-            "ai_description": analysis.ai_description,
-            "improvement_plan": analysis.improvement_plan,
-            "strengths": json.loads(analysis.strengths) if isinstance(analysis.strengths, str) else analysis.strengths,
-            "weaknesses": json.loads(analysis.weaknesses) if isinstance(analysis.weaknesses, str) else analysis.weaknesses,
+            "ai_description": analysis.ai_description or "",
+            "improvement_plan": analysis.improvement_plan or "",
+            "strengths": json.loads(analysis.strengths) if isinstance(analysis.strengths, str) else (analysis.strengths or []),
+            "weaknesses": json.loads(analysis.weaknesses) if isinstance(analysis.weaknesses, str) else (analysis.weaknesses or []),
         }
 
     from app.infrastructure.pdf.generate_pdf import generate_player_pdf
