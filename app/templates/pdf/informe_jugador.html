@@ -20,12 +20,8 @@
     width: 100%;
     min-height: 297mm;
     background: #fff;
+    position: relative;
     page-break-after: always;
-    display: flex;
-    flex-direction: column;
-  }
-  .footer-spacer {
-    flex: 1;
   }
 
   /* ── HEADER ── */
@@ -362,14 +358,7 @@
   .quote-author { font-size: 8px; color: #7c5fd6; font-weight: 600; margin-top: 1mm; }
 
   /* ── FOOTER ── */
-  .footer {
-    margin-top: 25mm;
-    padding-top: 3mm;
-    border-top: 1px solid #e8e4f5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  .footer { display: none; }
   .footer-brand { font-size: 8.5px; font-weight: 800; color: #7c5fd6; letter-spacing: 0.5px; }
   .footer-url { font-size: 8px; color: #94a3b8; }
   .footer-page {
@@ -389,7 +378,20 @@
 
   @page {
     size: A4;
-    margin: 12mm 14mm 12mm 14mm;
+    margin: 12mm 14mm 22mm 14mm;
+    @bottom-left {
+      content: "PADEL SCOUTER";
+      font-family: 'Inter', sans-serif;
+      font-size: 7px;
+      font-weight: 800;
+      color: #7c5fd6;
+    }
+    @bottom-right {
+      content: "www.padelscouter.com";
+      font-family: 'Inter', sans-serif;
+      font-size: 7px;
+      color: #94a3b8;
+    }
   }
 </style>
 </head>
@@ -526,7 +528,7 @@
     </div>
   </div>
 
-  <div class="footer-spacer"></div><!-- FOOTER -->
+  <!-- FOOTER -->
   <div class="footer">
     <div class="footer-brand">PADEL SCOUTER</div>
     <div class="footer-url">www.padelscouter.com</div>
@@ -619,7 +621,7 @@
     </div>
   </div>
 
-  <div class="footer-spacer"></div><!-- FOOTER -->
+  <!-- FOOTER -->
   <div class="footer">
     <div class="footer-brand">PADEL SCOUTER</div>
     <div class="footer-url">www.padelscouter.com</div>
@@ -629,4 +631,5 @@
 
 </body>
 </html>
+
 
