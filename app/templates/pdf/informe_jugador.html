@@ -20,8 +20,12 @@
     width: 100%;
     min-height: 297mm;
     background: #fff;
-    position: relative;
     page-break-after: always;
+    display: flex;
+    flex-direction: column;
+  }
+  .footer-spacer {
+    flex: 1;
   }
 
   /* ── HEADER ── */
@@ -359,7 +363,7 @@
 
   /* ── FOOTER ── */
   .footer {
-    margin-top: 15mm;
+    margin-top: 25mm;
     padding-top: 3mm;
     border-top: 1px solid #e8e4f5;
     display: flex;
@@ -522,7 +526,7 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
+  <div class="footer-spacer"></div><!-- FOOTER -->
   <div class="footer">
     <div class="footer-brand">PADEL SCOUTER</div>
     <div class="footer-url">www.padelscouter.com</div>
@@ -615,7 +619,7 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
+  <div class="footer-spacer"></div><!-- FOOTER -->
   <div class="footer">
     <div class="footer-brand">PADEL SCOUTER</div>
     <div class="footer-url">www.padelscouter.com</div>
@@ -625,3 +629,4 @@
 
 </body>
 </html>
+
