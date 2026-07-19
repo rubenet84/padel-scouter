@@ -386,28 +386,46 @@
     margin: 12mm 14mm 18mm 14mm;
   @page {
     size: A4;
-    margin: 12mm 14mm 15mm 14mm;
+    margin: 12mm 14mm 18mm 14mm;
     @bottom-left {
-      content: "PADEL SCOUTER";
-      font-size: 7px;
-      font-weight: bold;
-      color: #7c5fd6;
-    }
-    @bottom-center {
-      content: "www.padelscouter.com";
-      font-size: 7px;
-      color: #94a3b8;
-    }
-    @bottom-right {
-      content: counter(page);
-      font-size: 9px;
-      font-weight: bold;
-      color: #7c5fd6;
+      content: element(footerFixed);
+      width: 100%;
     }
   }
 
-  .footer { display: none; }
-  .footer-table, .footer-brand, .footer-url, .footer-page { display: none; }
+  .footer {
+    position: running(footerFixed);
+    padding-top: 4mm;
+    border-top: 1.5px solid #e8e4f5;
+    text-align: justify;
+  }
+  .footer::after {
+    content: '';
+    display: inline-block;
+    width: 100%;
+  }
+  .footer-brand {
+    display: inline-block;
+    font-size: 7.5px;
+    font-weight: bold;
+    color: #7c5fd6;
+  }
+  .footer-url {
+    display: inline-block;
+    font-size: 7px;
+    color: #94a3b8;
+  }
+  .footer-page {
+    display: inline-block;
+    width: 18px; height: 18px;
+    line-height: 18px;
+    background: #7c5fd6;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 8px;
+    font-weight: bold;
+    text-align: center;
+  }
   }
 
   .footer {
