@@ -352,7 +352,16 @@
   .quote-author { font-size: 8px; color: #7c5fd6; font-weight: 600; margin-top: 1mm; }
 
   /* ── FOOTER ── */
-  .footer { display: none; }
+  .footer {
+    position: running(footerFixed);
+    padding-top: 4mm;
+    border-top: 1.5px solid #e8e4f5;
+  }
+  .footer-table { width: 100%; }
+  .footer-table td { padding: 0; vertical-align: middle; }
+  .footer-table td:first-child { text-align: left; }
+  .footer-table td:nth-child(2) { text-align: center; }
+  .footer-table td:last-child { text-align: right; }
   .footer-brand { font-size: 7.5px; font-weight: 800; color: #7c5fd6; }
   .footer-url { font-size: 7px; color: #94a3b8; }
   .footer-page {
@@ -520,11 +529,7 @@
       </div>
     </div>
   </div></div></div><!-- FOOTER -->
-  <div class="footer">
-    <div class="footer-brand">PADEL SCOUTER</div>
-    <div class="footer-url">www.padelscouter.com</div>
-    <div class="footer-page">1</div>
-  </div>
+  <div class="footer"><table class="footer-table"><tr><td><span class="footer-brand">PADEL SCOUTER</span></td><td><span class="footer-url">www.padelscouter.com</span></td><td><span class="footer-page">1</span></td></tr></table></div>
 </div>
 
 
@@ -610,15 +615,12 @@
       <div class="quote-author">— Padel Scouter</div>
     </div>
   </div></div></div><!-- FOOTER -->
-  <div class="footer">
-    <div class="footer-brand">PADEL SCOUTER</div>
-    <div class="footer-url">www.padelscouter.com</div>
-    <div class="footer-page">2</div>
-  </div>
+  <div class="footer"><table class="footer-table"><tr><td><span class="footer-brand">PADEL SCOUTER</span></td><td><span class="footer-url">www.padelscouter.com</span></td><td><span class="footer-page">2</span></td></tr></table></div>
 </div>
 
 </body>
 </html>
+
 
 
 
