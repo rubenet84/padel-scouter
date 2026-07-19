@@ -58,6 +58,7 @@ def create_player(
         name=data.name,
         category=data.category,
         owner_id=current_user.id,
+        mano=data.mano,
         **data.stats.model_dump(),
     )
     db.add(player)
@@ -166,6 +167,7 @@ def update_player(
 
     player.name     = data.name
     player.category = data.category
+    player.mano     = data.mano
     for field, val in data.stats.model_dump().items():
         setattr(player, field, val)
 

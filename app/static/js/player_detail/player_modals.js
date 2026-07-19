@@ -84,6 +84,8 @@ function openEditModal() {
 
     document.getElementById('edit-name').value = p.name;
     document.getElementById('edit-category').value = resolveCategoryKey(p.category);
+    const manoEl = document.getElementById('edit-mano');
+    if (manoEl) manoEl.value = p.mano || 'Derecha';
 
     const fields = ['derecha','reves','volea_derecha','volea_reves','bandeja','vibora','remate','globo','saque',
         'bajada_pared','velocidad','resistencia','reflejos','tactica','presion',

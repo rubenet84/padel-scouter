@@ -30,6 +30,13 @@ function renderPlayer(p, analyses) {
         : catDisplay;
     D.badgeCategory().textContent = badgeText;
 
+    // Mano (diestro/zurdo)
+    const manoEl = document.getElementById('badge-mano');
+    if (manoEl) {
+        manoEl.textContent = '🖐 ' + (p.mano || 'Derecha');
+        manoEl.classList.remove('hidden');
+    }
+
     // Avatar
     setAvatar(p.avatar_url);
 

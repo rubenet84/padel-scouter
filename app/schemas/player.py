@@ -86,6 +86,7 @@ class PlayerCreateSchema(BaseModel):
     name:     str = Field(min_length=2, max_length=150)
     category: PlayerCategory
     stats:    PlayerStatsSchema = PlayerStatsSchema()
+    mano:     str = "Derecha"
 
 
 class PlayerPublicSchema(BaseModel):
@@ -95,6 +96,7 @@ class PlayerPublicSchema(BaseModel):
     owner_id: UUID
     avatar_url: str | None = None
     power_level: int | None = None
+    mano: str = "Derecha"
 
     derecha:       int = 50
     reves:         int = 50

@@ -215,7 +215,7 @@ def generate_player_html(player: dict, analysis: dict) -> str:
         '{{CATEGORIA}}':      categoria.upper(),
         '{{POWER_LEVEL}}':    str(power_level),
         '{{STARS}}':          get_nivel_amenaza_stars(power_level),
-        '{{MANO}}':           'Derecha',
+        '{{MANO}}':           player.get('mano', 'Derecha'),
         '{{TORNEOS}}':        str(torneos),
         '{{VICTORIAS}}':      str(victorias),
         '{{WIN_RATE}}':       win_rate,

@@ -67,6 +67,7 @@ class PlayerModel(Base):
 
     # Avatar
     avatar_url = Column(String(500), nullable=True)
+    mano      = Column(String(20), default="Derecha", nullable=False, server_default="Derecha")
 
     # Soft delete
     is_deleted = Column(Boolean, default=False, nullable=False)

@@ -180,6 +180,7 @@ async function saveAndAnalyze() {
         const body = {
             name,
             category: document.getElementById('edit-category').value,
+            mano: document.getElementById('edit-mano')?.value || 'Derecha',
             stats
         };
 
