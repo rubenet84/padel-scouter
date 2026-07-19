@@ -16,7 +16,12 @@
   }
 
   /* ── Layout: 2 pages side by side for preview, print splits them ── */
-  .page { width: 100%; min-height: 297mm; background: #fff; page-break-after: always; display: flex; flex-direction: column; }
+  .page {
+    width: 100%;
+    min-height: 297mm;
+    background: #fff;
+    page-break-after: always;
+  }
 
   /* ── HEADER ── */
   .header {
@@ -368,11 +373,14 @@
 
   @page {
     size: A4;
-    margin: 12mm 14mm 12mm 14mm;
+    margin: 12mm 14mm 18mm 14mm;
+    @bottom-center {
+      content: element(footerFixed);
+    }
   }
 
   .footer {
-    margin-top: auto;
+    position: running(footerFixed);
     padding-top: 4mm;
     border-top: 1.5px solid #e8e4f5;
     display: flex;
