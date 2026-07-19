@@ -3,7 +3,10 @@ import os
 import uuid as uuid_lib
 from uuid import UUID
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi.responses import StreamingResponse, Response
+from io import BytesIO
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 from sqlalchemy import or_
@@ -94,7 +97,8 @@ def list_players(
     current_user: UserModel = Depends(get_current_user),
 ):
     players = db.query(PlayerModel).filter(
-        PlayerModel.owner_id == current_user.id
+        PlayerModel.owner_id == current_user.id,
+        PlayerModel.is_deleted == False,
     ).all()
 
     # Enriquecer con el último power_level del análisis IA
@@ -129,6 +133,21 @@ def get_player(
     if not player:
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
     return player
+
+
+@router.get("/{player_id}/badges")
+def get_player_badges(
+    player_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    player = db.query(PlayerModel).filter(
+        PlayerModel.id == player_id,
+        PlayerModel.owner_id == current_user.id,
+    ).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    return compute_player_badges(db, player_id)
 
 
 @router.put("/{player_id}", response_model=PlayerPublicSchema)
@@ -300,7 +319,7 @@ def upload_avatar(
     return player
 
 
-@router.delete("/{player_id}", status_code=204)
+@router.delete("/{player_id}", status_code=200)
 def delete_player(
     player_id: UUID,
     db: Session = Depends(get_db),
@@ -312,8 +331,29 @@ def delete_player(
     ).first()
     if not player:
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
-    db.delete(player)
+    player.is_deleted = True
+    player.deleted_at = datetime.now(timezone.utc)
     db.commit()
+    return {"success": True, "message": f"Jugador '{player.name}' eliminado"}
+
+
+@router.put("/{player_id}/restore", status_code=200)
+def restore_player(
+    player_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    player = db.query(PlayerModel).filter(
+        PlayerModel.id == player_id,
+        PlayerModel.owner_id == current_user.id,
+        PlayerModel.is_deleted == True,
+    ).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado o no está eliminado")
+    player.is_deleted = False
+    player.deleted_at = None
+    db.commit()
+    return {"success": True, "message": f"Jugador '{player.name}' recuperado"}
 
 
 # ── Matches ───────────────────────────────────────────────────
