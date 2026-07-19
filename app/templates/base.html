@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="es" class="scroll-smooth" style="scrollbar-color: {{ '#f97316' if show_landing_nav|default(False) else '#7c5fd6' }} #0A0A0F; scrollbar-width: thin;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,7 +42,13 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="/static/css/scouter.css">
+    <link rel="stylesheet" href="/static/css/scouter.css?v=2">
+    <style>
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #0A0A0F; }
+      ::-webkit-scrollbar-thumb { background: {{ '#f97316' if show_landing_nav|default(False) else '#7c5fd6' }}; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: {{ '#FFD700' if show_landing_nav|default(False) else '#9d7fe8' }}; }
+    </style>
     {% block head_styles %}{% endblock %}
 </head>
 <body class="{% if show_landing_nav|default(False) %}landing-noise-overlay landing-grid-bg{% endif %} landing-body">
@@ -134,10 +140,10 @@
                 <div>
                     <h4 class="text-xs font-medium text-white tracking-wider uppercase mb-4">Producto</h4>
                     <div class="space-y-2.5">
-                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Funciones</a>
-                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Analytics</a>
-                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Rankings</a>
-                        <a href="#" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">IA Scouting</a>
+                        <a href="#features" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Funciones</a>
+                        <a href="#analytics" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Analytics</a>
+                        <a href="#rankings" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">Rankings</a>
+                        <a href="#ai" class="block text-sm text-neutral-500 hover:text-scouter-orange transition-colors">IA Scouting</a>
                     </div>
                 </div>
                 <div>

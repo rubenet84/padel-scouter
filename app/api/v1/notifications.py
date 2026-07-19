@@ -40,7 +40,7 @@ def list_notifications(
             "related_url": n.related_url,
             "player_id": str(n.player_id) if n.player_id else None,
             "is_read": n.is_read,
-            "created_at": n.created_at.isoformat(),
+            "created_at": n.created_at.isoformat() + 'Z',
         }
         for n in items
     ]

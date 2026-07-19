@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" style="scrollbar-color: #7c5fd6 #0A0A0F; scrollbar-width: thin;">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,12 +20,14 @@ tailwind.config = {
 </script>
 <link rel="stylesheet" href="/static/css/scouter.css">
 <style>
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0A0A0F; }
+  ::-webkit-scrollbar-thumb { background: #7c5fd6; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #9d7fe8; }
+</style>
+<style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;overflow-x:hidden;min-height:100vh}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:#120733}
-::-webkit-scrollbar-thumb{background:#7c5fd6;border-radius:3px}
-
 @keyframes particleFloat{0%{transform:translateY(0) translateX(0) scale(1);opacity:0}15%{opacity:.6}85%{opacity:.6}100%{transform:translateY(-90px) translateX(18px) scale(0);opacity:0}}
 
 .gradient-border { position: relative; }
@@ -46,10 +48,13 @@ body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;o
 .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 30px #FF6B0015; }
 
 /* Sidebar toggle */
-#sidebar{position:fixed;left:0;top:64px;bottom:0;width:240px;z-index:40;transform:translateX(-100%);transition:transform .35s cubic-bezier(.16,1,.3,1);border-right:1px solid rgba(124,95,214,.08);backdrop-filter:blur(12px);background:rgba(13,5,32,.85);overflow-y:auto}
+#sidebar{position:fixed;left:0;top:64px;bottom:0;width:240px;z-index:40;transform:translateX(-100%);transition:transform .35s cubic-bezier(.16,1,.3,1);border-right:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(12px);background:rgba(13,5,32,.9);overflow-y:auto;overflow-x:hidden}
+#sidebar::after{content:'';position:absolute;right:-1px;top:10%;height:80%;width:1px;background:linear-gradient(180deg,transparent,rgba(168,85,247,0.3),rgba(255,255,255,0.4),rgba(168,85,247,0.3),transparent)}
 #sidebar.open{transform:translateX(0)}
-.sidebar-link{transition:all .2s ease;border-left:2px solid transparent}
-.sidebar-link:hover,.sidebar-link.active{background:rgba(124,95,214,.08);border-left-color:#7c5fd6}
+.sidebar-link{transition:all .25s ease;border-left:2px solid transparent;position:relative}
+.sidebar-link:hover{background:rgba(168,85,247,0.12);border-left-color:rgba(255,255,255,0.5)}
+.sidebar-link.active{border-left-color:#fff;background:rgba(168,85,247,0.08)}
+.sidebar-link.active::before{content:'';position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:1px;height:60%;background:linear-gradient(180deg,transparent,rgba(168,85,247,0.5),transparent)}
 .sidebar-link.active .link-icon{color:#a78bfa}
 .sidebar-link.active .link-text{color:#e0d5ff}
 </style>
@@ -129,7 +134,7 @@ body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;o
       <!-- PR #4: Community Highlights Card -->
       <div id="community-highlights" class="mt-6 rounded-xl border border-[#2A2A3A] hidden" style="background:#12121A;">
         <div class="p-4">
-          <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4">🏆 Comunidad</h3>
+          <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4 font-orbitron">🏆 Comunidad</h3>
           <div id="community-content">
             <div class="animate-pulse space-y-3">
               <div class="h-4 bg-[#2A2A3A] rounded w-3/4"></div>

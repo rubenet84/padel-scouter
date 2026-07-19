@@ -27,7 +27,7 @@
 }
 .landing-body ::-webkit-scrollbar { width: 6px; }
 .landing-body ::-webkit-scrollbar-track { background: #0a0a12; }
-.landing-body ::-webkit-scrollbar-thumb { background: #f97316; border-radius: 3px; }
+.landing-body ::-webkit-scrollbar-thumb { background: #f97316 !important; border-radius: 3px; }
 
 /* ============================
    Keyframes — EXACTOS del diseño original
@@ -185,12 +185,30 @@
 /* ============================
    Border Gradient (pseudo-element)
    ============================ */
-.landing-border-gradient {
+.landing-border-gradient,
+.landing-border-gradient-blue,
+.landing-border-gradient-green,
+.landing-border-gradient-purple,
+.landing-border-gradient-red,
+.landing-border-gradient-cyan {
     position: relative;
     background: #0f0f1a;
     border-radius: 16px;
 }
-.landing-border-gradient::before {
+.landing-border-gradient::before,
+.landing-border-gradient-blue::before,
+.landing-border-gradient-green::before,
+.landing-border-gradient-purple::before,
+.landing-border-gradient-red::before,
+.landing-border-gradient-cyan::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 17px;
+    z-index: -1;
+}
+.landing-border-gradient::before,
+.landing-border-gradient-blue::before {
     content: '';
     position: absolute;
     inset: -1px;
@@ -206,6 +224,12 @@
 }
 .landing-border-gradient-purple::before {
     background: linear-gradient(135deg, rgba(168,85,247,0.5), transparent 40%, transparent 60%, rgba(239,68,68,0.3));
+}
+.landing-border-gradient-red::before {
+    background: linear-gradient(135deg, rgba(239,68,68,0.5), transparent 40%, transparent 60%, rgba(249,115,22,0.3));
+}
+.landing-border-gradient-cyan::before {
+    background: linear-gradient(135deg, rgba(6,182,212,0.5), transparent 40%, transparent 60%, rgba(59,130,246,0.3));
 }
 
 /* ============================

@@ -257,6 +257,8 @@ def get_community_highlights(
             best_pair_win_pct = wp
             members = list(key)
             best_pair = {
+                "player1_id": str(members[0]),
+                "player2_id": str(members[1]),
                 "player1_name": players_map[members[0]].name,
                 "player2_name": players_map[members[1]].name,
                 "win_pct": round(wp, 1),

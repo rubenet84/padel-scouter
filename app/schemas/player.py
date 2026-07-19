@@ -113,6 +113,9 @@ class PlayerPublicSchema(BaseModel):
     presion:            int = 50
     trabajo_en_pareja:  int = 50
 
+    is_deleted: bool = False
+    deleted_at: datetime | None = None
+
     model_config = {"from_attributes": True}
 
 

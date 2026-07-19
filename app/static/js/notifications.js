@@ -135,7 +135,10 @@
         try {
             const t = localStorage.getItem('access_token');
             if (!t) return;
-            await fetch('/api/v1/notifications/read-all', {
+            // Solo marcar como leídas las del jugador actual, no todas
+            const q = playerQuery();
+            const url = '/api/v1/notifications/read-all' + (q ? '?' + q : '');
+            await fetch(url, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${t}` }
             });

@@ -65,6 +65,7 @@ def get_players_by_owner(
             SELECT id, name, category
             FROM players
             WHERE owner_id = :uid
+              AND is_deleted = false
             ORDER BY name
         """),
         {"uid": owner_id},

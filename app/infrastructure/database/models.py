@@ -68,6 +68,10 @@ class PlayerModel(Base):
     # Avatar
     avatar_url = Column(String(500), nullable=True)
 
+    # Soft delete
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    deleted_at = Column(DateTime, nullable=True)
+
     owner     = relationship("UserModel", back_populates="players")
     analyses  = relationship("AnalysisModel", back_populates="player")
     matches_as_p1 = relationship("MatchModel", foreign_keys="MatchModel.player1_id")

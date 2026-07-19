@@ -148,9 +148,9 @@ function renderSummary(data) {
                     <div class="p-4">
                         <div class="flex items-center gap-2 mb-2">
                             <span aria-hidden="true">${c.icon}</span>
-                            <span class="text-xs font-bold uppercase tracking-widest" style="color:${c.color};">${escHtml(c.label)}</span>
+                            <span class="text-xs font-bold uppercase tracking-widest font-orbitron" style="color:${c.color};">${escHtml(c.label)}</span>
                         </div>
-                        <div class="text-2xl font-black text-white" aria-label="${c.value}">${c.value}</div>
+                        <div class="text-2xl font-black text-white font-orbitron" aria-label="${c.value}">${c.value}</div>
                     </div>
                 </div>
             `).join('')}
@@ -161,10 +161,10 @@ function renderSummary(data) {
                 <div class="p-4">
                     <div class="flex items-center gap-2 mb-2">
                         <span aria-hidden="true">👑</span>
-                        <span class="text-xs font-bold uppercase tracking-widest" style="color:#FFD700;">Líder del Ranking</span>
+                        <span class="text-xs font-bold uppercase tracking-widest font-orbitron" style="color:#FFD700;">Líder del Ranking</span>
                     </div>
                     ${data.ranking_leader
-                        ? `<a href="/player/${data.ranking_leader.id}" class="text-lg font-bold text-white hover:text-emerald-400 transition-colors">${escHtml(data.ranking_leader.name)}</a>
+                        ? `<a href="/player/${data.ranking_leader.id}" class="text-lg font-bold text-white hover:text-emerald-400 transition-colors font-orbitron">${escHtml(data.ranking_leader.name)}</a>
                            <div class="text-sm text-gray-400 mt-1">${data.ranking_leader.points} pts · ${data.ranking_leader.category}</div>`
                         : '<div class="text-gray-500">Sin datos</div>'}
                 </div>
@@ -173,10 +173,10 @@ function renderSummary(data) {
                 <div class="p-4">
                     <div class="flex items-center gap-2 mb-2">
                         <span aria-hidden="true">⭐</span>
-                        <span class="text-xs font-bold uppercase tracking-widest" style="color:#00FF87;">Mejor % de Victorias</span>
+                        <span class="text-xs font-bold uppercase tracking-widest font-orbitron" style="color:#00FF87;">Mejor % de Victorias</span>
                     </div>
                     ${data.best_win_pct
-                        ? `<a href="/player/${data.best_win_pct.id}" class="text-lg font-bold text-white hover:text-emerald-400 transition-colors">${escHtml(data.best_win_pct.name)}</a>
+                        ? `<a href="/player/${data.best_win_pct.id}" class="text-lg font-bold text-white hover:text-emerald-400 transition-colors font-orbitron">${escHtml(data.best_win_pct.name)}</a>
                            <div class="text-sm text-gray-400 mt-1">${data.best_win_pct.win_pct}% · ${data.best_win_pct.category}</div>`
                         : '<div class="text-gray-500">Sin datos</div>'}
                 </div>
@@ -513,7 +513,7 @@ function renderTopPlayers(data) {
             <div class="rounded-xl border border-[#2A2A3A] p-4" style="background:#12121A;">
                 <div class="flex items-center gap-2 mb-3">
                     <span aria-hidden="true">${metric.icon}</span>
-                    <span class="text-sm font-bold uppercase tracking-widest" style="color:${metric.color};">${escHtml(metric.label)}</span>
+                    <span class="text-sm font-bold uppercase tracking-widest font-orbitron" style="color:${metric.color};">${escHtml(metric.label)}</span>
                 </div>
                 <div class="space-y-1.5">
                     ${entries.length === 0
@@ -1023,9 +1023,9 @@ function renderRecords(data) {
             <div class="rounded-xl border border-[#2A2A3A] p-3 card-hover opacity-0 fade-in" style="background:#12121A;">
                 <div class="flex items-center gap-1.5 mb-2">
                     <span aria-hidden="true">${meta.icon}</span>
-                    <span class="text-xs font-bold uppercase tracking-widest" style="color:${meta.color};">${escHtml(meta.label)}</span>
+                    <span class="text-xs font-bold uppercase tracking-widest font-orbitron" style="color:${meta.color};">${escHtml(meta.label)}</span>
                 </div>
-                <div class="text-lg font-black text-white">${escHtml(String(valueDisplay))}</div>
+                <div class="text-lg font-black text-white font-orbitron">${escHtml(String(valueDisplay))}</div>
                 <a href="/player/${rec.player_id}" class="text-sm text-gray-400 hover:text-emerald-400 transition-colors truncate block">${escHtml(rec.name)}</a>
                 <div class="text-xs text-gray-500">${escHtml(rec.category)}</div>
             </div>
@@ -1086,7 +1086,7 @@ function renderCategoryStats(data) {
     content.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         ${data.map(cat => `
             <div class="rounded-xl border border-[#2A2A3A] p-4 card-hover opacity-0 fade-in" style="background:#12121A;">
-                <h3 class="text-lg font-bold text-white mb-3">${escHtml(cat.category)}</h3>
+                <h3 class="text-lg font-bold text-white mb-3 font-orbitron">${escHtml(cat.category)}</h3>
                 <div class="grid grid-cols-2 gap-2 text-sm mb-3">
                     <div><span class="text-gray-400">Jugadores:</span> <span class="text-white font-semibold">${cat.total_players}</span></div>
                     <div><span class="text-gray-400">Partidos:</span> <span class="text-white font-semibold">${cat.total_matches}</span></div>
@@ -1268,7 +1268,11 @@ function renderCommunityHighlights(data) {
                     <span class="text-xs text-gray-400 shrink-0">Mejor Pareja</span>
                 </div>
                 <div class="text-right min-w-0 ml-2">
-                    <div class="text-sm text-white font-medium">${escHtml(data.best_pair.player1_name)} + ${escHtml(data.best_pair.player2_name)}</div>
+                    <div class="text-sm text-white font-medium">
+                        <a href="/player/${data.best_pair.player1_id}" class="hover:text-emerald-400 transition-colors">${escHtml(data.best_pair.player1_name)}</a>
+                        <span class="text-gray-500"> + </span>
+                        <a href="/player/${data.best_pair.player2_id}" class="hover:text-emerald-400 transition-colors">${escHtml(data.best_pair.player2_name)}</a>
+                    </div>
                     <div class="text-xs text-gray-500">${data.best_pair.win_pct}% · ${data.best_pair.matches} partidos</div>
                 </div>
             </div>
