@@ -79,6 +79,14 @@ def build_report(player_dict, analysis_dict):
     avatar = player_dict.get("avatar_url")
     name = player_dict.get("name", "Jugador").upper()
 
+    # Avatar: intentar ruta absoluta, si no existe mostrar iniciales
+    avatar_img = None
+    if avatar:
+        from pathlib import Path
+        fpath = Path("app") / avatar.lstrip("/")
+        if fpath.exists():
+            avatar_img = str(fpath.resolve())
+
     TEC = ["derecha","reves","volea_derecha","volea_reves","bandeja","vibora","remate","globo","saque","bajada_pared"]
     FIS = ["velocidad","resistencia","reflejos"]
     MEN = ["tactica","presion","trabajo_en_pareja"]
@@ -89,8 +97,8 @@ def build_report(player_dict, analysis_dict):
     # ═══════════ PAGE 1: HERO ═══════════
     E += [S(6), Paragraph("INFORME DE SCOUTING", ParagraphStyle("Sub", fontName="Helvetica", fontSize=10, textColor=GRAY, alignment=1, letterSpacing=4, spaceAfter=4*mm))]
     # Avatar
-    if avatar:
-        E.append(Paragraph(f'<img src="{avatar}" width="60" height="60"/>', ParagraphStyle("Av", alignment=1, spaceAfter=4*mm)))
+    if avatar_img:
+        E.append(Paragraph(f'<img src="{avatar_img}" width="60" height="60"/>', ParagraphStyle("Av", alignment=1, spaceAfter=4*mm)))
     else:
         E.append(Paragraph(f'<font size="36" color="#7c5fd6">{name[:2]}</font>', ParagraphStyle("AvInit", alignment=1, spaceAfter=4*mm)))
     E.append(Paragraph(name, ParagraphStyle("Hero", fontName="Helvetica-Bold", fontSize=36, textColor=BLACK, alignment=1, leading=42, spaceAfter=2*mm)))
