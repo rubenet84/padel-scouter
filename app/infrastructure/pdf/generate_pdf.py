@@ -198,7 +198,13 @@ def generate_player_html(player: dict, analysis: dict) -> str:
     avatar_html = '<div class="hero-photo">🎾</div>'
     avatar_url = player.get('avatar_url')
     if avatar_url:
-        avatar_html = f'<div class="hero-photo"><img src="{avatar_url}" alt=""></div>'
+        from pathlib import Path
+        fpath = Path("app") / avatar_url.lstrip("/")
+        if fpath.exists():
+            avatar_html = f'<div class="hero-photo"><img src="file:///{fpath.resolve()}" alt=""></div>'
+        else:
+            initials = player.get('name', '?')[:2].upper()
+            avatar_html = f'<div class="hero-photo" style="display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#7c5fd6;">{initials}</div>'
     else:
         initials = player.get('name', '?')[:2].upper()
         avatar_html = f'<div class="hero-photo" style="display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#7c5fd6;">{initials}</div>'
