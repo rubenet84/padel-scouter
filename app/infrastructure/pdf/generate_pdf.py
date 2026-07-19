@@ -243,10 +243,13 @@ def generate_player_pdf(player: dict, analysis: dict) -> bytes:
     Returns:
         bytes: PDF listo para enviar como response o guardar.
     """
-    from weasyprint import HTML, CSS
+    from io import BytesIO
+    from xhtml2pdf import pisa
     html_content = generate_player_html(player, analysis)
-    pdf_bytes = HTML(string=html_content, base_url='/').write_pdf()
-    return pdf_bytes
+    buf = BytesIO()
+    pisa.CreatePDF(html_content, dest=buf)
+    buf.seek(0)
+    return buf.getvalue()
 
 
 # ── Test local ────────────────────────────────────────────────

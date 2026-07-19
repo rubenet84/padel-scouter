@@ -399,9 +399,22 @@ def restore_player(
 @router.get("/{player_id}/pdf")
 def export_player_pdf_weasy(
     player_id: UUID,
+    token: str | None = Query(None),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
 ):
+    if token:
+        from app.core.security import decode_token
+        try:
+            payload = decode_token(token)
+            uid = UUID(payload.get("sub"))
+        except Exception:
+            raise HTTPException(status_code=401, detail="Token inválido")
+        current_user = db.query(UserModel).filter(UserModel.id == uid).first()
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Usuario no encontrado")
+    else:
+        raise HTTPException(status_code=401, detail="Token requerido")
+
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,

@@ -980,7 +980,7 @@ function exportPDF() {
   if (!m) return;
   var t = localStorage.getItem('access_token');
   if (!t) return;
-  window.open('/api/v1/players/' + m[1] + '/export-pdf?token=' + encodeURIComponent(t), '_blank');
+  window.open('/api/v1/players/' + m[1] + '/pdf?token=' + encodeURIComponent(t), '_blank');
 }
 
 function openBadgesGuide() {
