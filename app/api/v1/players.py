@@ -200,6 +200,46 @@ def get_player_stats(
     return get_computed_stats(db, player_id)
 
 
+@router.get("/{player_id}/evolution")
+def get_player_evolution(
+    player_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    player = db.query(PlayerModel).filter(
+        PlayerModel.id == player_id,
+        PlayerModel.owner_id == current_user.id,
+    ).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
+    matches = db.query(MatchModel).filter(
+        or_(MatchModel.player1_id == player_id, MatchModel.player2_id == player_id, MatchModel.partner_id == player_id),
+        MatchModel.played_at.isnot(None),
+    ).order_by(MatchModel.played_at.asc()).all()
+
+    from collections import defaultdict
+    fep_by_date = defaultdict(int)
+    for m in matches:
+        if not m.played_at: continue
+        fep = 0
+        if m.tournament_id and m.tournament: fep = m.tournament.fep_points or 0
+        fep_by_date[m.played_at.strftime("%Y-%m-%d")] += fep
+    points_timeline = []
+    cumulative = 0
+    for d in sorted(fep_by_date): cumulative += fep_by_date[d]; points_timeline.append({"date": d, "points": cumulative})
+
+    monthly = defaultdict(lambda: {"wins": 0, "losses": 0})
+    for m in matches:
+        if not m.played_at: continue
+        month_key = m.played_at.strftime("%Y-%m")
+        if m.ganado: monthly[month_key]["wins"] += 1
+        else: monthly[month_key]["losses"] += 1
+    wins_losses = [{"month": k, "wins": v["wins"], "losses": v["losses"]} for k, v in sorted(monthly.items())]
+
+    return {"points_timeline": points_timeline, "wins_losses_monthly": wins_losses}
+
+
 @router.get("/{player_id}/analytics", response_model=PlayerAnalyticsSchema)
 def get_player_analytics(
     player_id: UUID,
@@ -354,6 +394,44 @@ def restore_player(
     player.deleted_at = None
     db.commit()
     return {"success": True, "message": f"Jugador '{player.name}' recuperado"}
+
+
+@router.get("/{player_id}/pdf")
+def export_player_pdf_weasy(
+    player_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    player = db.query(PlayerModel).filter(
+        PlayerModel.id == player_id,
+        PlayerModel.owner_id == current_user.id,
+    ).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
+    analysis = db.query(AnalysisModel).filter(
+        AnalysisModel.player_id == player_id,
+    ).order_by(sa_desc(AnalysisModel.created_at)).first()
+
+    import json
+    player_dict = {c.name: getattr(player, c.name) for c in player.__table__.columns}
+    player_dict["category"] = player.category.name if hasattr(player.category, "name") else str(player.category)
+
+    analysis_dict = {}
+    if analysis:
+        analysis_dict = {
+            "power_level": analysis.power_level,
+            "ai_description": analysis.ai_description,
+            "improvement_plan": analysis.improvement_plan,
+            "strengths": json.loads(analysis.strengths) if isinstance(analysis.strengths, str) else analysis.strengths,
+            "weaknesses": json.loads(analysis.weaknesses) if isinstance(analysis.weaknesses, str) else analysis.weaknesses,
+        }
+
+    from app.infrastructure.pdf.generate_pdf import generate_player_pdf
+    pdf_bytes = generate_player_pdf(player_dict, analysis_dict)
+    filename = f"informe_{player.name.replace(' ','_')}.pdf"
+    return Response(pdf_bytes, media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'})
 
 
 # ── Matches ───────────────────────────────────────────────────
