@@ -352,17 +352,7 @@
   .quote-author { font-size: 8px; color: #7c5fd6; font-weight: 600; margin-top: 1mm; }
 
   /* ── FOOTER ── */
-  .footer {
-    position: fixed;
-    bottom: 12mm;
-    left: 14mm;
-    right: 14mm;
-    padding-top: 4mm;
-    border-top: 1.5px solid #e8e4f5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  .footer { display: none; }
   .footer-brand { font-size: 7.5px; font-weight: 800; color: #7c5fd6; }
   .footer-url { font-size: 7px; color: #94a3b8; }
   .footer-page {
@@ -384,6 +374,32 @@
   @page {
     size: A4;
     margin: 12mm 14mm 22mm 14mm;
+    @bottom-left {
+      content: "PADEL SCOUTER";
+      font-family: 'Inter', sans-serif;
+      font-size: 7.5px;
+      font-weight: 800;
+      color: #7c5fd6;
+      padding-top: 4mm;
+      border-top: 1.5px solid #e8e4f5;
+    }
+    @bottom-center {
+      content: "www.padelscouter.com";
+      font-family: 'Inter', sans-serif;
+      font-size: 7px;
+      color: #94a3b8;
+      padding-top: 4mm;
+      border-top: 1.5px solid #e8e4f5;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #7c5fd6;
+      padding-top: 4mm;
+      border-top: 1.5px solid #e8e4f5;
+    }
   }
 
   .footer { display: none; }
