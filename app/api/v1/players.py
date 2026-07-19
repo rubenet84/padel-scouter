@@ -440,8 +440,8 @@ def export_player_pdf_weasy(
             "weaknesses": json.loads(analysis.weaknesses) if isinstance(analysis.weaknesses, str) else (analysis.weaknesses or []),
         }
 
-    from app.infrastructure.pdf.report import build_report
-    pdf_bytes = build_report(player_dict, analysis_dict).getvalue()
+    from app.infrastructure.pdf.generate_pdf import generate_player_pdf
+    pdf_bytes = generate_player_pdf(player_dict, analysis_dict)
     filename = f"informe_{player.name.replace(' ','_')}.pdf"
     return Response(pdf_bytes, media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'})
