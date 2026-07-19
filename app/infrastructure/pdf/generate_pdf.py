@@ -198,7 +198,6 @@ def generate_player_html(player: dict, analysis: dict) -> str:
     avatar_html = '<div class="hero-photo">🎾</div>'
     avatar_url = player.get('avatar_url')
     if avatar_url:
-        from pathlib import Path
         fpath = Path("app") / avatar_url.lstrip("/")
         if fpath.exists():
             avatar_html = f'<div class="hero-photo"><img src="file:///{fpath.resolve()}" alt=""></div>'
