@@ -136,7 +136,7 @@ def generate_player_html(player: dict, analysis: dict) -> str:
     power_level = analysis.get('power_level', 0)
     torneos = player.get('torneos_jugados', 0)
     victorias = player.get('victorias', 0)
-    win_rate = f"{round((victorias/torneos)*100)}%" if torneos > 0 else "—"
+    win_rate = player.get('win_rate', '—')
 
     # Proyección: estimar mejora basada en plan de mejora
     proy_diff = max(100, round(power_level * 0.04))
