@@ -517,8 +517,13 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div>
           <label class="text-xs mb-1 block font-bold" style="color:rgba(255,107,0,0.8);">Nombre del jugador</label>
-          <input id="p-name" type="text" placeholder="Ej: Martin Di Nenno" class="input-dash">
-        </div>
+           <input id="p-name" type="text" placeholder="Ej: Martin Di Nenno" class="input-dash">
+           <label class="text-xs mb-1 mt-3 block font-bold" style="color:rgba(255,107,0,0.8);">🖐 Mano</label>
+           <select id="p-mano" class="input-dash">
+             <option value="Derecha">🖐 Derecha</option>
+             <option value="Zurda">🖐 Zurda</option>
+           </select>
+         </div>
         <div>
           <label class="text-xs mb-1 block font-bold" style="color:rgba(255,107,0,0.8);">Categoria</label>
           <select id="p-category" class="input-dash">
@@ -531,11 +536,6 @@ body{font-family:'Inter',sans-serif;background:#0d0520;color:#e0d5ff;overflow-x:
             <option value="Profesional">&#128308; Profesional (6.0 – 7.0)</option>
           </select>
           <p class="text-xs mt-3" style="color:rgba(255,255,255,0.8);">🟢 Iniciación → 🟡 Intermedio → 🔴 Avanzado / Profesional</p>
-          <label class="text-xs mb-1 mt-3 block font-bold" style="color:rgba(255,107,0,0.8);">🖐 Mano</label>
-          <select id="p-mano" class="input-dash">
-            <option value="Derecha">🖐 Derecha</option>
-            <option value="Zurda">🖐 Zurda</option>
-          </select>
         </div>
       </div>
 
