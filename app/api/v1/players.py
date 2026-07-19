@@ -432,6 +432,20 @@ def export_player_pdf_weasy(
     player_dict = {c.name: getattr(player, c.name) for c in player.__table__.columns}
     player_dict["category"] = player.category.value if hasattr(player.category, "value") else str(player.category)
 
+    # Calcular datos de matches para el PDF
+    matches = db.query(MatchModel).options(joinedload(MatchModel.tournament)).filter(
+        or_(MatchModel.player1_id == player_id, MatchModel.player2_id == player_id, MatchModel.partner_id == player_id)
+    ).all()
+    total_matches = len(matches)
+    wins = sum(1 for m in matches if m.ganado)
+    tourney_count = len(set(m.tournament_id for m in matches if m.tournament_id))
+    win_rate = f"{round((wins / total_matches) * 100)}%" if total_matches > 0 else "—"
+    fep_points_total = sum((m.tournament.fep_points or 0) for m in matches if m.tournament_id and m.tournament)
+    player_dict["torneos_jugados"] = tourney_count
+    player_dict["victorias"] = wins
+    player_dict["win_rate"] = win_rate
+    player_dict["puntos_ranking_fep"] = fep_points_total
+
     analysis_dict = {}
     if analysis:
         analysis_dict = {
