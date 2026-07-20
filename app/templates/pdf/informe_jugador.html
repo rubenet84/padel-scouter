@@ -7,6 +7,11 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  @page {
+    size: A4;
+    margin: 12mm 14mm 20mm 14mm;
+  }
+
   body {
     font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
     background: #fff;
@@ -15,12 +20,33 @@
     line-height: 1.4;
   }
 
-  /* ── Layout: 2 pages side by side for preview, print splits them ── */
   .page {
     width: 100%;
-    min-height: 297mm;
-    background: #fff;
     page-break-after: always;
+    position: relative;
+  }
+
+  /* ── FOOTER fijo al fondo de cada página ── */
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 12mm;
+    padding: 3mm 14mm 0 14mm;
+    border-top: 1.5px solid #e8e4f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+  }
+  .footer-brand { font-size: 8px; font-weight: 800; color: #7c5fd6; letter-spacing: 0.5px; }
+  .footer-url   { font-size: 7.5px; color: #94a3b8; }
+  .footer-page  {
+    width: 18px; height: 18px; line-height: 18px;
+    background: #7c5fd6; border-radius: 50%;
+    color: #fff; font-size: 8px; font-weight: 700;
+    text-align: center; display: inline-block;
   }
 
   /* ── HEADER ── */
@@ -28,274 +54,128 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 10mm;
-    padding-bottom: 5mm;
+    margin-bottom: 8mm;
+    padding-bottom: 4mm;
     border-bottom: 2px solid #7c5fd6;
   }
-  .logo-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .logo-row { display: flex; align-items: center; gap: 8px; }
   .logo-circle {
-    width: 36px; height: 36px;
-    min-width: 36px; min-height: 36px;
-    flex-shrink: 0;
-    background: #7c5fd6;
-    border-radius: 50%;
+    width: 36px; height: 36px; min-width: 36px; min-height: 36px;
+    flex-shrink: 0; background: #7c5fd6; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    color: #fff;
-    font-weight: 900;
-    font-size: 11px;
-    letter-spacing: -0.5px;
+    color: #fff; font-weight: 900; font-size: 11px; letter-spacing: -0.5px;
   }
   .logo-text { line-height: 1.1; }
   .logo-text .ps1 { font-weight: 900; font-size: 13px; color: #1a1a2e; letter-spacing: 0.5px; }
   .logo-text .ps2 { font-weight: 300; font-size: 13px; color: #7c5fd6; letter-spacing: 0.5px; }
   .header-right { text-align: right; }
   .header-right .label { font-size: 8px; font-weight: 600; color: #7c5fd6; text-transform: uppercase; letter-spacing: 1px; }
-  .header-right .date { font-size: 9px; color: #64748b; margin-top: 2px; }
+  .header-right .date  { font-size: 9px; color: #64748b; margin-top: 2px; }
 
-  /* ── PAGE 1 HERO ── */
-  .hero {
-    display: grid;
-    grid-template-columns: 52mm 1fr;
-    gap: 8mm;
-    margin-bottom: 7mm;
-  }
+  /* ── HERO ── */
+  .hero { display: grid; grid-template-columns: 52mm 1fr; gap: 8mm; margin-bottom: 6mm; }
   .hero-photo {
-    width: 52mm;
-    height: 58mm;
+    width: 52mm; height: 58mm;
     background: linear-gradient(135deg, #e8e0ff 0%, #c7b8f5 100%);
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
+    border-radius: 8px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; font-size: 40px;
   }
   .hero-photo img { width: 100%; height: 100%; object-fit: cover; }
   .hero-info { padding-top: 2mm; }
   .player-name {
-    font-size: 26px;
-    font-weight: 900;
-    color: #1a1a2e;
-    line-height: 1.0;
-    text-transform: uppercase;
-    letter-spacing: -0.5px;
-    margin-bottom: 4mm;
+    font-size: 26px; font-weight: 900; color: #1a1a2e;
+    line-height: 1.0; text-transform: uppercase; letter-spacing: -0.5px; margin-bottom: 4mm;
   }
   .category-badge {
-    display: inline-block;
-    background: #f0ebff;
-    color: #7c5fd6;
-    font-size: 8px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    padding: 3px 10px;
-    border-radius: 4px;
-    margin-bottom: 4mm;
+    display: inline-block; background: #f0ebff; color: #7c5fd6;
+    font-size: 8px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; padding: 3px 10px; border-radius: 4px; margin-bottom: 4mm;
   }
   .power-box {
     background: linear-gradient(135deg, #7c5fd6 0%, #5b3fb5 100%);
-    border-radius: 10px;
-    padding: 5mm 6mm;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 4mm;
+    border-radius: 10px; padding: 5mm 6mm;
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 4mm;
   }
-  .power-label {
-    color: rgba(255,255,255,0.75);
-    font-size: 8px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-  }
-  .power-number {
-    color: #fff;
-    font-size: 36px;
-    font-weight: 900;
-    letter-spacing: -1px;
-    line-height: 1;
-  }
+  .power-label { color: rgba(255,255,255,0.75); font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+  .power-number { color: #fff; font-size: 36px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
   .stars-row { display: flex; gap: 3px; margin-top: 2mm; }
   .star { color: #FFD700; font-size: 14px; }
 
-  /* Meta info row */
+  /* ── META ROW ── */
   .meta-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 3mm;
-    padding: 4mm 0;
-    border-top: 1px solid #e8e4f5;
-    border-bottom: 1px solid #e8e4f5;
-    margin-bottom: 6mm;
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm;
+    padding: 4mm 0; border-top: 1px solid #e8e4f5; border-bottom: 1px solid #e8e4f5; margin-bottom: 5mm;
   }
   .meta-item { text-align: center; }
-  .meta-icon { font-size: 12px; color: #7c5fd6; margin-bottom: 1mm; }
+  .meta-icon  { font-size: 12px; color: #7c5fd6; margin-bottom: 1mm; }
   .meta-label { font-size: 7px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8; }
-  .meta-val { font-size: 9px; font-weight: 700; color: #1a1a2e; margin-top: 1px; }
+  .meta-val   { font-size: 9px; font-weight: 700; color: #1a1a2e; margin-top: 1px; }
 
-  /* ── TWO COLUMN BOTTOM ── */
-  .bottom-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6mm;
-  }
+  /* ── BOTTOM GRID ── */
+  .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
 
   /* Section title */
   .section-title {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 9px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #1a1a2e;
-    margin-bottom: 3mm;
+    display: flex; align-items: center; gap: 5px;
+    font-size: 9px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 1px; color: #1a1a2e; margin-bottom: 3mm;
   }
   .section-title .icon { font-size: 11px; }
 
-  /* Perfil general */
-  .perfil-box {
-    background: #f8f6ff;
-    border-radius: 8px;
-    padding: 4mm;
-    margin-bottom: 4mm;
-  }
-  .perfil-text {
-    font-size: 9px;
-    color: #4a4a6a;
-    line-height: 1.6;
-  }
+  /* Perfil */
+  .perfil-box { background: #f8f6ff; border-radius: 8px; padding: 4mm; margin-bottom: 4mm; }
+  .perfil-text { font-size: 9px; color: #4a4a6a; line-height: 1.6; }
 
   /* Radar */
-  .radar-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  .radar-box { display: flex; flex-direction: column; align-items: center; }
   .radar-svg { width: 80mm; height: 68mm; }
 
-  /* ── ESTADÍSTICAS (derecha) ── */
+  /* Stats */
   .stat-group { margin-bottom: 4mm; }
   .stat-group-title {
-    font-size: 8px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #7c5fd6;
-    margin-bottom: 2mm;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    font-size: 8px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: #7c5fd6; margin-bottom: 2mm;
+    display: flex; align-items: center; gap: 4px;
   }
-  .stat-row {
-    display: flex;
-    align-items: center;
-    gap: 3mm;
-    margin-bottom: 1.5mm;
-  }
+  .stat-row { display: flex; align-items: center; gap: 3mm; margin-bottom: 1.5mm; }
   .stat-name { width: 28mm; font-size: 9px; color: #334155; font-weight: 500; }
-  .stat-bar-track {
-    flex: 1;
-    height: 5px;
-    background: #e8e4f5;
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .stat-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #7c5fd6, #9d7fe8);
-    border-radius: 3px;
-  }
+  .stat-bar-track { flex: 1; height: 5px; background: #e8e4f5; border-radius: 3px; overflow: hidden; }
+  .stat-bar-fill { height: 100%; background: linear-gradient(90deg, #7c5fd6, #9d7fe8); border-radius: 3px; }
   .stat-val { width: 8mm; font-size: 9px; font-weight: 700; color: #1a1a2e; text-align: right; }
 
   /* ── PAGE 2 ── */
-  .p2-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 4mm;
-    margin-bottom: 6mm;
-  }
+  .p2-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; margin-bottom: 6mm; }
 
-  /* Análisis IA */
-  .ia-box {
-    background: #f8f6ff;
-    border-radius: 8px;
-    padding: 5mm;
-    margin-bottom: 6mm;
-    position: relative;
-  }
-  .quote-mark {
-    font-size: 36px;
-    color: #7c5fd6;
-    opacity: 0.3;
-    line-height: 0.8;
-    font-family: Georgia, serif;
-    float: left;
-    margin-right: 3mm;
-    margin-top: 1mm;
-  }
-  .quote-end {
-    font-size: 36px;
-    color: #7c5fd6;
-    opacity: 0.3;
-    line-height: 0.8;
-    font-family: Georgia, serif;
-    float: right;
-    margin-left: 3mm;
-  }
-  .ia-text {
-    font-size: 9.5px;
-    color: #334155;
-    line-height: 1.7;
-    font-style: italic;
-  }
+  /* IA box */
+  .ia-box { background: #f8f6ff; border-radius: 8px; padding: 5mm; margin-bottom: 6mm; position: relative; overflow: hidden; }
+  .quote-mark { font-size: 36px; color: #7c5fd6; opacity: 0.3; line-height: 0.8; font-family: Georgia, serif; float: left; margin-right: 3mm; margin-top: 1mm; }
+  .quote-end  { font-size: 36px; color: #7c5fd6; opacity: 0.3; line-height: 0.8; font-family: Georgia, serif; float: right; margin-left: 3mm; }
+  .ia-text { font-size: 9.5px; color: #334155; line-height: 1.7; font-style: italic; }
 
-  /* Plan de mejora cards */
-  .plan-card {
-    border-radius: 8px;
-    padding: 4mm;
-    border: 1.5px solid;
-  }
+  /* Plan cards */
+  .plan-card { border-radius: 8px; padding: 4mm; border: 1.5px solid; }
   .plan-card.purple { border-color: #7c5fd6; background: #f8f6ff; }
   .plan-card.blue   { border-color: #3b82f6; background: #eff6ff; }
   .plan-card.orange { border-color: #f97316; background: #fff7ed; }
-
   .plan-num {
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    font-size: 9px;
-    font-weight: 900;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff;
-    margin-bottom: 2mm;
+    width: 18px; height: 18px; border-radius: 50%;
+    font-size: 9px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+    color: #fff; margin-bottom: 2mm;
   }
   .plan-num.purple { background: #7c5fd6; }
   .plan-num.blue   { background: #3b82f6; }
   .plan-num.orange { background: #f97316; }
-
   .plan-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1mm; }
   .plan-title.purple { color: #7c5fd6; }
   .plan-title.blue   { color: #3b82f6; }
   .plan-title.orange { color: #f97316; }
-
   .plan-freq {
-    display: inline-block;
-    font-size: 7.5px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 10px;
-    margin-bottom: 2mm;
+    display: inline-block; font-size: 7.5px; font-weight: 600;
+    padding: 2px 7px; border-radius: 10px; margin-bottom: 2mm;
   }
   .plan-freq.purple { background: #ede9fe; color: #7c5fd6; }
   .plan-freq.blue   { background: #dbeafe; color: #3b82f6; }
   .plan-freq.orange { background: #ffedd5; color: #f97316; }
-
   .plan-desc { font-size: 8px; color: #4a4a6a; line-height: 1.5; margin-bottom: 2mm; }
   .plan-check { font-size: 8px; color: #4a4a6a; margin-bottom: 1mm; display: flex; align-items: flex-start; gap: 4px; }
   .plan-check::before { content: '✓'; font-weight: 700; flex-shrink: 0; }
@@ -304,119 +184,39 @@
   .plan-check.orange::before { color: #f97316; }
 
   /* Proyección */
-  .proyeccion-box {
-    background: #f8f6ff;
-    border-radius: 8px;
-    padding: 5mm;
-    margin-bottom: 6mm;
-  }
+  .proyeccion-box { background: #f8f6ff; border-radius: 8px; padding: 5mm; margin-bottom: 6mm; }
   .proy-grid {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr auto;
-    align-items: center;
-    gap: 4mm;
-    margin-bottom: 4mm;
+    display: grid; grid-template-columns: 1fr auto 1fr auto;
+    align-items: center; gap: 4mm; margin-bottom: 3mm;
   }
-  .proy-label { font-size: 7.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 1mm; }
-  .proy-num { font-size: 26px; font-weight: 900; color: #1a1a2e; }
-  .proy-arrow { font-size: 20px; color: #7c5fd6; }
+  .proy-label    { font-size: 7.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 1mm; }
+  .proy-num      { font-size: 26px; font-weight: 900; color: #1a1a2e; }
+  .proy-arrow    { font-size: 20px; color: #7c5fd6; }
   .proy-proj-num { font-size: 26px; font-weight: 900; color: #7c5fd6; }
-  .proy-badge {
-    background: #f0ebff;
-    border-radius: 8px;
-    padding: 3mm 5mm;
-    text-align: center;
-  }
-  .proy-badge-plus { font-size: 18px; font-weight: 900; color: #7c5fd6; }
+  .proy-badge    { background: #f0ebff; border-radius: 8px; padding: 3mm 5mm; text-align: center; }
+  .proy-badge-plus  { font-size: 18px; font-weight: 900; color: #7c5fd6; }
   .proy-badge-label { font-size: 7.5px; color: #7c5fd6; font-weight: 600; }
-  .proy-weeks {
-    font-size: 8.5px;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 2mm;
-  }
+  .proy-weeks { font-size: 8.5px; color: #64748b; display: flex; align-items: center; gap: 4px; margin-top: 2mm; }
 
   /* Quote footer */
   .quote-footer {
-    background: #1a1a2e;
-    border-radius: 8px;
-    padding: 4mm 5mm;
-    display: flex;
-    align-items: center;
-    gap: 4mm;
+    background: #1a1a2e; border-radius: 8px; padding: 4mm 5mm;
+    display: flex; align-items: center; gap: 4mm;
   }
   .quote-trophy { font-size: 18px; }
-  .quote-text { font-size: 9px; color: rgba(255,255,255,0.85); font-style: italic; line-height: 1.5; }
+  .quote-text   { font-size: 9px; color: rgba(255,255,255,0.85); font-style: italic; line-height: 1.5; }
   .quote-author { font-size: 8px; color: #7c5fd6; font-weight: 600; margin-top: 1mm; }
-
-  /* ── FOOTER ── */
-  .footer {
-    position: running(footerFixed);
-    width: 100%;
-    padding-top: 4mm;
-    border-top: 1.5px solid #e8e4f5;
-  }
-  .footer-table { width: 100%; }
-  .footer-table td { padding: 0; vertical-align: middle; }
-  .footer-table td:first-child { text-align: left; }
-  .footer-table td:nth-child(2) { text-align: center; }
-  .footer-table td:last-child { text-align: right; }
-  .footer-brand { font-size: 7.5px; font-weight: 800; color: #7c5fd6; }
-  .footer-url { font-size: 7px; color: #94a3b8; }
-  .footer-page {
-    display: inline-block;
-    width: 18px; height: 18px;
-    line-height: 18px;
-    background: #7c5fd6;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 8px;
-    font-weight: 700;
-    text-align: center;
-  }
 
   @media print {
     body { margin: 0; }
+    .page { margin: 0; box-shadow: none; }
   }
-
-  @page {
-    size: A4;
-    margin: 12mm 14mm 18mm 14mm;
-  @page {
-    size: A4;
-    margin: 12mm 14mm 14mm 14mm;
-  }
-
-  .footer {
-    padding-top: 4mm;
-    border-top: 1.5px solid #e8e4f5;
-    margin-top: 10mm;
-  }
-  .footer > div {
-    display: inline-block;
-    width: 32%;
-  }
-  .footer > div:first-child { text-align: left; }
-  .footer > div:nth-child(2) { text-align: center; }
-  .footer > div:last-child { text-align: right; }
-  }
-
-  .footer {
-    position: running(footerFixed);
-    padding-top: 4mm;
-    border-top: 1.5px solid #e8e4f5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════ PAGE 1 ═══════════════════════════════ --><div class="page"><div class="page-inner"><div class="page-body">
+<!-- ═══════════════════════════════ PAGE 1 ═══════════════════════════════ -->
+<div class="page">
 
   <!-- HEADER -->
   <div class="header">
@@ -448,9 +248,7 @@
           <div class="power-number">{{POWER_LEVEL}}</div>
         </div>
         <div>
-          <div class="stars-row">
-            {{STARS}}
-          </div>
+          <div class="stars-row">{{STARS}}</div>
         </div>
       </div>
     </div>
@@ -493,27 +291,21 @@
       <div class="perfil-box">
         <div class="perfil-text">{{PERFIL_GENERAL}}</div>
       </div>
-
       <div class="section-title"><span class="icon">📡</span> Radar de Habilidades</div>
       <div class="radar-box">
         <svg class="radar-svg" viewBox="0 0 200 175" xmlns="http://www.w3.org/2000/svg">
-          <!-- Grid rings -->
           <polygon points="100,15 163,52 163,122 100,159 37,122 37,52" fill="none" stroke="#e8e4f5" stroke-width="1"/>
           <polygon points="100,32 148,58 148,110 100,136 52,110 52,58" fill="none" stroke="#e8e4f5" stroke-width="1"/>
           <polygon points="100,49 133,65 133,99 100,115 67,99 67,65" fill="none" stroke="#e8e4f5" stroke-width="1"/>
           <polygon points="100,66 117,73 117,87 100,95 83,87 83,73" fill="none" stroke="#e8e4f5" stroke-width="1"/>
-          <!-- Axes -->
           <line x1="100" y1="87" x2="100" y2="15" stroke="#d8d0f5" stroke-width="0.8"/>
           <line x1="100" y1="87" x2="163" y2="52" stroke="#d8d0f5" stroke-width="0.8"/>
           <line x1="100" y1="87" x2="163" y2="122" stroke="#d8d0f5" stroke-width="0.8"/>
           <line x1="100" y1="87" x2="100" y2="159" stroke="#d8d0f5" stroke-width="0.8"/>
           <line x1="100" y1="87" x2="37" y2="122" stroke="#d8d0f5" stroke-width="0.8"/>
           <line x1="100" y1="87" x2="37" y2="52" stroke="#d8d0f5" stroke-width="0.8"/>
-          <!-- Data polygon -->
           <polygon points="{{RADAR_POINTS}}" fill="rgba(124,95,214,0.2)" stroke="#7c5fd6" stroke-width="2"/>
-          <!-- Data dots -->
           {{RADAR_DOTS}}
-          <!-- Labels -->
           <text x="100" y="10" text-anchor="middle" font-size="7" font-weight="700" fill="#7c5fd6">TÉCNICA</text>
           <text x="170" y="50" text-anchor="start" font-size="7" font-weight="700" fill="#7c5fd6">FÍSICO</text>
           <text x="170" y="128" text-anchor="start" font-size="7" font-weight="700" fill="#7c5fd6">ATAQUE</text>
@@ -527,28 +319,33 @@
     <!-- RIGHT: Estadísticas -->
     <div>
       <div class="section-title"><span class="icon">📊</span> Estadísticas</div>
-
       <div class="stat-group">
         <div class="stat-group-title">🎾 Técnica</div>
         {{STATS_TECNICA}}
       </div>
-
       <div class="stat-group">
         <div class="stat-group-title">⚡ Físico</div>
         {{STATS_FISICO}}
       </div>
-
       <div class="stat-group">
         <div class="stat-group-title">🧠 Mental</div>
         {{STATS_MENTAL}}
       </div>
     </div>
-  </div></div></div><!-- FOOTER -->
-  <div class="footer"><div><span class="footer-brand">PADEL SCOUTER</span></div><div><span class="footer-url">www.padelscouter.com</span></div><div><span class="footer-page">1</span></div></div>
-</div>
+  </div>
+
+  <!-- FOOTER PAGE 1 -->
+  <div class="footer">
+    <span class="footer-brand">PADEL SCOUTER</span>
+    <span class="footer-url">www.padelscouter.com</span>
+    <span class="footer-page">1</span>
+  </div>
+
+</div><!-- end page 1 -->
 
 
-<!-- ═══════════════════════════════ PAGE 2 ═══════════════════════════════ --><div class="page"><div class="page-inner"><div class="page-body">
+<!-- ═══════════════════════════════ PAGE 2 ═══════════════════════════════ -->
+<div class="page">
 
   <!-- HEADER -->
   <div class="header">
@@ -629,9 +426,16 @@
       <div class="quote-text">"La diferencia entre un buen jugador y un gran jugador es la constancia en los detalles."</div>
       <div class="quote-author">— Padel Scouter</div>
     </div>
-  </div></div></div><!-- FOOTER -->
-  <div class="footer"><div><span class="footer-brand">PADEL SCOUTER</span></div><div><span class="footer-url">www.padelscouter.com</span></div><div><span class="footer-page">2</span></div></div>
-</div>
+  </div>
+
+  <!-- FOOTER PAGE 2 -->
+  <div class="footer">
+    <span class="footer-brand">PADEL SCOUTER</span>
+    <span class="footer-url">www.padelscouter.com</span>
+    <span class="footer-page">2</span>
+  </div>
+
+</div><!-- end page 2 -->
 
 </body>
 </html>
