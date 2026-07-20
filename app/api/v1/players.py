@@ -68,7 +68,7 @@ def create_player(
 
 
 def compute_player_badges(db: Session, player_id: UUID) -> list[dict]:
-    from sqlalchemy import or_
+from sqlalchemy import or_, text
     matches = db.query(MatchModel).filter(or_(MatchModel.player1_id == player_id, MatchModel.player2_id == player_id, MatchModel.partner_id == player_id)).all()
     total = len(matches); wins = sum(1 for m in matches if m.ganado); losses = total - wins
     best_streak = 0; s = 0
@@ -441,14 +441,17 @@ def export_player_pdf_weasy(
     tourney_count = len(set(m.tournament_id for m in matches if m.tournament_id))
     win_rate = f"{round((wins / total_matches) * 100)}%" if total_matches > 0 else "—"
 
-    # FEP: sumar por torneo único
-    seen_tournaments = set()
-    fep_points_total = 0
-    for m in matches:
-        tid = m.tournament_id
-        if tid and tid not in seen_tournaments and m.tournament:
-            fep_points_total += m.tournament.fep_points or 0
-            seen_tournaments.add(tid)
+    # FEP usando la misma query que el player detail
+    from app.domain.value_objects.fep import compute_fep_points
+    fep_rows = db.execute(text("""
+        SELECT m.id, m.player1_id, m.partner_id, m.ronda, m.ganado,
+               m.tournament_id, t.fep_points
+        FROM matches m
+        LEFT JOIN tournaments t ON m.tournament_id = t.id
+        WHERE m.player1_id = :pid OR m.partner_id = :pid
+    """), {"pid": player_id}).fetchall()
+    fep_map_dict = compute_fep_points(fep_rows, [player_id])
+    fep_points_total = fep_map_dict.get(player_id, 0)
 
     player_dict["torneos_jugados"] = tourney_count
     player_dict["victorias"] = wins
