@@ -35,7 +35,7 @@ function renderPlayer(p, analyses) {
     if (manoEl) {
         const manoVal = p.mano || 'Derecha';
         const icono = manoVal === 'Zurda' ? 'zurdo.png' : 'diestro.png';
-        manoEl.innerHTML = '<div style="text-align:center;"><img src="/static/images/' + icono + '" style="width:144px;height:144px;display:block;margin:0 auto 8px auto;"><span style="color:rgba(255,107,0,0.8);">' + manoVal + '</span></div>';
+        manoEl.innerHTML = '<div style="text-align:center;margin-top:12px;"><img src="/static/images/' + icono + '" style="width:144px;height:144px;display:block;margin:0 auto 8px auto;"><span style="color:rgba(255,107,0,0.8);">' + manoVal + '</span></div>';
         manoEl.classList.remove('hidden');
     }
 
