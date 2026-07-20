@@ -233,6 +233,12 @@ def generate_player_html(player: dict, analysis: dict) -> str:
 
     # Reemplazar placeholders
     html = template
+    def get_initials(name):
+        parts = name.split()
+        if len(parts) >= 2:
+            return (parts[0][0] + parts[-1][0]).upper()
+        return (name[:2]).upper() if name else '??'
+
     avatar_html = '<div class="hero-photo">🎾</div>'
     avatar_url = player.get('avatar_url')
     if avatar_url:
@@ -240,10 +246,10 @@ def generate_player_html(player: dict, analysis: dict) -> str:
         if fpath.exists():
             avatar_html = f'<div class="hero-photo"><img src="file:///{fpath.resolve()}" alt=""></div>'
         else:
-            initials = player.get('name', '?')[:2].upper()
+            initials = get_initials(player.get('name', '?'))
             avatar_html = f'<div class="hero-photo" style="display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#7c5fd6;">{initials}</div>'
     else:
-        initials = player.get('name', '?')[:2].upper()
+        initials = get_initials(player.get('name', '?'))
         avatar_html = f'<div class="hero-photo" style="display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#7c5fd6;">{initials}</div>'
 
     replacements = {
