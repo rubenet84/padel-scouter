@@ -366,15 +366,15 @@
   .footer-brand { font-size: 7.5px; font-weight: 800; color: #7c5fd6; }
   .footer-url { font-size: 7px; color: #94a3b8; }
   .footer-page {
+    display: inline-block;
     width: 18px; height: 18px;
-    min-width: 18px; min-height: 18px;
+    line-height: 18px;
     background: #7c5fd6;
     border-radius: 50%;
     color: #fff;
     font-size: 8px;
     font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    text-align: center;
   }
 
   @media print {
@@ -386,46 +386,21 @@
     margin: 12mm 14mm 18mm 14mm;
   @page {
     size: A4;
-    margin: 12mm 14mm 18mm 14mm;
-    @bottom-left {
-      content: element(footerFixed);
-      width: 100%;
-    }
+    margin: 12mm 14mm 14mm 14mm;
   }
 
   .footer {
-    position: running(footerFixed);
     padding-top: 4mm;
     border-top: 1.5px solid #e8e4f5;
-    text-align: justify;
+    margin-top: 10mm;
   }
-  .footer::after {
-    content: '';
+  .footer > div {
     display: inline-block;
-    width: 100%;
+    width: 32%;
   }
-  .footer-brand {
-    display: inline-block;
-    font-size: 7.5px;
-    font-weight: bold;
-    color: #7c5fd6;
-  }
-  .footer-url {
-    display: inline-block;
-    font-size: 7px;
-    color: #94a3b8;
-  }
-  .footer-page {
-    display: inline-block;
-    width: 18px; height: 18px;
-    line-height: 18px;
-    background: #7c5fd6;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 8px;
-    font-weight: bold;
-    text-align: center;
-  }
+  .footer > div:first-child { text-align: left; }
+  .footer > div:nth-child(2) { text-align: center; }
+  .footer > div:last-child { text-align: right; }
   }
 
   .footer {
@@ -569,7 +544,7 @@
       </div>
     </div>
   </div></div></div><!-- FOOTER -->
-  <div class="footer"><table class="footer-table"><tr><td><span class="footer-brand">PADEL SCOUTER</span></td><td><span class="footer-url">www.padelscouter.com</span></td><td><span class="footer-page">1</span></td></tr></table></div>
+  <div class="footer"><div><span class="footer-brand">PADEL SCOUTER</span></div><div><span class="footer-url">www.padelscouter.com</span></div><div><span class="footer-page">1</span></div></div>
 </div>
 
 
@@ -655,11 +630,12 @@
       <div class="quote-author">— Padel Scouter</div>
     </div>
   </div></div></div><!-- FOOTER -->
-  <div class="footer"><table class="footer-table"><tr><td><span class="footer-brand">PADEL SCOUTER</span></td><td><span class="footer-url">www.padelscouter.com</span></td><td><span class="footer-page">2</span></td></tr></table></div>
+  <div class="footer"><div><span class="footer-brand">PADEL SCOUTER</span></div><div><span class="footer-url">www.padelscouter.com</span></div><div><span class="footer-page">2</span></div></div>
 </div>
 
 </body>
 </html>
+
 
 
 
