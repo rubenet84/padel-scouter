@@ -10,6 +10,7 @@ import math
 import json
 from datetime import datetime
 from pathlib import Path
+import re
 
 
 def get_nivel_amenaza_stars(power_level: int) -> str:
@@ -139,11 +140,17 @@ def generate_player_html(player: dict, analysis: dict) -> str:
     victorias = player.get('victorias', 0)
     win_rate = player.get('win_rate', '—')
 
-    # Proyección: estimar mejora basada en plan de mejora
+    # Proyección: intentar parsear del plan IA, si no, estimar
     proy_diff = max(100, round(power_level * 0.04))
     proy_num = min(9999, power_level + proy_diff)
-    proy_num_display = f"{proy_num}+" if proy_num >= 9999 else str(proy_num)
+    raw_plan = analysis.get('improvement_plan', '')
+    proj_match = re.search(r'(\d[\d,.]*)\s*[→–-]\s*(\d[\d,.]*)', raw_plan) if raw_plan else None
+    if proj_match:
+        try:
+            proy_num = min(9999, int(proj_match.group(2).replace(',', '')))
+        except: pass
     proy_diff = proy_num - power_level
+    proy_num_display = f"{proy_num}+" if proy_num >= 9999 else str(proy_num)
 
     # Categoría display
     cat_map = {
@@ -236,7 +243,7 @@ def generate_player_html(player: dict, analysis: dict) -> str:
     def get_initials(name):
         parts = name.split()
         if len(parts) >= 2:
-            return (parts[0][0] + parts[-1][0]).upper()
+            return (parts[0][0] + parts[1][0]).upper()
         return (name[:2]).upper() if name else '??'
 
     avatar_html = '<div class="hero-photo">🎾</div>'
