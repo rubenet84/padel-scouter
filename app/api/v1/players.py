@@ -441,10 +441,14 @@ def export_player_pdf_weasy(
     tourney_count = len(set(m.tournament_id for m in matches if m.tournament_id))
     win_rate = f"{round((wins / total_matches) * 100)}%" if total_matches > 0 else "—"
 
-    # FEP usando la misma función que player stats
-    from app.domain.value_objects.fep import compute_fep_points
-    fep_map = compute_fep_points(matches, [player_id])
-    fep_points_total = fep_map.get(player_id, 0)
+    # FEP: sumar por torneo único
+    seen_tournaments = set()
+    fep_points_total = 0
+    for m in matches:
+        tid = m.tournament_id
+        if tid and tid not in seen_tournaments and m.tournament:
+            fep_points_total += m.tournament.fep_points or 0
+            seen_tournaments.add(tid)
 
     player_dict["torneos_jugados"] = tourney_count
     player_dict["victorias"] = wins
