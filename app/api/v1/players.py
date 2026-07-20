@@ -9,7 +9,7 @@ from io import BytesIO
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.dependencies import get_current_user
@@ -924,3 +924,4 @@ def delete_match(
     ).delete()
     db.delete(match)
     db.commit()
+
