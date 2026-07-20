@@ -48,7 +48,7 @@ def calculate_power_level(
         win_rate = 0.0
         fep_pts = 0
 
-    competitive = (fep_pts / 10) + (win_rate * 300)
+    competitive = (fep_pts / 10) + (win_rate * 15)
 
     raw_score = (
         tecnica   * 0.45 +
