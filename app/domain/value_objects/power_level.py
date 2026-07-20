@@ -27,7 +27,7 @@ def calculate_power_level(
         stats.globo         * 0.06 +
         stats.saque        * 0.08 +
         stats.bajada_pared * 0.08
-    )
+    ) / 0.80  # escalar a 0-100 (pesos suman 80%)
 
     fisico = (
         stats.velocidad   * 0.35 +
