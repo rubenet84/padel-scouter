@@ -68,7 +68,7 @@ def create_player(
 
 
 def compute_player_badges(db: Session, player_id: UUID) -> list[dict]:
-    from sqlalchemy import or_
+from sqlalchemy import or_, text
     matches = db.query(MatchModel).filter(or_(MatchModel.player1_id == player_id, MatchModel.player2_id == player_id, MatchModel.partner_id == player_id)).all()
     total = len(matches); wins = sum(1 for m in matches if m.ganado); losses = total - wins
     best_streak = 0; s = 0
