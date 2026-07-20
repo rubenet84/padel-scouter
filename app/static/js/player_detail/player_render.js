@@ -178,7 +178,7 @@ function renderPlayer(p, analyses) {
               const projMatch = projLines[1]?.match(/(\d[\d,.]*)\s*→\s*(\d[\d,.]*)/);
               if (projMatch) {
                 const current = projMatch[1];
-                const target = projMatch[2];
+                const target = Math.min(9999, parseInt(projMatch[2].replace(',', '')));
                 document.getElementById('plan-current-pl').textContent = current;
                 document.getElementById('plan-target-pl').textContent = target;
                 projContainer.classList.remove('hidden');
