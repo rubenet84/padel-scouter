@@ -88,7 +88,7 @@ function renderPlayer(p, analyses) {
             { max: Infinity, label: 'Profesional' },
           ];
           const suggested = ranges.find(r => power < r.max)?.label || 'Profesional';
-          suggestedEl.innerHTML = '<span style="font-family:Orbitron,sans-serif;font-size:11px;font-weight:700;color:#FFD700;">Sugerida:</span><br><span style="font-family:Orbitron,sans-serif;font-size:14px;font-weight:900;color:#FFD700;">' + suggested + '</span>';
+          suggestedEl.innerHTML = '<span style="font-family:Orbitron,sans-serif;font-size:11px;font-weight:700;color:#FFD700;display:block;margin-bottom:8px;">Sugerida:</span><span style="font-family:Orbitron,sans-serif;font-size:14px;font-weight:900;color:#FFD700;">' + suggested + '</span>';
           suggestedEl.classList.remove('hidden');
         }
 
