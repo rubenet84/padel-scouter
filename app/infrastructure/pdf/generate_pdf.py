@@ -266,6 +266,7 @@ def generate_player_html(player: dict, analysis: dict) -> str:
         '{{POWER_LEVEL}}':    str(power_level),
         '{{STARS}}':          get_nivel_amenaza_stars(power_level),
         '{{MANO}}':           player.get('mano', 'Derecha'),
+        '{{MANO_ICON}}':      str((Path("app") / "static" / "images" / ("zurdo.png" if player.get('mano', '') == 'Zurda' else "diestro.png")).resolve()),
         '{{TORNEOS}}':        str(torneos),
         '{{VICTORIAS}}':      str(victorias),
         '{{WIN_RATE}}':       win_rate,
