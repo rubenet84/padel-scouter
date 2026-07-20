@@ -177,11 +177,11 @@ def generate_player_html(player: dict, analysis: dict) -> str:
             # Extraer descripción tras "—" o "-"
             desc_parts = re.split(r'\s*[—–-]\s*', text, maxsplit=1)
             if len(desc_parts) > 1:
-                plan_descs[i] = desc_parts[1].strip()[:200]
+                plan_descs[i] = desc_parts[1].strip()[:300]
                 text = desc_parts[0].strip()
             # Limpiar número inicial
             text = re.sub(r'^\d+[\.\)\-]?\s*', '', text).strip()
-            plan_titles[i] = text[:40].upper() if text else plan_titles[i]
+            plan_titles[i] = text[:60].upper() if text else plan_titles[i]
 
     # Usar strengths/weaknesses como fallback si no hay plan IA
     if not any(plan_descs):
@@ -265,15 +265,15 @@ def generate_player_html(player: dict, analysis: dict) -> str:
         '{{STATS_MENTAL}}':   stats_mental,
         '{{AI_DESCRIPTION}}': analysis.get('ai_description', 'Análisis no disponible.'),
         '{{IMPROVEMENT_PLAN}}': improvement_plan_display,
-        '{{PLAN1_TITULO}}':   plan_titles[0][:30].upper(),
+        '{{PLAN1_TITULO}}':   plan_titles[0][:60].upper(),
         '{{PLAN1_FREQ}}':     plan_freqs[0],
         '{{PLAN1_DESC}}':     plan_descs[0],
         '{{PLAN1_CHECKS}}':   build_plan_checks(['Sesiones enfocadas', 'Práctica específica', 'Seguimiento semanal'], 'purple'),
-        '{{PLAN2_TITULO}}':   plan_titles[1][:30].upper(),
+        '{{PLAN2_TITULO}}':   plan_titles[1][:60].upper(),
         '{{PLAN2_FREQ}}':     plan_freqs[1],
         '{{PLAN2_DESC}}':     plan_descs[1],
         '{{PLAN2_CHECKS}}':   build_plan_checks(['Análisis de partidos', 'Situaciones de presión', 'Control emocional'], 'blue'),
-        '{{PLAN3_TITULO}}':   plan_titles[2][:30].upper(),
+        '{{PLAN3_TITULO}}':   plan_titles[2][:60].upper(),
         '{{PLAN3_FREQ}}':     plan_freqs[2],
         '{{PLAN3_DESC}}':     plan_descs[2],
         '{{PLAN3_CHECKS}}':   build_plan_checks(['Técnica específica', 'Variedad de golpes', 'Efectos y velocidad'], 'orange'),
