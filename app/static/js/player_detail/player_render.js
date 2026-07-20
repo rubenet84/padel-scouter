@@ -178,9 +178,11 @@ function renderPlayer(p, analyses) {
               const projMatch = projLines[1]?.match(/(\d[\d,.]*)\s*→\s*(\d[\d,.]*)/);
               if (projMatch) {
                 const current = projMatch[1];
-                const target = Math.min(9999, parseInt(projMatch[2].replace(',', '')));
+                const rawTarget = parseInt(projMatch[2].replace(',', ''));
+                const target = Math.min(9999, rawTarget);
+                const targetDisplay = rawTarget > 9999 ? '9999+' : String(target);
                 document.getElementById('plan-current-pl').textContent = current;
-                document.getElementById('plan-target-pl').textContent = target;
+                document.getElementById('plan-target-pl').textContent = targetDisplay;
                 projContainer.classList.remove('hidden');
                 // Update visual with proper styling
                 document.getElementById('plan-current-pl').style.cssText = 'font-orbitron;font-weight:900;font-size:1.25rem;color:white';

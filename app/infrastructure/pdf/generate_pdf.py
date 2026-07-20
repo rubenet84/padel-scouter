@@ -142,7 +142,8 @@ def generate_player_html(player: dict, analysis: dict) -> str:
     # Proyección: estimar mejora basada en plan de mejora
     proy_diff = max(100, round(power_level * 0.04))
     proy_num = min(9999, power_level + proy_diff)
-    proy_diff = proy_num - power_level  # diff real tras aplicar el tope
+    proy_num_display = f"{proy_num}+" if proy_num >= 9999 else str(proy_num)
+    proy_diff = proy_num - power_level
 
     # Categoría display
     cat_map = {
@@ -277,7 +278,7 @@ def generate_player_html(player: dict, analysis: dict) -> str:
         '{{PLAN3_FREQ}}':     plan_freqs[2],
         '{{PLAN3_DESC}}':     plan_descs[2],
         '{{PLAN3_CHECKS}}':   build_plan_checks(['Técnica específica', 'Variedad de golpes', 'Efectos y velocidad'], 'orange'),
-        '{{PROY_NUM}}':       str(proy_num),
+        '{{PROY_NUM}}':       str(proy_num_display),
         '{{PROY_DIFF}}':      str(proy_diff),
     }
 
