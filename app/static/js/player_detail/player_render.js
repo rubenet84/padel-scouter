@@ -33,7 +33,9 @@ function renderPlayer(p, analyses) {
     // Mano (diestro/zurdo)
     const manoEl = document.getElementById('badge-mano');
     if (manoEl) {
-        manoEl.textContent = '🖐 ' + (p.mano || 'Derecha');
+        const manoVal = p.mano || 'Derecha';
+        const icono = manoVal === 'Zurda' ? 'zurdo.png' : 'diestro.png';
+        manoEl.innerHTML = '<img src="/static/images/' + icono + '" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;">' + manoVal;
         manoEl.classList.remove('hidden');
     }
 
