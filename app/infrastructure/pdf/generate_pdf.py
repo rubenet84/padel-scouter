@@ -141,6 +141,7 @@ def generate_player_html(player: dict, analysis: dict) -> str:
     # Proyección: estimar mejora basada en plan de mejora
     proy_diff = max(100, round(power_level * 0.04))
     proy_num = min(9999, power_level + proy_diff)
+    proy_diff = proy_num - power_level  # diff real tras aplicar el tope
 
     # Categoría display
     cat_map = {
