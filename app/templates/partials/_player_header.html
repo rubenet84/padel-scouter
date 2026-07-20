@@ -30,14 +30,10 @@
         <!-- Category badge (debajo del nombre) -->
         <div class="text-center mb-5">
             <span id="badge-category" class="inline-block px-4 py-0.5 rounded-full text-black font-black text-xs tracking-wider" style="background:linear-gradient(90deg,#FF6B00,#FFD700);">—</span>
-            <div class="grid grid-cols-2 gap-3 mt-3">
-                <div id="badge-mano" class="hidden flex flex-col items-center justify-center rounded-xl p-2" style="background:rgba(255,107,0,0.06);border:1px solid rgba(255,107,0,0.15);"></div>
-                <div id="badge-suggested" class="hidden flex flex-col items-center justify-center rounded-xl p-2" style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.15);"></div>
-            </div>
         </div>
 
         <!-- Power Level -->
-        <div class="scouter-scan rounded-xl p-4 mb-5" style="background:rgba(10,10,15,0.8);border:1px solid rgba(0,255,135,0.15);">
+        <div class="scouter-scan rounded-xl p-4 mb-4" style="background:rgba(10,10,15,0.8);border:1px solid rgba(0,255,135,0.15);">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-xs font-bold tracking-widest uppercase font-orbitron" style="color:rgba(0,255,135,0.6);">Power Level</span>
                 <div class="flex items-center gap-1">
@@ -72,6 +68,11 @@
         </div>
     </div>
 </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div id="badge-suggested" class="hidden flex flex-col items-center justify-center rounded-xl p-2" style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.15);"></div>
+            <div id="badge-mano" class="hidden flex flex-col items-center justify-center rounded-xl p-2" style="background:rgba(255,107,0,0.06);border:1px solid rgba(255,107,0,0.15);"></div>
+        </div>
 
 <!-- Golpe definitivo card -->
 <div id="golpe-card" class="gradient-border rounded-2xl card-hover hidden" style="background:#12121A;overflow:hidden;">
