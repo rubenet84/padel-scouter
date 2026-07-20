@@ -292,6 +292,7 @@ def generate_player_html(player: dict, analysis: dict) -> str:
         '{{PLAN3_CHECKS}}':   build_plan_checks(['Técnica específica', 'Variedad de golpes', 'Efectos y velocidad'], 'orange'),
         '{{PROY_NUM}}':       str(proy_num_display),
         '{{PROY_DIFF}}':      str(proy_diff),
+        '{{TROFEO_PATH}}':    str((Path("app") / "static" / "images" / "trofeo.png").resolve()),
     }
 
     for placeholder, value in replacements.items():
