@@ -201,6 +201,9 @@
   /* Quote footer */
   .quote-footer {
     background: #f8f6ff; border-radius: 8px; padding: 4mm 5mm;
+    position: relative; overflow: hidden;
+  }
+  .quote-footer-inner {
     display: flex; align-items: center; gap: 4mm;
   }
   .quote-trophy { width: 28px; height: 28px; flex-shrink: 0; }
@@ -422,10 +425,14 @@
 
   <!-- QUOTE -->
   <div class="quote-footer">
+    <span class="quote-mark">"</span>
+    <span class="quote-end">"</span>
+    <div class="quote-footer-inner">
     <div class="quote-trophy"><img src="file:///{{TROFEO_PATH}}" alt=""></div>
     <div>
       <div class="quote-text">"La diferencia entre un buen jugador y un gran jugador es la constancia en los detalles."</div>
       <div class="quote-author">— Padel Scouter</div>
+    </div>
     </div>
   </div>
 
