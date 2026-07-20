@@ -34,14 +34,14 @@ def calc_radar_points(stats: dict) -> str:
     max_r = 72  # radio máximo (de centro a vértice exterior)
 
     # Valores normalizados 0-100 para cada eje
-    tecnica = (stats.get('derecha', 50) + stats.get('reves', 50) + stats.get('volea_derecha', 50) + stats.get('volea_reves', 50)) / 4
-    fisico  = (stats.get('velocidad', 50) + stats.get('resistencia', 50) + stats.get('reflejos', 50)) / 3
-    ataque  = (stats.get('remate', 50) + stats.get('bandeja', 50) + stats.get('vibora', 50)) / 3
-    mental  = (stats.get('tactica', 50) + stats.get('presion', 50) + stats.get('trabajo_en_pareja', 50)) / 3
-    defensa = (stats.get('bajada_pared', 50) + stats.get('globo', 50)) / 2
-    tactica = (stats.get('saque', 50) + stats.get('tactica', 50)) / 2
+    derecha = stats.get('derecha', 50)
+    volea   = (stats.get('volea_derecha', 50) + stats.get('volea_reves', 50)) / 2
+    bandeja = stats.get('bandeja', 50)
+    remate  = stats.get('remate', 50)
+    velocidad = stats.get('velocidad', 50)
+    tactica_st = stats.get('tactica', 50)
 
-    values = [tecnica, fisico, ataque, mental, defensa, tactica]
+    values = [derecha, volea, bandeja, remate, velocidad, tactica_st]
 
     # Ángulos: empezar desde arriba (-90°) y girar 60° por vértice
     angles = [-90 + 60 * i for i in range(6)]
@@ -61,14 +61,14 @@ def calc_radar_dots(stats: dict) -> str:
     cx, cy = 100, 87
     max_r = 72
 
-    tecnica = (stats.get('derecha', 50) + stats.get('reves', 50) + stats.get('volea_derecha', 50) + stats.get('volea_reves', 50)) / 4
-    fisico  = (stats.get('velocidad', 50) + stats.get('resistencia', 50) + stats.get('reflejos', 50)) / 3
-    ataque  = (stats.get('remate', 50) + stats.get('bandeja', 50) + stats.get('vibora', 50)) / 3
-    mental  = (stats.get('tactica', 50) + stats.get('presion', 50) + stats.get('trabajo_en_pareja', 50)) / 3
-    defensa = (stats.get('bajada_pared', 50) + stats.get('globo', 50)) / 2
-    tactica = (stats.get('saque', 50) + stats.get('tactica', 50)) / 2
+    derecha = stats.get('derecha', 50)
+    volea   = (stats.get('volea_derecha', 50) + stats.get('volea_reves', 50)) / 2
+    bandeja = stats.get('bandeja', 50)
+    remate  = stats.get('remate', 50)
+    velocidad = stats.get('velocidad', 50)
+    tactica_st = stats.get('tactica', 50)
 
-    values = [tecnica, fisico, ataque, mental, defensa, tactica]
+    values = [derecha, volea, bandeja, remate, velocidad, tactica_st]
     angles = [-90 + 60 * i for i in range(6)]
     dots = []
     for val, angle in zip(values, angles):
