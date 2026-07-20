@@ -88,7 +88,7 @@ function renderPlayer(p, analyses) {
             { max: Infinity, label: 'Profesional' },
           ];
           const suggested = ranges.find(r => power < r.max)?.label || 'Profesional';
-          suggestedEl.textContent = `Sugerida: ${suggested}`;
+          suggestedEl.innerHTML = '<span style="font-family:Orbitron,sans-serif;font-size:14px;font-weight:900;color:#FFD700;">Sugerida: ' + suggested + '</span>';
           suggestedEl.classList.remove('hidden');
         }
 
