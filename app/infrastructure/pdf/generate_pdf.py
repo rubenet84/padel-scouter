@@ -152,22 +152,55 @@ def generate_player_html(player: dict, analysis: dict) -> str:
     }
     categoria = cat_map.get(player.get('category', ''), player.get('category', '—'))
 
-    # Fortalezas como plan cards
-    strengths = analysis.get('strengths', ['Técnica sólida', 'Buen físico', 'Mentalidad competitiva'])
-    if isinstance(strengths, str):
-        strengths = json.loads(strengths)
-
-    weaknesses = analysis.get('weaknesses', ['Mejorar resistencia'])
-    if isinstance(weaknesses, str):
-        weaknesses = json.loads(weaknesses)
-
-    # Distribir fortalezas en 3 cards
-    plan_titles = [
-        strengths[0] if len(strengths) > 0 else 'Fortaleza principal',
-        strengths[1] if len(strengths) > 1 else 'Segunda fortaleza',
-        strengths[2] if len(strengths) > 2 else 'Tercera fortaleza',
-    ]
+    # ── Plan de mejora: parsear el texto de la IA ───────────────
+    plan_intro = ""
+    plan_titles = ['Fortaleza principal', 'Segunda fortaleza', 'Tercera fortaleza']
     plan_freqs = ['3 sesiones / semana', '2 sesiones / semana', '1 sesión / semana']
+    plan_descs = ['', '', '']
+
+    raw_plan = analysis.get('improvement_plan', '')
+    if raw_plan:
+        # Dividir por "---" para separar intro y objetivos
+        parts = [p.strip() for p in raw_plan.split('---') if p.strip()]
+        if len(parts) >= 1:
+            plan_intro = parts[0]
+        for i, part in enumerate(parts[1:4]):
+            # Intentar extraer: [número] [título] [frecuencia] — [descripción]
+            text = part.strip()
+            # Extraer frecuencia si existe
+            import re
+            freq_match = re.search(r'(\d+\s*sesi[oó]n(?:es)?\s*/\s*semana)', text, re.IGNORECASE)
+            if freq_match:
+                plan_freqs[i] = freq_match.group(1)
+                text = text.replace(freq_match.group(1), '').strip()
+            # Extraer descripción tras "—" o "-"
+            desc_parts = re.split(r'\s*[—–-]\s*', text, maxsplit=1)
+            if len(desc_parts) > 1:
+                plan_descs[i] = desc_parts[1].strip()[:200]
+                text = desc_parts[0].strip()
+            # Limpiar número inicial
+            text = re.sub(r'^\d+[\.\)\-]?\s*', '', text).strip()
+            plan_titles[i] = text[:40].upper() if text else plan_titles[i]
+
+    # Usar strengths/weaknesses como fallback si no hay plan IA
+    if not any(plan_descs):
+        strengths = analysis.get('strengths', [])
+        weaknesses = analysis.get('weaknesses', [])
+        if isinstance(strengths, str): strengths = json.loads(strengths)
+        if isinstance(weaknesses, str): weaknesses = json.loads(weaknesses)
+        plan_titles = [
+            strengths[0] if len(strengths) > 0 else 'Fortaleza principal',
+            strengths[1] if len(strengths) > 1 else 'Segunda fortaleza',
+            strengths[2] if len(strengths) > 2 else 'Tercera fortaleza',
+        ]
+        plan_descs = [
+            weaknesses[0] if len(weaknesses) > 0 else 'Área de mejora principal.',
+            weaknesses[1] if len(weaknesses) > 1 else 'Segunda área de mejora.',
+            weaknesses[2] if len(weaknesses) > 2 else 'Tercera área de mejora.',
+        ]
+
+    # Pasar el intro del plan (sin los --- objetivos)
+    improvement_plan_display = plan_intro if plan_intro else raw_plan[:500]
 
     # Perfil general basado en stats
     top_stat = max(stats, key=stats.get)
@@ -228,18 +261,18 @@ def generate_player_html(player: dict, analysis: dict) -> str:
         '{{STATS_FISICO}}':   stats_fisico,
         '{{STATS_MENTAL}}':   stats_mental,
         '{{AI_DESCRIPTION}}': analysis.get('ai_description', 'Análisis no disponible.'),
-        '{{IMPROVEMENT_PLAN}}': analysis.get('improvement_plan', 'Plan de mejora no disponible.'),
+        '{{IMPROVEMENT_PLAN}}': improvement_plan_display,
         '{{PLAN1_TITULO}}':   plan_titles[0][:30].upper(),
         '{{PLAN1_FREQ}}':     plan_freqs[0],
-        '{{PLAN1_DESC}}':     weaknesses[0] if weaknesses else 'Área de mejora principal.',
+        '{{PLAN1_DESC}}':     plan_descs[0],
         '{{PLAN1_CHECKS}}':   build_plan_checks(['Sesiones enfocadas', 'Práctica específica', 'Seguimiento semanal'], 'purple'),
         '{{PLAN2_TITULO}}':   plan_titles[1][:30].upper(),
         '{{PLAN2_FREQ}}':     plan_freqs[1],
-        '{{PLAN2_DESC}}':     weaknesses[1] if len(weaknesses) > 1 else 'Segunda área de mejora.',
+        '{{PLAN2_DESC}}':     plan_descs[1],
         '{{PLAN2_CHECKS}}':   build_plan_checks(['Análisis de partidos', 'Situaciones de presión', 'Control emocional'], 'blue'),
         '{{PLAN3_TITULO}}':   plan_titles[2][:30].upper(),
         '{{PLAN3_FREQ}}':     plan_freqs[2],
-        '{{PLAN3_DESC}}':     weaknesses[2] if len(weaknesses) > 2 else 'Tercera área de mejora.',
+        '{{PLAN3_DESC}}':     plan_descs[2],
         '{{PLAN3_CHECKS}}':   build_plan_checks(['Técnica específica', 'Variedad de golpes', 'Efectos y velocidad'], 'orange'),
         '{{PROY_NUM}}':       str(proy_num),
         '{{PROY_DIFF}}':      str(proy_diff),
