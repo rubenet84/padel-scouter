@@ -177,7 +177,7 @@ def generate_player_html(player: dict, analysis: dict) -> str:
             # Intentar extraer: [número] [título] [frecuencia] — [descripción]
             text = part.strip()
             # Extraer frecuencia si existe
-                    freq_match = re.search(r'(\d+\s*sesi[oó]n(?:es)?\s*/\s*semana)', text, re.IGNORECASE)
+            freq_match = re.search(r'(\d+\s*sesi[oó]n(?:es)?\s*/\s*semana)', text, re.IGNORECASE)
             if freq_match:
                 plan_freqs[i] = freq_match.group(1)
                 text = text.replace(freq_match.group(1), '').strip()
