@@ -34,11 +34,11 @@ def calc_radar_points(stats: dict) -> str:
     max_r = 72  # radio máximo (de centro a vértice exterior)
 
     # Valores normalizados 0-100 para cada eje
-    tecnica = (stats.get('derecha', 50) + stats.get('reves', 50) + stats.get('volea', 50)) / 3
+    tecnica = (stats.get('derecha', 50) + stats.get('reves', 50) + stats.get('volea_derecha', 50) + stats.get('volea_reves', 50)) / 4
     fisico  = (stats.get('velocidad', 50) + stats.get('resistencia', 50) + stats.get('reflejos', 50)) / 3
-    ataque  = (stats.get('smash', 50) + stats.get('bandeja', 50) + stats.get('vibora', 50)) / 3
+    ataque  = (stats.get('remate', 50) + stats.get('bandeja', 50) + stats.get('vibora', 50)) / 3
     mental  = (stats.get('tactica', 50) + stats.get('presion', 50) + stats.get('trabajo_en_pareja', 50)) / 3
-    defensa = (stats.get('bajada_pared', 50) + stats.get('lob', 50)) / 2
+    defensa = (stats.get('bajada_pared', 50) + stats.get('globo', 50)) / 2
     tactica = (stats.get('saque', 50) + stats.get('tactica', 50)) / 2
 
     values = [tecnica, fisico, ataque, mental, defensa, tactica]
@@ -61,11 +61,11 @@ def calc_radar_dots(stats: dict) -> str:
     cx, cy = 100, 87
     max_r = 72
 
-    tecnica = (stats.get('derecha', 50) + stats.get('reves', 50) + stats.get('volea', 50)) / 3
+    tecnica = (stats.get('derecha', 50) + stats.get('reves', 50) + stats.get('volea_derecha', 50) + stats.get('volea_reves', 50)) / 4
     fisico  = (stats.get('velocidad', 50) + stats.get('resistencia', 50) + stats.get('reflejos', 50)) / 3
-    ataque  = (stats.get('smash', 50) + stats.get('bandeja', 50) + stats.get('vibora', 50)) / 3
+    ataque  = (stats.get('remate', 50) + stats.get('bandeja', 50) + stats.get('vibora', 50)) / 3
     mental  = (stats.get('tactica', 50) + stats.get('presion', 50) + stats.get('trabajo_en_pareja', 50)) / 3
-    defensa = (stats.get('bajada_pared', 50) + stats.get('lob', 50)) / 2
+    defensa = (stats.get('bajada_pared', 50) + stats.get('globo', 50)) / 2
     tactica = (stats.get('saque', 50) + stats.get('tactica', 50)) / 2
 
     values = [tecnica, fisico, ataque, mental, defensa, tactica]
@@ -118,11 +118,12 @@ def generate_player_html(player: dict, analysis: dict) -> str:
     stats = {
         'derecha':      player.get('derecha', 50),
         'reves':        player.get('reves', 50),
-        'volea':        player.get('volea', 50),
+        'volea_derecha': player.get('volea_derecha', 50),
+        'volea_reves':  player.get('volea_reves', 50),
         'bandeja':      player.get('bandeja', 50),
         'vibora':       player.get('vibora', 50),
-        'smash':        player.get('smash', 50),
-        'lob':          player.get('lob', 50),
+        'remate':       player.get('remate', 50),
+        'globo':        player.get('globo', 50),
         'saque':        player.get('saque', 50),
         'bajada_pared': player.get('bajada_pared', 50),
         'velocidad':    player.get('velocidad', 50),
@@ -204,19 +205,21 @@ def generate_player_html(player: dict, analysis: dict) -> str:
 
     # Perfil general basado en stats
     top_stat = max(stats, key=stats.get)
-    stat_labels = {
-        'smash': 'remate', 'bandeja': 'bandeja', 'vibora': 'víbora',
-        'saque': 'servicio', 'volea': 'volea', 'derecha': 'derecha',
-        'reves': 'revés', 'bajada_pared': 'bajada de pared',
+    stat_labels_perfil = {
+        'remate': 'remate', 'bandeja': 'bandeja', 'vibora': 'víbora',
+        'saque': 'servicio', 'derecha': 'derecha',
+        'reves': 'revés', 'bajada_pared': 'bajada de pared', 'globo': 'globo',
+        'volea_derecha': 'volea', 'volea_reves': 'volea',
     }
-    top_label = stat_labels.get(top_stat, top_stat)
+    top_label = stat_labels_perfil.get(top_stat, top_stat)
     perfil = f"Jugador de {categoria.lower()} con {stats[top_stat]}/100 en {top_label} como golpe más destacado. Win rate del {win_rate} en {torneos} torneos disputados."
 
     # Stats rows
     stats_tecnica = build_stat_rows([
-        ('Derecha', 'derecha'), ('Revés', 'reves'), ('Volea', 'volea'),
-        ('Bandeja', 'bandeja'), ('Víbora', 'vibora'), ('Remate', 'smash'),
-        ('Globo/Lob', 'lob'), ('Saque', 'saque'), ('Bajada de pared', 'bajada_pared'),
+        ('Derecha', 'derecha'), ('Revés', 'reves'),
+        ('Volea Der.', 'volea_derecha'), ('Volea Rev.', 'volea_reves'),
+        ('Bandeja', 'bandeja'), ('Víbora', 'vibora'), ('Remate', 'remate'),
+        ('Globo', 'globo'), ('Saque', 'saque'), ('Bajada de pared', 'bajada_pared'),
     ], stats)
 
     stats_fisico = build_stat_rows([
@@ -303,8 +306,8 @@ if __name__ == '__main__':
     test_player = {
         'name': 'Rubén Rebollo Rua',
         'category': 'PRIMERA',
-        'derecha': 80, 'reves': 90, 'volea': 85, 'bandeja': 85,
-        'vibora': 80, 'smash': 95, 'lob': 85, 'saque': 100,
+        'derecha': 80, 'reves': 90, 'volea_derecha': 85, 'bandeja': 85,
+        'vibora': 80, 'remate': 95, 'globo': 85, 'saque': 100,
         'bajada_pared': 95, 'velocidad': 85, 'resistencia': 75,
         'reflejos': 85, 'tactica': 80, 'presion': 80,
         'trabajo_en_pareja': 90, 'torneos_jugados': 15,
