@@ -13,7 +13,7 @@ from app.infrastructure.ai.gemini_client import analyze_player_with_ai
 from app.infrastructure.cache.redis_client import redis_cache
 from app.domain.entities.player import Player, PlayerStats
 from app.domain.use_cases.analyze_player import AnalyzePlayerUseCase
-from app.domain.value_objects.computed_stats import get_computed_stats
+from app.services.computed_stats_service import get_computed_stats
 from app.schemas.player import AnalysisPublicSchema
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])

@@ -1,8 +1,11 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
+from app.core.rate_limit import limiter
 from app.api.v1.auth import router as auth_router
 from app.api.v1.players import router as players_router
 from app.api.v1.tournaments import router as tournaments_router
@@ -27,6 +30,15 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+async def _rate_limit_exceeded_handler(request, exc):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Demasiadas peticiones. Esperá un momento."},
+    )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.get_allowed_origins(),

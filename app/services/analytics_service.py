@@ -1,4 +1,4 @@
-"""Match analytics computed from real match + tournament data."""
+"""Analytics service — match analytics from real match + tournament data."""
 
 from collections import defaultdict
 from uuid import UUID
@@ -11,18 +11,7 @@ from app.infrastructure.database.models import MatchModel
 
 
 def get_match_analytics(db: Session, player_id: UUID) -> dict:
-    """
-    Computa estadísticas detalladas basadas en partidos reales.
-
-    Returns
-    -------
-    dict con claves:
-        total_partidos, victorias, derrotas, win_rate,
-        total_sets, sets_ganados, sets_perdidos, set_ratio, sets_por_partido,
-        torneos_jugados, amistosos_jugados,
-        mejor_ronda, rondas_breakdown, fase_media_nombre, fase_media_idx,
-        scoring_breakdown
-    """
+    """Compute detailed match-based statistics."""
     matches = (
         db.query(MatchModel)
         .filter(
@@ -37,12 +26,10 @@ def get_match_analytics(db: Session, player_id: UUID) -> dict:
 
     total_partidos = len(matches)
 
-    # ── Victorias / Derrotas ──
     victorias = sum(1 for m in matches if m.ganado)
     derrotas = total_partidos - victorias
     win_rate = round(victorias / total_partidos * 100, 1) if total_partidos else 0.0
 
-    # ── Sets ──
     total_sets = 0
     sets_ganados = 0
     sets_perdidos = 0
@@ -62,14 +49,12 @@ def get_match_analytics(db: Session, player_id: UUID) -> dict:
                     sets_ganados += 1
                 elif ps < rs:
                     sets_perdidos += 1
-                # empate no debería ocurrir en pádel
             except ValueError:
                 continue
 
     set_ratio = round(sets_ganados / total_sets, 3) if total_sets else 0.0
     sets_por_partido = round(total_sets / total_partidos, 1) if total_partidos else 0.0
 
-    # ── Partidos a 2 / 3 sets ──
     partidos_2_sets = 0
     partidos_3_sets = 0
     for m in matches:
@@ -81,7 +66,6 @@ def get_match_analytics(db: Session, player_id: UUID) -> dict:
         elif n_sets >= 3:
             partidos_3_sets += 1
 
-    # ── Torneos / Amistosos ──
     tour_groups: dict[UUID | None, list[MatchModel]] = defaultdict(list)
     for m in matches:
         tour_groups[m.tournament_id].append(m)
@@ -89,7 +73,6 @@ def get_match_analytics(db: Session, player_id: UUID) -> dict:
     torneos_jugados = sum(1 for tid in tour_groups if tid is not None)
     amistosos_jugados = len(tour_groups.get(None, []))
 
-    # ── Rondas ──
     mejor_ronda: str | None = None
     mejor_idx = -1
     round_counts: dict[str, int] = {}
@@ -97,7 +80,7 @@ def get_match_analytics(db: Session, player_id: UUID) -> dict:
 
     for tid, tmatches in tour_groups.items():
         if tid is None:
-            continue  # amistoso
+            continue
         r_name, r_idx, _ = best_round_info(tmatches)
         if r_name is None:
             continue
@@ -107,12 +90,10 @@ def get_match_analytics(db: Session, player_id: UUID) -> dict:
             mejor_idx = r_idx
             mejor_ronda = r_name
 
-    # Ordenar breakdown por índice de ronda
     rondas_breakdown = dict(
         sorted(round_counts.items(), key=lambda kv: ROUND_ORDER.index(kv[0]))
     )
 
-    # Fase media
     fase_media_idx = round(sum(best_indices) / len(best_indices), 1) if best_indices else 0.0
     if best_indices:
         clamped = min(max(round(fase_media_idx), 0), len(ROUND_ORDER) - 1)
@@ -120,7 +101,6 @@ def get_match_analytics(db: Session, player_id: UUID) -> dict:
     else:
         fase_media_nombre = None
 
-    # ── Scoring breakdown ──
     scoring: dict[str, int] = {}
     for m in matches:
         sm = m.scoring_method.value if hasattr(m.scoring_method, "value") else str(m.scoring_method)

@@ -9,7 +9,6 @@ El chatbot SOLO responde con información extraída del PDF indexado, nunca
 inventa reglas ni usa conocimiento externo del modelo.
 """
 import json
-import os
 import pickle
 import re
 from pathlib import Path
@@ -17,14 +16,14 @@ from typing import List
 from urllib import request as urllib_request
 
 import numpy as np
-from dotenv import load_dotenv
 from google import genai
 from google.genai import types as genai_types
 from pypdf import PdfReader
 
+from app.core.config import settings
+
 # --- Configuración ---
-load_dotenv()
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_API_KEY = settings.google_api_key.get_secret_value()
 if not GOOGLE_API_KEY:
     raise RuntimeError(
         "Falta la variable de entorno GOOGLE_API_KEY. "
@@ -63,7 +62,6 @@ class PadelRulesRAG:
         self.chunks = self._chunk_by_structure(text, max_chunk_chars)
         self.embeddings = self._embed_chunks(self.chunks)
         self._save_index()
-        print(f"Índice creado: {len(self.chunks)} fragmentos a partir de {pdf_path}")
 
     def _extract_text(self, pdf_path: str) -> str:
         reader = PdfReader(pdf_path)

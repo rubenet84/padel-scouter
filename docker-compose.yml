@@ -3,9 +3,9 @@ services:
     image: postgres:16
     container_name: padel_postgres
     environment:
-      POSTGRES_USER: padel
-      POSTGRES_PASSWORD: padel123
-      POSTGRES_DB: padel_scouter
+      POSTGRES_USER: ${POSTGRES_USER:-padel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-padel_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-padel_scouter}
     ports:
       - "5432:5432"
     volumes:

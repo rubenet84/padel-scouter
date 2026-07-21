@@ -1,18 +1,15 @@
 import logging
-import os
-import uuid as uuid_lib
 from uuid import UUID
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from fastapi.responses import StreamingResponse, Response
-from io import BytesIO
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 from sqlalchemy import or_, text
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, _optional_auth
 from app.infrastructure.database.session import get_db
 from sqlalchemy import func, desc as sa_desc
 from app.infrastructure.database.models import PlayerModel, UserModel, MatchModel, TournamentModel, AnalysisModel
@@ -24,15 +21,9 @@ from app.schemas.player import (
 
 
 from app.domain.value_objects.rounds import ROUND_ORDER, get_round_index
-from app.domain.value_objects.computed_stats import get_computed_stats
-
-from PIL import Image, UnidentifiedImageError
-import io
-
-AVATAR_DIR = "app/static/avatars"
-MAX_AVATAR_SIZE = 5 * 1024 * 1024  # 5MB
-ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
-MAX_DIM = 2048
+from app.services.computed_stats_service import get_computed_stats
+from app.services.badges_service import compute_player_badges
+from app.services.avatar_service import process_avatar
 
 router = APIRouter(prefix="/players", tags=["players"])
 
@@ -67,28 +58,6 @@ def create_player(
     return player
 
 
-def compute_player_badges(db: Session, player_id: UUID) -> list[dict]:
-    matches = db.query(MatchModel).filter(or_(MatchModel.player1_id == player_id, MatchModel.player2_id == player_id, MatchModel.partner_id == player_id)).all()
-    total = len(matches); wins = sum(1 for m in matches if m.ganado); losses = total - wins
-    best_streak = 0; s = 0
-    for m in sorted(matches, key=lambda x: x.played_at or datetime.min):
-        if m.ganado: s += 1; best_streak = max(best_streak, s)
-        else: s = 0
-    tw = sum(1 for m in matches if m.ganado and m.tournament_id is not None and m.ronda and 'final' in (m.ronda or '').lower())
-    a = db.query(AnalysisModel).filter(AnalysisModel.player_id == player_id).order_by(sa_desc(AnalysisModel.created_at)).first()
-    pl = a.power_level if a else 0
-    b = []
-    if total >= 1:    b.append({"id":"first_blood","icon":"🩸","label":"Primera Sangre","desc":"Primer partido jugado","color":"#ef4444"})
-    if best_streak >= 3: b.append({"id":"streak","icon":"🔥","label":"En Racha","desc":"3 victorias seguidas","color":"#f97316"})
-    if best_streak >= 10: b.append({"id":"unstoppable","icon":"⚔️","label":"Imparable","desc":"10 partidos sin perder","color":"#dc2626"})
-    if total >= 50:   b.append({"id":"veteran","icon":"⏳","label":"Veterano","desc":"50 partidos jugados","color":"#8b5cf6"})
-    if total >= 100:  b.append({"id":"century","icon":"💯","label":"Centenario","desc":"100 partidos jugados","color":"#fbbf24"})
-    if wins >= 3 and losses == 0: b.append({"id":"invictus","icon":"🛡️","label":"Invicto","desc":"100% partidos ganados, mínimo 3","color":"#06b6d4"})
-    if tw >= 1: b.append({"id":"champion","icon":"🏆","label":"Campeón","desc":"1 torneo ganado","color":"#FFD700"})
-    if tw >= 10: b.append({"id":"machine","icon":"🤖","label":"Máquina","desc":"10 torneos ganados","color":"#10b981"})
-    if pl >= 5000: b.append({"id":"power_5000","icon":"⚡","label":"Poderoso","desc":"Power Level ≥ 5000","color":"#a855f7"})
-    if pl >= 7500: b.append({"id":"power_7500","icon":"💥","label":"Élite","desc":"Power Level ≥ 7500","color":"#ec4899"})
-    return b
 
 
 @router.get("/", response_model=list[PlayerPublicSchema])
@@ -263,7 +232,7 @@ def get_player_analytics(
     if not player:
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
 
-    from app.domain.value_objects.analytics import get_match_analytics
+    from app.services.analytics_service import get_match_analytics
     return get_match_analytics(db, player_id)
 
 
@@ -293,64 +262,15 @@ def upload_avatar(
     if not player:
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
 
-    # A03: reject empty or oversized
+    # Read file contents
     file.file.seek(0)
     contents = file.file.read()
-    if len(contents) == 0:
-        raise HTTPException(status_code=400, detail="Archivo vacío")
-    if len(contents) > MAX_AVATAR_SIZE:
-        raise HTTPException(status_code=400, detail="Archivo demasiado grande (máx 5MB)")
 
-    # A03: validate extension
-    ext = os.path.splitext(file.filename or "")[1].lower()
-    if ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(status_code=400, detail=f"Formato no permitido: {ext}. Usá JPG, PNG, GIF o WebP.")
-
-    # A03: validate & re-encode with Pillow (strips EXIF/metadata)
+    # Process avatar via service (validation + re-encode + save + cleanup)
     try:
-        img = Image.open(io.BytesIO(contents))
-        img.verify()  # quick structural check
-    except UnidentifiedImageError:
-        raise HTTPException(status_code=400, detail="El archivo no es una imagen válida")
-    except Exception as e:
-        logger.error("Error al verificar imagen: %s", e)
-        raise HTTPException(status_code=400, detail="El archivo no es una imagen válida")
-
-    # Re-open after verify (verify consumes the file)
-    img = Image.open(io.BytesIO(contents))
-
-    # A03: convert to RGB (strip EXIF, alpha, etc.)
-    if img.mode in ("RGBA", "P"):
-        img = img.convert("RGBA")
-    else:
-        img = img.convert("RGB")
-
-    # A03: resize if too large
-    if img.width > MAX_DIM or img.height > MAX_DIM:
-        img.thumbnail((MAX_DIM, MAX_DIM), Image.LANCZOS)
-
-    # Ensure avatar directory exists
-    os.makedirs(AVATAR_DIR, exist_ok=True)
-
-    # Save re-encoded image (strips all EXIF/metadata automatically)
-    # Force extension to match actual format saved (E5: no mismatch)
-    if img.mode == "RGBA":
-        ext = ".png"
-        out_name = f"{uuid_lib.uuid4().hex}{ext}"
-        out_path = os.path.join(AVATAR_DIR, out_name)
-        img.save(out_path, "PNG")
-    else:
-        ext = ".jpg"
-        out_name = f"{uuid_lib.uuid4().hex}{ext}"
-        out_path = os.path.join(AVATAR_DIR, out_name)
-        img.save(out_path, "JPEG", quality=85)
-    avatar_url = f"/static/avatars/{out_name}"
-
-    # Remove old avatar if exists
-    if player.avatar_url:
-        old_path = os.path.join("app", player.avatar_url.lstrip("/"))
-        if os.path.exists(old_path):
-            os.remove(old_path)
+        avatar_url = process_avatar(contents, file.filename or "", player.avatar_url)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     # Save to DB
     player.avatar_url = avatar_url
@@ -397,24 +317,48 @@ def restore_player(
     return {"success": True, "message": f"Jugador '{player.name}' recuperado"}
 
 
+@router.post("/{player_id}/pdf-token")
+def request_pdf_download_token(
+    player_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    """Generate a short-lived download token for PDF export."""
+    player = db.query(PlayerModel).filter(
+        PlayerModel.id == player_id,
+        PlayerModel.owner_id == current_user.id,
+    ).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    from app.core.security import create_download_token
+    token = create_download_token(str(current_user.id), str(player_id))
+    return {"download_token": token, "expires_in": 300}
+
+
 @router.get("/{player_id}/pdf")
 def export_player_pdf_weasy(
     player_id: UUID,
-    token: str | None = Query(None),
+    download_token: str | None = Query(None),
     db: Session = Depends(get_db),
+    current_user: UserModel | None = Depends(_optional_auth),
 ):
-    if token:
-        from app.core.security import decode_token
+    # Accept Bearer token (API client) OR short-lived download_token
+    if current_user is None and download_token:
+        from app.core.security import decode_download_token
+        from jose import JWTError
         try:
-            payload = decode_token(token)
+            payload = decode_download_token(download_token)
             uid = UUID(payload.get("sub"))
-        except Exception:
-            raise HTTPException(status_code=401, detail="Token inválido")
+            pid = UUID(payload.get("player_id"))
+            if pid != player_id:
+                raise HTTPException(status_code=403, detail="Token no válido para este jugador")
+        except (JWTError, ValueError):
+            raise HTTPException(status_code=401, detail="Token inválido o expirado")
         current_user = db.query(UserModel).filter(UserModel.id == uid).first()
         if not current_user:
             raise HTTPException(status_code=401, detail="Usuario no encontrado")
-    else:
-        raise HTTPException(status_code=401, detail="Token requerido")
+    elif current_user is None:
+        raise HTTPException(status_code=401, detail="Autenticación requerida")
 
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
@@ -476,6 +420,83 @@ def export_player_pdf_weasy(
 
 # ── Matches ───────────────────────────────────────────────────
 
+
+def _validate_tournament_round(
+    db: Session,
+    player_id: UUID,
+    data: MatchCreateSchema,
+    *,
+    exclude_match_id: UUID | None = None,
+):
+    """Shared round validation for add_match and update_match."""
+    if not data.ronda or data.tournament_id is None:
+        return
+
+    round_idx = get_round_index(data.ronda)
+    if round_idx < 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Ronda inválida: '{data.ronda}'. Las rondas válidas son: {', '.join(ROUND_ORDER)}",
+        )
+
+    # ── Build base filter (exclude current match for updates)
+    base = [_player_filter(player_id), MatchModel.tournament_id == data.tournament_id]
+    if exclude_match_id is not None:
+        base.append(MatchModel.id != exclude_match_id)
+
+    # Rule 1: if there's a loss in a LOWER round, can't play later
+    loss_below = ROUND_ORDER[:round_idx + 1] if data.ganado is False else ROUND_ORDER[:round_idx]
+    lower_loss = db.query(MatchModel).filter(
+        *base,
+        MatchModel.ganado == False,
+        MatchModel.ronda.in_(loss_below),
+    ).first()
+    if lower_loss:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Este jugador ya perdió en {lower_loss.ronda}. No puede haber partidos en rondas posteriores.",
+        )
+
+    # Rule 2: if marking as loss, can't have WINS in higher rounds
+    if data.ganado is False:
+        higher_win = db.query(MatchModel).filter(
+            *base,
+            MatchModel.ganado == True,
+            MatchModel.ronda.in_(ROUND_ORDER[round_idx + 1:]),
+        ).first()
+        if higher_win:
+            raise HTTPException(
+                status_code=400,
+                detail="No se puede marcar como derrota porque hay partidos ganados en rondas superiores. Eliminá primero esos partidos.",
+            )
+
+    # Rule 3: no skipping rounds — must be consecutive
+    existing_any = db.query(MatchModel).filter(*base).first()
+    if existing_any and round_idx > 0:
+        prev_round = ROUND_ORDER[round_idx - 1]
+        prev_win = db.query(MatchModel).filter(
+            *base,
+            MatchModel.ronda == prev_round,
+            MatchModel.ganado == True,
+        ).first()
+        if not prev_win:
+            raise HTTPException(
+                status_code=400,
+                detail=f"No se puede jugar {data.ronda} sin haber ganado {prev_round} antes. Las rondas deben ser consecutivas.",
+            )
+
+    # Rule 4: no duplicate round in the same tournament
+    existing = db.query(MatchModel).filter(
+        *base,
+        MatchModel.ronda == data.ronda,
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Ya existe un partido en {data.ronda} para este torneo. Solo se puede editar o eliminar.",
+        )
+
+
 @router.post("/{player_id}/matches", response_model=MatchPublicSchema, status_code=201)
 def add_match(
     player_id: UUID,
@@ -500,72 +521,7 @@ def add_match(
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
         legacy_torneo = tournament.name  # set legacy torneo field for backward compat
 
-        # Validar ronda
-        if data.ronda:
-            round_idx = get_round_index(data.ronda)
-            if round_idx < 0:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Ronda inválida: '{data.ronda}'. Las rondas válidas son: {', '.join(ROUND_ORDER)}",
-                )
-            if round_idx >= 0:
-                # Regla 1: si hay derrota en ronda INFERIOR, no se puede jugar después
-                lower_loss = db.query(MatchModel).filter(
-                    _player_filter(player_id),
-                    MatchModel.tournament_id == data.tournament_id,
-                    MatchModel.ganado == False,
-                    MatchModel.ronda.in_(ROUND_ORDER[:round_idx]),
-                ).first()
-                if lower_loss:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Este jugador ya perdió en {lower_loss.ronda}. No puede haber partidos en rondas posteriores.",
-                    )
-
-                # Regla 2: si es derrota, no puede haber partidos GANADOS en rondas superiores
-                if data.ganado is False:
-                    higher_win = db.query(MatchModel).filter(
-                        _player_filter(player_id),
-                        MatchModel.tournament_id == data.tournament_id,
-                        MatchModel.ganado == True,
-                        MatchModel.ronda.in_(ROUND_ORDER[round_idx + 1:]),
-                    ).first()
-                    if higher_win:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"No se puede marcar como derrota porque hay partidos ganados en rondas superiores. Eliminá primero esos partidos.",
-                        )
-
-                # Regla 3: no saltar rondas — si ya hay partidos en el torneo, la ronda debe ser consecutiva
-                existing_any = db.query(MatchModel).filter(
-                    _player_filter(player_id),
-                    MatchModel.tournament_id == data.tournament_id,
-                ).first()
-                if existing_any and round_idx > 0:
-                    prev_round = ROUND_ORDER[round_idx - 1]
-                    prev_win = db.query(MatchModel).filter(
-                        _player_filter(player_id),
-                        MatchModel.tournament_id == data.tournament_id,
-                        MatchModel.ronda == prev_round,
-                        MatchModel.ganado == True,
-                    ).first()
-                    if not prev_win:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"No se puede jugar {data.ronda} sin haber ganado {prev_round} antes. Las rondas deben ser consecutivas.",
-                        )
-
-            # Regla 4: no duplicar ronda en el mismo torneo (excluyendo este partido en update)
-            existing = db.query(MatchModel).filter(
-                _player_filter(player_id),
-                MatchModel.tournament_id == data.tournament_id,
-                MatchModel.ronda == data.ronda,
-            ).first()
-            if existing:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Ya existe un partido en {data.ronda} para este torneo. Solo se puede editar o eliminar.",
-                )
+        _validate_tournament_round(db, player_id, data)
 
     # ── Partner / Compañero logic ───────────────────────────────────
     partner_id = data.partner_id
@@ -744,80 +700,15 @@ def update_match(
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
         legacy_torneo = tournament.name
 
-        # Validar ronda
-        if data.ronda:
-            round_idx = get_round_index(data.ronda)
-            if round_idx >= 0:
-                # Regla 1: si hay derrota en ronda INFERIOR (o en esta misma ronda si es derrota), no se puede pasar después
-                constraining_rounds = ROUND_ORDER[:round_idx + 1] if data.ganado is False else ROUND_ORDER[:round_idx]
-                lower_loss = db.query(MatchModel).filter(
-                    _player_filter(player_id),
-                    MatchModel.tournament_id == data.tournament_id,
-                    MatchModel.ganado == False,
-                    MatchModel.ronda.in_(constraining_rounds),
-                    MatchModel.id != match_id,
-                ).first()
-                if lower_loss:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Este jugador ya perdió en {lower_loss.ronda}. No puede haber partidos en rondas posteriores.",
-                    )
-                # Si el partido actual es derrota y se mueve a ronda superior, también bloquear
-                if data.ganado is False and data.ronda != match.ronda and ROUND_ORDER.index(match.ronda) < round_idx:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Este partido es una derrota en {match.ronda}. No se puede subir a {data.ronda}.",
-                    )
+        _validate_tournament_round(db, player_id, data, exclude_match_id=match_id)
 
-                # Regla 2: si se cambia a derrota, no puede haber partidos GANADOS en rondas superiores
-                if data.ganado is False and data.ronda != match.ronda:
-                    higher_win = db.query(MatchModel).filter(
-                        _player_filter(player_id),
-                        MatchModel.tournament_id == data.tournament_id,
-                        MatchModel.ganado == True,
-                        MatchModel.ronda.in_(ROUND_ORDER[round_idx + 1:]),
-                        MatchModel.id != match_id,
-                    ).first()
-                    if higher_win:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"No se puede marcar como derrota porque hay partidos ganados en rondas superiores. Eliminá primero esos partidos.",
-                        )
-
-                # Regla 3: no saltar rondas — si hay otros partidos en el torneo, la ronda debe ser consecutiva
-                other_exists = db.query(MatchModel).filter(
-                    _player_filter(player_id),
-                    MatchModel.tournament_id == data.tournament_id,
-                    MatchModel.id != match_id,
-                ).first()
-                if other_exists and round_idx > 0 and data.ronda != match.ronda:
-                    prev_round = ROUND_ORDER[round_idx - 1]
-                    prev_win = db.query(MatchModel).filter(
-                        _player_filter(player_id),
-                        MatchModel.tournament_id == data.tournament_id,
-                        MatchModel.ronda == prev_round,
-                        MatchModel.ganado == True,
-                        MatchModel.id != match_id,
-                    ).first()
-                    if not prev_win:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"No se puede jugar {data.ronda} sin haber ganado {prev_round} antes. Las rondas deben ser consecutivas.",
-                        )
-
-            # Regla 4: no duplicar ronda en el mismo torneo (excluyendo este partido)
-            if data.ronda != match.ronda or data.tournament_id != match.tournament_id:
-                existing = db.query(MatchModel).filter(
-                    _player_filter(player_id),
-                    MatchModel.tournament_id == data.tournament_id,
-                    MatchModel.ronda == data.ronda,
-                    MatchModel.id != match_id,
-                ).first()
-                if existing:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Ya existe otro partido en {data.ronda} para este torneo.",
-                    )
+        # Update-specific: no mover una derrota a ronda superior
+        if data.ronda and data.ganado is False and data.ronda != match.ronda \
+                and ROUND_ORDER.index(match.ronda) < get_round_index(data.ronda):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Este partido es una derrota en {match.ronda}. No se puede subir a {data.ronda}.",
+            )
 
     # ── Partner / Compañero update logic ────────────────────────────
     if data.tournament_id is not None:

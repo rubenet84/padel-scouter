@@ -89,3 +89,26 @@ def verify_reset_token(token: str) -> str | None:
         return payload.get("sub")
     except JWTError:
         return None
+
+
+# ── Download tokens (PDF export, short-lived) ──────────────────
+
+DOWNLOAD_TOKEN_EXPIRE_MINUTES = 5
+
+
+def create_download_token(user_id: str, player_id: str) -> str:
+    """Token de un solo uso para descargar PDF sin exponer JWT en URL."""
+    expire = datetime.now(UTC) + timedelta(minutes=DOWNLOAD_TOKEN_EXPIRE_MINUTES)
+    return jwt.encode(
+        {"sub": user_id, "player_id": player_id, "exp": expire, "type": "download"},
+        settings.secret_key.get_secret_value(),
+        algorithm=settings.algorithm,
+    )
+
+
+def decode_download_token(token: str) -> dict[str, Any]:
+    """Decodifica y valida un download token. Lanza JWTError si expiró."""
+    payload = decode_token(token)
+    if payload.get("type") != "download":
+        raise JWTError("Token type mismatch")
+    return payload

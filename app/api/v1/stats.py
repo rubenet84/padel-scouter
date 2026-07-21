@@ -2,15 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
-from app.domain.value_objects.categories import get_category_details
-from app.domain.value_objects.comparison import get_comparison, get_h2h
-from app.domain.value_objects.highlights import (
-    get_community_highlights,
-    get_evolution,
-    get_records,
-)
-from app.domain.value_objects.rankings import get_rankings, get_top_players
-from app.domain.value_objects.summary import get_global_summary
+from app.services.category_service import get_category_details
+from app.services.comparison_service import get_comparison, get_h2h
+from app.services.highlights_service import get_community_highlights, get_evolution, get_records
+from app.services.ranking_service import get_rankings, get_top_players
+from app.services.summary_service import get_global_summary
 from app.infrastructure.database.models import UserModel
 from app.infrastructure.database.session import get_db
 from app.schemas.stats import ApiResponse

@@ -142,7 +142,7 @@ function renderSummary(data) {
     ];
 
     container.innerHTML = `
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="summary-cards">
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-4" id="summary-cards">
             ${cards.map(c => `
                 <div class="rounded-xl border border-[#2A2A3A] card-hover" style="background:#12121A;" role="region" aria-label="${escHtml(c.label)}">
                     <div class="p-4">
@@ -640,10 +640,10 @@ function renderComparison(data) {
 
     function avatarHtml(player) {
         if (player.avatar) {
-            return `<img src="${escHtml(player.avatar)}" alt="" class="w-16 h-16 rounded-full object-cover border-2 border-[#2A2A3A]">`;
+            return `<img src="${escHtml(player.avatar)}" alt="" class="w-16 h-16 rounded-full object-cover border-2 border-[#2A2A3A] mx-auto">`;
         }
         const initials = (player.name || '??').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-        return `<div class="w-16 h-16 rounded-full bg-[#2A2A3A] flex items-center justify-center text-lg font-bold text-emerald-400 border-2 border-[#3A3A4A]">${initials}</div>`;
+        return `<div class="w-16 h-16 rounded-full bg-[#2A2A3A] flex items-center justify-center text-lg font-bold text-emerald-400 border-2 border-[#3A3A4A] mx-auto">${initials}</div>`;
     }
 
     const section = document.getElementById('compare-section');
@@ -771,90 +771,13 @@ function renderH2H(data) {
     const section = document.getElementById('h2h-section');
     if (section) section.classList.remove('hidden');
 
-    // Get player names from the selectors
-    const s1 = document.getElementById('compare-p1');
-    const s2 = document.getElementById('compare-p2');
-    const nameA = s1?.selectedOptions?.[0]?.text?.split(' (')[0] || 'Jugador A';
-    const nameB = s2?.selectedOptions?.[0]?.text?.split(' (')[0] || 'Jugador B';
-    const escA = escHtml(nameA);
-    const escB = escHtml(nameB);
-
-    if (data.total_matches === 0) {
-        container.innerHTML = `
-            <div class="rounded-xl border border-[#2A2A3A] p-8 text-center" style="background:#12121A;">
-                <div class="text-4xl mb-3">🤷</div>
-                <h3 class="text-lg font-bold text-white mb-2">Historial entre ${escA} y ${escB}</h3>
-                <p class="text-gray-400">Estos jugadores todavía no se han enfrentado</p>
-            </div>
-        `;
-        return;
-    }
-
     container.innerHTML = `
-        <h3 class="text-xl font-bold text-white mb-4">Historial entre Jugadores</h3>
-
-        <!-- Summary cards -->
-        <div class="grid grid-cols-3 gap-3 mb-6">
-            <div class="rounded-xl border border-[#2A2A3A] p-4 text-center" style="background:#12121A;">
-                <div class="text-2xl font-black text-white">${data.total_matches}</div>
-                <div class="text-xs text-gray-400 mt-1">Enfrentamientos</div>
-            </div>
-            <div class="rounded-xl border border-[#2A2A3A] p-4 text-center" style="background:#12121A;">
-                <div class="text-2xl font-black text-emerald-400">${data.wins_a}</div>
-                <div class="text-xs text-gray-400 mt-1">Victorias ${escA}</div>
-            </div>
-            <div class="rounded-xl border border-[#2A2A3A] p-4 text-center" style="background:#12121A;">
-                <div class="text-2xl font-black text-emerald-400">${data.wins_b}</div>
-                <div class="text-xs text-gray-400 mt-1">Victorias ${escB}</div>
-            </div>
-        </div>
-
-        <!-- Sets/Games summary -->
-        <div class="grid grid-cols-2 gap-3 mb-6">
-            <div class="rounded-xl border border-[#2A2A3A] p-3" style="background:#12121A;">
-                <div class="text-xs text-gray-400 uppercase tracking-wider">Sets</div>
-                <div class="text-white font-mono text-sm mt-1">${escA}: ${data.sets_a} · ${escB}: ${data.sets_b}</div>
-            </div>
-            <div class="rounded-xl border border-[#2A2A3A] p-3" style="background:#12121A;">
-                <div class="text-xs text-gray-400 uppercase tracking-wider">Juegos</div>
-                <div class="text-white font-mono text-sm mt-1">${escA}: ${data.games_a} · ${escB}: ${data.games_b}</div>
-            </div>
-        </div>
-
-        <!-- Last match -->
-        ${data.last_match ? `
-            <div class="mb-4 p-3 rounded-lg bg-emerald-900/10 border border-emerald-700/30 text-sm">
-                <span class="text-gray-400">Último enfrentamiento:</span>
-                <span class="text-white font-medium">${escHtml(data.last_match.date || '')}</span>
-                <span class="text-gray-400 mx-2">·</span>
-                <span class="text-emerald-400 font-bold">${escHtml(data.last_match.winner_name || '')}</span>
-                <span class="text-gray-400"> ganó </span>
-                <span class="text-white font-mono">${escHtml(data.last_match.resultado || '')}</span>
-            </div>
-        ` : ''}
-
-        <!-- Match history -->
-        <h4 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3">Historial de Enfrentamientos</h4>
-        <div class="space-y-2">
-            ${data.history.map(m => {
-                const isWinA = m.winner_id === data.player_a_id;
-                const isWinB = m.winner_id === data.player_b_id;
-                const resultClass = isWinA ? 'text-emerald-400' : (isWinB ? 'text-red-400' : 'text-gray-400');
-                return `
-                    <div class="flex items-center justify-between rounded-lg border border-[#2A2A3A] p-3 text-sm" style="background:#12121A;">
-                        <div class="flex items-center gap-3">
-                            <span class="text-gray-500 text-xs font-mono">${escHtml(m.date || '')}</span>
-                            <span class="text-white font-mono">${escHtml(m.resultado || '')}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-gray-400">Ganó</span>
-                            <span class="font-semibold ${resultClass}">${escHtml(m.winner_name || '—')}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
+        <div class="text-center py-8 px-4">
+            <div class="text-3xl mb-3">🔄</div>
+            <p class="text-purple-200/70 text-sm">El historial de enfrentamientos requiere que los rivales estén registrados como jugadores.</p>
+            <p class="text-purple-200/40 text-xs mt-1">Funcionalidad prevista para una versión futura.</p>
+        </div>`;
+    return;
 }
 
 // ── Compare Selector Handlers ───────────────────────────────────
@@ -897,7 +820,7 @@ function initCompareHandlers() {
         history.replaceState(null, '', window.location.pathname + '?' + p.toString());
 
         loadComparison(id1, id2);
-        loadH2H(id1, id2);
+        renderH2H(null);
     });
 
     if (clearBtn) {
@@ -956,7 +879,7 @@ function handleCompareUrlParam() {
             }
 
             loadComparison(id1, id2);
-            loadH2H(id1, id2);
+            renderH2H(null);
         }
     }, 200);
 }

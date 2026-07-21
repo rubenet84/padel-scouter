@@ -1,8 +1,4 @@
-"""Shared SQL queries — reusable data access for domain modules.
-
-Contains the query builders and raw SQL queries that are shared across
-multiple domain modules. No business logic — just data access.
-"""
+"""Match repository — shared data access for match queries."""
 
 from uuid import UUID
 
@@ -18,12 +14,7 @@ def build_filters(
     date_from: str | None = None,
     date_to: str | None = None,
 ) -> tuple[str, dict]:
-    """
-    Build WHERE clause parts and params for reuse across all endpoints.
-
-    Activated in PR #2 — supports season, competition_type, date range.
-    Category filtering is handled at the player level (not in match SQL).
-    """
+    """Build WHERE clause parts and params for reuse across all endpoints."""
     clauses: list[str] = []
     params: dict = {}
 
@@ -55,42 +46,12 @@ def build_filters(
     return where_clause, params
 
 
-def get_players_by_owner(
-    db: Session,
-    owner_id: UUID,
-) -> list:
-    """All players for a given owner, ordered by name."""
-    return db.execute(
-        text("""
-            SELECT id, name, category
-            FROM players
-            WHERE owner_id = :uid
-              AND is_deleted = false
-            ORDER BY name
-        """),
-        {"uid": owner_id},
-    ).fetchall()
-
-
 def fetch_match_rows(
     db: Session,
     where_clause: str,
     params: dict,
 ) -> list:
-    """Match rows with tournament info, filtered by a pre-built WHERE clause.
-
-    This is the core match dataset used by rankings, top players, comparison,
-    records, category details, and evolution. It returns the full row objects
-    for downstream computation (FEP points, per-player metrics).
-
-    Args:
-        db: SQLAlchemy session.
-        where_clause: Pre-built WHERE clause (from build_filters or equivalent).
-        params: Query parameters matching the WHERE clause.
-
-    Returns:
-        List of Row objects with m.* columns + t.fep_points.
-    """
+    """Match rows with tournament info, filtered by a pre-built WHERE clause."""
     return db.execute(
         text(f"""
             SELECT m.id, m.player1_id, m.partner_id, m.resultado, m.ganado,

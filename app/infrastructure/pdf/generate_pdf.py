@@ -341,4 +341,3 @@ if __name__ == '__main__':
 
     pdf = generate_player_pdf(test_player, test_analysis)
     Path('/home/claude/test_informe.pdf').write_bytes(pdf)
-    print(f"PDF generado: {len(pdf):,} bytes")

@@ -1,4 +1,4 @@
-"""Category stats — per-category player aggregation."""
+"""Category service — per-category player aggregation (orchestration)."""
 
 from collections import defaultdict
 from uuid import UUID
@@ -7,11 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.domain.value_objects.fep import compute_fep_points
 from app.domain.value_objects.metrics import _compute_player_metrics
-from app.domain.value_objects.queries import (
-    build_filters,
-    fetch_match_rows,
-    get_players_by_owner,
-)
+from app.infrastructure.repositories.match_repository import build_filters, fetch_match_rows
+from app.infrastructure.repositories.player_repository import get_players_by_owner
 from app.schemas.stats import CategoryDetail, TopPlayerEntry
 
 
@@ -22,12 +19,7 @@ def get_category_details(
     player_limit: int = 5,
     filters: dict | None = None,
 ) -> list[CategoryDetail]:
-    """
-    Enhanced per-category stats. If category is None, returns ALL categories.
-    For each category: total players, matches, wins, losses, avg win%, avg points.
-    If player_limit > 0, include top N players sorted by FEP points.
-    Uses a single query for all categories to avoid N+1.
-    """
+    """Enhanced per-category stats. If category is None, returns ALL categories."""
     filters = filters or {}
 
     players = get_players_by_owner(db, user_id)
@@ -35,7 +27,6 @@ def get_category_details(
     if not players:
         return []
 
-    # Group players by category
     cat_players: dict[str, list] = defaultdict(list)
     for p in players:
         cat_players[p.category].append(p)
@@ -55,9 +46,7 @@ def get_category_details(
 
     match_rows = fetch_match_rows(db, where_clause, params)
 
-    # Compute FEP for all relevant players
     fep_points = compute_fep_points(match_rows, all_cat_ids)
-
     metrics = _compute_player_metrics(match_rows, all_cat_ids, fep_points)
     players_map = {p.id: p for p in players}
 
@@ -74,12 +63,10 @@ def get_category_details(
         avg_win_pct = round(cat_wins / cat_matches * 100, 1) if cat_matches > 0 else 0.0
         avg_points = round(cat_points / cat_total_players, 1) if cat_total_players > 0 else 0.0
 
-        # Leader (most points)
         leader_pid = max(cat_ids, key=lambda pid: metrics.get(pid, {}).get("points", 0))
         leader_name = players_map[leader_pid].name
         leader_points = metrics.get(leader_pid, {}).get("points", 0)
 
-        # Top N players by points
         top_list: list[TopPlayerEntry] = []
         if player_limit > 0:
             sorted_cat = sorted(

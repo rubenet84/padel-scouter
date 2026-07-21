@@ -194,9 +194,13 @@
     loadingEl.classList.add('ps-loading');
 
     try {
+      const token = localStorage.getItem('access_token');
       const res = await fetch(CHAT_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ question }),
       });
       const data = await res.json();

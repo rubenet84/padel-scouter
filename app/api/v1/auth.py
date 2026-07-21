@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.security import (
@@ -7,6 +7,7 @@ from app.core.security import (
     decode_token, create_reset_token, verify_reset_token
 )
 from app.core.dependencies import get_current_user
+from app.core.rate_limit import limiter
 from app.infrastructure.database.session import get_db
 from app.infrastructure.database.models import UserModel
 from app.infrastructure.email.email_service import (
@@ -21,7 +22,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserPublicSchema, status_code=201)
-def register(data: UserRegisterSchema, db: Session = Depends(get_db)):
+@limiter.limit("3/minute")
+def register(data: UserRegisterSchema, request: Request, db: Session = Depends(get_db)):
     email = data.email.lower().strip()
 
     if db.query(UserModel).filter(UserModel.email == email).first():
@@ -46,7 +48,8 @@ def register(data: UserRegisterSchema, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenSchema)
-def login(data: UserLoginSchema, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def login(data: UserLoginSchema, request: Request, db: Session = Depends(get_db)):
     email = data.email.lower().strip()
     user = db.query(UserModel).filter(UserModel.email == email).first()
 
@@ -66,7 +69,8 @@ def login(data: UserLoginSchema, db: Session = Depends(get_db)):
 
 
 @router.post("/forgot-password", status_code=200)
-def forgot_password(email: str = Body(embed=True), db: Session = Depends(get_db)):
+@limiter.limit("3/minute")
+def forgot_password(request: Request, email: str = Body(embed=True), db: Session = Depends(get_db)):
     """
     OWASP A01 — email va en el body, no en query params (consistente con reset-password).
     OWASP A07 — siempre devuelve 200 aunque el email no exista,
@@ -84,7 +88,9 @@ def forgot_password(email: str = Body(embed=True), db: Session = Depends(get_db)
 
 
 @router.post("/reset-password", status_code=200)
+@limiter.limit("3/minute")
 def reset_password(
+    request: Request,
     token: str = Body(...),
     new_password: str = Body(...),
     db: Session = Depends(get_db),

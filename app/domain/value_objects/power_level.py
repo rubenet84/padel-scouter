@@ -1,4 +1,5 @@
 from app.domain.entities.player import PlayerStats
+from app.domain.value_objects.category import PlayerCategory
 from app.domain.value_objects.computed_stats import ComputedStats
 
 

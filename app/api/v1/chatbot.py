@@ -7,10 +7,13 @@ en preguntas repetidas.
 import hashlib
 import json
 import logging
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, Request
+from app.core.dependencies import get_current_user
+from app.core.rate_limit import limiter
 from app.infrastructure.ai.padel_rules_rag import PadelRulesRAG
 from app.infrastructure.cache.redis_client import redis_cache
+from app.infrastructure.database.models import UserModel
+from app.schemas.chatbot import ChatRequest, ChatResponse
 
 logger = logging.getLogger(__name__)
 
@@ -25,15 +28,6 @@ CACHE_TTL_SECONDS = 60 * 60 * 24 * 7  # 1 semana
 _redis = redis_cache._client
 
 
-class ChatRequest(BaseModel):
-    question: str = Field(..., min_length=1, max_length=500)
-
-
-class ChatResponse(BaseModel):
-    answer: str
-    cached: bool = False
-
-
 def _cache_key(question: str) -> str:
     normalized = question.strip().lower()
     digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
@@ -41,7 +35,12 @@ def _cache_key(question: str) -> str:
 
 
 @router.post("/chatbot/ask", response_model=ChatResponse)
-def ask_chatbot(payload: ChatRequest):
+@limiter.limit("10/minute")
+def ask_chatbot(
+    payload: ChatRequest,
+    request: Request,
+    current_user: UserModel = Depends(get_current_user),
+):
     question = payload.question.strip()
     key = _cache_key(question)
 

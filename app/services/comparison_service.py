@@ -1,4 +1,4 @@
-"""Player comparison — side-by-side stats and head-to-head history."""
+"""Comparison service — side-by-side stats and head-to-head history."""
 
 from uuid import UUID
 
@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.domain.value_objects.fep import compute_fep_points
 from app.domain.value_objects.metrics import _compute_player_metrics
-from app.domain.value_objects.queries import build_filters, fetch_match_rows
+from app.infrastructure.repositories.match_repository import build_filters, fetch_match_rows
 from app.schemas.stats import ComparisonPlayer, ComparisonResult, H2HMatch, H2HResult
 
 
@@ -18,13 +18,9 @@ def get_comparison(
     p2_id: UUID,
     filters: dict | None = None,
 ) -> ComparisonResult:
-    """
-    Side-by-side stats comparison for two players.
-    Returns positions and point difference if same category.
-    """
+    """Side-by-side stats comparison for two players."""
     filters = filters or {}
 
-    # 1. Validate both players exist and belong to user
     players = db.execute(
         text("""
             SELECT id, name, category, avatar_url
@@ -44,30 +40,23 @@ def get_comparison(
     p2 = p_map[p2_id]
     same_category = p1.category == p2.category
 
-    # 2. Compute per-player stats
     match_filter_keys = {"season", "competition_type", "date_from", "date_to"}
     match_filters = {k: v for k, v in filters.items() if k in match_filter_keys}
-    where_clause, params = build_filters(
-        user_ids=[p1_id, p2_id], **match_filters
-    )
+    where_clause, params = build_filters(user_ids=[p1_id, p2_id], **match_filters)
 
     match_rows = fetch_match_rows(db, where_clause, params)
 
-    # Compute FEP points for both players
     fep_both = compute_fep_points(match_rows, [p1_id, p2_id])
-
     metrics = _compute_player_metrics(match_rows, [p1_id, p2_id], fep_both)
     m1 = metrics.get(p1_id, {})
     m2 = metrics.get(p2_id, {})
 
-    # 3. Find ranking positions (if same category)
     position_a = None
     position_b = None
     point_difference = None
     notice = None
 
     if same_category:
-        # Get all players in that category with their FEP points
         cat_players = db.execute(
             text("""
                 SELECT id
@@ -79,16 +68,16 @@ def get_comparison(
 
         if len(cat_players) > 1:
             cat_ids = [p.id for p in cat_players]
-
-            # Get matches for category players
-            cat_where, cat_params = build_filters(
-                user_ids=cat_ids, **match_filters
-            )
+            cat_where, cat_params = build_filters(user_ids=cat_ids, **match_filters)
             cat_rows = fetch_match_rows(db, cat_where, cat_params)
-
             cat_fep = compute_fep_points(cat_rows, cat_ids)
+            cat_metrics = _compute_player_metrics(cat_rows, cat_ids, cat_fep)
 
-            sorted_cat = sorted(cat_ids, key=lambda pid: cat_fep.get(pid, 0), reverse=True)
+            sorted_cat = sorted(
+                cat_ids,
+                key=lambda pid: (cat_fep.get(pid, 0), cat_metrics.get(pid, {}).get("wins", 0)),
+                reverse=True,
+            )
             for i, pid in enumerate(sorted_cat):
                 if pid == p1_id:
                     position_a = i + 1
@@ -96,9 +85,7 @@ def get_comparison(
                     position_b = i + 1
 
             if position_a and position_b:
-                point_difference = abs(
-                    cat_fep.get(p1_id, 0) - cat_fep.get(p2_id, 0)
-                )
+                point_difference = abs(cat_fep.get(p1_id, 0) - cat_fep.get(p2_id, 0))
     else:
         notice = "Distinta categoría — los puntos no son directamente comparables"
 
@@ -147,14 +134,9 @@ def get_h2h(
     p2_id: UUID,
     filters: dict | None = None,
 ) -> H2HResult:
-    """
-    Head-to-head history between two players.
-    Two players face each other when one is player1/partner
-    and the other is player2 (opponent).
-    """
+    """Head-to-head history between two players."""
     filters = filters or {}
 
-    # 1. Validate both players exist and belong to user
     players = db.execute(
         text("""
             SELECT id, name
@@ -171,12 +153,9 @@ def get_h2h(
 
     p_map_name = {p.id: p.name for p in players}
 
-    # 2. Build H2H filter: matches where p1 and p2 faced each other
-    #    p1 on player1/partner side AND p2 on player2 side, OR vice versa
     match_filter_keys = {"season", "competition_type", "date_from", "date_to"}
     match_filters = {k: v for k, v in filters.items() if k in match_filter_keys}
 
-    # H2H doesn't use user_ids in build_filters — we build custom where
     base_clauses: list[str] = []
     base_params: dict = {}
 
@@ -198,16 +177,20 @@ def get_h2h(
         base_clauses.append("m.played_at::date <= :date_to")
         base_params["date_to"] = match_filters["date_to"]
 
-    # H2H condition: p1 and p2 faced each other
+    # H2H condition: p1 and p2 faced each other (must be on OPPOSITE sides)
     h2h_condition = """
         (
             (m.player1_id = :p1_id OR m.partner_id = :p1_id)
             AND m.player2_id = :p2_id
+            AND NOT (m.player1_id = :p1_id AND m.partner_id = :p2_id)
+            AND NOT (m.player1_id = :p2_id AND m.partner_id = :p1_id)
         )
         OR
         (
             (m.player1_id = :p2_id OR m.partner_id = :p2_id)
             AND m.player2_id = :p1_id
+            AND NOT (m.player1_id = :p1_id AND m.partner_id = :p2_id)
+            AND NOT (m.player1_id = :p2_id AND m.partner_id = :p1_id)
         )
     """
     base_params["p1_id"] = p1_id
@@ -215,7 +198,6 @@ def get_h2h(
 
     all_clauses = [h2h_condition] + base_clauses
     final_where = " AND ".join(all_clauses)
-    final_params = base_params
 
     h2h_matches = db.execute(
         text(f"""
@@ -226,23 +208,16 @@ def get_h2h(
             WHERE {final_where}
             ORDER BY m.played_at DESC
         """),
-        final_params,
+        base_params,
     ).fetchall()
 
     total = len(h2h_matches)
     if total == 0:
         return H2HResult(
-            player_a_id=p1_id,
-            player_b_id=p2_id,
-            total_matches=0,
-            wins_a=0,
-            wins_b=0,
-            sets_a=0,
-            sets_b=0,
-            games_a=0,
-            games_b=0,
-            last_match=None,
-            history=[],
+            player_a_id=p1_id, player_b_id=p2_id,
+            total_matches=0, wins_a=0, wins_b=0,
+            sets_a=0, sets_b=0, games_a=0, games_b=0,
+            last_match=None, history=[],
         )
 
     wins_a = 0
@@ -255,10 +230,8 @@ def get_h2h(
     last_match: H2HMatch | None = None
 
     for m in h2h_matches:
-        # Determine which player is "p1" (side A) in this match
         p1_is_player1 = m.player1_id == p1_id or m.partner_id == p1_id
 
-        # Parse resultado for sets/games
         m_sets_a = 0
         m_sets_b = 0
         m_games_a = 0
@@ -291,7 +264,6 @@ def get_h2h(
         games_a += m_games_a
         games_b += m_games_b
 
-        # Determine winner
         winner_id = m.winner_id
         winner_name = p_map_name.get(winner_id) if winner_id else None
 
@@ -300,7 +272,6 @@ def get_h2h(
         elif winner_id == p2_id:
             wins_b += 1
         else:
-            # Fallback: use ganado field
             if p1_is_player1:
                 if m.ganado:
                     wins_a += 1
@@ -321,7 +292,7 @@ def get_h2h(
                     winner_name = p_map_name.get(p1_id)
 
         h2h_entry = H2HMatch(
-            date=str(m.played_at.date()) if m.played_at else None,
+            date=m.played_at.strftime('%d-%m-%Y') if m.played_at else None,
             winner_id=winner_id,
             winner_name=winner_name,
             sets_p1=m_sets_a,
