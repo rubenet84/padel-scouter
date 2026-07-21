@@ -214,7 +214,9 @@
         }).catch(() => {});
     })();
     </script>
+    {% if not show_landing_nav|default(False) %}
     {% include "partials/chatbot_widget.html" %}
+    {% endif %}
     {% block scripts %}{% endblock %}
 </body>
 </html>
