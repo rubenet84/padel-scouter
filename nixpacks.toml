@@ -1,0 +1,11 @@
+# Railway — Nixpacks configuration for Padel Scouter
+# Instala las librerías del sistema necesarias para WeasyPrint (generación PDF)
+
+[phases.setup]
+nixPkgs = ["...", "cairo", "pango", "gdk-pixbuf", "glib", "libffi"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[start]
+cmd = "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
