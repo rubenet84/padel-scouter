@@ -1,4 +1,8 @@
-"""Analytics service — match analytics from real match + tournament data."""
+"""Servicio de analíticas — estadísticas detalladas desde partidos y torneos reales.
+
+Calcula victorias, sets, rondas, torneos, rachas, scoring breakdown y más
+a partir del historial completo de partidos de un jugador.
+"""
 
 from collections import defaultdict
 from uuid import UUID

@@ -1,4 +1,8 @@
-"""Player repository — data access for player queries."""
+"""Repositorio de jugadores — acceso a datos para consultas de players.
+
+Provee la consulta base de jugadores por propietario, filtrando
+automáticamente los eliminados (soft delete).
+"""
 
 from uuid import UUID
 

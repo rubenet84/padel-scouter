@@ -1,3 +1,15 @@
+"""
+Schemas Pydantic para la API de jugadores, autenticación y partidos.
+
+Define los contratos de entrada/salida de la API REST:
+- Auth: registro, login, tokens.
+- Players: creación, lectura, estadísticas.
+- Matches: creación, validación FIP 2026.
+- Analysis: resultado de análisis IA.
+
+Las validaciones de contraseña y formato de resultado implementan
+reglas de seguridad (OWASP A02) y reglamento FIP.
+"""
 import re
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
@@ -8,6 +20,7 @@ from datetime import date, datetime
 # ── Auth ──────────────────────────────────────────────────────
 
 class UserRegisterSchema(BaseModel):
+    """Schema de registro de usuario con validación de contraseña fuerte."""
     email: EmailStr
     username: str = Field(min_length=3, max_length=100)
     password: str = Field(min_length=12, max_length=128)
@@ -15,6 +28,12 @@ class UserRegisterSchema(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, v: str) -> str:
+        """OWASP A02: valida complejidad mínima de contraseña.
+
+        Requisitos:
+        - Mínimo 12 caracteres.
+        - Al menos una mayúscula, una minúscula, un número y un carácter especial.
+        """
         errors = []
         if len(v) < 12:
             errors.append("mínimo 12 caracteres")
@@ -33,10 +52,12 @@ class UserRegisterSchema(BaseModel):
     @field_validator("email")
     @classmethod
     def normalize_email(cls, v: str) -> str:
+        """Normaliza el email a minúsculas y sin espacios."""
         return v.lower().strip()
 
 
 class UserLoginSchema(BaseModel):
+    """Schema de login: solo email y contraseña."""
     email: EmailStr
     password: str
 
@@ -47,12 +68,14 @@ class UserLoginSchema(BaseModel):
 
 
 class TokenSchema(BaseModel):
+    """Tokens JWT devueltos tras login/refresh."""
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
 
 
 class UserPublicSchema(BaseModel):
+    """Datos públicos del usuario (sin contraseña ni datos sensibles)."""
     id: UUID
     email: str
     username: str
@@ -64,6 +87,7 @@ class UserPublicSchema(BaseModel):
 # ── Players ───────────────────────────────────────────────────
 
 class PlayerStatsSchema(BaseModel):
+    """Estadísticas base del jugador, todas en rango 0-100."""
     derecha:       int = Field(default=50, ge=0, le=100)
     reves:         int = Field(default=50, ge=0, le=100)
     volea_derecha: int = Field(default=50, ge=0, le=100)
@@ -83,6 +107,7 @@ class PlayerStatsSchema(BaseModel):
 
 
 class PlayerCreateSchema(BaseModel):
+    """Datos necesarios para crear un jugador."""
     name:     str = Field(min_length=2, max_length=150)
     category: PlayerCategory
     stats:    PlayerStatsSchema = PlayerStatsSchema()
@@ -90,6 +115,7 @@ class PlayerCreateSchema(BaseModel):
 
 
 class PlayerPublicSchema(BaseModel):
+    """Representación pública de un jugador, incluye stats y power_level."""
     id:       UUID
     name:     str
     category: PlayerCategory
@@ -124,7 +150,7 @@ class PlayerPublicSchema(BaseModel):
 # ── Computed Stats ────────────────────────────────────────────
 
 class ComputedStatsSchema(BaseModel):
-    """Competitive stats computed from matches + tournaments."""
+    """Estadísticas competitivas computadas desde partidos + torneos."""
 
     torneos:   int
     win_rate:  float  # 0.0 – 100.0 percentage
@@ -161,6 +187,7 @@ class PlayerAnalyticsSchema(BaseModel):
 # ── Analysis ──────────────────────────────────────────────────
 
 class AnalysisPublicSchema(BaseModel):
+    """Resultado de un análisis IA para consulta pública."""
     id:               UUID
     player_id:        UUID
     power_level:      int
@@ -180,6 +207,12 @@ class AnalysisPublicSchema(BaseModel):
 # ── Matches ───────────────────────────────────────────────────
 
 def _is_valid_set_score(a: int, b: int) -> bool:
+    """Valida un resultado de set según reglas FIP 2026.
+
+    Resultados válidos:
+    - 6-0, 6-1, 6-2, 6-3, 6-4
+    - 7-5, 7-6 (tie-break)
+    """
     if a < 0 or b < 0:
         return False
     high, low = max(a, b), min(a, b)
@@ -191,12 +224,18 @@ def _is_valid_set_score(a: int, b: int) -> bool:
 
 
 def _has_lesion_notes(notes: str | None) -> bool:
+    """Detecta si las notas indican lesión/retiro/abandono.
+
+    Si es así, se saltea la validación estricta de scores porque
+    los sets pueden ser parciales (ej: 6-2 3-0 ret.).
+    """
     if not notes:
         return False
     return bool(re.search(r'lesi[oó]n|retiro|retirada|abandono', notes, re.IGNORECASE))
 
 
 class MatchCreateSchema(BaseModel):
+    """Schema para crear/actualizar un partido."""
     rival_nombre:   str = Field(min_length=2, max_length=150)
     resultado:      str = Field(min_length=3, max_length=50)
     ganado:         bool
@@ -224,7 +263,7 @@ class MatchCreateSchema(BaseModel):
     @field_validator("resultado")
     @classmethod
     def validate_resultado_format(cls, v: str) -> str:
-        """Validación básica: formato numérico y cantidad de sets."""
+        """Validación básica: formato numérico y cantidad de sets (2 o 3)."""
         v = v.strip()
         sets = v.split()
         if len(sets) < 2 or len(sets) > 3:
@@ -241,7 +280,7 @@ class MatchCreateSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_resultado_scores(self):
-        """Valida sets FIP, SALVO si notes indica lesión/retiro/abandono."""
+        """Valida sets según reglamento FIP 2026, salvo si hay lesión/retiro."""
         if _has_lesion_notes(self.notes):
             return self
         for s in self.resultado.split():
@@ -256,6 +295,7 @@ class MatchCreateSchema(BaseModel):
 
 
 class MatchPublicSchema(BaseModel):
+    """Representación pública de un partido."""
     id:             UUID
     player1_id:     UUID
     rival_nombre:   str | None = None

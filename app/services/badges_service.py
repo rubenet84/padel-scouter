@@ -1,4 +1,14 @@
-"""Badges service — compute achievement badges from match history."""
+"""Servicio de insignias — cálculo de logros desde el historial de partidos.
+
+Genera hasta 10 insignias dinámicas por jugador basadas en:
+- Total de partidos jugados (Primera Sangre, Veterano, Centenario).
+- Rachas de victorias (En Racha, Imparable).
+- Porcentaje de victorias (Invicto).
+- Torneos ganados (Campeón, Máquina).
+- Power Level alcanzado (Poderoso, Élite).
+
+Cada insignia incluye id, icono emoji, etiqueta, descripción y color.
+"""
 
 from datetime import datetime
 from uuid import UUID
@@ -10,7 +20,22 @@ from app.infrastructure.database.models import AnalysisModel, MatchModel
 
 
 def compute_player_badges(db: Session, player_id: UUID) -> list[dict]:
-    """Compute all achievement badges for a player from match + analysis data."""
+    """Calcula todas las insignias de logro para un jugador.
+
+    Analiza el historial completo de partidos del jugador (como player1,
+    partner o player2) junto con su último análisis de IA para determinar
+    qué insignias ha desbloqueado.
+
+    Args:
+        db: Sesión de SQLAlchemy activa.
+        player_id: UUID del jugador a evaluar.
+
+    Returns:
+        Lista de dicts con claves: id, icon, label, desc, color.
+        Las insignias se evalúan de menor a mayor requisito; un jugador
+        puede tener varias simultáneamente.
+    """
+    # Todos los partidos donde participó el jugador en cualquier rol
     matches = db.query(MatchModel).filter(
         or_(
             MatchModel.player1_id == player_id,
@@ -23,6 +48,7 @@ def compute_player_badges(db: Session, player_id: UUID) -> list[dict]:
     wins = sum(1 for m in matches if m.ganado)
     losses = total - wins
 
+    # Calcular mejor racha de victorias consecutivas
     best_streak = 0
     s = 0
     for m in sorted(matches, key=lambda x: x.played_at or datetime.min):
@@ -32,12 +58,14 @@ def compute_player_badges(db: Session, player_id: UUID) -> list[dict]:
         else:
             s = 0
 
+    # Torneos ganados: victorias en rondas que contienen "final" (case-insensitive)
     tw = sum(
         1 for m in matches
         if m.ganado and m.tournament_id is not None
         and m.ronda and "final" in (m.ronda or "").lower()
     )
 
+    # Obtener el power level del análisis más reciente
     from sqlalchemy import desc as sa_desc
     a = db.query(AnalysisModel).filter(
         AnalysisModel.player_id == player_id
@@ -45,6 +73,7 @@ def compute_player_badges(db: Session, player_id: UUID) -> list[dict]:
 
     pl = a.power_level if a else 0
 
+    # Evaluar cada insignia de menor a mayor requisito
     badges = []
     if total >= 1:
         badges.append({"id": "first_blood", "icon": "🩸", "label": "Primera Sangre",

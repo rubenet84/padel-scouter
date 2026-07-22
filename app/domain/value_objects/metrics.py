@@ -1,7 +1,8 @@
-"""Per-player metrics computation — batch metrics from match data.
+"""Cálculo de métricas por jugador desde datos de partidos.
 
-All per-player metric aggregation across the application
-should go through this module.
+Fuente única de verdad para la agregación de métricas por jugador en
+toda la aplicación. Procesa lotes de partidos y devuelve estadísticas
+normalizadas para rankings, comparadores y visualizaciones.
 """
 
 from collections import defaultdict
@@ -12,13 +13,25 @@ def compute_player_match_metrics(
     match_rows: list,
     player_ids: list[UUID],
 ) -> dict[UUID, dict]:
-    """Core match-derived metrics for a batch of players.
+    """Métricas base derivadas de partidos para un lote de jugadores.
 
-    Returns dict[pid -> {wins, losses, matches, win_pct, sets_won, games_won, streak}]
-    These are the base metrics derived directly from match history,
-    shared by rankings, comparisons, and extended metrics.
+    Calcula victorias, derrotas, % victorias, sets ganados, juegos ganados
+    y mejor racha de victorias consecutivas a partir de los partidos.
+
+    Los partidos se asignan al jugador si este aparece como player1 o partner.
+    El resultado (resultado) se parsea asumiendo el formato "6-4 6-3" donde el
+    primer número de cada set corresponde al jugador.
+
+    Args:
+        match_rows: Lista de objetos Row con atributos:
+                    ganado, resultado, player1_id, partner_id.
+        player_ids: Lista de UUIDs de jugadores a evaluar.
+
+    Returns:
+        Dict[UUID, dict] con claves: wins, losses, matches, win_pct,
+        sets_won, games_won, streak.
     """
-    # Group matches by player
+    # Agrupar partidos por jugador
     player_matches: dict[UUID, list] = defaultdict(list)
     for m in match_rows:
         for pid in player_ids:
@@ -34,6 +47,8 @@ def compute_player_match_metrics(
         total = len(pms)
         win_pct = round(wins / total * 100, 1) if total > 0 else 0.0
 
+        # Parsear resultado para contar sets y juegos ganados
+        # Formato esperado: "6-4 6-3" (juegos del set 1, juegos del set 2)
         sets_won = 0
         games_won = 0
         for m in pms:
@@ -45,16 +60,16 @@ def compute_player_match_metrics(
                     continue
                 try:
                     ps, rs = int(parts[0]), int(parts[1])
-                    games_won += ps
+                    games_won += ps                    # ps = juegos del jugador
                     if ps > rs:
-                        sets_won += 1
+                        sets_won += 1                  # ganó el set
                 except ValueError:
                     continue
 
-        # Best streak: longest winning run
+        # Mejor racha de victorias consecutivas
         best_streak = 0
         current = 0
-        for m in pms:  # ordered by played_at DESC (most recent first)
+        for m in pms:  # ordenados por played_at DESC (más reciente primero)
             if m.ganado:
                 current += 1
                 if current > best_streak:
@@ -80,11 +95,24 @@ def _compute_player_metrics(
     player_ids: list[UUID],
     fep_points: dict[UUID, int],
 ) -> dict[UUID, dict]:
-    """Compute all metrics for a batch of players from their match data."""
-    # 1. Base match-derived metrics (wins, losses, sets, games, streak)
+    """Métricas completas por jugador: base + torneos ganados + finales + semis.
+
+    Extiende compute_player_match_metrics() añadiendo datos específicos de
+    torneo (torneos ganados, finales alcanzadas, semifinales) y puntos FEP.
+
+    Args:
+        match_rows: Lista de objetos Row con atributos de partido.
+        player_ids: Lista de UUIDs de jugadores.
+        fep_points: Dict precalculado de puntos FEP por jugador.
+
+    Returns:
+        Dict[UUID, dict] con todas las métricas incluido "points", "tournaments_won",
+        "finals", "semis".
+    """
+    # 1. Métricas base desde partidos (victorias, derrotas, sets, juegos, racha)
     base = compute_player_match_metrics(match_rows, player_ids)
 
-    # 2. Initialize result with defaults for ALL player_ids
+    # 2. Inicializar resultado con defaults para TODOS los player_ids
     result: dict[UUID, dict] = {}
     for pid in player_ids:
         entry = dict(
@@ -106,11 +134,13 @@ def _compute_player_metrics(
         entry["semis"] = 0
         result[pid] = entry
 
-    # 3. Enrich with tournament-specific data (lightweight — no resultado parsing)
+    # 3. Enriquecer con datos de torneo (ligero — sin parsear resultado de nuevo)
     for m in match_rows:
         for pid in player_ids:
             if not (m.player1_id == pid or m.partner_id == pid):
                 continue
+            # Una victoria en un partido de torneo cuenta como "torneo ganado"
+            # (representa ganar UN partido en ese torneo, no el torneo entero)
             if m.ganado and m.tournament_id:
                 result[pid]["tournaments_won"] += 1
             ronda = (getattr(m, "ronda", None) or "").strip()
@@ -119,6 +149,7 @@ def _compute_player_metrics(
             elif ronda == "Semifinal":
                 result[pid]["semis"] += 1
 
+    # 4. Adjuntar puntos FEP precalculados
     for pid in player_ids:
         result[pid]["points"] = fep_points.get(pid, 0)
 

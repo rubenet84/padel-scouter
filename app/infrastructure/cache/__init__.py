@@ -1,0 +1,1 @@
+"""Adaptador de caché Redis para respuestas de IA y chatbot."""

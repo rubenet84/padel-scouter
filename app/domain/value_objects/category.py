@@ -1,7 +1,18 @@
+"""
+Value objects de categorías de jugador y métodos de puntuación.
+
+Define los enumerados oficiales usados en toda la aplicación:
+- PlayerCategory: categorías FEP (Iniciación a Profesional) con pesos.
+- ScoringMethod: métodos de puntuación FIP 2026.
+"""
 from enum import Enum
 
 
 class PlayerCategory(Enum):
+    """Categorías de la Federación Española de Pádel (FEP).
+
+    Cada categoría tiene un peso numérico usado para ordenar y comparar niveles.
+    """
     INICIACION = "Iniciación"
     QUINTA     = "5ª Categoría"
     CUARTA     = "4ª Categoría"
@@ -11,6 +22,7 @@ class PlayerCategory(Enum):
     PRO        = "Profesional"
 
     def weight(self) -> int:
+        """Peso numérico de la categoría para ordenamiento (1-7)."""
         weights = {
             "Iniciación":   1,
             "5ª Categoría": 2,
@@ -24,6 +36,12 @@ class PlayerCategory(Enum):
 
 
 class ScoringMethod(Enum):
+    """Métodos de puntuación según reglamento FIP 2026.
+
+    - CON_VENTAJA: clásico, ventaja después de deuce.
+    - STAR_POINT: nuevo 2026, tercer deuce = punto decisivo.
+    - PUNTO_ORO: deuce directo a punto decisivo.
+    """
     CON_VENTAJA = "con_ventaja"
     STAR_POINT  = "star_point"
     PUNTO_ORO   = "punto_oro"

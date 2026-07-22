@@ -1,3 +1,10 @@
+"""Cliente de Google Gemini para análisis de jugadores.
+
+Envía las estadísticas del jugador a Gemini 2.5 Flash y recibe una respuesta
+estructurada con descripción épica, fortalezas, debilidades, plan de mejora
+y golpe definitivo. Incluye fallback para errores de API (503, 429, quota).
+"""
+
 import json
 import logging
 from google import genai

@@ -1,0 +1,1 @@
+"""Modelos ORM SQLAlchemy y gestión de sesiones de base de datos."""

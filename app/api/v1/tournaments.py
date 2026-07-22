@@ -1,3 +1,14 @@
+"""
+Endpoints CRUD de torneos: crear, listar, obtener, actualizar y eliminar.
+
+Los torneos son compartibles entre usuarios vía unicidad global por
+nombre + fecha. Cada torneo puede tener puntos FEP asociados que se
+distribuyen entre los jugadores según la ronda alcanzada.
+
+Arquitectura: Capa API — orquestación con validación de permisos y
+delegación a modelos SQLAlchemy. La lógica de rondas y FEP se maneja
+en app/domain/value_objects/rounds.py y app/domain/value_objects/fep.py.
+"""
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -27,6 +38,10 @@ def create_tournament(
     """
     Crear un nuevo torneo. Si se pasa player_id, el torneo se asigna
     a ese jugador y la unicidad es por nombre + fecha + player_id.
+
+    Unicidad global: si ya existe un torneo con el mismo nombre y fecha,
+    se devuelve el existente en lugar de crear un duplicado. Esto permite
+    que múltiples usuarios compartan el mismo torneo.
 
     OWASP:
       - A01 (Broken Access Control): owner_id = current_user.id
@@ -72,6 +87,8 @@ def list_tournaments(
       - Torneos sin asignar ni partidos (asignables)
 
     Si no se pasa player_id, devuelve torneos creados por el usuario actual.
+
+    Incluye match_count para cada torneo vía agregación SQL.
 
     OWASP:
       - A01: scoped by player_id or ownership

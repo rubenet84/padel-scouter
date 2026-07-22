@@ -1,3 +1,13 @@
+"""
+Endpoints de análisis IA de jugadores.
+
+Permite ejecutar y recuperar análisis generados por Gemini AI para cada
+jugador. Usa el caso de uso AnalyzePlayerUseCase del dominio, con caché
+en Redis para evitar llamadas repetidas a la API de IA.
+
+Arquitectura: Capa API — orquesta la capa de dominio (use case) y la capa
+de infraestructura (Gemini, Redis). No contiene lógica de análisis propia.
+"""
 import json
 import logging
 from uuid import UUID
@@ -20,6 +30,8 @@ router = APIRouter(prefix="/analysis", tags=["analysis"])
 
 
 class GeminiClientWrapper:
+    """Adaptador que envuelve la función analyze_player_with_ai para que
+    cumpla con la interfaz esperada por AnalyzePlayerUseCase."""
     def analyze_player_with_ai(self, data: dict) -> dict:
         return analyze_player_with_ai(data)
 
@@ -30,6 +42,20 @@ def analyze_player(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Ejecuta un análisis completo del jugador usando IA (Gemini).
+
+    Flujo:
+    1. Verifica que el jugador pertenezca al usuario (OWASP A01).
+    2. Construye la entidad de dominio Player desde el modelo de BD.
+    3. Obtiene estadísticas computadas (torneos, win_rate, FEP).
+    4. Ejecuta AnalyzePlayerUseCase que calcula power level, consulta
+       a Gemini y devuelve el AnalysisResult.
+    5. Persiste el análisis en la tabla analyses.
+    6. Si Gemini falla, devuelve 503 con mensaje amigable.
+
+    El análisis se cachea en Redis para no gastar cuota de API en
+    análisis repetidos del mismo jugador con los mismos stats.
+    """
     player_model = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -114,6 +140,12 @@ def get_player_analyses(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Recupera el historial completo de análisis IA de un jugador.
+
+    Ordenados por fecha de creación (más reciente primero).
+    Los campos JSON (strengths, weaknesses) se deserializan con manejo
+    seguro de errores de formato.
+    """
     # OWASP A01: verificar que el player pertenece al usuario actual
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
@@ -125,7 +157,9 @@ def get_player_analyses(
     analyses = db.query(AnalysisModel).filter(
         AnalysisModel.player_id == player_id
     ).all()
+
     def _safe_json_loads(val: str) -> list:
+        """Deserializa JSON de forma segura, devolviendo lista vacía si falla."""
         try:
             return json.loads(val)
         except (json.JSONDecodeError, TypeError):

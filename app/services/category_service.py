@@ -1,4 +1,8 @@
-"""Category service — per-category player aggregation (orchestration)."""
+"""Servicio de categorías — agregación de estadísticas por categoría FEP.
+
+Calcula para cada categoría: total de jugadores, partidos, victorias, derrotas,
+% victorias promedio, puntos promedio, líder y top N jugadores.
+"""
 
 from collections import defaultdict
 from uuid import UUID

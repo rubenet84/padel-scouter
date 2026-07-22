@@ -1,3 +1,18 @@
+"""
+Endpoints de jugadores: CRUD, estadísticas, partidos, avatar, PDF, evolución.
+
+Arquitectura: Capa API — solo orquestación y validación de permisos.
+La lógica de negocio se delega a servicios en app/services/ y al dominio en
+app/domain/. Los repositorios en app/infrastructure/repositories/ manejan
+el acceso a datos con consultas SQL parametrizadas.
+
+OWASP:
+- A01 (Broken Access Control): todos los endpoints verifican que el jugador
+  pertenezca al usuario autenticado (owner_id check).
+- A03 (Injection): todas las consultas usan SQL parametrizado (SQLAlchemy text()
+  con parámetros o el ORM).
+- A07 (Authentication): todos los endpoints requieren JWT válido.
+"""
 import logging
 from uuid import UUID
 from datetime import datetime
@@ -29,7 +44,12 @@ router = APIRouter(prefix="/players", tags=["players"])
 
 
 def _player_filter(player_id: UUID):
-    """Matches where player participated in any role (creator, self-ref, or partner)."""
+    """Filtro reutilizable para consultas de partidos donde un jugador participa.
+
+    El jugador puede aparecer como player1 (creador), player2 (self-ref legacy),
+    o partner (compañero). Este filtro cubre los tres roles para que tanto el
+    creador del partido como su compañero puedan ver y editar.
+    """
     return or_(
         MatchModel.player1_id == player_id,
         MatchModel.player2_id == player_id,
@@ -45,6 +65,11 @@ def create_player(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Crea un nuevo jugador asociado al usuario autenticado.
+
+    El owner_id se asigna automáticamente desde el JWT para prevenir
+    que un usuario cree jugadores para otra cuenta (OWASP A01).
+    """
     player = PlayerModel(
         name=data.name,
         category=data.category,
@@ -65,6 +90,11 @@ def list_players(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Lista todos los jugadores activos del usuario autenticado.
+
+    Enriquece cada jugador con su último power_level del análisis IA
+    más reciente, usando una subquery optimizada con DISTINCT ON.
+    """
     players = db.query(PlayerModel).filter(
         PlayerModel.owner_id == current_user.id,
         PlayerModel.is_deleted == False,
@@ -95,6 +125,7 @@ def get_player(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Obtiene un jugador por ID. Verifica ownership (OWASP A01)."""
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -110,6 +141,11 @@ def get_player_badges(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Calcula y devuelve las insignias/achievements del jugador.
+
+    Las insignias se computan desde datos reales de partidos y análisis IA.
+    Ver app/services/badges_service.py para la lógica de cálculo.
+    """
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -126,6 +162,12 @@ def update_player(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Actualiza los datos y estadísticas base de un jugador.
+
+    Solo modifica name, category, mano y stats. Las estadísticas
+    computadas (win_rate, fep_points) se derivan de partidos reales
+    y no se modifican aquí.
+    """
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -176,6 +218,12 @@ def get_player_evolution(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Calcula la evolución de puntos FEP y wins/losses mensuales del jugador.
+
+    Devuelve dos series temporales:
+    - points_timeline: puntos FEP acumulados por fecha de partido.
+    - wins_losses_monthly: victorias y derrotas agrupadas por mes.
+    """
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -245,14 +293,20 @@ def upload_avatar(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Upload avatar for a player.
+    """Sube y procesa un avatar para el jugador.
 
-    OWASP Top 10 protections applied:
-    - A01 (Broken Access Control): verify ownership
-    - A03 (Injection): re-encode image, strip EXIF, rename file
-    - A05 (Security Misconfiguration): static dir, no execution
-    - A06 (Vulnerable Components): safe Pillow usage
-    - A07 (Authentication): JWT required
+    El servicio process_avatar() aplica protecciones OWASP A03:
+    - Re-codifica la imagen para eliminar metadatos EXIF.
+    - Valida el tipo de archivo real (no confía en la extensión).
+    - Usa nombres de archivo aleatorios (UUID) para prevenir path traversal.
+    - Elimina el avatar anterior si existía.
+    - Límite de tamaño: 5 MB.
+    - Dimensiones máximas: 2048x2048 píxeles.
+
+    OWASP:
+      - A01: verifica ownership del jugador.
+      - A03: re-encode para eliminar EXIF, renombrado aleatorio.
+      - A07: JWT requerido.
     """
     # A07: Auth + A01: Ownership check
     player = db.query(PlayerModel).filter(
@@ -286,6 +340,11 @@ def delete_player(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Soft-delete de un jugador: marca is_deleted=True y registra deleted_at.
+
+    Los datos no se eliminan físicamente para preservar el historial de partidos.
+    El jugador se excluye de listados normales (filtro is_deleted=False).
+    """
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -304,6 +363,7 @@ def restore_player(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Restaura un jugador previamente eliminado (soft-delete)."""
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -323,7 +383,12 @@ def request_pdf_download_token(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Generate a short-lived download token for PDF export."""
+    """Genera un token de descarga de corta duración (5 min) para exportar PDF.
+
+    El token es de un solo uso y evita exponer el JWT del usuario en la URL
+    de descarga. El frontend obtiene este token y lo pasa como query param
+    al endpoint GET /{player_id}/pdf.
+    """
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -342,6 +407,15 @@ def export_player_pdf_weasy(
     db: Session = Depends(get_db),
     current_user: UserModel | None = Depends(_optional_auth),
 ):
+    """Genera y devuelve el PDF del informe de scouting del jugador.
+
+    Soporta dos métodos de autenticación:
+    1. Bearer token JWT (para clientes API).
+    2. Download token por query param (para enlaces de descarga desde el frontend).
+
+    El PDF incluye estadísticas, análisis IA, gráfico radar y plan de mejora.
+    Generado con WeasyPrint a partir de una plantilla HTML.
+    """
     # Accept Bearer token (API client) OR short-lived download_token
     if current_user is None and download_token:
         from app.core.security import decode_download_token
@@ -428,7 +502,20 @@ def _validate_tournament_round(
     *,
     exclude_match_id: UUID | None = None,
 ):
-    """Shared round validation for add_match and update_match."""
+    """Valida reglas de negocio para rondas de torneo en eliminación simple.
+
+    Reglas:
+    1. Si hay derrota en ronda inferior, no se puede jugar ronda posterior.
+    2. Si se marca derrota, no puede haber victorias en rondas superiores.
+    3. Las rondas deben ser consecutivas (no se puede saltar de Fase de grupos a Cuartos).
+    4. No se permiten rondas duplicadas en el mismo torneo.
+
+    Args:
+        db: Sesión de base de datos.
+        player_id: ID del jugador.
+        data: Datos del partido a validar.
+        exclude_match_id: ID de partido a excluir (para updates, no comparar consigo mismo).
+    """
     if not data.ronda or data.tournament_id is None:
         return
 
@@ -504,6 +591,15 @@ def add_match(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Registra un nuevo partido para un jugador.
+
+    Lógica de negocio:
+    - Si el partido pertenece a un torneo, valida las reglas de rondas.
+    - Si el torneo ya tiene un compañero registrado, bloquea el compañero
+      para todos los partidos de ese torneo (partner locking).
+    - Si el compañero está registrado en el sistema, envía una notificación.
+    - Mantiene solo las últimas 50 notificaciones por usuario.
+    """
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -621,6 +717,12 @@ def get_matches(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
+    """Lista los últimos 20 partidos del jugador, opcionalmente filtrados por torneo.
+
+    - tournament_id="none": solo partidos amistosos (sin torneo).
+    - tournament_id=<UUID>: solo partidos de un torneo específico.
+    - Sin tournament_id: todos los partidos.
+    """
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -672,7 +774,9 @@ def update_match(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Update an existing match."""
+    """Actualiza un partido existente. Aplica las mismas reglas de validación
+    de rondas que add_match, más la restricción adicional de que una derrota
+    no puede moverse a una ronda superior."""
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,
@@ -790,7 +894,11 @@ def delete_match(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Delete a match."""
+    """Elimina un partido y sus notificaciones asociadas.
+
+    La eliminación es física (DELETE). Las notificaciones vinculadas al
+    partido también se eliminan para mantener la integridad referencial.
+    """
     player = db.query(PlayerModel).filter(
         PlayerModel.id == player_id,
         PlayerModel.owner_id == current_user.id,

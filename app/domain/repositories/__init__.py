@@ -1,0 +1,1 @@
+"""Interfaces de repositorio (puertos) — las implementaciones viven en infrastructure."""

@@ -1,0 +1,1 @@
+"""Adaptadores de IA: cliente Gemini y RAG del reglamento de pádel."""

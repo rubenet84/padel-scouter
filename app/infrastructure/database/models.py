@@ -1,3 +1,16 @@
+"""
+Modelos ORM de SQLAlchemy para la base de datos.
+
+Define todas las tablas del sistema: users, players, tournaments,
+analyses, matches y notifications. Cada modelo mapea directamente
+a una tabla PostgreSQL con columnas, restricciones y relaciones.
+
+Las entidades de dominio (app.domain.entities) son independientes
+de estos modelos. La conversión entre ORM y dominio ocurre en la
+capa de aplicación (API endpoints + use cases).
+
+Arquitectura: Capa de infraestructura — modelos de persistencia.
+"""
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -12,11 +25,18 @@ from app.domain.value_objects.category import PlayerCategory, ScoringMethod
 
 UTC = timezone.utc
 
+
 class Base(DeclarativeBase):
+    """Clase base declarativa para todos los modelos ORM."""
     pass
 
 
 class UserModel(Base):
+    """Tabla de usuarios del sistema.
+
+    Almacena credenciales (email, hashed_password), datos de perfil
+    (username) y control de acceso (role, is_active).
+    """
     __tablename__ = "users"
 
     id           = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -31,6 +51,12 @@ class UserModel(Base):
 
 
 class PlayerModel(Base):
+    """Tabla de jugadores.
+
+    Cada jugador pertenece a un usuario (owner_id). Incluye estadísticas
+    base en columnas separadas para facilitar consultas y ordenamiento.
+    Soporta soft-delete (is_deleted, deleted_at) para preservar historial.
+    """
     __tablename__ = "players"
 
     id       = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -81,6 +107,12 @@ class PlayerModel(Base):
 
 
 class TournamentModel(Base):
+    """Tabla de torneos.
+
+    Los torneos tienen unicidad global por nombre + fecha para permitir
+    compartirlos entre usuarios. Incluyen puntos FEP que se distribuyen
+    entre los participantes según la ronda alcanzada.
+    """
     __tablename__ = "tournaments"
 
     id         = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -97,6 +129,12 @@ class TournamentModel(Base):
 
 
 class AnalysisModel(Base):
+    """Tabla de análisis IA.
+
+    Almacena el resultado completo de cada análisis ejecutado:
+    power level, descripción narrativa, fortalezas/debilidades (JSON),
+    plan de mejora y datos del golpe definitivo.
+    """
     __tablename__ = "analyses"
 
     id               = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -117,20 +155,25 @@ class AnalysisModel(Base):
 
 
 class MatchModel(Base):
+    """Tabla de partidos.
+
+    Un partido se registra desde la perspectiva de un jugador (player1).
+    Incluye rival, resultado, torneo/ronda, compañero y método de puntuación.
+    """
     __tablename__ = "matches"
 
     id             = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     player1_id     = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=False)
     player2_id     = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=False)
     rival_nombre   = Column(String(150), nullable=True)
-    torneo         = Column(String(150), nullable=True)
+    torneo         = Column(String(150), nullable=True)                    # legacy
     tournament_id  = Column(UUID(as_uuid=True), ForeignKey("tournaments.id"), nullable=True)
     ronda          = Column(String(100), nullable=True)
     resultado      = Column(String(50),  nullable=True)
     ganado         = Column(Boolean,     default=True, nullable=False)
     scoring_method = Column(SAEnum(ScoringMethod), nullable=False,
                             default=ScoringMethod.CON_VENTAJA)
-    result         = Column(String(50),  nullable=True)
+    result         = Column(String(50),  nullable=True)                    # legacy
     winner_id      = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=True)
     played_at      = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     partner_id     = Column(UUID(as_uuid=True), ForeignKey("players.id"), nullable=True)
@@ -144,12 +187,19 @@ class MatchModel(Base):
 
 
 # ── Notification types ──────────────────────────────────────────
+# Tipos de notificación soportados. Agregar nuevos tipos aquí.
 NOTIF_MATCH_ADDED = "match_added"
 NOTIF_TYPES = [NOTIF_MATCH_ADDED]
 
 
 # ── Notification ────────────────────────────────────────────────
 class NotificationModel(Base):
+    """Tabla de notificaciones para la campanita del frontend.
+
+    Cada notificación se asocia a un usuario (destinatario) y opcionalmente
+    a un jugador y partido. El frontend hace polling del endpoint
+    GET /notifications/unread-count para mostrar el badge.
+    """
     __tablename__ = "notifications"
 
     id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)

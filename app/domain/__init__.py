@@ -1,0 +1,1 @@
+"""Capa de dominio: entidades, value objects y casos de uso — núcleo de la aplicación sin dependencias externas."""

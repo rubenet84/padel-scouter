@@ -1,4 +1,9 @@
-"""Comparison service — side-by-side stats and head-to-head history."""
+"""Servicio de comparación — estadísticas lado a lado e historial H2H.
+
+Compara dos jugadores mostrando estadísticas enfrentadas y posición en ranking.
+El H2H busca partidos donde ambos jugadores estuvieron en lados opuestos
+(excluye partidos donde jugaron como compañeros).
+"""
 
 from uuid import UUID
 
@@ -18,7 +23,11 @@ def get_comparison(
     p2_id: UUID,
     filters: dict | None = None,
 ) -> ComparisonResult:
-    """Side-by-side stats comparison for two players."""
+    """Comparación lado a lado de estadísticas entre dos jugadores.
+
+    Calcula posición en el ranking de su categoría, puntos FEP, diferencia
+    de puntos y tabla comparativa con victorias, % victorias, partidos, sets,
+    juegos y racha."""
     filters = filters or {}
 
     players = db.execute(
@@ -134,7 +143,11 @@ def get_h2h(
     p2_id: UUID,
     filters: dict | None = None,
 ) -> H2HResult:
-    """Head-to-head history between two players."""
+    """Historial de enfrentamientos directos (H2H) entre dos jugadores.
+
+    Busca partidos donde ambos jugadores estuvieron en lados opuestos
+    (excluye partidos donde jugaron como compañeros). Calcula victorias,
+    sets, juegos de cada uno y devuelve el historial cronológico inverso."""
     filters = filters or {}
 
     players = db.execute(

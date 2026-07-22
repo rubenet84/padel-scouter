@@ -1,0 +1,1 @@
+"""Casos de uso de la aplicación: orquestan entidades, value objects y servicios externos."""

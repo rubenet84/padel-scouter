@@ -1,4 +1,10 @@
-"""Highlights service — community records, evolution, and dashboard highlights."""
+"""Servicio de destacados — récords, evolución y highlights de comunidad.
+
+Provee los datos para las secciones de comunidad del dashboard:
+- Récords: mejor jugador en cada métrica.
+- Evolución: puntos FEP actuales por jugador (sparkline-ready).
+- Community Highlights: más puntos, mejor forma, mejor pareja, más activo.
+"""
 
 from uuid import UUID
 

@@ -1,4 +1,10 @@
-"""ReportLab PDF — reliable, no system deps, professional output."""
+"""Generador de PDF con ReportLab — fallback sin dependencias de sistema.
+
+Alternativa a WeasyPrint que no requiere GTK3 ni librerías del sistema.
+Produce PDFs directamente desde Python con ReportLab, útil en entornos
+donde WeasyPrint no está disponible (CI/CD, algunos Linux serverless).
+Actualmente no se usa en producción — el generador principal es generate_pdf.py.
+"""
 import json, re
 from io import BytesIO
 from datetime import datetime, timezone

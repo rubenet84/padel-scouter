@@ -1,0 +1,1 @@
+"""Capa API: adaptadores de entrada REST vía FastAPI."""

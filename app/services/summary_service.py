@@ -1,4 +1,10 @@
-"""Summary service — global aggregate totals + ranking leader + best win %."""
+"""Servicio de resumen global — totales agregados + líder del ranking + mejor %.
+
+Alimenta los widgets de estadísticas del dashboard con datos agregados de
+todos los jugadores del usuario: totales, torneos, amistosos, sets y juegos.
+Usa _batch_compute_stats() para procesar todos los jugadores en 2 consultas
+(evita el problema N+1 de la versión anterior).
+"""
 
 from collections import defaultdict
 from uuid import UUID

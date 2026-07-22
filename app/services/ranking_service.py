@@ -1,4 +1,8 @@
-"""Ranking service — FEP-based ranking and top-player lists."""
+"""Servicio de rankings — clasificación FEP y listas top de jugadores.
+
+Genera rankings paginados con ordenación multi-criterio y listas top-5/10
+por diversas métricas (puntos, victorias, % victorias, sets, juegos, racha).
+"""
 
 from uuid import UUID
 
@@ -25,7 +29,11 @@ def get_rankings(
     filters: dict | None = None,
     page: int = 1, page_size: int = 50,
 ) -> RankingResponse:
-    """Full ranking with FEP points, match stats, sort, filter, and pagination."""
+    """Ranking completo con puntos FEP, estadísticas y paginación.
+
+    Soporta ordenación por múltiples criterios (puntos, victorias, % victorias,
+    partidos, sets, juegos, racha, nombre) y filtrado por categoría, temporada,
+    tipo de competición y rango de fechas."""
     filters = filters or {}
 
     players = get_players_by_owner(db, user_id)
@@ -95,7 +103,10 @@ def get_rankings(
 def get_top_players(
     db: Session, user_id: UUID, filters: dict | None = None,
 ) -> TopLists:
-    """Returns 10 independent top-5 lists of players by various metrics."""
+    """Devuelve 10 listas independientes top-5 de jugadores por diversas métricas.
+
+    Las métricas incluyen: puntos, victorias, % victorias, partidos, torneos
+    ganados, finales, semifinales, sets ganados, juegos ganados y racha."""
     filters = filters or {}
 
     players = get_players_by_owner(db, user_id)

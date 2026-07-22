@@ -1,3 +1,13 @@
+"""
+Endpoints de autenticación: registro, login, refresh, reset de contraseña.
+
+Implementa el flujo completo de autenticación con JWT (access + refresh tokens)
+siguiendo las recomendaciones OWASP:
+- A01 (Broken Access Control): ownership checks en todos los endpoints.
+- A02 (Cryptographic Failures): bcrypt para passwords, JWT firmados.
+- A07 (Identification & Authentication Failures): rate limiting en login/register,
+  tokens de reset de corta duración, mensajes genéricos para evitar enumeración.
+"""
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
@@ -24,6 +34,18 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/register", response_model=UserPublicSchema, status_code=201)
 @limiter.limit("3/minute")
 def register(data: UserRegisterSchema, request: Request, db: Session = Depends(get_db)):
+    """Registra un nuevo usuario con email, username y contraseña.
+
+    Validaciones:
+    - Email único en el sistema (case-insensitive).
+    - Username único en el sistema.
+    - Contraseña fuerte validada por UserRegisterSchema (12+ chars, mayúscula,
+      minúscula, número, carácter especial).
+    - Rate limit: 3 registros por minuto por IP.
+
+    El rol por defecto es "viewer". El usuario se crea activo.
+    Se envía email de bienvenida de forma no bloqueante.
+    """
     email = data.email.lower().strip()
 
     if db.query(UserModel).filter(UserModel.email == email).first():
@@ -50,6 +72,15 @@ def register(data: UserRegisterSchema, request: Request, db: Session = Depends(g
 @router.post("/login", response_model=TokenSchema)
 @limiter.limit("5/minute")
 def login(data: UserLoginSchema, request: Request, db: Session = Depends(get_db)):
+    """Autentica al usuario y devuelve tokens de acceso y refresco.
+
+    Seguridad (OWASP A02):
+    - El mensaje de error es genérico ("Credenciales incorrectas") tanto si el
+      email no existe como si la contraseña es incorrecta, para prevenir
+      enumeración de usuarios.
+    - Rate limit: 5 intentos por minuto por IP para mitigar fuerza bruta.
+    - El access token incluye el rol del usuario para autorización.
+    """
     email = data.email.lower().strip()
     user = db.query(UserModel).filter(UserModel.email == email).first()
 
@@ -98,6 +129,11 @@ def reset_password(
     """
     OWASP A01 — token y password van en el body, no en query params.
     OWASP A07 — reset seguro con token firmado de un solo uso.
+
+    Flujo:
+    1. Verifica que el token de reset sea válido y no haya expirado.
+    2. Valida la fortaleza de la nueva contraseña con las mismas reglas de registro.
+    3. Hashea y persiste la nueva contraseña.
     """
     from app.schemas.player import UserRegisterSchema
     from pydantic import ValidationError
@@ -132,6 +168,12 @@ def reset_password(
 
 @router.post("/refresh", response_model=TokenSchema)
 def refresh(refresh_token: str = Body(...), db: Session = Depends(get_db)):
+    """Genera un nuevo par de tokens (access + refresh) usando un refresh token válido.
+
+    Solo acepta tokens de tipo 'refresh'. El refresh token se rota:
+    se emite uno nuevo junto con el access token. El usuario debe descartar
+    el refresh token anterior.
+    """
     from jose import JWTError
     try:
         payload = decode_token(refresh_token)
@@ -153,4 +195,5 @@ def refresh(refresh_token: str = Body(...), db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserPublicSchema)
 def me(current_user: UserModel = Depends(get_current_user)):
+    """Devuelve los datos del usuario autenticado actual (obtenidos del JWT)."""
     return current_user

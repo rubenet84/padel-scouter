@@ -1,3 +1,15 @@
+"""
+Endpoints de estadísticas globales: ranking, top jugadores, comparador,
+H2H, récords comunitarios, categorías, evolución y highlights.
+
+Todos los endpoints delegan la lógica de cálculo a los servicios en
+app/services/. Esta capa solo se encarga de:
+- Validar parámetros de entrada (UUIDs, formatos de fecha).
+- Verificar autenticación (JWT requerido en todos los endpoints).
+- Formatear la respuesta usando ApiResponse.
+
+Arquitectura: Capa API — orquestación pura, sin lógica de negocio.
+"""
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -19,7 +31,7 @@ def get_summary(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Global summary: aggregate totals + ranking leader + best win %."""
+    """Resumen global: totales agregados + líder de ranking + mejor % victorias."""
     data = get_global_summary(db, current_user.id)
     return ApiResponse(success=True, data=data.model_dump())
 
@@ -40,7 +52,7 @@ def get_ranking(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Full ranking with sort, filter, and pagination."""
+    """Ranking completo con ordenación, filtros y paginación."""
     filters = {
         "category": category,
         "season": season,
@@ -76,7 +88,7 @@ def get_ranking_by_category(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Per-category ranking (delegates to get_rankings with category filter)."""
+    """Ranking filtrado por categoría (delega en get_rankings con filtro)."""
     filters = {
         "category": category,
         "season": season,
@@ -111,7 +123,7 @@ def get_top(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """10 independent top-5 lists by various metrics."""
+    """10 listas independientes de top 5 jugadores por distintas métricas."""
     filters = {
         "category": category,
         "season": season,
@@ -139,7 +151,7 @@ def get_compare(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Side-by-side comparison of two players."""
+    """Comparación lado a lado de dos jugadores con posición en el ranking de su categoría."""
     from uuid import UUID
 
     try:
@@ -177,7 +189,7 @@ def get_h2h_endpoint(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Head-to-head history between two players."""
+    """Historial de enfrentamientos directos (head-to-head) entre dos jugadores."""
     from uuid import UUID
 
     try:
@@ -214,7 +226,7 @@ def get_records_endpoint(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Community records — top player for each metric."""
+    """Récords comunitarios: el mejor jugador para cada métrica."""
     filters = {
         "category": category,
         "season": season,
@@ -241,7 +253,7 @@ def get_categories(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """All categories with aggregated stats."""
+    """Todas las categorías con estadísticas agregadas y top N jugadores."""
     filters = {
         "season": season,
         "competition_type": competition_type,
@@ -267,7 +279,7 @@ def get_category_detail(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Single category with aggregated stats."""
+    """Estadísticas agregadas de una categoría específica."""
     filters = {
         "season": season,
         "competition_type": competition_type,
@@ -297,7 +309,7 @@ def get_evolution_endpoint(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Evolution of points per player (sparkline-ready)."""
+    """Evolución de puntos FEP por jugador con array sparkline (vacío por ahora)."""
     filters = {
         "category": category,
         "season": season,
@@ -323,7 +335,7 @@ def get_community_endpoint(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Community highlights: most points, best form, best pair, most active."""
+    """Highlights comunitarios: más puntos, mejor forma, mejor pareja, más activo."""
     filters = {
         "season": season,
         "competition_type": competition_type,

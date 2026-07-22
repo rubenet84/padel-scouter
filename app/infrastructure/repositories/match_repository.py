@@ -1,4 +1,8 @@
-"""Match repository — shared data access for match queries."""
+"""Repositorio de partidos — acceso a datos compartidos para consultas de matches.
+
+Provee las funciones base de filtrado y consulta de partidos usadas por
+múltiples servicios: rankings, comparador, categorías, highlights, H2H.
+"""
 
 from uuid import UUID
 

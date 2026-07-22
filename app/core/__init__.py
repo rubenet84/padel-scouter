@@ -1,0 +1,1 @@
+"""Núcleo compartido: configuración, seguridad, dependencias y rate limiting."""

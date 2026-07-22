@@ -1,4 +1,8 @@
-"""Computed stats service — computes torneos, win_rate, fep_points per player."""
+"""Servicio de estadísticas computadas — torneos, win_rate y FEP por jugador.
+
+Calcula estadísticas competitivas desde datos reales de partidos y torneos.
+Utilizado por los endpoints de perfil de jugador, análisis IA y PDF export.
+"""
 
 from collections import defaultdict
 from uuid import UUID
@@ -11,7 +15,11 @@ from app.domain.value_objects.rounds import best_round_info
 
 
 def get_computed_stats(db: Session, player_id: UUID) -> ComputedStats:
-    """Compute competitive stats directly from match + tournament data."""
+    """Calcula estadísticas competitivas desde datos reales de partidos y torneos.
+
+    Ejecuta 2 consultas SQL: torneos+win_rate y puntos FEP por ronda.
+    Los puntos FEP se distribuyen según la mejor ronda alcanzada en cada torneo
+    (no se suman planos)."""
     result = db.execute(
         text("""
             SELECT

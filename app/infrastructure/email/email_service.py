@@ -1,3 +1,13 @@
+"""
+Servicio de envío de emails transaccionales vía Resend.
+
+Implementa:
+- Envío de email de bienvenida tras registro.
+- Envío de email de reseteo de contraseña con token (OWASP A07).
+
+En desarrollo, Resend solo permite enviar al email del propietario
+de la cuenta. Se redirige automáticamente y se indica [TEST] en el asunto.
+"""
 import logging
 
 import resend
@@ -20,6 +30,11 @@ def _get_recipient(to_email: str) -> str:
 
 
 def send_welcome_email(to_email: str, username: str) -> bool:
+    """Envía email de bienvenida tras registro exitoso.
+
+    El envío es no bloqueante — si falla, se loguea el error pero
+    no se interrumpe el flujo de registro.
+    """
     try:
         resend.Emails.send({
             "from": settings.emails_from,
@@ -69,6 +84,12 @@ def send_welcome_email(to_email: str, username: str) -> bool:
 
 
 def send_password_reset_email(to_email: str, reset_token: str, username: str) -> bool:
+    """Envía email con enlace de reseteo de contraseña (OWASP A07).
+
+    El token expira en 15 minutos. El enlace incluye el token como
+    query param para que el frontend lo capture y lo envíe al endpoint
+    POST /auth/reset-password.
+    """
     reset_url = f"{settings.app_url}/reset-password?token={reset_token}"
 
     try:

@@ -1,0 +1,1 @@
+"""Servicio de emails transaccionales vía Resend."""

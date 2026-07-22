@@ -1,0 +1,1 @@
+"""Generación de informes PDF con WeasyPrint y fallback ReportLab."""

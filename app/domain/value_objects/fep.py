@@ -1,7 +1,14 @@
-"""FEP points calculation — single source of truth.
+"""Cálculo de puntos FEP (Federación Española de Pádel).
 
-All FEP (Federación de Pádel) point calculations across the application
-must go through this module.
+Fuente única de verdad para el cálculo de puntos FEP en toda la aplicación.
+Los puntos se distribuyen según la mejor ronda alcanzada en cada torneo,
+no se suman planos.
+
+Regla FEP: puntos_torneo × peso_ronda = puntos_obtenidos.
+- Ganar la Final → 100% de los puntos del torneo.
+- Semifinal → 56.25%.
+- Cuartos → 42.18%.
+- Fase de grupos → 0%.
 """
 
 from collections import defaultdict
@@ -14,26 +21,24 @@ def compute_fep_points(
     match_rows: list,
     player_ids: list[UUID],
 ) -> dict[UUID, int]:
-    """
-    Compute FEP points per player from tournament match rows.
+    """Calcula los puntos FEP por jugador a partir de partidos de torneo.
 
-    For each player, FEP points are calculated by grouping tournament matches
-    by tournament, applying the round weight from best_round_info(), and
-    summing the weighted points.
+    Para cada jugador, agrupa los partidos por torneo, determina la mejor
+    ronda alcanzada mediante best_round_info() y aplica el peso correspondiente
+    sobre los puntos base del torneo.
 
-    Only tournament matches (m.tournament_id IS NOT NULL) contribute to FEP.
-    Friendly matches are excluded from FEP calculation.
+    Solo los partidos de torneo (tournament_id IS NOT NULL) contribuyen al FEP.
+    Los partidos amistosos se excluyen del cálculo.
 
     Args:
-        match_rows: list of Row objects with at least the attributes
-                    tournament_id, fep_points, ronda, ganado, player1_id,
-                    and partner_id.
-        player_ids: list of player UUIDs to compute FEP for.
+        match_rows: Lista de objetos Row de SQLAlchemy con atributos:
+                    tournament_id, fep_points, ronda, ganado, player1_id, partner_id.
+        player_ids: Lista de UUIDs de jugadores para los que calcular FEP.
 
     Returns:
-        dict mapping each player_id to their total FEP points (int).
+        Dict mapeando cada player_id a sus puntos FEP totales (int).
     """
-    # Group tournament matches by player → tournament
+    # Agrupar partidos de torneo por jugador → torneo
     pt_groups: dict[UUID, dict[UUID, list]] = defaultdict(lambda: defaultdict(list))
     for m in match_rows:
         if not m.tournament_id:
@@ -46,9 +51,10 @@ def compute_fep_points(
     for pid in player_ids:
         total_fep = 0
         for tid, tms in pt_groups.get(pid, {}).items():
-            fep_total = tms[0].fep_points or 0
+            fep_total = tms[0].fep_points or 0   # puntos base del torneo
             if fep_total == 0:
                 continue
+            # Peso según mejor ronda: final=1.0, semi=0.5625, cuartos=0.4218...
             weight = best_round_info(tms)[2]
             total_fep += int(fep_total * weight)
         result[pid] = total_fep

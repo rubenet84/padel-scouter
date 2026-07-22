@@ -1,0 +1,1 @@
+"""Value objects: tipos inmutables del dominio (categorías, estadísticas, puntuación)."""
