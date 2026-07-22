@@ -13,8 +13,18 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Cliente Gemini lazy — se inicializa bajo demanda para evitar crashes si la API key no está configurada
+_client = None
 
-client = genai.Client(api_key=settings.google_api_key.get_secret_value())
+
+def _get_client():
+    global _client
+    if _client is None:
+        api_key = settings.google_api_key.get_secret_value()
+        if not api_key:
+            raise RuntimeError("GOOGLE_API_KEY no configurada. La IA no está disponible.")
+        _client = genai.Client(api_key=api_key)
+    return _client
 
 
 ANALYSIS_PROMPT = """
@@ -84,7 +94,7 @@ def analyze_player_with_ai(player_data: dict) -> dict:
     prompt = ANALYSIS_PROMPT.format(**player_data)
 
     try:
-        response = client.models.generate_content(
+        response = _get_client().models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
