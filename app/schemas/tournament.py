@@ -1,3 +1,9 @@
+"""Schemas Pydantic para la API de torneos.
+
+Define los contratos de entrada/salida para los endpoints de torneos:
+creación, actualización, listado y respuesta pública.
+"""
+
 import re
 from datetime import date as DateType, datetime
 from typing import Optional
