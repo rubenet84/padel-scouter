@@ -766,7 +766,7 @@ def get_matches(
         query
         .options(joinedload(MatchModel.player1))
         .order_by(MatchModel.played_at.desc())
-        .limit(20)
+        .limit(200)
         .all()
     )
     # Hydrate player1_name for correct partner display on the other side
