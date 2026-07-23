@@ -1,10 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
+  <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   @page {
@@ -20,7 +18,7 @@
   }
 
   body {
-    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'DejaVu Sans', 'Helvetica Neue', Arial, sans-serif;
     background: #fff;
     color: #1a1a2e;
     font-size: 10px;
@@ -273,17 +271,17 @@
       <div class="meta-val">{{TORNEOS}}</div>
     </div>
     <div class="meta-item">
-      <div class="meta-icon">🎯</div>
+      <div class="meta-icon">&#9679;</div>
       <div class="meta-label">Victorias</div>
       <div class="meta-val">{{VICTORIAS}}</div>
     </div>
     <div class="meta-item">
-      <div class="meta-icon">📊</div>
+      <div class="meta-icon">&#9632;</div>
       <div class="meta-label">Win Rate</div>
       <div class="meta-val">{{WIN_RATE}}</div>
     </div>
     <div class="meta-item">
-      <div class="meta-icon">🏅</div>
+      <div class="meta-icon">&#9733;</div>
       <div class="meta-label">Pts FEP</div>
       <div class="meta-val">{{PTS_FEP}}</div>
     </div>
@@ -297,7 +295,7 @@
       <div class="perfil-box">
         <div class="perfil-text">{{PERFIL_GENERAL}}</div>
       </div>
-      <div class="section-title"><span class="icon">📡</span> Radar de Habilidades</div>
+      <div class="section-title"><span class="icon">&#9678;</span> Radar de Habilidades</div>
       <div class="radar-box">
         <svg class="radar-svg" viewBox="-20 0 240 185" xmlns="http://www.w3.org/2000/svg">
           <polygon points="100,15 163,52 163,122 100,159 37,122 37,52" fill="none" stroke="#e8e4f5" stroke-width="1"/>
@@ -324,13 +322,13 @@
 
     <!-- RIGHT: Estadísticas -->
     <div>
-      <div class="section-title"><span class="icon">📊</span> Estadísticas</div>
+      <div class="section-title"><span class="icon">&#9642;</span> Estadísticas</div>
       <div class="stat-group">
-        <div class="stat-group-title">🎾 Técnica</div>
+        <div class="stat-group-title">&#9679; Técnica</div>
         {{STATS_TECNICA}}
       </div>
       <div class="stat-group">
-        <div class="stat-group-title">⚡ Físico</div>
+        <div class="stat-group-title">&#9654; Físico</div>
         {{STATS_FISICO}}
       </div>
       <div class="stat-group">
@@ -362,7 +360,7 @@
   </div>
 
   <!-- ANÁLISIS IA -->
-  <div class="section-title"><span class="icon">🤖</span> Análisis IA</div>
+  <div class="section-title"><span class="icon">&#9670;</span> Análisis IA</div>
   <div class="ia-box">
     <span class="quote-mark">"</span>
     <span class="quote-end">"</span>
@@ -370,7 +368,7 @@
   </div>
 
   <!-- PLAN DE MEJORA -->
-  <div class="section-title" style="margin-bottom:4mm;"><span class="icon">🎯</span> Plan de Mejora</div>
+  <div class="section-title" style="margin-bottom:4mm;"><span class="icon">&#9679;</span> Plan de Mejora</div>
   <div style="font-size:9px;color:#4a4a6a;line-height:1.6;margin-bottom:5mm;">{{IMPROVEMENT_PLAN}}</div>
 
   <div class="p2-grid">
