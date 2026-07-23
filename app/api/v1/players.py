@@ -512,7 +512,10 @@ def export_player_pdf_weasy(
         }
 
     from app.infrastructure.pdf.generate_pdf import generate_player_pdf
-    pdf_bytes = generate_player_pdf(player_dict, analysis_dict)
+    try:
+        pdf_bytes = generate_player_pdf(player_dict, analysis_dict)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     filename = f"informe_{player.name.replace(' ','_')}.pdf"
     return Response(pdf_bytes, media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'})

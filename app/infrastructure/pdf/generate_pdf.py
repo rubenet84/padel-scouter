@@ -304,12 +304,22 @@ def generate_player_html(player: dict, analysis: dict) -> str:
 
 def generate_player_pdf(player: dict, analysis: dict) -> bytes:
     """
-    Genera el PDF como bytes.
+    Genera el PDF como bytes usando WeasyPrint.
     
     Returns:
         bytes: PDF listo para enviar como response o guardar.
+        
+    Raises:
+        RuntimeError: Si WeasyPrint no está disponible (falta libgobject en el sistema).
     """
-    from weasyprint import HTML
+    try:
+        from weasyprint import HTML
+    except OSError as e:
+        raise RuntimeError(
+            "WeasyPrint no está disponible en este servidor. "
+            "Se requieren librerías del sistema (libgobject, pango, cairo). "
+            "En Railway, usar Dockerfile con libglib2.0-dev."
+        ) from e
     html_content = generate_player_html(player, analysis)
     pdf_bytes = HTML(string=html_content, base_url=str(Path.cwd())).write_pdf()
     return pdf_bytes
