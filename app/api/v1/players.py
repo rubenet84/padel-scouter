@@ -237,20 +237,24 @@ def get_player_evolution(
     ).order_by(MatchModel.played_at.asc()).all()
 
     from collections import defaultdict
-    from app.domain.value_objects.rounds import ROUND_ORDER, ROUND_WEIGHTS
+    from app.domain.value_objects.rounds import best_round_info
 
-    # Para calcular FEP por partido, usamos el peso de la ronda
-    # (no el total del torneo — los puntos se distribuyen según la ronda alcanzada)
-    fep_by_date = defaultdict(int)
+    # Agrupar partidos por torneo y calcular FEP solo UNA VEZ por torneo
+    # (la mejor ronda alcanzada, en la fecha del último partido de ese torneo)
+    tour_matches: dict = defaultdict(list)
     for m in matches:
-        if not m.played_at: continue
-        fep = 0
         if m.tournament_id and m.tournament:
-            base = m.tournament.fep_points or 0
-            ronda = (m.ronda or '').strip()
-            weight = ROUND_WEIGHTS.get(ronda, 0.0)
-            fep = int(base * weight)
-        fep_by_date[m.played_at.strftime("%Y-%m-%d")] += fep
+            tour_matches[m.tournament_id].append(m)
+
+    fep_by_date = defaultdict(int)
+    for tid, tms in tour_matches.items():
+        if not tms: continue
+        base = tms[0].tournament.fep_points or 0
+        if base == 0: continue
+        _, _, weight = best_round_info(tms)
+        fep = int(base * weight)
+        last_date = max(m.played_at for m in tms if m.played_at).strftime("%Y-%m-%d")
+        fep_by_date[last_date] += fep
     points_timeline = []
     cumulative = 0
     for d in sorted(fep_by_date): cumulative += fep_by_date[d]; points_timeline.append({"date": d, "points": cumulative})
