@@ -246,7 +246,7 @@ def get_player_evolution(
         if m.tournament_id and m.tournament:
             tour_matches[m.tournament_id].append(m)
 
-    fep_by_date = defaultdict(int)
+    fep_by_date: dict = {}  # date -> {"fep": int, "tournaments": [{"name": str, "points": int}]}
     for tid, tms in tour_matches.items():
         if not tms: continue
         base = tms[0].tournament.fep_points or 0
@@ -254,10 +254,24 @@ def get_player_evolution(
         _, _, weight = best_round_info(tms)
         fep = int(base * weight)
         last_date = max(m.played_at for m in tms if m.played_at).strftime("%Y-%m-%d")
-        fep_by_date[last_date] += fep
+        if last_date not in fep_by_date:
+            fep_by_date[last_date] = {"fep": 0, "tournaments": []}
+        fep_by_date[last_date]["fep"] += fep
+        fep_by_date[last_date]["tournaments"].append({
+            "name": tms[0].tournament.name,
+            "points": fep,
+            "round": best_round_info(tms)[0] or "—",
+        })
     points_timeline = []
     cumulative = 0
-    for d in sorted(fep_by_date): cumulative += fep_by_date[d]; points_timeline.append({"date": d, "points": cumulative})
+    for d in sorted(fep_by_date):
+        cumulative += fep_by_date[d]["fep"]
+        points_timeline.append({
+            "date": d,
+            "points": cumulative,
+            "delta": fep_by_date[d]["fep"],
+            "tournaments": fep_by_date[d]["tournaments"],
+        })
 
     monthly = defaultdict(lambda: {"wins": 0, "losses": 0})
     for m in matches:

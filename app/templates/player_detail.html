@@ -898,6 +898,8 @@ document.addEventListener('click', function(e) {
           datasets: [{
             label: 'Puntos FEP',
             data: data.points_timeline.map(p => p.points),
+            tournamentInfo: data.points_timeline.map(p => p.tournaments || []),
+            delta: data.points_timeline.map(p => p.delta || 0),
             borderColor: '#a78bfa',
             backgroundColor: 'rgba(167,139,250,0.08)',
             fill: true,
@@ -915,6 +917,17 @@ document.addEventListener('click', function(e) {
               tooltip: {
                 usePointStyle: true,
                 boxPadding: 6,
+                callbacks: {
+                  label: function(ctx) {
+                    const info = ctx.dataset.tournamentInfo?.[ctx.dataIndex] || [];
+                    const delta = ctx.dataset.delta?.[ctx.dataIndex] || 0;
+                    let lines = ['Total: ' + ctx.parsed.y + ' pts (+' + delta + ')'];
+                    info.forEach(function(t) {
+                      lines.push(t.name + ' — ' + t.round + ' → ' + t.points + ' pts');
+                    });
+                    return lines;
+                  }
+                }
               }
             },
             scales: {
