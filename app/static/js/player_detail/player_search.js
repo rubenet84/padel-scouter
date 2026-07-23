@@ -24,6 +24,7 @@ function filterMatchesBySearch() {
     const terms = query.split(/\s+/).filter(t => t);
     const filtered = allServerMatches.filter(m => {
         const rival = (m.rival_nombre || '').toLowerCase();
+        const playerName = (m.player1_name || '').toLowerCase();
         const d = new Date(m.played_at);
         // Componentes de fecha
         const dia   = d.getDate();
@@ -79,7 +80,7 @@ function filterMatchesBySearch() {
         const tipo         = m.tournament_id ? 'torneo' : 'amistoso';
         // Cada término debe aparecer en ALGÚN campo del mismo partido (AND).
         // Ronda se matchea como palabra completa para no mezclar "final" con "semifinal".
-        const haystack = [rival, resultado, torneo, rondaPal, ganado, notas, lesion,
+        const haystack = [rival, playerName, resultado, torneo, rondaPal, ganado, notas, lesion,
             partner, scoring, tipo,
             soloAnio, soloAnio2, soloMes, soloMesC,
             fBarra1, fBarra2, fBarra3,
