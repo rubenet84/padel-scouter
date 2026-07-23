@@ -237,11 +237,19 @@ def get_player_evolution(
     ).order_by(MatchModel.played_at.asc()).all()
 
     from collections import defaultdict
+    from app.domain.value_objects.rounds import ROUND_ORDER, ROUND_WEIGHTS
+
+    # Para calcular FEP por partido, usamos el peso de la ronda
+    # (no el total del torneo — los puntos se distribuyen según la ronda alcanzada)
     fep_by_date = defaultdict(int)
     for m in matches:
         if not m.played_at: continue
         fep = 0
-        if m.tournament_id and m.tournament: fep = m.tournament.fep_points or 0
+        if m.tournament_id and m.tournament:
+            base = m.tournament.fep_points or 0
+            ronda = (m.ronda or '').strip()
+            weight = ROUND_WEIGHTS.get(ronda, 0.0)
+            fep = int(base * weight)
         fep_by_date[m.played_at.strftime("%Y-%m-%d")] += fep
     points_timeline = []
     cumulative = 0
