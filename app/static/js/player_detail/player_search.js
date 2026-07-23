@@ -72,9 +72,15 @@ function filterMatchesBySearch() {
         const ganado       = m.ganado ? 'victoria' : 'derrota';
         const notas        = (m.notes || '').toLowerCase();
         const lesion       = hasLesionNote(m.notes) ? 'lesion' : '';
+        const partner      = (m.partner_nombre || '').toLowerCase();
+        const scoring      = ((m.scoring_method || '').toString().toLowerCase() === 'con_ventaja' ? 'con ventaja' :
+                              (m.scoring_method || '').toString().toLowerCase() === 'punto_oro' ? 'punto oro' :
+                              (m.scoring_method || '').toString().toLowerCase() === 'star_point' ? 'star point' : '');
+        const tipo         = m.tournament_id ? 'torneo' : 'amistoso';
         // Cada término debe aparecer en ALGÚN campo del mismo partido (AND).
         // Ronda se matchea como palabra completa para no mezclar "final" con "semifinal".
-        const haystack = [rival, resultado, torneo, ganado, notas, lesion,
+        const haystack = [rival, resultado, torneo, rondaPal, ganado, notas, lesion,
+            partner, scoring, tipo,
             soloAnio, soloAnio2, soloMes, soloMesC,
             fBarra1, fBarra2, fBarra3,
             fGuion1, fGuion2, fGuion3,
