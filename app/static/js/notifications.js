@@ -119,7 +119,9 @@
                 return;
             }
             list.innerHTML = items.map(n => `
-                <a href="${escHtml(n.related_url || '#')}" class="block px-4 py-3 transition-colors hover:bg-white/5 ${n.is_read ? '' : 'border-l-2'}"
+                <a href="${escHtml(n.related_url || '#')}"
+                   onclick="event.preventDefault();markNotifRead('${n.id}','${(n.related_url || '#').replace(/'/g, "\\'")}')"
+                   class="block px-4 py-3 transition-colors hover:bg-white/5 ${n.is_read ? '' : 'border-l-2'}"
                    style="${n.is_read ? 'opacity:0.55;' : 'border-left:2px solid #a78bfa;'}">
                     <div class="text-xs font-bold" style="color:#e2e8f0;">${escHtml(n.title)}</div>
                     <div class="text-[11px] mt-0.5" style="color:#cbd5e1;">${n.message || ''}</div>
@@ -171,4 +173,24 @@
     } else {
         init();
     }
+
+    // Expuesta globalmente para el onclick inline de las notificaciones
+    window.markNotifRead = async function(id, url) {
+        try {
+            const t = localStorage.getItem('access_token');
+            if (!t) return;
+            await fetch('/api/v1/notifications/' + id + '/read', {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + t }
+            });
+            // Cerrar dropdown antes de navegar
+            var dd = document.querySelector('#notif-dropdown');
+            if (dd) dd.classList.remove('open');
+            updateCount();
+            // Pequeña pausa para que el fetch termine antes de navegar
+            setTimeout(function() { window.location.href = url; }, 100);
+        } catch (_) {
+            window.location.href = url;
+        }
+    };
 })();
