@@ -13,7 +13,7 @@
  */
 
 const CATEGORY_LEVELS = {
-    'Iniciación':   { min: 1.0, max: 2.5,  group: 'Iniciación', color: '#22c55e', icon: '🟢' },
+    'Iniciación':   { min: 1.0, max: 2.0,  group: 'Iniciación', color: '#22c55e', icon: '🟢' },
     '5ª Categoría': { min: 2.0, max: 3.0,  group: 'Intermedio', color: '#eab308', icon: '🟡' },
     '4ª Categoría': { min: 3.0, max: 3.75, group: 'Intermedio', color: '#eab308', icon: '🟡' },
     '3ª Categoría': { min: 3.75,max: 4.25, group: 'Intermedio', color: '#eab308', icon: '🟡' },
