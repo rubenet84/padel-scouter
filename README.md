@@ -14,6 +14,12 @@
 
 **Arquitectura:** Clean Architecture (Hexagonal) · FastAPI · PostgreSQL · Redis · Google Gemini · WeasyPrint
 
+**🔗 Recursos TFM:**
+- 📊 [Presentación (Slides)](#)
+- 🎥 [Vídeo demostración](#)
+- 🌐 [Despliegue en producción](https://padel-scouter-production.up.railway.app)
+- 👤 **Usuario de prueba:** `Ruben829@msn.com` / `Eroseros_1984`
+
 [![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.138-009688.svg)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
