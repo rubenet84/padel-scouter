@@ -15,7 +15,7 @@
 **Arquitectura:** Clean Architecture (Hexagonal) · FastAPI · PostgreSQL · Redis · Google Gemini · WeasyPrint
 
 **🔗 Recursos TFM:**
-- 📊 [Presentación (Slides)](#)
+- 📊 [Presentación (Slides)](docs/Padel_Scouter_Proyecto_TFM_Desarrollo_Con_IA.pptx)
 - 🎥 [Vídeo demostración](#)
 - 🌐 [Despliegue en producción](https://padel-scouter-production.up.railway.app)
 - 👤 **Usuario de prueba:** `Ruben829@msn.com` / `Eroseros_1984`
