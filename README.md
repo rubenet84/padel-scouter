@@ -35,17 +35,17 @@
 1. [Descripción del proyecto](#1--descripción-del-proyecto)
 2. [Características principales](#2--características-principales)
 3. [Stack tecnológico](#3--stack-tecnológico)
-4. [Arquitectura](#4--arquitectura)
+4. [Arquitectura](#4-arquitectura)
 5. [Estructura del proyecto](#5--estructura-del-proyecto)
 6. [Instalación](#6--instalación)
 7. [Variables de entorno](#7--variables-de-entorno)
-8. [Ejecución](#8--ejecución)
+8. [Ejecución](#8-ejecución)
 9. [API](#9--api)
-10. [Seguridad](#10--seguridad)
+10. [Seguridad](#10-seguridad)
 11. [Testing](#11--testing)
 12. [Capturas](#12--capturas)
 13. [Futuras mejoras](#13--futuras-mejoras)
-14. [Autor](#14--autor)
+14. [Autor](#14-autor)
 
 ---
 
