@@ -49,6 +49,7 @@
 
 ---
 
+<a name="1-descripción-del-proyecto"></a>
 ## 1. 📖 Descripción del proyecto
 
 ### Problema que resuelve
@@ -89,6 +90,7 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
+<a name="2-características-principales"></a>
 ## 2. ⭐ Características principales
 
 ### 👥 Gestión de jugadores
@@ -201,6 +203,7 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
+<a name="3-stack-tecnológico"></a>
 ## 3. 🔧 Stack tecnológico
 
 | Capa | Tecnología | Versión |
@@ -227,8 +230,7 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
-<a name="4-arquitectura"></a>
-## 4. 🏗️ Arquitectura
+<a name="4-arquitectura"></a>`n## 4. 🏗️ Arquitectura
 
 El proyecto sigue los principios de **Clean Architecture** (Hexagonal) con separación estricta de responsabilidades:
 
@@ -268,6 +270,7 @@ Esta separación facilita el mantenimiento, la escalabilidad y la realización d
 
 ---
 
+<a name="5-estructura-del-proyecto"></a>
 ## 5. 📁 Estructura del proyecto
 
 ```
@@ -338,6 +341,7 @@ padel-scouter/
 
 ---
 
+<a name="6-instalación"></a>
 ## 6. 🚀 Instalación
 
 Existen dos formas de instalar el proyecto:
@@ -430,6 +434,7 @@ El proyecto estará disponible en **http://localhost:8000**
 
 ---
 
+<a name="7-variables-de-entorno"></a>
 ## 7. 🔐 Variables de entorno
 
 Copia `.env.example` a `.env` y configura las siguientes variables:
@@ -450,8 +455,7 @@ Copia `.env.example` a `.env` y configura las siguientes variables:
 
 ---
 
-<a name="8-ejecución"></a>
-## 8. ▶️ Ejecución
+<a name="8-ejecución"></a>`n## 8. ▶️ Ejecución
 
 ### Backend
 
@@ -495,6 +499,7 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 4
 
 ---
 
+<a name="9-api"></a>
 ## 9. 📡 API
 
 Documentación interactiva disponible en `/docs` (Swagger UI) y `/redoc`.
@@ -571,8 +576,7 @@ Documentación interactiva disponible en `/docs` (Swagger UI) y `/redoc`.
 
 ---
 
-<a name="10-seguridad"></a>
-## 10. 🛡️ Seguridad
+<a name="10-seguridad"></a>`n## 10. 🛡️ Seguridad
 
 El proyecto implementa protecciones alineadas con el **OWASP Top 10**:
 
@@ -596,6 +600,7 @@ El proyecto implementa protecciones alineadas con el **OWASP Top 10**:
 
 ---
 
+<a name="11-testing"></a>
 ## 11. 🧪 Testing
 
 ```bash
@@ -630,6 +635,7 @@ pytest tests/unit/test_security.py -v
 
 ---
 
+<a name="12-capturas"></a>
 ## 12. 📸 Capturas
 
 > **Nota**: Las capturas a continuación son representativas de la interfaz. Para ver el proyecto en funcionamiento, sigue los pasos de instalación.
@@ -667,6 +673,7 @@ pytest tests/unit/test_security.py -v
 
 ---
 
+<a name="13-futuras-mejoras"></a>
 ## 13. 🔮 Futuras mejoras
 
 - [ ] **Internacionalización (i18n)**: soporte multi-idioma (inglés, francés, italiano)
@@ -683,8 +690,7 @@ pytest tests/unit/test_security.py -v
 
 ---
 
-<a name="14-autor"></a>
-## 14. 👨‍💻 Autor
+<a name="14-autor"></a>`n## 14. 👨‍💻 Autor
 
 **Rubén Rebollo Rua**
 
