@@ -41,8 +41,9 @@ def send_welcome_email(to_email: str, username: str) -> bool:
             "to": [_get_recipient(to_email)],
             "subject": f"🎾 Bienvenido a Padel Scouter{' [TEST] ' + to_email if settings.app_env == 'development' else ''}",
             "html": f"""
-            <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto;
+            <div style="font-family: Inter, 'Orbitron', sans-serif; max-width: 600px; margin: 0 auto;
                         background: #0f172a; color: #fff; padding: 40px; border-radius: 16px;">
+                <style>@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');</style>
                 <div style="text-align: center; margin-bottom: 32px;">
                     <div style="font-size: 48px;">🔮</div>
                     <h1 style="color: #10b981; margin: 16px 0; font-family: 'Orbitron', sans-serif; letter-spacing: 2px;">Padel Scouter</h1>
@@ -98,8 +99,9 @@ def send_password_reset_email(to_email: str, reset_token: str, username: str) ->
             "to": [_get_recipient(to_email)],
             "subject": f"🔐 Restablece tu contraseña — Padel Scouter{' TEST: ' + to_email if settings.app_env == 'development' else ''}",
             "html": f"""
-            <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto;
+            <div style="font-family: Inter, 'Orbitron', sans-serif; max-width: 600px; margin: 0 auto;
                         background: #0f172a; color: #fff; padding: 40px; border-radius: 16px;">
+                <style>@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');</style>
                 <div style="text-align: center; margin-bottom: 32px;">
                     <div style="font-size: 48px;">🔐</div>
                     <h1 style="color: #10b981; margin: 16px 0; font-family: 'Orbitron', sans-serif; letter-spacing: 2px;">Padel Scouter</h1>
