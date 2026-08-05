@@ -230,7 +230,8 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
-<a name="4-arquitectura"></a>`n## 4. 🏗️ Arquitectura
+<a name="4-arquitectura"></a>
+## 4. 🏗️ Arquitectura
 
 El proyecto sigue los principios de **Clean Architecture** (Hexagonal) con separación estricta de responsabilidades:
 
@@ -455,7 +456,8 @@ Copia `.env.example` a `.env` y configura las siguientes variables:
 
 ---
 
-<a name="8-ejecución"></a>`n## 8. ▶️ Ejecución
+<a name="8-ejecución"></a>
+## 8. ▶️ Ejecución
 
 ### Backend
 
@@ -576,7 +578,8 @@ Documentación interactiva disponible en `/docs` (Swagger UI) y `/redoc`.
 
 ---
 
-<a name="10-seguridad"></a>`n## 10. 🛡️ Seguridad
+<a name="10-seguridad"></a>
+## 10. 🛡️ Seguridad
 
 El proyecto implementa protecciones alineadas con el **OWASP Top 10**:
 
@@ -690,7 +693,8 @@ pytest tests/unit/test_security.py -v
 
 ---
 
-<a name="14-autor"></a>`n## 14. 👨‍💻 Autor
+<a name="14-autor"></a>
+## 14. 👨‍💻 Autor
 
 **Rubén Rebollo Rua**
 
