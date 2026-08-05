@@ -49,7 +49,7 @@
 
 ---
 
-## 1. Descripción del proyecto
+## 1. 📖 Descripción del proyecto
 
 ### Problema que resuelve
 
@@ -89,7 +89,7 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
-## 2. Características principales
+## 2. ⭐ Características principales
 
 ### 👥 Gestión de jugadores
 
@@ -201,7 +201,7 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
-## 3. Stack tecnológico
+## 3. 🔧 Stack tecnológico
 
 | Capa | Tecnología | Versión |
 |---|---|---|
@@ -227,7 +227,8 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
-## 4. Arquitectura
+<a name="4-arquitectura"></a>
+## 4. 🏗️ Arquitectura
 
 El proyecto sigue los principios de **Clean Architecture** (Hexagonal) con separación estricta de responsabilidades:
 
@@ -267,7 +268,7 @@ Esta separación facilita el mantenimiento, la escalabilidad y la realización d
 
 ---
 
-## 5. Estructura del proyecto
+## 5. 📁 Estructura del proyecto
 
 ```
 padel-scouter/
@@ -337,7 +338,7 @@ padel-scouter/
 
 ---
 
-## 6. Instalación
+## 6. 🚀 Instalación
 
 Existen dos formas de instalar el proyecto:
 
@@ -429,7 +430,7 @@ El proyecto estará disponible en **http://localhost:8000**
 
 ---
 
-## 7. Variables de entorno
+## 7. 🔐 Variables de entorno
 
 Copia `.env.example` a `.env` y configura las siguientes variables:
 
@@ -449,7 +450,8 @@ Copia `.env.example` a `.env` y configura las siguientes variables:
 
 ---
 
-## 8. Ejecución
+<a name="8-ejecución"></a>
+## 8. ▶️ Ejecución
 
 ### Backend
 
@@ -493,7 +495,7 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 4
 
 ---
 
-## 9. API
+## 9. 📡 API
 
 Documentación interactiva disponible en `/docs` (Swagger UI) y `/redoc`.
 
@@ -569,7 +571,8 @@ Documentación interactiva disponible en `/docs` (Swagger UI) y `/redoc`.
 
 ---
 
-## 10. Seguridad
+<a name="10-seguridad"></a>
+## 10. 🛡️ Seguridad
 
 El proyecto implementa protecciones alineadas con el **OWASP Top 10**:
 
@@ -593,7 +596,7 @@ El proyecto implementa protecciones alineadas con el **OWASP Top 10**:
 
 ---
 
-## 11. Testing
+## 11. 🧪 Testing
 
 ```bash
 # Ejecutar todos los tests unitarios
@@ -627,7 +630,7 @@ pytest tests/unit/test_security.py -v
 
 ---
 
-## 12. Capturas
+## 12. 📸 Capturas
 
 > **Nota**: Las capturas a continuación son representativas de la interfaz. Para ver el proyecto en funcionamiento, sigue los pasos de instalación.
 
@@ -664,7 +667,7 @@ pytest tests/unit/test_security.py -v
 
 ---
 
-## 13. Futuras mejoras
+## 13. 🔮 Futuras mejoras
 
 - [ ] **Internacionalización (i18n)**: soporte multi-idioma (inglés, francés, italiano)
 - [ ] **Roles avanzados**: entrenador, jugador, admin con permisos granulares
@@ -680,7 +683,8 @@ pytest tests/unit/test_security.py -v
 
 ---
 
-## 14. Autor
+<a name="14-autor"></a>
+## 14. 👨‍💻 Autor
 
 **Rubén Rebollo Rua**
 
