@@ -628,10 +628,29 @@ async function doRegister() {
   }
 }
 
-// ── Forgot password (visual placeholder) ──────────────────────
-function handleForgot(e) {
+// ── Forgot password ───────────────────────────────────────────
+async function handleForgot(e) {
   e.preventDefault();
+  const emailInput = document.querySelector('#viewForgot input[type="email"]');
+  const email = (emailInput?.value || '').trim();
+  if (!email) { showError('Introduce tu email'); return; }
+
   animateBtn('forgotBtn', 'forgotBtnText', 'ENVIANDO...', 'ENLACE ENVIADO', 'Enviar enlace');
+  try {
+    const res = await fetch('/api/v1/auth/forgot-password', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email}),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showSuccess(data.message || 'Si el email existe, recibirás un enlace.');
+    } else {
+      showError(data.detail || 'Error al enviar.');
+    }
+  } catch {
+    showError('Error de conexión.');
+  }
 }
 
 // ── Messages ──────────────────────────────────────────────────
