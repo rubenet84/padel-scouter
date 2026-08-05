@@ -32,24 +32,24 @@
 
 ## 📑 Índice
 
-1. [Descripción del proyecto](#1--descripción-del-proyecto)
-2. [Características principales](#2--características-principales)
-3. [Stack tecnológico](#3--stack-tecnológico)
+1. [Descripción del proyecto](#1-descripcion)
+2. [Características principales](#2-caracteristicas)
+3. [Stack tecnológico](#3-stack)
 4. [Arquitectura](#4-arquitectura)
-5. [Estructura del proyecto](#5--estructura-del-proyecto)
-6. [Instalación](#6--instalación)
-7. [Variables de entorno](#7--variables-de-entorno)
-8. [Ejecución](#8-ejecución)
-9. [API](#9--api)
+5. [Estructura del proyecto](#5-estructura)
+6. [Instalación](#6-instalacion)
+7. [Variables de entorno](#7-variables)
+8. [Ejecución](#8-ejecucion)
+9. [API](#9-api)
 10. [Seguridad](#10-seguridad)
-11. [Testing](#11--testing)
-12. [Capturas](#12--capturas)
-13. [Futuras mejoras](#13--futuras-mejoras)
+11. [Testing](#11-testing)
+12. [Capturas](#12-capturas)
+13. [Futuras mejoras](#13-futuras)
 14. [Autor](#14-autor)
 
 ---
 
-## 1. 📖 Descripción del proyecto
+## 1. 📖 Descripción del proyecto {#1-descripcion}
 
 ### Problema que resuelve
 
@@ -89,7 +89,7 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
-## 2. ⭐ Características principales
+## 2. ⭐ Características principales {#2-caracteristicas}
 
 ### 👥 Gestión de jugadores
 
@@ -201,7 +201,7 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
-## 3. 🔧 Stack tecnológico
+## 3. 🔧 Stack tecnológico {#3-stack}
 
 | Capa | Tecnología | Versión |
 |---|---|---|
@@ -227,7 +227,7 @@ Padel Scouter es una plataforma web completa que permite:
 
 ---
 
-## 4. 🏗️ Arquitectura
+## 4. 🏗️ Arquitectura {#4-arquitectura}
 
 El proyecto sigue los principios de **Clean Architecture** (Hexagonal) con separación estricta de responsabilidades:
 
@@ -267,7 +267,7 @@ Esta separación facilita el mantenimiento, la escalabilidad y la realización d
 
 ---
 
-## 5. 📁 Estructura del proyecto
+## 5. 📁 Estructura del proyecto {#5-estructura}
 
 ```
 padel-scouter/
@@ -337,7 +337,7 @@ padel-scouter/
 
 ---
 
-## 6. 🚀 Instalación
+## 6. 🚀 Instalación {#6-instalacion}
 
 Existen dos formas de instalar el proyecto:
 
@@ -429,7 +429,7 @@ El proyecto estará disponible en **http://localhost:8000**
 
 ---
 
-## 7. 🔐 Variables de entorno
+## 7. 🔐 Variables de entorno {#7-variables}
 
 Copia `.env.example` a `.env` y configura las siguientes variables:
 
@@ -449,7 +449,7 @@ Copia `.env.example` a `.env` y configura las siguientes variables:
 
 ---
 
-## 8. ▶️ Ejecución
+## 8. ▶️ Ejecución {#8-ejecucion}
 
 ### Backend
 
@@ -485,7 +485,7 @@ El proyecto está preparado para desplegarse en diferentes proveedores cloud. Un
 | **Redis** | [Upstash](https://upstash.com/) |
 | **Variables de entorno** | Secrets del proveedor |
 
-Todas las variables de entorno de la [sección 7](#7--variables-de-entorno) deben configurarse en el panel de Secrets del proveedor elegido. Para el comando de inicio en producción:
+Todas las variables de entorno de la [sección 7](#7-variables) deben configurarse en el panel de Secrets del proveedor elegido. Para el comando de inicio en producción:
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 4
@@ -493,7 +493,7 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 4
 
 ---
 
-## 9. 📡 API
+## 9. 📡 API {#9-api}
 
 Documentación interactiva disponible en `/docs` (Swagger UI) y `/redoc`.
 
@@ -569,7 +569,7 @@ Documentación interactiva disponible en `/docs` (Swagger UI) y `/redoc`.
 
 ---
 
-## 10. 🛡️ Seguridad
+## 10. 🛡️ Seguridad {#10-seguridad}
 
 El proyecto implementa protecciones alineadas con el **OWASP Top 10**:
 
@@ -593,7 +593,7 @@ El proyecto implementa protecciones alineadas con el **OWASP Top 10**:
 
 ---
 
-## 11. 🧪 Testing
+## 11. 🧪 Testing {#11-testing}
 
 ```bash
 # Ejecutar todos los tests unitarios
@@ -627,7 +627,7 @@ pytest tests/unit/test_security.py -v
 
 ---
 
-## 12. 📸 Capturas
+## 12. 📸 Capturas {#12-capturas}
 
 > **Nota**: Las capturas a continuación son representativas de la interfaz. Para ver el proyecto en funcionamiento, sigue los pasos de instalación.
 
@@ -664,7 +664,7 @@ pytest tests/unit/test_security.py -v
 
 ---
 
-## 13. 🔮 Futuras mejoras
+## 13. 🔮 Futuras mejoras {#13-futuras}
 
 - [ ] **Internacionalización (i18n)**: soporte multi-idioma (inglés, francés, italiano)
 - [ ] **Roles avanzados**: entrenador, jugador, admin con permisos granulares
@@ -680,7 +680,7 @@ pytest tests/unit/test_security.py -v
 
 ---
 
-## 14. 👨‍💻 Autor
+## 14. 👨‍💻 Autor {#14-autor}
 
 **Rubén Rebollo Rua**
 
