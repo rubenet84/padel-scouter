@@ -45,7 +45,7 @@ def send_welcome_email(to_email: str, username: str) -> bool:
                         background: #0f172a; color: #fff; padding: 40px; border-radius: 16px;">
                 <div style="text-align: center; margin-bottom: 32px;">
                     <div style="font-size: 48px;">🔮</div>
-                    <h1 style="color: #10b981; margin: 16px 0;">Padel Scouter</h1>
+                    <h1 style="color: #10b981; margin: 16px 0; font-family: 'Orbitron', sans-serif; letter-spacing: 2px;">Padel Scouter</h1>
                 </div>
                 {"<div style='background:#f59e0b22;border:1px solid #f59e0b;border-radius:8px;padding:12px;margin-bottom:20px;color:#f59e0b;font-size:12px;'>⚠️ MODO DESARROLLO — Email real: " + to_email + "</div>" if settings.app_env == "development" else ""}
                 <h2 style="color: #f1f5f9;">¡Bienvenido, {username}! 🎾</h2>
@@ -102,10 +102,10 @@ def send_password_reset_email(to_email: str, reset_token: str, username: str) ->
                         background: #0f172a; color: #fff; padding: 40px; border-radius: 16px;">
                 <div style="text-align: center; margin-bottom: 32px;">
                     <div style="font-size: 48px;">🔐</div>
-                    <h1 style="color: #10b981; margin: 16px 0;">Padel Scouter</h1>
+                    <h1 style="color: #10b981; margin: 16px 0; font-family: 'Orbitron', sans-serif; letter-spacing: 2px;">Padel Scouter</h1>
                 </div>
                 {"<div style='background:#f59e0b22;border:1px solid #f59e0b;border-radius:8px;padding:12px;margin-bottom:20px;color:#f59e0b;font-size:12px;'>⚠️ MODO DESARROLLO — Email real: " + to_email + "</div>" if settings.app_env == "development" else ""}
-                <h2 style="color: #f1f5f9;">Hola, {username}</h2>
+                <h2 style="color: #f1f5f9; font-family: 'Orbitron', sans-serif;">Hola, {username}</h2>
                 <p style="color: #94a3b8; line-height: 1.6;">
                     Recibimos una solicitud para restablecer tu contraseña.
                     Si no fuiste tú, ignora este email — tu cuenta está segura.
