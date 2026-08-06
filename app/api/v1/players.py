@@ -877,9 +877,9 @@ def update_match(
             match.partner_id = partner_id
             match.partner_nombre = partner_nombre
     else:
-        # Amistoso: allow changing partner freely
-        partner_id = data.partner_id
-        partner_nombre = data.partner_nombre
+        # Amistoso: allow changing partner, but preserve existing if not provided
+        partner_id = data.partner_id if data.partner_id is not None else match.partner_id
+        partner_nombre = data.partner_nombre if data.partner_nombre is not None else match.partner_nombre
 
         if partner_id is not None:
             partner_player = db.query(PlayerModel).filter(
