@@ -869,8 +869,6 @@ def update_match(
     db.commit()
     db.refresh(match)
 
-    # DEBUG
-    logger.error(f"NOTIF_DEBUG: partner_id={match.partner_id} player1={match.player1_id} user={current_user.id}")
     partner_id = match.partner_id
     if not partner_id:
         return match  # sin compañero → nada que notificar
