@@ -869,9 +869,9 @@ def update_match(
     db.commit()
     db.refresh(match)
 
-    # ── Notificar al otro jugador que el partido fue modificado ──
+    # DEBUG
+    logger.error(f"NOTIF_DEBUG: partner_id={match.partner_id} player1={match.player1_id} user={current_user.id}")
     partner_id = match.partner_id
-    logger.info(f"update_match notification: partner_id={partner_id}, editor_user={current_user.id}, match_owner_player={match.player1_id}")
     if not partner_id:
         return match  # sin compañero → nada que notificar
 
