@@ -875,6 +875,8 @@ async function deleteMatch(matchId) {
         await apiDeleteMatch(matchId, playerId);
         await loadMatches();
         renderComputedStats(playerId);
+        loadBadges();  // refrescar insignias tras borrar
+        loadEvolution();  // refrescar gráfico de evolución
         const historyModal = document.getElementById('match-history-modal');
         if (historyModal && !historyModal.classList.contains('hidden')) {
             renderFullMatchHistory(state.matches);

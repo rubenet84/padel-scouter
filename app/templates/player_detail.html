@@ -865,7 +865,7 @@ document.addEventListener('click', function(e) {
 </script>
 <script>
 // ── 📈 Evolution Charts ──────────────────────────────────────
-(async function() {
+async function loadEvolution() {
   const m = window.location.pathname.match(/\/player\/([\w-]+)/);
   if (!m) return;
   const t = localStorage.getItem('access_token');
@@ -985,7 +985,8 @@ document.addEventListener('click', function(e) {
       });
     }
   } catch {}
-})();
+}
+loadEvolution();
 </script>
 <script>
 async function exportPDF() {
@@ -1034,7 +1035,7 @@ function closeBadgesGuide() {
 })();
 
 // 🏅 Load badges
-(function() {
+function loadBadges() {
   var m = window.location.pathname.match(/\/player\/([\w-]+)/);
   if (!m) return;
   var t = localStorage.getItem('access_token');
@@ -1042,10 +1043,13 @@ function closeBadgesGuide() {
   fetch('/api/v1/players/' + m[1] + '/badges', {
     headers: { 'Authorization': 'Bearer ' + t }
   }).then(function(r) { return r.json(); }).then(function(badges) {
-    if (!badges || !badges.length) return;
     var section = document.getElementById('badges-section');
     var grid = document.getElementById('badges-grid');
     if (!section || !grid) return;
+    if (!badges || !badges.length) {
+      section.classList.add('hidden');
+      return;
+    }
     section.classList.remove('hidden');
     grid.innerHTML = badges.map(function(b) {
       return '<div class="badge-card rounded-xl p-3 text-center transition-all duration-300 cursor-help relative" style="background:rgba(13,5,32,0.6);border:1px solid ' + b.color + '33;" ' +
@@ -1058,7 +1062,8 @@ function closeBadgesGuide() {
       '</div>';
     }).join('');
   }).catch(function(){});
-})();
+}
+loadBadges();
 </script>
 <script type="module" src="/static/js/player_detail/player_detail.js"></script>
 {% include "partials/chatbot_widget.html" %}
