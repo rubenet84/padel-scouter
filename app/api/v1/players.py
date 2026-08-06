@@ -871,12 +871,13 @@ def update_match(
 
     # ── Notificar al otro jugador que el partido fue modificado ──
     partner_id = match.partner_id
-    # Determinar a quién notificar: si edita el dueño → notificar al compañero,
-    # si edita el compañero → notificar al dueño
+    # El dueño del partido es quien creó el match (match.player1_id)
+    match_owner = db.query(PlayerModel).filter(PlayerModel.id == match.player1_id).first()
+    match_owner_user_id = match_owner.owner_id if match_owner else None
     notify_player_id = None
-    if current_user.id == player.owner_id and partner_id:
-        notify_player_id = partner_id  # el dueño edita → notificar al compañero
-    elif partner_id and current_user.id != player.owner_id:
+    if current_user.id == match_owner_user_id and partner_id:
+        notify_player_id = partner_id  # el dueño del partido edita → notificar al compañero
+    elif partner_id:
         notify_player_id = match.player1_id  # el compañero edita → notificar al dueño del partido
 
     if notify_player_id:
@@ -887,8 +888,8 @@ def update_match(
         tipoBadge = '<span style="background:rgba(255,215,0,0.1);color:#FFD700;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">TORNEO</span>' if match.tournament_id else '<span style="background:rgba(255,107,0,0.1);color:#FF6B00;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">AMISTOSO</span>'
         resultBadge = '<span style="background:rgba(0,255,135,0.1);color:#00FF87;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">VICTORIA</span>' if data.ganado else '<span style="background:rgba(255,45,45,0.1);color:#FF2D2D;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">DERROTA</span>'
         # Determinar quién editó para el mensaje de notificación
-        editor_name = player.name  # el dueño del partido
-        if current_user.id != player.owner_id:
+        editor_name = match_owner.name if match_owner else player.name
+        if current_user.id != match_owner_user_id:
             # El compañero está editando — buscar su nombre de jugador
             editor_player = db.query(PlayerModel).filter(
                 PlayerModel.id == partner_id,
