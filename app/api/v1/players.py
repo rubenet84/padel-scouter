@@ -873,21 +873,22 @@ def update_match(
     if not partner_id:
         return match  # sin compañero → nada que notificar
 
-    # El dueño del partido es quien creó el match (match.player1_id)
+    # Determinar quién edita comparando el jugador de la URL con el dueño del partido
+    # (funciona aunque todos los jugadores compartan el mismo usuario)
     match_owner = db.query(PlayerModel).filter(PlayerModel.id == match.player1_id).first()
-    owner_user_id = match_owner.owner_id if match_owner else None
-
-    # Notificar al que NO está editando: si edita el dueño → partner, si edita partner → dueño
-    if current_user.id == owner_user_id:
+    if player_id == match.player1_id:
+        # El dueño del partido está editando → notificar al compañero
         notify_player_id = partner_id
         editor_name = match_owner.name if match_owner else "Dueño"
-    else:
+    elif player_id == partner_id:
+        # El compañero está editando → notificar al dueño
         notify_player_id = match.player1_id
-        # Buscar el nombre del compañero que está editando
         editor = db.query(PlayerModel).filter(PlayerModel.id == partner_id).first()
         editor_name = editor.name if editor else "Compañero"
+    else:
+        return match  # ni dueño ni compañero — no notificar
 
-    if not notify_player_id or notify_player_id == player_id:
+    if notify_player_id == player_id:
         return match  # evitar auto-notificación
 
     from app.infrastructure.database.models import NotificationModel
