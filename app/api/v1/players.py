@@ -869,21 +869,40 @@ def update_match(
     db.commit()
     db.refresh(match)
 
-    # ── Notificar al compañero que el partido fue modificado ────
+    # ── Notificar al otro jugador que el partido fue modificado ──
     partner_id = match.partner_id
-    if partner_id and partner_id != player_id:
+    # Determinar a quién notificar: si edita el dueño → notificar al compañero,
+    # si edita el compañero → notificar al dueño
+    notify_player_id = None
+    if current_user.id == player_id and partner_id and partner_id != player_id:
+        notify_player_id = partner_id  # el dueño edita → notificar al compañero
+    elif partner_id and current_user.id != player_id:
+        notify_player_id = player_id   # el compañero edita → notificar al dueño
+
+    if notify_player_id:
         from app.infrastructure.database.models import NotificationModel
         rivalText = data.rival_nombre or "Rival"
         safeRival = rivalText.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
         fechaStr = match.played_at.strftime('%d/%m/%Y') if match.played_at else ''
-        tipoBadge = '<span style="background:rgba(255,215,0,0.1);color:#FFD700;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">TORNEO</span>' if data.tournament_id else '<span style="background:rgba(255,107,0,0.1);color:#FF6B00;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">AMISTOSO</span>'
+        tipoBadge = '<span style="background:rgba(255,215,0,0.1);color:#FFD700;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">TORNEO</span>' if match.tournament_id else '<span style="background:rgba(255,107,0,0.1);color:#FF6B00;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">AMISTOSO</span>'
         resultBadge = '<span style="background:rgba(0,255,135,0.1);color:#00FF87;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">VICTORIA</span>' if data.ganado else '<span style="background:rgba(255,45,45,0.1);color:#FF2D2D;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">DERROTA</span>'
+        # Determinar quién editó para el mensaje de notificación
+        editor_name = player.name  # el dueño del partido
+        if current_user.id != player_id:
+            # El compañero está editando — buscar su nombre de jugador
+            editor_player = db.query(PlayerModel).filter(
+                PlayerModel.id == partner_id,
+                PlayerModel.owner_id == current_user.id,
+            ).first()
+            if editor_player:
+                editor_name = editor_player.name
+
         notif = NotificationModel(
             user_id=current_user.id,
-            player_id=partner_id,
+            player_id=notify_player_id,
             match_id=match.id,
             type="match_added",
-            title=f"{player.name} ha modificado un partido",
+            title=f"{editor_name} ha modificado un partido",
             message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>  {data.resultado or ''}  <span style=\"color:#fbbf24;font-size:9px;\">{fechaStr}</span>",
             related_url=f"/player/{player_id}",
         )

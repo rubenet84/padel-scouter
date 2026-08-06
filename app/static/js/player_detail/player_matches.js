@@ -723,6 +723,8 @@ async function saveMatch() {
         }
         await loadMatches();
         renderComputedStats(playerId);
+        if (typeof loadBadges === 'function') loadBadges();
+        if (typeof loadEvolution === 'function') loadEvolution();
     } catch (e) {
         console.error('saveMatch exception', e);
         if (errEl) {
@@ -878,6 +880,8 @@ async function deleteMatch(matchId) {
         await apiDeleteMatch(matchId, playerId);
         await loadMatches();
         renderComputedStats(playerId);
+        if (typeof loadBadges === 'function') loadBadges();
+        if (typeof loadEvolution === 'function') loadEvolution();
         loadBadges();  // refrescar insignias tras borrar
         loadEvolution();  // refrescar gráfico de evolución
         const historyModal = document.getElementById('match-history-modal');
