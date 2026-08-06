@@ -874,7 +874,7 @@ def update_match(
     # Determinar a quién notificar: si edita el dueño → notificar al compañero,
     # si edita el compañero → notificar al dueño
     notify_player_id = None
-    if current_user.id == player.owner_id and partner_id and partner_id != player_id:
+    if current_user.id == player.owner_id and partner_id:
         notify_player_id = partner_id  # el dueño edita → notificar al compañero
     elif partner_id and current_user.id != player.owner_id:
         notify_player_id = match.player1_id  # el compañero edita → notificar al dueño del partido
