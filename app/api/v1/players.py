@@ -871,56 +871,56 @@ def update_match(
 
     # ── Notificar al otro jugador que el partido fue modificado ──
     partner_id = match.partner_id
+    if not partner_id:
+        return match  # sin compañero → nada que notificar
+
     # El dueño del partido es quien creó el match (match.player1_id)
     match_owner = db.query(PlayerModel).filter(PlayerModel.id == match.player1_id).first()
-    match_owner_user_id = match_owner.owner_id if match_owner else None
-    notify_player_id = None
-    if current_user.id == match_owner_user_id and partner_id:
-        notify_player_id = partner_id  # el dueño del partido edita → notificar al compañero
-    elif partner_id:
-        notify_player_id = match.player1_id  # el compañero edita → notificar al dueño del partido
+    owner_user_id = match_owner.owner_id if match_owner else None
 
-    if notify_player_id:
-        from app.infrastructure.database.models import NotificationModel
-        rivalText = data.rival_nombre or "Rival"
-        safeRival = rivalText.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
-        fechaStr = match.played_at.strftime('%d/%m/%Y') if match.played_at else ''
-        tipoBadge = '<span style="background:rgba(255,215,0,0.1);color:#FFD700;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">TORNEO</span>' if match.tournament_id else '<span style="background:rgba(255,107,0,0.1);color:#FF6B00;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">AMISTOSO</span>'
-        resultBadge = '<span style="background:rgba(0,255,135,0.1);color:#00FF87;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">VICTORIA</span>' if data.ganado else '<span style="background:rgba(255,45,45,0.1);color:#FF2D2D;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">DERROTA</span>'
-        # Determinar quién editó para el mensaje de notificación
-        editor_name = match_owner.name if match_owner else player.name
-        if current_user.id != match_owner_user_id:
-            # El compañero está editando — buscar su nombre de jugador
-            editor_player = db.query(PlayerModel).filter(
-                PlayerModel.id == partner_id,
-                PlayerModel.owner_id == current_user.id,
-            ).first()
-            if editor_player:
-                editor_name = editor_player.name
+    # Notificar al que NO está editando: si edita el dueño → partner, si edita partner → dueño
+    if current_user.id == owner_user_id:
+        notify_player_id = partner_id
+        editor_name = match_owner.name if match_owner else "Dueño"
+    else:
+        notify_player_id = match.player1_id
+        # Buscar el nombre del compañero que está editando
+        editor = db.query(PlayerModel).filter(PlayerModel.id == partner_id).first()
+        editor_name = editor.name if editor else "Compañero"
 
-        # Buscar el owner_id del jugador notificado para dirigir la notificación
-        notify_player = db.query(PlayerModel).filter(PlayerModel.id == notify_player_id).first()
-        notify_user_id = notify_player.owner_id if notify_player else current_user.id
+    if not notify_player_id or notify_player_id == player_id:
+        return match  # evitar auto-notificación
 
-        notif = NotificationModel(
-            user_id=notify_user_id,
-            player_id=notify_player_id,
-            match_id=match.id,
-            type="match_added",
-            title=f"{editor_name} ha modificado un partido",
-            message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>  {data.resultado or ''}  <span style=\"color:#fbbf24;font-size:9px;\">{fechaStr}</span>",
-            related_url=f"/player/{match.player1_id}",
-        )
-        db.add(notif)
-        # Mantener solo las últimas 50 notificaciones del destinatario
-        all_ids = db.query(NotificationModel.id).filter(
-            NotificationModel.user_id == notify_user_id,
-        ).order_by(NotificationModel.created_at.desc()).offset(50).all()
-        if all_ids:
-            db.query(NotificationModel).filter(
-                NotificationModel.id.in_([r[0] for r in all_ids])
-            ).delete(synchronize_session=False)
-        db.commit()
+    from app.infrastructure.database.models import NotificationModel
+    rivalText = data.rival_nombre or "Rival"
+    safeRival = rivalText.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+    fechaStr = match.played_at.strftime('%d/%m/%Y') if match.played_at else ''
+    tipoBadge = '<span style="background:rgba(255,215,0,0.1);color:#FFD700;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">TORNEO</span>' if match.tournament_id else '<span style="background:rgba(255,107,0,0.1);color:#FF6B00;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">AMISTOSO</span>'
+    resultBadge = '<span style="background:rgba(0,255,135,0.1);color:#00FF87;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">VICTORIA</span>' if data.ganado else '<span style="background:rgba(255,45,45,0.1);color:#FF2D2D;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">DERROTA</span>'
+
+    # Buscar el owner_id del jugador notificado para dirigir la notificación
+    notify_player = db.query(PlayerModel).filter(PlayerModel.id == notify_player_id).first()
+    notify_user_id = notify_player.owner_id if notify_player else current_user.id
+
+    notif = NotificationModel(
+        user_id=notify_user_id,
+        player_id=notify_player_id,
+        match_id=match.id,
+        type="match_added",
+        title=f"{editor_name} ha modificado un partido",
+        message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>  {data.resultado or ''}  <span style=\"color:#fbbf24;font-size:9px;\">{fechaStr}</span>",
+        related_url=f"/player/{match.player1_id}",
+    )
+    db.add(notif)
+    # Mantener solo las últimas 50 notificaciones del destinatario
+    all_ids = db.query(NotificationModel.id).filter(
+        NotificationModel.user_id == notify_user_id,
+    ).order_by(NotificationModel.created_at.desc()).offset(50).all()
+    if all_ids:
+        db.query(NotificationModel).filter(
+            NotificationModel.id.in_([r[0] for r in all_ids])
+        ).delete(synchronize_session=False)
+    db.commit()
 
     return match
 
