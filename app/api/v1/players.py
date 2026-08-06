@@ -858,9 +858,9 @@ def update_match(
             match.partner_id = existing_partner_match.partner_id
             match.partner_nombre = existing_partner_match.partner_nombre
         else:
-            # First tournament match without partner yet — allow setting it
-            partner_id = data.partner_id
-            partner_nombre = data.partner_nombre
+            # First tournament match without partner yet — preserve existing if not provided
+            partner_id = data.partner_id if data.partner_id is not None else match.partner_id
+            partner_nombre = data.partner_nombre if data.partner_nombre is not None else match.partner_nombre
 
             if partner_id is not None:
                 partner_player = db.query(PlayerModel).filter(
