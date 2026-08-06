@@ -877,7 +877,7 @@ def update_match(
     if current_user.id == player.owner_id and partner_id and partner_id != player_id:
         notify_player_id = partner_id  # el dueño edita → notificar al compañero
     elif partner_id and current_user.id != player.owner_id:
-        notify_player_id = player_id   # el compañero edita → notificar al dueño
+        notify_player_id = match.player1_id  # el compañero edita → notificar al dueño del partido
 
     if notify_player_id:
         from app.infrastructure.database.models import NotificationModel
@@ -908,7 +908,7 @@ def update_match(
             type="match_added",
             title=f"{editor_name} ha modificado un partido",
             message=f"{tipoBadge} — {resultBadge} vs <span style=\"color:white;\">{safeRival}</span>  {data.resultado or ''}  <span style=\"color:#fbbf24;font-size:9px;\">{fechaStr}</span>",
-            related_url=f"/player/{player_id}",
+            related_url=f"/player/{match.player1_id}",
         )
         db.add(notif)
         # Mantener solo las últimas 50 notificaciones del destinatario
