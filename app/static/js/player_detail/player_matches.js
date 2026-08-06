@@ -820,6 +820,9 @@ async function openEditMatchModal(matchId) {
             partnerInput.value = match.partner_nombre;
             if (partnerSelect) partnerSelect.value = '';
         }
+        // Bloquear edición de pareja (el backend la ignora al editar)
+        if (partnerSelect) partnerSelect.disabled = true;
+        if (partnerInput) partnerInput.disabled = true;
 
         if (isTorneo) {
             const pName = match.partner_nombre || 'Compa\u00F1ero';

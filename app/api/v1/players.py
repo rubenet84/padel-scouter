@@ -844,57 +844,12 @@ def update_match(
             )
 
     # ── Partner / Compañero update logic ────────────────────────────
-    if data.tournament_id is not None:
-        # Tournament match: partner is locked once set on any match in this tournament.
-        # Auto-swap: if current player IS the partner in existing match, swap.
-        existing_partner_match = db.query(MatchModel).filter(
-            _player_filter(player_id),
-            MatchModel.tournament_id == data.tournament_id,
-            MatchModel.partner_id.isnot(None),
-            MatchModel.id != match_id,
-        ).first()
-        if existing_partner_match and existing_partner_match.id != match.id:
-            # Preservar el compañero original del torneo, sin intercambiar roles
-            match.partner_id = existing_partner_match.partner_id
-            match.partner_nombre = existing_partner_match.partner_nombre
-        else:
-            # First tournament match without partner yet — preserve existing if not provided
-            partner_id = data.partner_id if data.partner_id is not None else match.partner_id
-            partner_nombre = data.partner_nombre if data.partner_nombre is not None else match.partner_nombre
-
-            if partner_id is not None:
-                partner_player = db.query(PlayerModel).filter(
-                    PlayerModel.id == partner_id,
-                    PlayerModel.owner_id == current_user.id,
-                ).first()
-                if not partner_player:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="El compañero seleccionado no existe o no pertenece a tu cuenta.",
-                    )
-                if not partner_nombre:
-                    partner_nombre = partner_player.name
-            match.partner_id = partner_id
-            match.partner_nombre = partner_nombre
-    else:
-        # Amistoso: allow changing partner, but preserve existing if not provided
-        partner_id = data.partner_id if data.partner_id is not None else match.partner_id
-        partner_nombre = data.partner_nombre if data.partner_nombre is not None else match.partner_nombre
-
-        if partner_id is not None:
-            partner_player = db.query(PlayerModel).filter(
-                PlayerModel.id == partner_id,
-                PlayerModel.owner_id == current_user.id,
-            ).first()
-            if not partner_player:
-                raise HTTPException(
-                    status_code=400,
-                    detail="El compañero seleccionado no existe o no pertenece a tu cuenta.",
-                )
-            if not partner_nombre:
-                partner_nombre = partner_player.name
-        match.partner_id = partner_id
-        match.partner_nombre = partner_nombre
+    # La pareja NO se puede modificar al editar un partido.
+    # Cambiarla rompería la integridad: el partido seguiría apareciendo
+    # en el historial del compañero original, y las notificaciones ya enviadas
+    # apuntarían a un compañero incorrecto.
+    match.partner_id = match.partner_id      # preservar original
+    match.partner_nombre = match.partner_nombre  # preservar original
 
     # Update fields
     match.rival_nombre = data.rival_nombre
