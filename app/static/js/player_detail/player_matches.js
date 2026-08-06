@@ -820,16 +820,19 @@ async function openEditMatchModal(matchId) {
             partnerInput.value = match.partner_nombre;
             if (partnerSelect) partnerSelect.value = '';
         }
-        // Bloquear edición de pareja (el backend la ignora al editar)
-        if (partnerSelect) partnerSelect.disabled = true;
-        if (partnerInput) partnerInput.disabled = true;
-
         if (isTorneo) {
             const pName = match.partner_nombre || 'Compa\u00F1ero';
             lockPartnerForTournament(pName);
         }
 
         toggleTorneo();
+
+        // Bloquear edición de pareja (el backend la ignora al editar)
+        // Va DESPUÉS de toggleTorneo() porque unlockPartnerSection() re-habilita los campos
+        const ps = D.mPartnerSelect?.();
+        const pi = D.mPartnerName?.();
+        if (ps) ps.disabled = true;
+        if (pi) pi.disabled = true;
 
         const resultadoEl = D.mResultado?.();
         if (resultadoEl) resultadoEl.value = match.resultado || '';
