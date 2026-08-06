@@ -874,9 +874,9 @@ def update_match(
     # Determinar a quién notificar: si edita el dueño → notificar al compañero,
     # si edita el compañero → notificar al dueño
     notify_player_id = None
-    if current_user.id == player_id and partner_id and partner_id != player_id:
+    if current_user.id == player.owner_id and partner_id and partner_id != player_id:
         notify_player_id = partner_id  # el dueño edita → notificar al compañero
-    elif partner_id and current_user.id != player_id:
+    elif partner_id and current_user.id != player.owner_id:
         notify_player_id = player_id   # el compañero edita → notificar al dueño
 
     if notify_player_id:
@@ -888,7 +888,7 @@ def update_match(
         resultBadge = '<span style="background:rgba(0,255,135,0.1);color:#00FF87;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">VICTORIA</span>' if data.ganado else '<span style="background:rgba(255,45,45,0.1);color:#FF2D2D;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;">DERROTA</span>'
         # Determinar quién editó para el mensaje de notificación
         editor_name = player.name  # el dueño del partido
-        if current_user.id != player_id:
+        if current_user.id != player.owner_id:
             # El compañero está editando — buscar su nombre de jugador
             editor_player = db.query(PlayerModel).filter(
                 PlayerModel.id == partner_id,
