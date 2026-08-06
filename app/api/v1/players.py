@@ -897,8 +897,12 @@ def update_match(
             if editor_player:
                 editor_name = editor_player.name
 
+        # Buscar el owner_id del jugador notificado para dirigir la notificación
+        notify_player = db.query(PlayerModel).filter(PlayerModel.id == notify_player_id).first()
+        notify_user_id = notify_player.owner_id if notify_player else current_user.id
+
         notif = NotificationModel(
-            user_id=current_user.id,
+            user_id=notify_user_id,
             player_id=notify_player_id,
             match_id=match.id,
             type="match_added",
@@ -907,9 +911,9 @@ def update_match(
             related_url=f"/player/{player_id}",
         )
         db.add(notif)
-        # Mantener solo las últimas 50 notificaciones
+        # Mantener solo las últimas 50 notificaciones del destinatario
         all_ids = db.query(NotificationModel.id).filter(
-            NotificationModel.user_id == current_user.id,
+            NotificationModel.user_id == notify_user_id,
         ).order_by(NotificationModel.created_at.desc()).offset(50).all()
         if all_ids:
             db.query(NotificationModel).filter(
