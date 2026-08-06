@@ -871,6 +871,7 @@ def update_match(
 
     # ── Notificar al otro jugador que el partido fue modificado ──
     partner_id = match.partner_id
+    logger.info(f"update_match notification: partner_id={partner_id}, editor_user={current_user.id}, match_owner_player={match.player1_id}")
     if not partner_id:
         return match  # sin compañero → nada que notificar
 
