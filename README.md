@@ -16,7 +16,7 @@
 
 **🔗 Recursos TFM:**
 - 📊 [Presentación (Slides)](docs/Padel_Scouter_Proyecto_TFM_Desarrollo_Con_IA.pptx)
-- 🎥 [Vídeo demostración](#)
+- 🎥 [Vídeo demostración](https://youtu.be/uglVCCTKinU)
 - 🌐 [Despliegue en producción](https://padel-scouter-production.up.railway.app)
 - 👤 **Usuario de prueba:** `ruben829@msn.com` / `Eroseros_1984`
 - ⚠️ Emails redirigidos a cuenta personal (sin dominio verificado en Resend)
