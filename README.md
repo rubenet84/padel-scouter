@@ -700,7 +700,7 @@ pytest tests/unit/test_security.py -v
 
 - 📧 [Ruben829@msn.com](mailto:Ruben829@msn.com)
 - 💻 [github.com/rubenet84](https://github.com/rubenet84)
-- 🎓 Máster en Ingeniería de Software
+- 🎓 Máster en Desarrollo con IA
 - 📅 2026
 
 ---
