@@ -43,9 +43,9 @@ function renderPlayer(p, analyses) {
     setAvatar(p.avatar_url);
 
     // Aggregate bars (misma fórmula que dashboard: 10 stats, voleas separadas)
-    const tecnica = Math.round(((p.derecha||50)+(p.reves||50)+(p.volea_derecha||50)+(p.volea_reves||50)+(p.bandeja||50)+(p.vibora||50)+(p.remate||50)+(p.globo||50)+(p.saque||50)+(p.bajada_pared||50)) / 10);
-    const fisico  = Math.round(((p.velocidad||50)+(p.resistencia||50)+(p.reflejos||50)) / 3);
-    const mental  = Math.round(((p.tactica||50)+(p.presion||50)+(p.trabajo_en_pareja||50)) / 3);
+    const tecnica = Math.round(((p.derecha ?? 0)+(p.reves ?? 0)+(p.volea_derecha ?? 0)+(p.volea_reves ?? 0)+(p.bandeja ?? 0)+(p.vibora ?? 0)+(p.remate ?? 0)+(p.globo ?? 0)+(p.saque ?? 0)+(p.bajada_pared ?? 0)) / 10);
+    const fisico  = Math.round(((p.velocidad ?? 0)+(p.resistencia ?? 0)+(p.reflejos ?? 0)) / 3);
+    const mental  = Math.round(((p.tactica ?? 0)+(p.presion ?? 0)+(p.trabajo_en_pareja ?? 0)) / 3);
 
     D.barTecnica().style.width = Math.min(tecnica, 100) + '%';
     D.barTecnicaVal().textContent = Math.min(tecnica, 100);
@@ -58,10 +58,10 @@ function renderPlayer(p, analyses) {
     renderComputedStats(playerId);
 
     // Individual stats
-    D.valRemate().textContent = p.remate || 50;
-    D.valBandeja().textContent = p.bandeja || 50;
-    D.valVoleaDerecha().textContent = p.volea_derecha || 50;
-    D.valVoleaReves().textContent = p.volea_reves || 50;
+    D.valRemate().textContent = p.remate ?? 0;
+    D.valBandeja().textContent = p.bandeja ?? 0;
+    D.valVoleaDerecha().textContent = p.volea_derecha ?? 0;
+    D.valVoleaReves().textContent = p.volea_reves ?? 0;
 
     // Radar
     drawRadar(p);

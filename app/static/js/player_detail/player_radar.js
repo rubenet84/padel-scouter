@@ -26,8 +26,8 @@ function drawRadar(p) {
     const cx = SIZE / 2, cy = SIZE / 2, maxR = 105;
     const labels = ['DERECHA','VOLEA','BANDEJA','REMATE','VELOCIDAD','TÁCTICA'];
     const values = [
-        p.derecha || 50, Math.round(((p.volea_derecha||50)+(p.volea_reves||50))/2) || 50, p.bandeja || 50,
-        p.remate || 50, p.velocidad || 50, p.tactica || 50
+        p.derecha ?? 0, Math.round(((p.volea_derecha ?? 0) + (p.volea_reves ?? 0)) / 2) ?? 0, p.bandeja ?? 0,
+        p.remate ?? 0, p.velocidad ?? 0, p.tactica ?? 0
     ];
     const N = labels.length;
     const step = (Math.PI * 2) / N;
