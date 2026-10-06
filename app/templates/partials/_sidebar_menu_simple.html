@@ -30,6 +30,30 @@
       <span class="iconify link-icon text-purple-300/70 text-lg" data-icon="mdi:trophy-award"></span>
       <span class="link-text text-sm text-purple-200/80 font-medium">Récords de la Comunidad</span>
     </a>
+
+    <div class="text-[10px] text-white/70 tracking-widest uppercase font-semibold px-3 mb-3 mt-6" id="sidebar-admin-group" style="display:none;">Administración</div>
+    <a href="/admin/users" id="sidebar-admin" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg" style="display:none;">
+      <span class="iconify link-icon text-purple-300/70 text-lg" data-icon="mdi:shield-account"></span>
+      <span class="link-text text-sm text-purple-200/80 font-medium">Gestión de Usuarios</span>
+    </a>
+    <script>
+    (function () {
+      var t = localStorage.getItem('access_token');
+      if (!t) return;
+      fetch('/api/v1/auth/me', { headers: { 'Authorization': 'Bearer ' + t } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (u) {
+          if (u && u.role === 'admin') {
+            var g = document.getElementById('sidebar-admin-group');
+            var a = document.getElementById('sidebar-admin');
+            if (g) g.style.display = '';
+            if (a) a.style.display = '';
+          }
+        })
+        .catch(function () {});
+    })();
+    </script>
+
     <a href="/login" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-r-lg" onclick="localStorage.clear()">
       <span class="iconify link-icon text-purple-300/70 text-lg" data-icon="mdi:logout"></span>
       <span class="link-text text-sm text-purple-200/80 font-medium">Cerrar Sesión</span>

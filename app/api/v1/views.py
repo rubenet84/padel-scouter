@@ -207,3 +207,16 @@ def reset_password_page(request: Request):
         name="reset_password.html",
         context={"user": None},
     )
+
+
+@router.get("/admin/users", response_class=HTMLResponse)
+def admin_users_page(request: Request):
+    """Panel de administración de usuarios (shell; los datos se cargan por API).
+
+    La protección real reside en la API (/api/v1/admin/*, permiso users.read).
+    """
+    return templates.TemplateResponse(
+        request=request,
+        name="admin_users.html",
+        context={"user": {}},
+    )
