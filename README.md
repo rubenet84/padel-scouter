@@ -18,7 +18,7 @@
 - 📊 [Presentación (Slides)](docs/Padel_Scouter_Proyecto_TFM_Desarrollo_Con_IA.pptx)
 - 🎥 [Vídeo demostración](https://youtu.be/uglVCCTKinU)
 - 🌐 [Despliegue en producción](https://padel-scouter-production.up.railway.app)
-- 👤 **Usuario de prueba:** `ruben829@msn.com` / `Eroseros_1984`
+- 👤 **Usuario demo (rol jugador):** `demo_jugador@padel-scouter.com` / `DemoJugador2026!136f`
 - ⚠️ Emails redirigidos a cuenta personal (sin dominio verificado en Resend)
 
 [![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)](https://www.python.org/)
