@@ -28,6 +28,7 @@ from app.api.v1.views import router as views_router
 from app.api.v1.chatbot import router as chatbot_router
 from app.api.v1.stats import router as stats_router
 from app.api.v1.notifications import router as notifications_router
+from app.api.v1.admin import router as admin_router
 from app.infrastructure.database.models import Base
 from app.infrastructure.database.session import engine
 
@@ -115,6 +116,7 @@ app.include_router(analysis_router, prefix="/api/v1")
 app.include_router(chatbot_router, prefix="/api/v1")
 app.include_router(stats_router, prefix="/api/v1")
 app.include_router(notifications_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1")
 # Router de vistas HTML sin prefijo (sirve templates directamente)
 app.include_router(views_router)
 
