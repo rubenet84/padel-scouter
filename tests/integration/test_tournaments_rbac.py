@@ -250,11 +250,12 @@ class TestUpdateTournament:
         tid = _tournament_id(admin)
         assert client.put(f"/api/v1/tournaments/{tid}", json={"fep_points": 250}, headers=admin).status_code == 200
 
-    def test_admin_ajeno_200(self):
+    def test_admin_ajeno_404(self):
+        # Escritura owner-only: el admin NO puede modificar torneos ajenos.
         admin, _ = _register_and_login("admin")
         owner, _ = _register_and_login("jugador")
         tid = _tournament_id(owner)
-        assert client.put(f"/api/v1/tournaments/{tid}", json={"fep_points": 250}, headers=admin).status_code == 200
+        assert client.put(f"/api/v1/tournaments/{tid}", json={"fep_points": 250}, headers=admin).status_code == 404
 
     def test_entrenador_propio_200(self):
         coach, _ = _register_and_login("entrenador")
@@ -288,11 +289,12 @@ class TestDeleteTournament:
         tid = _tournament_id(admin)
         assert client.delete(f"/api/v1/tournaments/{tid}", headers=admin).status_code == 204
 
-    def test_admin_ajeno_204(self):
+    def test_admin_ajeno_404(self):
+        # Escritura owner-only: el admin NO puede borrar torneos ajenos.
         admin, _ = _register_and_login("admin")
         owner, _ = _register_and_login("jugador")
         tid = _tournament_id(owner)
-        assert client.delete(f"/api/v1/tournaments/{tid}", headers=admin).status_code == 204
+        assert client.delete(f"/api/v1/tournaments/{tid}", headers=admin).status_code == 404
 
     def test_entrenador_propio_204(self):
         coach, _ = _register_and_login("entrenador")
@@ -353,14 +355,46 @@ class TestMatchTournamentOwnership:
                         json={**MATCH_PAYLOAD, "tournament_id": tid_b}, headers=a)
         assert r.status_code == 404
 
-    def test_admin_global_matches_ok(self):
+    def test_admin_match_ajeno_404(self):
+        # Escritura owner-only: el admin NO crea partidos sobre jugadores ajenos.
         admin, _ = _register_and_login("admin")
         owner, _ = _register_and_login("jugador")
         pid = _new_player(owner, "DeOwner")
         tid = _tournament_id(owner, player_id=pid)
         r = client.post(f"/api/v1/players/{pid}/matches",
                         json={**MATCH_PAYLOAD, "tournament_id": tid}, headers=admin)
-        assert r.status_code == 201
+        assert r.status_code == 404
+
+
+# ── ADMIN: LECTURA GLOBAL vs ESCRITURA OWNER-ONLY ──────────────
+
+class TestAdminEscrituraOwnership:
+    """El admin conserva la LECTURA global pero la escritura es owner-only:
+    no puede modificar ni borrar torneos de otros owners (404)."""
+
+    def test_admin_lee_ajeno_200(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        tid = _tournament_id(owner)
+        assert client.get(f"/api/v1/tournaments/{tid}", headers=admin).status_code == 200
+
+    def test_admin_put_ajeno_404(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        tid = _tournament_id(owner)
+        assert client.put(f"/api/v1/tournaments/{tid}", json={"fep_points": 1}, headers=admin).status_code == 404
+
+    def test_admin_delete_ajeno_404(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        tid = _tournament_id(owner)
+        assert client.delete(f"/api/v1/tournaments/{tid}", headers=admin).status_code == 404
+
+    def test_admin_escribe_su_propio_ok(self):
+        admin, _ = _register_and_login("admin")
+        tid = _tournament_id(admin)
+        assert client.put(f"/api/v1/tournaments/{tid}", json={"fep_points": 250}, headers=admin).status_code == 200
+        assert client.delete(f"/api/v1/tournaments/{tid}", headers=admin).status_code == 204
 
 
 # ── DUPLICADOS POR OWNER ───────────────────────────────────────

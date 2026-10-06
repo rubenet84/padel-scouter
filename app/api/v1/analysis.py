@@ -51,9 +51,12 @@ def _get_owned_player_or_404(db: Session, user: UserModel, player_id: UUID) -> P
     """POST de análisis: exige ownership DIRECTO (owner_id == user.id), SIN el
     alcance global del admin. Motivo: la generación llama a Gemini y tiene coste
     externo, por lo que un admin no debe generar análisis de jugadores ajenos.
-    Recurso ajeno o inexistente → 404 (se comprueba ANTES de tocar la IA)."""
+    Recurso ajeno o inexistente → 404 (se comprueba ANTES de tocar la IA).
+
+    Delega la regla de escritura en access_service.can_write_owner (fuente única).
+    """
     player = db.query(PlayerModel).filter(PlayerModel.id == player_id).first()
-    if player is None or player.owner_id != user.id:
+    if player is None or not access_service.can_write_owner(user, player.owner_id):
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
     return player
 

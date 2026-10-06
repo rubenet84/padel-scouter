@@ -119,6 +119,17 @@ def can_access_owner(user, owner_id: UUID | None) -> bool:
     return owner_id == user.id
 
 
+def can_write_owner(user, owner_id: UUID | None) -> bool:
+    """Autorización de ESCRITURA: exigente ownership DIRECTO (owner_id == user.id).
+
+    NO concede el alcance global del admin: un admin no puede modificar/borrar
+    recursos de otro owner. owner_id None → False (fail-closed).
+    """
+    if owner_id is None:
+        return False
+    return owner_id == user.id
+
+
 def can_access_player(db: Session, user, player_id: UUID) -> bool:
     """Indica si el usuario puede acceder al jugador indicado.
 

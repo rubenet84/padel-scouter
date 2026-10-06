@@ -61,16 +61,29 @@ def _player_filter(player_id: UUID):
     )
 
 
-def _get_player_or_404(db: Session, current_user: UserModel, player_id: UUID, only_deleted: bool = False):
+def _get_player_or_404(
+    db: Session,
+    current_user: UserModel,
+    player_id: UUID,
+    only_deleted: bool = False,
+    write: bool = False,
+):
     """Carga un jugador comprobando el ownership de forma centralizada.
 
-    Reglas:
+    Reglas de LECTURA (write=False):
     - admin (scope global) accede a cualquier jugador;
-    - entrenador/jugador solo a los de su owner_id;
-    - si pertenece a otro usuario o no existe → 404 (no se revela su existencia).
+    - entrenador/jugador solo a los de su owner_id.
+
+    Reglas de ESCRITURA (write=True, mutaciones):
+    - exigente ownership DIRECTO (owner_id == current_user.id);
+    - el admin NO tiene bypass: no puede modificar/borrar jugadores ajenos.
+
+    En ambos casos, si pertenece a otro usuario o no existe → 404 (no se revela
+    su existencia).
 
     Args:
         only_deleted: si True, exige que el jugador esté soft-deleted (restore).
+        write: si True, aplica la regla de escritura (owner-only, sin admin).
     """
     query = db.query(PlayerModel).filter(PlayerModel.id == player_id)
     if only_deleted:
@@ -78,7 +91,11 @@ def _get_player_or_404(db: Session, current_user: UserModel, player_id: UUID, on
     player = query.first()
     if player is None:
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
-    if not access_service.can_access_owner(current_user, player.owner_id):
+    if write:
+        allowed = access_service.can_write_owner(current_user, player.owner_id)
+    else:
+        allowed = access_service.can_access_owner(current_user, player.owner_id)
+    if not allowed:
         raise HTTPException(status_code=404, detail="Jugador no encontrado")
     return player
 
@@ -216,7 +233,7 @@ def update_player(
     stats. Las estadísticas computadas (win_rate, fep_points) se derivan de
     partidos reales y no se modifican aquí.
     """
-    player = _get_player_or_404(db, current_user, player_id)
+    player = _get_player_or_404(db, current_user, player_id, write=True)
 
     player.name     = data.name
     player.category = data.category
@@ -363,8 +380,8 @@ def upload_avatar(
       - A03: re-encode para eliminar EXIF, renombrado aleatorio.
       - A07: JWT requerido.
     """
-    # A07: Auth + A01: ownership/scope
-    player = _get_player_or_404(db, current_user, player_id)
+    # A07: Auth + A01: ownership directo (escritura, sin bypass admin)
+    player = _get_player_or_404(db, current_user, player_id, write=True)
 
     # Read file contents
     file.file.seek(0)
@@ -396,7 +413,7 @@ def delete_player(
     para preservar el historial de partidos. El jugador se excluye de listados
     normales (filtro is_deleted=False).
     """
-    player = _get_player_or_404(db, current_user, player_id)
+    player = _get_player_or_404(db, current_user, player_id, write=True)
     player.is_deleted = True
     player.deleted_at = datetime.now(timezone.utc)
     db.commit()
@@ -415,7 +432,7 @@ def restore_player(
     tiene). Verifica ownership/scope. Mantiene la semántica actual de
     soft-delete: no elimina ni recrea datos.
     """
-    player = _get_player_or_404(db, current_user, player_id, only_deleted=True)
+    player = _get_player_or_404(db, current_user, player_id, only_deleted=True, write=True)
     player.is_deleted = False
     player.deleted_at = None
     db.commit()
@@ -649,7 +666,7 @@ def add_match(
     - Si el compañero está registrado en el sistema, envía una notificación.
     - Mantiene solo las últimas 50 notificaciones por usuario.
     """
-    player = _get_player_or_404(db, current_user, player_id)
+    player = _get_player_or_404(db, current_user, player_id, write=True)
 
     # Verify tournament exists
     legacy_torneo = None
@@ -817,7 +834,7 @@ def update_match(
     """Actualiza un partido existente. Aplica las mismas reglas de validación
     de rondas que add_match, más la restricción adicional de que una derrota
     no puede moverse a una ronda superior."""
-    player = _get_player_or_404(db, current_user, player_id)
+    player = _get_player_or_404(db, current_user, player_id, write=True)
 
     match = db.query(MatchModel).filter(
         MatchModel.id == match_id,
@@ -943,7 +960,7 @@ def delete_match(
     La eliminación es física (DELETE). Las notificaciones vinculadas al
     partido también se eliminan para mantener la integridad referencial.
     """
-    player = _get_player_or_404(db, current_user, player_id)
+    player = _get_player_or_404(db, current_user, player_id, write=True)
 
     match = db.query(MatchModel).filter(
         MatchModel.id == match_id,

@@ -157,22 +157,70 @@ class TestEntrenadorMatches:
 
 class TestAdminMatches:
 
-    def test_admin_gestiona_partidos_ajenos(self):
+    def test_admin_no_gestiona_partidos_ajenos_404(self):
+        # Escritura owner-only: el admin mantiene lectura global pero NO puede
+        # crear/editar/borrar partidos de jugadores ajenos.
         admin, _ = _register_and_login("admin")
         owner, _ = _register_and_login("jugador")
         pid = _new_player(owner, "DeOwner")
+        mid = _new_match(owner, pid)
 
-        # crear partido para el jugador de otro owner
-        mid = _new_match(admin, pid)
-        # listar
+        # listar: lectura global del admin → 200
         listed = client.get(f"/api/v1/players/{pid}/matches", headers=admin)
         assert listed.status_code == 200
         assert mid in [m["id"] for m in listed.json()]
-        # actualizar
+        # crear en jugador ajeno → 404
+        assert _create_match(admin, pid).status_code == 404
+        # actualizar partido ajeno → 404
         assert client.put(f"/api/v1/players/{pid}/matches/{mid}", json={
             "rival_nombre": "Admin Edit", "resultado": "6-3 6-2", "ganado": True,
+        }, headers=admin).status_code == 404
+        # borrar partido ajeno → 404
+        assert client.delete(f"/api/v1/players/{pid}/matches/{mid}", headers=admin).status_code == 404
+
+
+# ── ADMIN: LECTURA GLOBAL vs ESCRITURA OWNER-ONLY ──────────────
+
+class TestAdminEscrituraOwnership:
+    """El admin conserva lectura global pero no puede mutar partidos ajenos."""
+
+    def test_admin_get_ajeno_200(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player(owner, "DeOwner")
+        _new_match(owner, pid)
+        assert client.get(f"/api/v1/players/{pid}/matches", headers=admin).status_code == 200
+
+    def test_admin_create_match_ajeno_404(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player(owner, "DeOwner")
+        assert _create_match(admin, pid).status_code == 404
+
+    def test_admin_update_match_ajeno_404(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player(owner, "DeOwner")
+        mid = _new_match(owner, pid)
+        r = client.put(f"/api/v1/players/{pid}/matches/{mid}", json={
+            "rival_nombre": "Admin Edit", "resultado": "6-3 6-2", "ganado": True,
+        }, headers=admin)
+        assert r.status_code == 404
+
+    def test_admin_delete_match_ajeno_404(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player(owner, "DeOwner")
+        mid = _new_match(owner, pid)
+        assert client.delete(f"/api/v1/players/{pid}/matches/{mid}", headers=admin).status_code == 404
+
+    def test_admin_crud_propio_ok(self):
+        admin, _ = _register_and_login("admin")
+        pid = _new_player(admin, "AdminP")
+        mid = _new_match(admin, pid)
+        assert client.put(f"/api/v1/players/{pid}/matches/{mid}", json={
+            "rival_nombre": "Propio Edit", "resultado": "6-1 6-1", "ganado": True,
         }, headers=admin).status_code == 200
-        # borrar
         assert client.delete(f"/api/v1/players/{pid}/matches/{mid}", headers=admin).status_code == 204
 
 
@@ -189,20 +237,20 @@ class TestPartnerOwnerRestriction:
         assert r.status_code == 400
 
     def test_partner_otra_cuenta_rechazado_admin(self):
+        # El admin escribe su PROPIO jugador, pero no puede emparejarlo con un
+        # jugador de otra cuenta: la restricción de compañero aplica también al admin.
         admin, _ = _register_and_login("admin")
-        owner_a, _ = _register_and_login("jugador")
+        pid_a = _new_player(admin, "AdminP1")
         owner_b, _ = _register_and_login("jugador")
-        pid_a = _new_player(owner_a, "OwnerA")
         pid_b = _new_player(owner_b, "OwnerB")
-        # admin no puede mezclar propietarios aunque tenga acceso global
         r = _create_match(admin, pid_a, partner_id=pid_b)
         assert r.status_code == 400
 
     def test_admin_partner_mismo_owner_ok(self):
+        # Sanity: el admin SÍ puede escribir y emparejar sus propios jugadores.
         admin, _ = _register_and_login("admin")
-        owner, _ = _register_and_login("jugador")
-        p1 = _new_player(owner, "OwnerP1")
-        p2 = _new_player(owner, "OwnerP2")
+        p1 = _new_player(admin, "AdminP1")
+        p2 = _new_player(admin, "AdminP2")
         r = _create_match(admin, p1, partner_id=p2)
         assert r.status_code == 201
         assert r.json()["partner_id"] == p2

@@ -31,15 +31,30 @@ from app.schemas.tournament import (
 router = APIRouter(prefix="/tournaments", tags=["tournaments"])
 
 
-def _get_tournament_or_404(db: Session, user: UserModel, tournament_id: UUID) -> TournamentModel:
-    """Carga un torneo comprobando ownership/scope (admin GLOBAL; resto OWN).
+def _get_tournament_or_404(
+    db: Session,
+    user: UserModel,
+    tournament_id: UUID,
+    write: bool = False,
+) -> TournamentModel:
+    """Carga un torneo comprobando ownership/scope.
+
+    - Lectura (write=False): admin GLOBAL accede a cualquiera; resto solo OWN.
+    - Escritura (write=True): exigente ownership DIRECTO (owner_id == user.id),
+      SIN bypass del admin (no puede modificar/borrar torneos ajenos).
 
     Recurso ajeno o inexistente → 404 (no revela existencia).
     """
     tournament = db.query(TournamentModel).filter(
         TournamentModel.id == tournament_id
     ).first()
-    if tournament is None or not access_service.can_access_owner(user, tournament.owner_id):
+    if tournament is None:
+        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+    if write:
+        allowed = access_service.can_write_owner(user, tournament.owner_id)
+    else:
+        allowed = access_service.can_access_owner(user, tournament.owner_id)
+    if not allowed:
         raise HTTPException(status_code=404, detail="Torneo no encontrado")
     return tournament
 
@@ -219,12 +234,12 @@ def update_tournament(
 ):
     """Actualiza nombre, fecha y/o puntos FEP de un torneo.
 
-    Verifica permiso + ownership/scope (admin GLOBAL; resto OWN). Ajeno o
-    inexistente → 404. Si se cambia el nombre, actualiza el campo legacy
-    `torneo` de los partidos asociados. La validación de duplicados se acota
-    al MISMO owner del torneo.
+    Verifica permiso + ownership DIRECTO (owner-only, sin bypass del admin).
+    Torneo ajeno o inexistente → 404. Si se cambia el nombre, actualiza el
+    campo legacy `torneo` de los partidos asociados. La validación de
+    duplicados se acota al MISMO owner del torneo.
     """
-    tournament = _get_tournament_or_404(db, current_user, tournament_id)
+    tournament = _get_tournament_or_404(db, current_user, tournament_id, write=True)
 
     effective_name = tournament.name
     owner_id = tournament.owner_id
@@ -298,11 +313,11 @@ def delete_tournament(
 ):
     """Elimina un torneo (hard delete) solo si no tiene partidos asociados.
 
-    Verifica permiso + ownership/scope (admin GLOBAL; resto OWN). Ajeno o
-    inexistente → 404. Mantiene la regla funcional: no se puede eliminar si
-    tiene partidos. No hay soft delete ni restore.
+    Verifica permiso + ownership DIRECTO (owner-only, sin bypass del admin).
+    Torneo ajeno o inexistente → 404. Mantiene la regla funcional: no se puede
+    eliminar si tiene partidos. No hay soft delete ni restore.
     """
-    tournament = _get_tournament_or_404(db, current_user, tournament_id)
+    tournament = _get_tournament_or_404(db, current_user, tournament_id, write=True)
 
     match_count = (
         db.query(func.count(MatchModel.id))

@@ -124,6 +124,76 @@ class TestAdmin:
             assert _create_player(admin, name=f"Admin{i}").status_code == 201
 
 
+# ── ADMIN: LECTURA GLOBAL vs ESCRITURA OWNER-ONLY ──────────────
+
+class TestAdminEscrituraOwnership:
+    """El admin conserva la LECTURA global (GET/stats/evolution/analytics) pero
+    la ESCRITURA es owner-only: no puede mutar jugadores de otros owners."""
+
+    def test_admin_get_ajeno_200(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player_id(owner, "DeOwner")
+        r = client.get(f"/api/v1/players/{pid}", headers=admin)
+        assert r.status_code == 200
+        assert r.json()["id"] == pid
+
+    def test_admin_stats_evolution_analytics_ajeno_200(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player_id(owner, "DeOwner")
+        assert client.get(f"/api/v1/players/{pid}/stats", headers=admin).status_code == 200
+        assert client.get(f"/api/v1/players/{pid}/evolution", headers=admin).status_code == 200
+        assert client.get(f"/api/v1/players/{pid}/analytics", headers=admin).status_code == 200
+
+    def test_admin_put_ajeno_404(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player_id(owner, "DeOwner")
+        r = client.put(f"/api/v1/players/{pid}", json={
+            "name": "Hackeado", "category": "3ª Categoría", "stats": {"derecha": 1},
+        }, headers=admin)
+        assert r.status_code == 404
+
+    def test_admin_avatar_ajeno_404(self):
+        from PIL import Image
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player_id(owner, "DeOwner")
+        buf = BytesIO()
+        Image.new("RGB", (64, 64), (30, 30, 30)).save(buf, format="PNG")
+        r = client.post(
+            f"/api/v1/players/{pid}/avatar",
+            files={"file": ("avatar.png", buf.getvalue(), "image/png")},
+            headers=admin,
+        )
+        assert r.status_code == 404
+
+    def test_admin_delete_ajeno_404(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player_id(owner, "DeOwner")
+        assert client.delete(f"/api/v1/players/{pid}", headers=admin).status_code == 404
+
+    def test_admin_restore_ajeno_404(self):
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player_id(owner, "DeOwner")
+        client.delete(f"/api/v1/players/{pid}", headers=owner)
+        assert client.put(f"/api/v1/players/{pid}/restore", headers=admin).status_code == 404
+
+    def test_admin_escribe_su_propio_ok(self):
+        # Sanity: el admin SÍ puede mutar sus propios jugadores.
+        admin, _ = _register_and_login("admin")
+        pid = _new_player_id(admin, "AdminP")
+        r = client.put(f"/api/v1/players/{pid}", json={
+            "name": "AdminEditado", "category": "3ª Categoría", "stats": {"derecha": 70},
+        }, headers=admin)
+        assert r.status_code == 200
+        assert client.delete(f"/api/v1/players/{pid}", headers=admin).status_code == 200
+        assert client.put(f"/api/v1/players/{pid}/restore", headers=admin).status_code == 200
+
+
 # ── ENTRENADOR ─────────────────────────────────────────────────
 
 class TestEntrenador:
