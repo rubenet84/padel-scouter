@@ -1,11 +1,16 @@
 """
 Tests de integración RBAC del bloque PDFs.
 
+Política actual:
+- admin / entrenador → reports.generate + reports.download
+- jugador → SIN reports.* → 403 en generar y descargar
+
 Cubren:
 - POST /players/{pid}/pdf-token  -> reports.generate + scope (admin global).
 - GET  /players/{pid}/pdf (Bearer) -> reports.download + scope.
 - GET  /players/{pid}/pdf (download_token) -> token válido, usuario actual,
-  permiso y scope vigentes (el token NO es bypass de RBAC).
+  permiso y scope vigentes (el token NO es bypass de RBAC: un token de jugador
+  se rechaza con 403 tras el cambio de permisos).
 - Content-Disposition saneado.
 - Errores: 401/403/404, token manipulado/expirado, reuso (no one-time).
 
@@ -123,16 +128,18 @@ class TestPdfToken:
         pid_b = _new_player(b, "DeB")
         assert client.post(f"/api/v1/players/{pid_b}/pdf-token", headers=a).status_code == 404
 
-    def test_jugador_propio_200(self):
+    def test_jugador_propio_403(self):
+        # jugador NO tiene reports.generate → 403
         user, _ = _register_and_login("jugador")
         pid = _new_player(user, "Mio")
-        assert client.post(f"/api/v1/players/{pid}/pdf-token", headers=user).status_code == 200
+        assert client.post(f"/api/v1/players/{pid}/pdf-token", headers=user).status_code == 403
 
-    def test_jugador_ajeno_404(self):
+    def test_jugador_ajeno_403(self):
         a, _ = _register_and_login("jugador")
         b, _ = _register_and_login("jugador")
         pid_b = _new_player(b, "DeB")
-        assert client.post(f"/api/v1/players/{pid_b}/pdf-token", headers=a).status_code == 404
+        # permiso antes que ownership → 403 (no 404)
+        assert client.post(f"/api/v1/players/{pid_b}/pdf-token", headers=a).status_code == 403
 
 
 # ── GET /pdf con Bearer ────────────────────────────────────────
@@ -142,8 +149,7 @@ class TestPdfWithBearer:
     def test_admin_propio_200(self, mock_pdf):
         admin, _ = _register_and_login("admin")
         pid = _new_player(admin, "AdminP")
-        r = client.get(f"/api/v1/players/{pid}/pdf", headers=admin)
-        assert r.status_code == 200
+        assert client.get(f"/api/v1/players/{pid}/pdf", headers=admin).status_code == 200
 
     def test_admin_otro_owner_200(self, mock_pdf):
         admin, _ = _register_and_login("admin")
@@ -162,21 +168,21 @@ class TestPdfWithBearer:
         pid_b = _new_player(b, "DeB")
         assert client.get(f"/api/v1/players/{pid_b}/pdf", headers=a).status_code == 404
 
-    def test_jugador_propio_200(self, mock_pdf):
+    def test_jugador_propio_403(self, mock_pdf):
         user, _ = _register_and_login("jugador")
         pid = _new_player(user, "Mio")
-        assert client.get(f"/api/v1/players/{pid}/pdf", headers=user).status_code == 200
+        assert client.get(f"/api/v1/players/{pid}/pdf", headers=user).status_code == 403
 
-    def test_jugador_ajeno_404(self, mock_pdf):
+    def test_jugador_ajeno_403(self, mock_pdf):
         a, _ = _register_and_login("jugador")
         b, _ = _register_and_login("jugador")
         pid_b = _new_player(b, "DeB")
-        assert client.get(f"/api/v1/players/{pid_b}/pdf", headers=a).status_code == 404
+        assert client.get(f"/api/v1/players/{pid_b}/pdf", headers=a).status_code == 403
 
     def test_respuesta_pdf_valida(self, mock_pdf):
-        user, _ = _register_and_login("jugador")
-        pid = _new_player(user, "Mio")
-        r = client.get(f"/api/v1/players/{pid}/pdf", headers=user)
+        coach, _ = _register_and_login("entrenador")
+        pid = _new_player(coach, "Alumno")
+        r = client.get(f"/api/v1/players/{pid}/pdf", headers=coach)
         assert r.status_code == 200
         assert r.headers["content-type"] == "application/pdf"
         assert r.content.startswith(b"%PDF")
@@ -188,14 +194,14 @@ class TestPdfWithBearer:
 class TestPdfAuth:
 
     def test_sin_credenciales_401(self):
-        user, _ = _register_and_login("jugador")
-        pid = _new_player(user, "Mio")
+        coach, _ = _register_and_login("entrenador")
+        pid = _new_player(coach, "Alumno")
         # sin Bearer ni download_token
         assert client.get(f"/api/v1/players/{pid}/pdf").status_code == 401
 
     def test_usuario_inactivo_401(self, mock_pdf):
-        headers, uid = _register_and_login("jugador")
-        pid = _new_player(headers, "Mio")
+        headers, uid = _register_and_login("entrenador")
+        pid = _new_player(headers, "Alumno")
         db = TestSession()
         u = db.query(UserModel).filter(UserModel.id == uid).first()
         u.is_active = False
@@ -208,28 +214,35 @@ class TestPdfAuth:
 
 class TestDownloadToken:
 
-    def test_token_valido_jugador_correcto_200(self, mock_pdf):
-        user, uid = _register_and_login("jugador")
-        pid = _new_player(user, "Mio")
+    def test_token_entrenador_propio_200(self, mock_pdf):
+        coach, uid = _register_and_login("entrenador")
+        pid = _new_player(coach, "Alumno")
         token = create_download_token(str(uid), str(pid))
         assert client.get(_token_url(pid, token)).status_code == 200
 
-    def test_token_player_mismatch_rechazado(self, mock_pdf):
+    def test_token_jugador_denegado_403(self, mock_pdf):
+        # Un token de jugador NO salta el nuevo permiso: el endpoint revalida
+        # reports.download contra el rol actual → 403 (aunque el token sea válido).
         user, uid = _register_and_login("jugador")
         pid = _new_player(user, "Mio")
         token = create_download_token(str(uid), str(pid))
-        # URL con OTRO player id → token.player_id != player_id de la URL → 403
+        assert client.get(_token_url(pid, token)).status_code == 403
+
+    def test_token_player_mismatch_rechazado(self, mock_pdf):
+        coach, uid = _register_and_login("entrenador")
+        pid = _new_player(coach, "Alumno")
+        token = create_download_token(str(uid), str(pid))
         otro = str(uuid.uuid4())
         assert client.get(_token_url(otro, token)).status_code == 403
 
     def test_token_manipulado_401(self, mock_pdf):
-        user, _ = _register_and_login("jugador")
-        pid = _new_player(user, "Mio")
+        coach, _ = _register_and_login("entrenador")
+        pid = _new_player(coach, "Alumno")
         assert client.get(_token_url(pid, "token.falso.invalido")).status_code == 401
 
     def test_token_expirado_401(self, mock_pdf):
-        user, uid = _register_and_login("jugador")
-        pid = _new_player(user, "Mio")
+        coach, uid = _register_and_login("entrenador")
+        pid = _new_player(coach, "Alumno")
         expired = jose_jwt.encode(
             {"sub": str(uid), "player_id": str(pid),
              "exp": datetime.now(timezone.utc) - timedelta(minutes=1), "type": "download"},
@@ -237,18 +250,17 @@ class TestDownloadToken:
         )
         assert client.get(_token_url(pid, expired)).status_code == 401
 
-    def test_token_de_A_para_jugador_de_B_bloqueado(self, mock_pdf):
-        a, a_id = _register_and_login("jugador")
-        b, _ = _register_and_login("jugador")
+    def test_token_entrenador_otro_owner_404(self, mock_pdf):
+        a, a_id = _register_and_login("entrenador")
+        b, _ = _register_and_login("entrenador")
         pid_b = _new_player(b, "DeB")
-        # A fabrica/obtiene un token para el jugador de B
         token = create_download_token(str(a_id), str(pid_b))
-        r = client.get(_token_url(pid_b, token))
-        assert r.status_code == 404  # scope de A no alcanza al jugador de B
+        # A tiene permiso pero el jugador es de B → ownership → 404
+        assert client.get(_token_url(pid_b, token)).status_code == 404
 
     def test_token_usuario_inactivo_bloqueado_401(self, mock_pdf):
-        user, uid = _register_and_login("jugador")
-        pid = _new_player(user, "Mio")
+        coach, uid = _register_and_login("entrenador")
+        pid = _new_player(coach, "Alumno")
         token = create_download_token(str(uid), str(pid))
         db = TestSession()
         u = db.query(UserModel).filter(UserModel.id == uid).first()
@@ -259,8 +271,8 @@ class TestDownloadToken:
 
     def test_token_reutilizable_dentro_de_5_min(self, mock_pdf):
         # Documenta el comportamiento real: NO es one-time (stateless, sin jti/blacklist)
-        user, uid = _register_and_login("jugador")
-        pid = _new_player(user, "Mio")
+        coach, uid = _register_and_login("entrenador")
+        pid = _new_player(coach, "Alumno")
         token = create_download_token(str(uid), str(pid))
         assert client.get(_token_url(pid, token)).status_code == 200
         assert client.get(_token_url(pid, token)).status_code == 200  # reuso OK
@@ -271,10 +283,9 @@ class TestDownloadToken:
 class TestContentDisposition:
 
     def test_nombre_problematico_saneado(self, mock_pdf):
-        user, _ = _register_and_login("jugador")
-        # nombre con comilla, dos puntos y CR/LF
-        pid = _new_player(user, 'Malo"CRLF\r\nInjected: x')
-        r = client.get(f"/api/v1/players/{pid}/pdf", headers=user)
+        coach, _ = _register_and_login("entrenador")
+        pid = _new_player(coach, 'Malo"CRLF\r\nInjected: x')
+        r = client.get(f"/api/v1/players/{pid}/pdf", headers=coach)
         assert r.status_code == 200
         header = r.headers["content-disposition"]
         assert "\r" not in header and "\n" not in header

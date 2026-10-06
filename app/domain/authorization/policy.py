@@ -107,8 +107,6 @@ _PLAYER_PERMISSIONS: frozenset[Permission] = frozenset({
     Permission.STATS_READ,
     Permission.AI_ANALYZE,
     Permission.AI_CHAT,
-    Permission.REPORTS_GENERATE,
-    Permission.REPORTS_DOWNLOAD,
     Permission.TOURNAMENTS_CREATE,
     Permission.TOURNAMENTS_READ,
     Permission.TOURNAMENTS_UPDATE,
@@ -117,10 +115,13 @@ _PLAYER_PERMISSIONS: frozenset[Permission] = frozenset({
     Permission.NOTIFICATIONS_UPDATE,
 })
 
-# El entrenador amplía al jugador con: restaurar jugadores y comparar estadísticas.
+# El entrenador amplía al jugador con: restaurar jugadores, comparar estadísticas
+# y generar/descargar informes PDF (reports.* queda fuera de 'jugador').
 _COACH_PERMISSIONS: frozenset[Permission] = _PLAYER_PERMISSIONS | frozenset({
     Permission.PLAYERS_RESTORE,
     Permission.STATS_COMPARE,
+    Permission.REPORTS_GENERATE,
+    Permission.REPORTS_DOWNLOAD,
 })
 
 # El administrador tiene todos los permisos del sistema.

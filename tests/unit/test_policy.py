@@ -87,12 +87,19 @@ class TestHasPermissionJugador:
         assert has_permission(Role.JUGADOR, Permission.PLAYERS_UPDATE)
         assert has_permission(Role.JUGADOR, Permission.PLAYERS_DELETE)
 
-    def test_jugador_gestiona_partidos_ia_e_informes(self):
+    def test_jugador_gestiona_partidos_e_ia(self):
         assert has_permission(Role.JUGADOR, Permission.MATCHES_CREATE)
         assert has_permission(Role.JUGADOR, Permission.AI_ANALYZE)
         assert has_permission(Role.JUGADOR, Permission.AI_CHAT)
-        assert has_permission(Role.JUGADOR, Permission.REPORTS_GENERATE)
-        assert has_permission(Role.JUGADOR, Permission.REPORTS_DOWNLOAD)
+
+    def test_reportes_solo_admin_y_entrenador(self):
+        # jugador NO tiene reports.* (generar/descargar PDF); admin y entrenador SÍ.
+        assert has_permission(Role.JUGADOR, Permission.REPORTS_GENERATE) is False
+        assert has_permission(Role.JUGADOR, Permission.REPORTS_DOWNLOAD) is False
+        assert has_permission(Role.ENTRENADOR, Permission.REPORTS_GENERATE) is True
+        assert has_permission(Role.ENTRENADOR, Permission.REPORTS_DOWNLOAD) is True
+        assert has_permission(Role.ADMIN, Permission.REPORTS_GENERATE) is True
+        assert has_permission(Role.ADMIN, Permission.REPORTS_DOWNLOAD) is True
 
     def test_jugador_no_restaura_ni_compara(self):
         assert has_permission(Role.JUGADOR, Permission.PLAYERS_RESTORE) is False
