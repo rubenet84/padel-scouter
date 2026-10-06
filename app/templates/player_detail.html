@@ -797,11 +797,13 @@ body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;o
       const navEl = document.getElementById('nav-username');
       if (navEl) navEl.textContent = safe;
 
-      // UX: el rol 'jugador' no tiene reports.* → ocultar el botón de PDF.
+      // UX: 'jugador' no tiene reports.* ni stats.compare → ocultar PDF y Comparativas.
       // El backend sigue siendo la autoridad final (devuelve 403).
       if (user.role === 'jugador') {
         const pdfWrap = document.getElementById('pdf-export-wrap');
         if (pdfWrap) pdfWrap.style.display = 'none';
+        const compareLink = document.getElementById('sidebar-compare');
+        if (compareLink) compareLink.style.display = 'none';
       }
     }
   }).catch(() => {});
@@ -862,7 +864,10 @@ async function restorePlayer() {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${t}` }
     });
-    if (res.ok) window.location.reload();
+    if (res.ok) { window.location.reload(); return; }
+    if (res.status === 403 && typeof showToast === 'function') {
+      showToast('No tienes permisos para esta acción.', 'error');
+    }
   } catch {}
 }
 

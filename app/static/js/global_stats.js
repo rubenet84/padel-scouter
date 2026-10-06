@@ -594,7 +594,10 @@ async function loadComparison(id1, id2) {
             headers: { 'Authorization': `Bearer ${TOKEN}` }
         });
         if (!res.ok) {
-            panel.innerHTML = '<div class="text-center text-red-400 py-8">Error al cargar la comparación</div>';
+            const msg = res.status === 403
+                ? 'No tienes permisos para esta acción.'
+                : 'Error al cargar la comparación';
+            panel.innerHTML = `<div class="text-center text-red-400 py-8">${msg}</div>`;
             return;
         }
         const json = await res.json();

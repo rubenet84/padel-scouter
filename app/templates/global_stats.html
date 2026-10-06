@@ -385,6 +385,12 @@ function toggleSidebar() {
       if (u) {
         const el = document.getElementById('nav-username');
         if (el) el.textContent = u.username;
+        // UX: 'jugador' no tiene stats.compare → ocultar el Comparador.
+        // El backend sigue siendo la autoridad final (devuelve 403).
+        if (u.role === 'jugador') {
+          const cs = document.getElementById('compare-section');
+          if (cs) cs.style.display = 'none';
+        }
       }
     }).catch(() => {});
 })();
