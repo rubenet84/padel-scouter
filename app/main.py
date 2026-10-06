@@ -69,6 +69,32 @@ async def _rate_limit_exceeded_handler(request, exc):
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+
+# ── Manejadores de excepciones de autorización ──────────────────
+# Traducen las excepciones de dominio (app.domain.authorization.errors) a
+# respuestas HTTP, de forma centralizada para toda la aplicación.
+from app.domain.authorization.errors import (
+    PermissionDeniedError,
+    ResourceNotFoundError,
+    PlayerLimitExceededError,
+)
+
+
+async def _authorization_exception_handler(request, exc):
+    """Mapea cada error de autorización a su código HTTP."""
+    if isinstance(exc, ResourceNotFoundError):
+        status_code = 404
+    elif isinstance(exc, PlayerLimitExceededError):
+        status_code = 409
+    else:  # PermissionDeniedError
+        status_code = 403
+    return JSONResponse(status_code=status_code, content={"detail": str(exc)})
+
+
+app.add_exception_handler(ResourceNotFoundError, _authorization_exception_handler)
+app.add_exception_handler(PlayerLimitExceededError, _authorization_exception_handler)
+app.add_exception_handler(PermissionDeniedError, _authorization_exception_handler)
+
 # Configuración de CORS: orígenes permitidos definidos en settings
 app.add_middleware(
     CORSMiddleware,

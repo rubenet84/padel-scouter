@@ -13,7 +13,8 @@ Arquitectura: Capa API — orquestación pura, sin lógica de negocio.
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_permission
+from app.domain.authorization.policy import Permission
 from app.services.category_service import get_category_details
 from app.services.comparison_service import get_comparison, get_h2h
 from app.services.highlights_service import get_community_highlights, get_evolution, get_records
@@ -29,10 +30,10 @@ router = APIRouter(prefix="/stats", tags=["stats"])
 @router.get("/summary", response_model=ApiResponse)
 def get_summary(
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
     """Resumen global: totales agregados + líder de ranking + mejor % victorias."""
-    data = get_global_summary(db, current_user.id)
+    data = get_global_summary(db, current_user)
     return ApiResponse(success=True, data=data.model_dump())
 
 
@@ -50,7 +51,7 @@ def get_ranking(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(50, ge=1, le=200, description="Items per page"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
     """Ranking completo con ordenación, filtros y paginación."""
     filters = {
@@ -62,7 +63,7 @@ def get_ranking(
     }
     data = get_rankings(
         db,
-        current_user.id,
+        current_user,
         sort_by=sort_by,
         order=order,
         filters=filters,
@@ -86,7 +87,7 @@ def get_ranking_by_category(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(50, ge=1, le=200, description="Items per page"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
     """Ranking filtrado por categoría (delega en get_rankings con filtro)."""
     filters = {
@@ -98,7 +99,7 @@ def get_ranking_by_category(
     }
     data = get_rankings(
         db,
-        current_user.id,
+        current_user,
         sort_by=sort_by,
         order=order,
         filters=filters,
@@ -121,7 +122,7 @@ def get_top(
     date_from: str | None = Query(None, description="Start date (YYYY-MM-DD)"),
     date_to: str | None = Query(None, description="End date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
     """10 listas independientes de top 5 jugadores por distintas métricas."""
     filters = {
@@ -131,7 +132,7 @@ def get_top(
         "date_from": date_from,
         "date_to": date_to,
     }
-    data = get_top_players(db, current_user.id, filters=filters)
+    data = get_top_players(db, current_user, filters=filters)
     return ApiResponse(success=True, data=data.model_dump())
 
 
@@ -149,7 +150,7 @@ def get_compare(
     date_from: str | None = Query(None, description="Start date (YYYY-MM-DD)"),
     date_to: str | None = Query(None, description="End date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_COMPARE)),
 ):
     """Comparación lado a lado de dos jugadores con posición en el ranking de su categoría."""
     from uuid import UUID
@@ -167,7 +168,7 @@ def get_compare(
         "date_to": date_to,
     }
     try:
-        data = get_comparison(db, current_user.id, pid1, pid2, filters=filters)
+        data = get_comparison(db, current_user, pid1, pid2, filters=filters)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return ApiResponse(success=True, data=data.model_dump())
@@ -187,7 +188,7 @@ def get_h2h_endpoint(
     date_from: str | None = Query(None, description="Start date (YYYY-MM-DD)"),
     date_to: str | None = Query(None, description="End date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_COMPARE)),
 ):
     """Historial de enfrentamientos directos (head-to-head) entre dos jugadores."""
     from uuid import UUID
@@ -205,7 +206,7 @@ def get_h2h_endpoint(
         "date_to": date_to,
     }
     try:
-        data = get_h2h(db, current_user.id, pid1, pid2, filters=filters)
+        data = get_h2h(db, current_user, pid1, pid2, filters=filters)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return ApiResponse(success=True, data=data.model_dump())
@@ -224,7 +225,7 @@ def get_records_endpoint(
     date_from: str | None = Query(None, description="Start date (YYYY-MM-DD)"),
     date_to: str | None = Query(None, description="End date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
     """Récords comunitarios: el mejor jugador para cada métrica."""
     filters = {
@@ -234,7 +235,7 @@ def get_records_endpoint(
         "date_from": date_from,
         "date_to": date_to,
     }
-    data = get_records(db, current_user.id, filters=filters)
+    data = get_records(db, current_user, filters=filters)
     return ApiResponse(success=True, data=[r.model_dump() for r in data])
 
 
@@ -251,7 +252,7 @@ def get_categories(
     date_to: str | None = Query(None, description="End date (YYYY-MM-DD)"),
     player_limit: int = Query(5, ge=0, le=20, description="Top N per category"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
     """Todas las categorías con estadísticas agregadas y top N jugadores."""
     filters = {
@@ -261,7 +262,7 @@ def get_categories(
         "date_to": date_to,
     }
     data = get_category_details(
-        db, current_user.id, category=None, player_limit=player_limit, filters=filters
+        db, current_user, category=None, player_limit=player_limit, filters=filters
     )
     return ApiResponse(success=True, data=[c.model_dump() for c in data])
 
@@ -277,7 +278,7 @@ def get_category_detail(
     date_to: str | None = Query(None, description="End date (YYYY-MM-DD)"),
     player_limit: int = Query(5, ge=0, le=20, description="Top N players"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
     """Estadísticas agregadas de una categoría específica."""
     filters = {
@@ -287,7 +288,7 @@ def get_category_detail(
         "date_to": date_to,
     }
     data = get_category_details(
-        db, current_user.id, category=category, player_limit=player_limit, filters=filters
+        db, current_user, category=category, player_limit=player_limit, filters=filters
     )
     if not data:
         raise HTTPException(status_code=404, detail=f"Category '{category}' not found")
@@ -307,7 +308,7 @@ def get_evolution_endpoint(
     date_from: str | None = Query(None, description="Start date (YYYY-MM-DD)"),
     date_to: str | None = Query(None, description="End date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
     """Evolución de puntos FEP por jugador con array sparkline (vacío por ahora)."""
     filters = {
@@ -317,7 +318,7 @@ def get_evolution_endpoint(
         "date_from": date_from,
         "date_to": date_to,
     }
-    data = get_evolution(db, current_user.id, filters=filters)
+    data = get_evolution(db, current_user, filters=filters)
     return ApiResponse(success=True, data=[e.model_dump() for e in data])
 
 
@@ -333,7 +334,7 @@ def get_community_endpoint(
     date_from: str | None = Query(None, description="Start date (YYYY-MM-DD)"),
     date_to: str | None = Query(None, description="End date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
     """Highlights comunitarios: más puntos, mejor forma, mejor pareja, más activo."""
     filters = {
@@ -342,5 +343,5 @@ def get_community_endpoint(
         "date_from": date_from,
         "date_to": date_to,
     }
-    data = get_community_highlights(db, current_user.id, filters=filters)
+    data = get_community_highlights(db, current_user, filters=filters)
     return ApiResponse(success=True, data=data.model_dump())

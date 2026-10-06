@@ -14,9 +14,10 @@ OWASP:
 - A07 (Authentication): todos los endpoints requieren JWT válido.
 """
 import logging
+import re
 from uuid import UUID
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Request
 from fastapi.responses import StreamingResponse, Response
 from datetime import datetime, timezone
 
@@ -24,10 +25,13 @@ logger = logging.getLogger(__name__)
 from sqlalchemy import or_, text
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.dependencies import get_current_user, _optional_auth
+from app.core.dependencies import _optional_auth, require_permission
+from app.core.rate_limit import limiter
 from app.infrastructure.database.session import get_db
 from sqlalchemy import func, desc as sa_desc
 from app.infrastructure.database.models import PlayerModel, UserModel, MatchModel, TournamentModel, AnalysisModel
+from app.domain.authorization.policy import Permission, has_permission, role_from_value
+from app.services import access_service
 from app.schemas.player import (
     PlayerCreateSchema, PlayerPublicSchema,
     MatchCreateSchema, MatchPublicSchema,
@@ -57,19 +61,63 @@ def _player_filter(player_id: UUID):
     )
 
 
+def _get_player_or_404(db: Session, current_user: UserModel, player_id: UUID, only_deleted: bool = False):
+    """Carga un jugador comprobando el ownership de forma centralizada.
+
+    Reglas:
+    - admin (scope global) accede a cualquier jugador;
+    - entrenador/jugador solo a los de su owner_id;
+    - si pertenece a otro usuario o no existe → 404 (no se revela su existencia).
+
+    Args:
+        only_deleted: si True, exige que el jugador esté soft-deleted (restore).
+    """
+    query = db.query(PlayerModel).filter(PlayerModel.id == player_id)
+    if only_deleted:
+        query = query.filter(PlayerModel.is_deleted == True)
+    player = query.first()
+    if player is None:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    if not access_service.can_access_owner(current_user, player.owner_id):
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    return player
+
+
+def _safe_pdf_filename(player_name: str) -> str:
+    """Nombre de archivo seguro para Content-Disposition.
+
+    Elimina comillas, CR/LF, caracteres de control y cualquier carácter no
+    permitido, evitando inyección de cabecera. Conserva un nombre legible
+    (p. ej. "informe_Ruben_Rebollo.pdf").
+    """
+    base = re.sub(r"[^A-Za-z0-9 _-]", "", player_name or "").strip()
+    base = re.sub(r"\s+", "_", base)
+    if not base:
+        base = "jugador"
+    return f"informe_{base}.pdf"
+
+
 # ── Players CRUD ──────────────────────────────────────────────
 
 @router.post("/", response_model=PlayerPublicSchema, status_code=201)
 def create_player(
     data: PlayerCreateSchema,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_CREATE)),
 ):
     """Crea un nuevo jugador asociado al usuario autenticado.
 
-    El owner_id se asigna automáticamente desde el JWT para prevenir
-    que un usuario cree jugadores para otra cuenta (OWASP A01).
+    Seguridad (RBAC / OWASP A01):
+    - Exige el permiso players.create.
+    - El owner_id se asigna SIEMPRE desde el usuario autenticado: el cliente no
+      puede enviar un owner_id para crear jugadores en otra cuenta.
+    - Respeta el límite de jugadores del rol (jugador 2, entrenador 25, admin
+      ilimitado). El bloqueo y el INSERT ocurren en la misma transacción para
+      evitar condiciones de carrera.
     """
+    # Límite por rol: bloquea la fila del usuario y cuenta (misma transacción).
+    access_service.enforce_player_limit(db, current_user)
+
     player = PlayerModel(
         name=data.name,
         category=data.category,
@@ -88,15 +136,22 @@ def create_player(
 @router.get("/", response_model=list[PlayerPublicSchema])
 def list_players(
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_READ)),
 ):
-    """Lista todos los jugadores activos del usuario autenticado.
+    """Lista los jugadores activos visibles según el alcance del rol.
+
+    - admin → todos (global);
+    - entrenador / jugador → solo los suyos (owner_id).
+
+    El filtro lo aplica access_service.apply_owner_scope, por lo que no existe
+    ningún parámetro que permita eliminar el ownership.
 
     Enriquece cada jugador con su último power_level del análisis IA
     más reciente, usando una subquery optimizada con DISTINCT ON.
     """
-    players = db.query(PlayerModel).filter(
-        PlayerModel.owner_id == current_user.id,
+    players = access_service.apply_owner_scope(
+        db.query(PlayerModel), current_user
+    ).filter(
         PlayerModel.is_deleted == False,
     ).all()
 
@@ -123,35 +178,25 @@ def list_players(
 def get_player(
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_READ)),
 ):
-    """Obtiene un jugador por ID. Verifica ownership (OWASP A01)."""
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
-    return player
+    """Obtiene un jugador por ID. Verifica permiso + ownership/scope (OWASP A01)."""
+    return _get_player_or_404(db, current_user, player_id)
 
 
 @router.get("/{player_id}/badges")
 def get_player_badges(
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_READ)),
 ):
     """Calcula y devuelve las insignias/achievements del jugador.
 
+    Verifica permiso + ownership/scope antes de calcular.
     Las insignias se computan desde datos reales de partidos y análisis IA.
     Ver app/services/badges_service.py para la lógica de cálculo.
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    _get_player_or_404(db, current_user, player_id)
     return compute_player_badges(db, player_id)
 
 
@@ -160,20 +205,15 @@ def update_player(
     player_id: UUID,
     data: PlayerCreateSchema,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_UPDATE)),
 ):
     """Actualiza los datos y estadísticas base de un jugador.
 
-    Solo modifica name, category, mano y stats. Las estadísticas
-    computadas (win_rate, fep_points) se derivan de partidos reales
-    y no se modifican aquí.
+    Verifica permiso + ownership/scope. Solo modifica name, category, mano y
+    stats. Las estadísticas computadas (win_rate, fep_points) se derivan de
+    partidos reales y no se modifican aquí.
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    player = _get_player_or_404(db, current_user, player_id)
 
     player.name     = data.name
     player.category = data.category
@@ -192,22 +232,17 @@ def update_player(
 def get_player_stats(
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_READ)),
 ):
     """
     Devuelve estadísticas competitivas computadas desde partidos y torneos reales.
 
     OWASP:
-      - A01: Ownership check — el usuario solo ve stats de sus jugadores
+      - A01: permiso + ownership/scope — el usuario solo ve stats de jugadores accesibles
       - A07: JWT requerido
       - A03: player_id validado como UUID por FastAPI; query parametrizada
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    _get_player_or_404(db, current_user, player_id)
 
     return get_computed_stats(db, player_id)
 
@@ -216,20 +251,16 @@ def get_player_stats(
 def get_player_evolution(
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_READ)),
 ):
     """Calcula la evolución de puntos FEP y wins/losses mensuales del jugador.
 
+    Verifica permiso + ownership/scope.
     Devuelve dos series temporales:
     - points_timeline: puntos FEP acumulados por fecha de partido.
     - wins_losses_monthly: victorias y derrotas agrupadas por mes.
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    _get_player_or_404(db, current_user, player_id)
 
     matches = db.query(MatchModel).filter(
         or_(MatchModel.player1_id == player_id, MatchModel.player2_id == player_id, MatchModel.partner_id == player_id),
@@ -288,23 +319,18 @@ def get_player_evolution(
 def get_player_analytics(
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_READ)),
 ):
     """
     Devuelve estadísticas detalladas de partidos: sets, rondas,
     desglose por torneo, sistema de puntuación, etc.
 
     OWASP:
-      - A01: Ownership check
+      - A01: permiso + ownership/scope
       - A07: JWT requerido
       - A03: player_id validado como UUID
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    _get_player_or_404(db, current_user, player_id)
 
     from app.services.analytics_service import get_match_analytics
     return get_match_analytics(db, player_id)
@@ -317,7 +343,7 @@ def upload_avatar(
     player_id: UUID,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_UPDATE)),
 ):
     """Sube y procesa un avatar para el jugador.
 
@@ -330,17 +356,12 @@ def upload_avatar(
     - Dimensiones máximas: 2048x2048 píxeles.
 
     OWASP:
-      - A01: verifica ownership del jugador.
+      - A01: permiso + ownership/scope del jugador.
       - A03: re-encode para eliminar EXIF, renombrado aleatorio.
       - A07: JWT requerido.
     """
-    # A07: Auth + A01: Ownership check
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    # A07: Auth + A01: ownership/scope
+    player = _get_player_or_404(db, current_user, player_id)
 
     # Read file contents
     file.file.seek(0)
@@ -364,19 +385,15 @@ def upload_avatar(
 def delete_player(
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_DELETE)),
 ):
     """Soft-delete de un jugador: marca is_deleted=True y registra deleted_at.
 
-    Los datos no se eliminan físicamente para preservar el historial de partidos.
-    El jugador se excluye de listados normales (filtro is_deleted=False).
+    Verifica permiso + ownership/scope. Los datos no se eliminan físicamente
+    para preservar el historial de partidos. El jugador se excluye de listados
+    normales (filtro is_deleted=False).
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    player = _get_player_or_404(db, current_user, player_id)
     player.is_deleted = True
     player.deleted_at = datetime.now(timezone.utc)
     db.commit()
@@ -387,16 +404,15 @@ def delete_player(
 def restore_player(
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_RESTORE)),
 ):
-    """Restaura un jugador previamente eliminado (soft-delete)."""
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-        PlayerModel.is_deleted == True,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado o no está eliminado")
+    """Restaura un jugador previamente eliminado (soft-delete).
+
+    Exige el permiso players.restore (admin y entrenador; el jugador no lo
+    tiene). Verifica ownership/scope. Mantiene la semántica actual de
+    soft-delete: no elimina ni recrea datos.
+    """
+    player = _get_player_or_404(db, current_user, player_id, only_deleted=True)
     player.is_deleted = False
     player.deleted_at = None
     db.commit()
@@ -404,30 +420,30 @@ def restore_player(
 
 
 @router.post("/{player_id}/pdf-token")
+@limiter.limit("20/minute")
 def request_pdf_download_token(
+    request: Request,
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.REPORTS_GENERATE)),
 ):
     """Genera un token de descarga de corta duración (5 min) para exportar PDF.
 
-    El token es de un solo uso y evita exponer el JWT del usuario en la URL
-    de descarga. El frontend obtiene este token y lo pasa como query param
-    al endpoint GET /{player_id}/pdf.
+    Autorización: permiso reports.generate + scope (admin GLOBAL; entrenador y
+    jugador solo sus jugadores). El token es de corta duración y evita exponer
+    el JWT del usuario en la URL de descarga. Recurso ajeno/inexistente → 404.
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    # Scope vía RBAC centralizado: admin accede a cualquier jugador; resto, a los suyos.
+    _get_player_or_404(db, current_user, player_id)
     from app.core.security import create_download_token
     token = create_download_token(str(current_user.id), str(player_id))
     return {"download_token": token, "expires_in": 300}
 
 
 @router.get("/{player_id}/pdf")
+@limiter.limit("10/minute")
 def export_player_pdf_weasy(
+    request: Request,
     player_id: UUID,
     download_token: str | None = Query(None),
     db: Session = Depends(get_db),
@@ -435,37 +451,38 @@ def export_player_pdf_weasy(
 ):
     """Genera y devuelve el PDF del informe de scouting del jugador.
 
-    Soporta dos métodos de autenticación:
-    1. Bearer token JWT (para clientes API).
-    2. Download token por query param (para enlaces de descarga desde el frontend).
-
+    Autenticación: Bearer JWT (API) O download_token por query param.
+    Autorización (ambos caminos): permiso reports.download + scope (admin
+    GLOBAL; entrenador/jugador solo sus jugadores). El download_token NO es un
+    bypass de RBAC: se valida, se recupera el usuario y se comprueba que SIGUE
+    teniendo permiso y acceso. Recurso ajeno/inexistente → 404.
     El PDF incluye estadísticas, análisis IA, gráfico radar y plan de mejora.
     Generado con WeasyPrint a partir de una plantilla HTML.
     """
-    # Accept Bearer token (API client) OR short-lived download_token
-    if current_user is None and download_token:
+    # 1. Resolver identidad: Bearer (validado por _optional_auth) o download_token
+    if current_user is None:
+        if not download_token:
+            raise HTTPException(status_code=401, detail="Autenticación requerida")
         from app.core.security import decode_download_token
         from jose import JWTError
         try:
             payload = decode_download_token(download_token)
             uid = UUID(payload.get("sub"))
             pid = UUID(payload.get("player_id"))
-            if pid != player_id:
-                raise HTTPException(status_code=403, detail="Token no válido para este jugador")
         except (JWTError, ValueError):
             raise HTTPException(status_code=401, detail="Token inválido o expirado")
+        if pid != player_id:
+            raise HTTPException(status_code=403, detail="Token no válido para este jugador")
         current_user = db.query(UserModel).filter(UserModel.id == uid).first()
-        if not current_user:
-            raise HTTPException(status_code=401, detail="Usuario no encontrado")
-    elif current_user is None:
-        raise HTTPException(status_code=401, detail="Autenticación requerida")
+        if current_user is None or not current_user.is_active:
+            raise HTTPException(status_code=401, detail="Usuario no válido")
 
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    # 2. Autorización RBAC (misma política para ambos caminos): reports.download
+    if not has_permission(role_from_value(current_user.role), Permission.REPORTS_DOWNLOAD):
+        raise HTTPException(status_code=403, detail="No tienes permisos para esta acción")
+
+    # 3. Ownership/scope (admin GLOBAL; resto OWN) → 404 si no es accesible
+    player = _get_player_or_404(db, current_user, player_id)
 
     analysis = db.query(AnalysisModel).filter(
         AnalysisModel.player_id == player_id,
@@ -516,7 +533,7 @@ def export_player_pdf_weasy(
         pdf_bytes = generate_player_pdf(player_dict, analysis_dict)
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
-    filename = f"informe_{player.name.replace(' ','_')}.pdf"
+    filename = _safe_pdf_filename(player.name)
     return Response(pdf_bytes, media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'})
 
@@ -618,7 +635,7 @@ def add_match(
     player_id: UUID,
     data: MatchCreateSchema,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.MATCHES_CREATE)),
 ):
     """Registra un nuevo partido para un jugador.
 
@@ -629,12 +646,7 @@ def add_match(
     - Si el compañero está registrado en el sistema, envía una notificación.
     - Mantiene solo las últimas 50 notificaciones por usuario.
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    player = _get_player_or_404(db, current_user, player_id)
 
     # Verify tournament exists
     legacy_torneo = None
@@ -642,7 +654,7 @@ def add_match(
         tournament = db.query(TournamentModel).filter(
             TournamentModel.id == data.tournament_id,
         ).first()
-        if not tournament:
+        if not tournament or tournament.owner_id != player.owner_id:
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
         legacy_torneo = tournament.name  # set legacy torneo field for backward compat
 
@@ -672,16 +684,17 @@ def add_match(
                 partner_id = existing_partner_match.partner_id
                 partner_nombre = existing_partner_match.partner_nombre
 
-    # Verify partner_id belongs to same user
+    # El compañero debe pertenecer a la MISMA cuenta (owner_id) que el jugador
+    # principal. Esta restricción se aplica también al admin: nunca se mezclan
+    # propietarios en un partido.
     if partner_id is not None:
         partner_player = db.query(PlayerModel).filter(
             PlayerModel.id == partner_id,
-            PlayerModel.owner_id == current_user.id,
         ).first()
-        if not partner_player:
+        if not partner_player or partner_player.owner_id != player.owner_id:
             raise HTTPException(
                 status_code=400,
-                detail="El compañero seleccionado no existe o no pertenece a tu cuenta.",
+                detail="El compañero seleccionado no existe o no pertenece a la misma cuenta que el jugador.",
             )
         # Auto-fill partner_nombre from player name if not provided
         if not partner_nombre:
@@ -744,7 +757,7 @@ def get_matches(
     player_id: UUID,
     tournament_id: str | None = None,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.MATCHES_READ)),
 ):
     """Lista los últimos 20 partidos del jugador, opcionalmente filtrados por torneo.
 
@@ -752,12 +765,7 @@ def get_matches(
     - tournament_id=<UUID>: solo partidos de un torneo específico.
     - Sin tournament_id: todos los partidos.
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    player = _get_player_or_404(db, current_user, player_id)
 
     query = db.query(MatchModel).filter(
         or_(
@@ -801,17 +809,12 @@ def update_match(
     match_id: UUID,
     data: MatchCreateSchema,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.MATCHES_UPDATE)),
 ):
     """Actualiza un partido existente. Aplica las mismas reglas de validación
     de rondas que add_match, más la restricción adicional de que una derrota
     no puede moverse a una ronda superior."""
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    player = _get_player_or_404(db, current_user, player_id)
 
     match = db.query(MatchModel).filter(
         MatchModel.id == match_id,
@@ -829,7 +832,7 @@ def update_match(
         tournament = db.query(TournamentModel).filter(
             TournamentModel.id == data.tournament_id,
         ).first()
-        if not tournament:
+        if not tournament or tournament.owner_id != player.owner_id:
             raise HTTPException(status_code=404, detail="Torneo no encontrado")
         legacy_torneo = tournament.name
 
@@ -930,19 +933,14 @@ def delete_match(
     player_id: UUID,
     match_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.MATCHES_DELETE)),
 ):
     """Elimina un partido y sus notificaciones asociadas.
 
     La eliminación es física (DELETE). Las notificaciones vinculadas al
     partido también se eliminan para mantener la integridad referencial.
     """
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    player = _get_player_or_404(db, current_user, player_id)
 
     match = db.query(MatchModel).filter(
         MatchModel.id == match_id,

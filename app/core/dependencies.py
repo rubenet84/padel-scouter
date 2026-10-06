@@ -20,6 +20,12 @@ from sqlalchemy.orm import Session
 from app.core.security import decode_token
 from app.infrastructure.database.session import get_db
 from app.infrastructure.database.models import UserModel
+from app.domain.authorization.policy import (
+    Permission,
+    has_all_permissions,
+    has_any_permission,
+    role_from_value,
+)
 
 # Esquema OAuth2 para Swagger UI — espera token en header Authorization: Bearer <token>
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -112,6 +118,62 @@ def require_role(*roles: str):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Rol requerido: {roles}",
+            )
+        return current_user
+    return checker
+
+
+def require_permission(*permissions: Permission):
+    """Factory de dependencia que exige TODOS los permisos indicados (AND).
+
+    Semántica: require_permission(A, B) exige A **y** B.
+
+    Uso:
+        @router.post("/players", dependencies=[Depends(require_permission(Permission.PLAYERS_CREATE))])
+
+    La autorización se calcula siempre a partir del rol leído de la BD en
+    get_current_user (fuente de verdad), nunca del claim del JWT.
+
+    Fail-closed: un rol inválido no posee permisos; una llamada sin permisos es
+    un error de programación y se rechaza en el momento de su definición.
+    """
+    if not permissions:
+        raise ValueError(
+            "require_permission requiere al menos un permiso "
+            "(una lista vacía nunca debe conceder acceso)."
+        )
+
+    def checker(current_user: UserModel = Depends(get_current_user)):
+        role = role_from_value(current_user.role)
+        if not has_all_permissions(role, *permissions):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes permisos para esta acción",
+            )
+        return current_user
+    return checker
+
+
+def require_any_permission(*permissions: Permission):
+    """Factory de dependencia que exige AL MENOS UNO de los permisos (OR).
+
+    Semántica: require_any_permission(A, B) exige A **o** B.
+
+    Fail-closed: sin permisos indicados es error de programación; un rol
+    inválido no pasa.
+    """
+    if not permissions:
+        raise ValueError(
+            "require_any_permission requiere al menos un permiso "
+            "(una lista vacía nunca debe conceder acceso)."
+        )
+
+    def checker(current_user: UserModel = Depends(get_current_user)):
+        role = role_from_value(current_user.role)
+        if not has_any_permission(role, *permissions):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes permisos para esta acción",
             )
         return current_user
     return checker

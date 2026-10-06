@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.domain.value_objects.computed_stats import ComputedStats
 from app.domain.value_objects.rounds import best_round_info
-from app.infrastructure.repositories.player_repository import get_players_by_owner
+from app.services import access_service
 from app.schemas.stats import GlobalSummary, PlayerBrief
 
 
@@ -88,9 +88,12 @@ def _batch_compute_stats(db: Session, player_ids: list[UUID]) -> dict[UUID, Comp
     return stats_map
 
 
-def get_global_summary(db: Session, user_id: UUID) -> GlobalSummary:
-    """Aggregate totals + ranking leader + best win % for a single user."""
-    players = get_players_by_owner(db, user_id)
+def get_global_summary(db: Session, user) -> GlobalSummary:
+    """Aggregate totals + ranking leader + best win % for the accessible players.
+
+    El alcance (propios vs global-admin) lo decide access_service.
+    """
+    players = access_service.list_accessible_players(db, user)
 
     total_players = len(players)
 

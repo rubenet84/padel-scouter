@@ -12,13 +12,13 @@ from sqlalchemy.orm import Session
 from app.domain.value_objects.fep import compute_fep_points
 from app.domain.value_objects.metrics import _compute_player_metrics
 from app.infrastructure.repositories.match_repository import build_filters, fetch_match_rows
-from app.infrastructure.repositories.player_repository import get_players_by_owner
+from app.services import access_service
 from app.schemas.stats import CategoryDetail, TopPlayerEntry
 
 
 def get_category_details(
     db: Session,
-    user_id: UUID,
+    user,
     category: str | None = None,
     player_limit: int = 5,
     filters: dict | None = None,
@@ -26,7 +26,7 @@ def get_category_details(
     """Enhanced per-category stats. If category is None, returns ALL categories."""
     filters = filters or {}
 
-    players = get_players_by_owner(db, user_id)
+    players = access_service.list_accessible_players(db, user)
 
     if not players:
         return []

@@ -4,7 +4,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_permission
+from app.domain.authorization.policy import Permission
 from app.infrastructure.database.models import NotificationModel, UserModel
 from app.infrastructure.database.session import get_db
 
@@ -17,7 +18,7 @@ def list_notifications(
     player_id: str | None = Query(None, description="Filtrar por jugador"),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.NOTIFICATIONS_READ)),
 ):
     """Lista notificaciones del usuario, opcionalmente filtradas por jugador."""
     q = db.query(NotificationModel).filter(
@@ -50,7 +51,7 @@ def list_notifications(
 def unread_count(
     player_id: str | None = Query(None, description="Filtrar por jugador"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.NOTIFICATIONS_READ)),
 ):
     """Contador rápido de no leídas (para polling ligero)."""
     q = db.query(NotificationModel).filter(
@@ -67,7 +68,7 @@ def unread_count(
 def mark_read(
     notification_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.NOTIFICATIONS_UPDATE)),
 ):
     """Marca una notificación como leída."""
     n = db.query(NotificationModel).filter(
@@ -86,7 +87,7 @@ def mark_read(
 def mark_all_read(
     player_id: str | None = Query(None, description="Filtrar por jugador"),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.NOTIFICATIONS_UPDATE)),
 ):
     """Marca todas las notificaciones como leídas."""
     q = db.query(NotificationModel).filter(

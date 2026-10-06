@@ -205,3 +205,99 @@ class TestPasswordResetFlow:
             json={"token": token, "new_password": "debil"},
         )
         assert response.status_code == 422
+
+
+class TestRolesRegistro:
+    """Fase 3 — el registro crea siempre 'jugador' y no permite autoasignar rol."""
+
+    def _register_and_me(self, role_payload=None):
+        email = f"role_{uuid.uuid4().hex[:8]}@padel.com"
+        username = f"role_{uuid.uuid4().hex[:8]}"
+        payload = {
+            "email": email,
+            "username": username,
+            "password": STRONG_PASSWORD,
+        }
+        if role_payload is not None:
+            payload["role"] = role_payload  # intento de autoasignación
+        client.post("/api/v1/auth/register", json=payload)
+        login = client.post(
+            "/api/v1/auth/login",
+            json={"email": email, "password": STRONG_PASSWORD},
+        )
+        assert login.status_code == 200, f"Login falló: {login.json()}"
+        token = login.json()["access_token"]
+        me = client.get(
+            "/api/v1/auth/me",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert me.status_code == 200, f"/me falló: {me.json()}"
+        return me.json()
+
+    def test_registro_nuevo_recibe_jugador(self):
+        assert self._register_and_me()["role"] == "jugador"
+
+    def test_cliente_no_puede_registrarse_como_admin(self):
+        assert self._register_and_me("admin")["role"] == "jugador"
+
+    def test_cliente_no_puede_registrarse_como_entrenador(self):
+        assert self._register_and_me("entrenador")["role"] == "jugador"
+
+    def test_get_current_user_y_login_siguen_funcionando(self):
+        data = self._register_and_me()
+        assert "@padel.com" in data["email"]
+        assert data["role"] == "jugador"
+
+    def test_rol_invalido_no_persiste_por_check(self):
+        from sqlalchemy.exc import IntegrityError
+        from app.infrastructure.database.models import UserModel
+
+        db = TestSession()
+        try:
+            bad = UserModel(
+                email=f"bad_{uuid.uuid4().hex[:8]}@padel.com",
+                username=f"bad_{uuid.uuid4().hex[:8]}",
+                hashed_password="x",
+                role="superuser",  # inválido → debe violar ck_users_role
+            )
+            db.add(bad)
+            with pytest.raises(IntegrityError):
+                db.commit()
+        finally:
+            db.rollback()
+            db.close()
+
+
+class TestSuspension:
+    """Fase 4 — un usuario suspendido no puede usar la API con un token previo."""
+
+    def test_usuario_suspendido_bloqueado_con_token_previo(self):
+        from app.infrastructure.database.models import UserModel
+
+        email = f"susp_{uuid.uuid4().hex[:8]}@padel.com"
+        username = f"susp_{uuid.uuid4().hex[:8]}"
+        client.post("/api/v1/auth/register", json={
+            "email": email,
+            "username": username,
+            "password": STRONG_PASSWORD,
+        })
+        login = client.post("/api/v1/auth/login", json={
+            "email": email,
+            "password": STRONG_PASSWORD,
+        })
+        assert login.status_code == 200
+        token = login.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        # El token funciona mientras la cuenta está activa
+        assert client.get("/api/v1/auth/me", headers=headers).status_code == 200
+
+        # Suspender la cuenta (is_active = False)
+        db = TestSession()
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        user.is_active = False
+        db.commit()
+        db.close()
+
+        # El MISMO token ya no sirve: la BD es la fuente de verdad
+        assert client.get("/api/v1/auth/me", headers=headers).status_code == 401

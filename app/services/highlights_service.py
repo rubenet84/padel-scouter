@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from app.domain.value_objects.fep import compute_fep_points
 from app.domain.value_objects.metrics import _compute_player_metrics
 from app.infrastructure.repositories.match_repository import build_filters, fetch_match_rows
-from app.infrastructure.repositories.player_repository import get_players_by_owner
+from app.services import access_service
 from app.schemas.stats import (
     CommunityHighlights,
     EvolutionEntry,
@@ -24,11 +24,11 @@ from app.schemas.stats import (
 
 
 def get_records(
-    db: Session, user_id: UUID, filters: dict | None = None,
+    db: Session, user, filters: dict | None = None,
 ) -> list[PlayerRecord]:
     """Community records — top player for each metric."""
     filters = filters or {}
-    players = get_players_by_owner(db, user_id)
+    players = access_service.list_accessible_players(db, user)
 
     if not players:
         return []
@@ -81,11 +81,11 @@ def get_records(
 
 
 def get_evolution(
-    db: Session, user_id: UUID, filters: dict | None = None,
+    db: Session, user, filters: dict | None = None,
 ) -> list[EvolutionEntry]:
     """Returns current FEP points per player with empty sparkline array."""
     filters = filters or {}
-    players = get_players_by_owner(db, user_id)
+    players = access_service.list_accessible_players(db, user)
 
     if not players:
         return []
@@ -114,11 +114,11 @@ def get_evolution(
 
 
 def get_community_highlights(
-    db: Session, user_id: UUID, filters: dict | None = None,
+    db: Session, user, filters: dict | None = None,
 ) -> CommunityHighlights:
     """Community dashboard highlights: most points, best form, best pair, most active."""
     filters = filters or {}
-    players = get_players_by_owner(db, user_id)
+    players = access_service.list_accessible_players(db, user)
 
     if not players:
         return CommunityHighlights()

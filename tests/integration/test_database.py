@@ -30,7 +30,7 @@ class TestDatabaseConnection:
             email="test@padel.com",
             username="testuser",
             hashed_password="hashed_xxx",
-            role="viewer"
+            role="jugador"
         )
         db_session.add(user)
         db_session.commit()

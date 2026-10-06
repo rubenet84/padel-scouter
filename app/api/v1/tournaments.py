@@ -15,9 +15,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_permission
+from app.domain.authorization.policy import Permission
+from app.services import access_service
 from app.infrastructure.database.models import (
-    TournamentModel, UserModel, MatchModel,
+    TournamentModel, UserModel, MatchModel, PlayerModel,
 )
 from app.infrastructure.database.session import get_db
 from app.schemas.tournament import (
@@ -29,32 +31,58 @@ from app.schemas.tournament import (
 router = APIRouter(prefix="/tournaments", tags=["tournaments"])
 
 
+def _get_tournament_or_404(db: Session, user: UserModel, tournament_id: UUID) -> TournamentModel:
+    """Carga un torneo comprobando ownership/scope (admin GLOBAL; resto OWN).
+
+    Recurso ajeno o inexistente → 404 (no revela existencia).
+    """
+    tournament = db.query(TournamentModel).filter(
+        TournamentModel.id == tournament_id
+    ).first()
+    if tournament is None or not access_service.can_access_owner(user, tournament.owner_id):
+        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+    return tournament
+
+
+def _validate_tournament_player(db: Session, player_id: UUID | None, owner_id: UUID) -> None:
+    """El `player_id` asignado al torneo debe pertenecer al MISMO owner del torneo.
+
+    Aislamiento estricto: no se permiten torneos cuyo owner sea A y player_id de B.
+    Aplica también al admin. Si no se cumple → 404.
+    """
+    if player_id is None:
+        return
+    player = db.query(PlayerModel).filter(PlayerModel.id == player_id).first()
+    if player is None or player.owner_id != owner_id:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
+
 @router.post("/", response_model=TournamentPublicSchema, status_code=201)
 def create_tournament(
     data: TournamentCreateSchema,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.TOURNAMENTS_CREATE)),
 ):
-    """
-    Crear un nuevo torneo. Si se pasa player_id, el torneo se asigna
-    a ese jugador y la unicidad es por nombre + fecha + player_id.
+    """Crea un torneo. El owner es SIEMPRE el usuario autenticado.
 
-    Unicidad global: si ya existe un torneo con el mismo nombre y fecha,
-    se devuelve el existente en lugar de crear un duplicado. Esto permite
-    que múltiples usuarios compartan el mismo torneo.
-
-    OWASP:
-      - A01 (Broken Access Control): owner_id = current_user.id
-      - A03 (Injection): name validado por Pydantic (strip_html, max_length)
-      - A07 (Authentication): JWT requerido
+    Aislamiento por owner:
+    - La unicidad es por (owner_id, name, date): ya NO se reutiliza el torneo de
+      otro owner. Dos owners pueden tener "Liga Primavera" el mismo día como
+      filas distintas.
+    - Si se envía player_id, debe pertenecer al mismo owner del torneo (404 si no).
+    El cliente NO puede fijar owner_id (no está en el schema).
     """
     name_clean = data.name.strip()
+    owner_id = current_user.id
 
-    # Unicidad GLOBAL por nombre + fecha: si alguien ya creó un torneo
-    # con el mismo nombre y fecha, lo reutilizamos en vez de duplicar.
+    # El player_id asignado debe pertenecer al mismo owner que el torneo.
+    _validate_tournament_player(db, data.player_id, owner_id)
+
+    # Unicidad por owner + nombre + fecha (aislada por owner; nunca cruza owners).
     existing = db.query(TournamentModel).filter(
         TournamentModel.name == name_clean,
         TournamentModel.date == data.date,
+        TournamentModel.owner_id == owner_id,
     ).first()
     if existing:
         return existing
@@ -63,7 +91,7 @@ def create_tournament(
         name=name_clean,
         date=data.date,
         fep_points=data.fep_points or 0,
-        owner_id=current_user.id,
+        owner_id=owner_id,
         player_id=data.player_id,
     )
     db.add(tournament)
@@ -76,32 +104,32 @@ def create_tournament(
 def list_tournaments(
     player_id: UUID | None = None,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.TOURNAMENTS_READ)),
 ):
+    """Lista torneos según el scope del rol.
+
+    - Sin player_id: admin ve todos; entrenador/jugador solo los suyos.
+    - Con player_id: se valida que el jugador sea accesible (404 si ajeno o
+      inexistente); admin ve los del jugador de cualquier owner; el resto solo
+      si es suyo.
+
+    Aislamiento: nunca se filtra por un owner_id enviado por el cliente.
     """
-    Listar torneos.
+    is_global = access_service.is_global(current_user)
 
-    Si se pasa player_id, devuelve torneos donde ese jugador participa:
-      - Torneos donde el jugador tiene partidos
-      - Torneos asignados al jugador (player_id = X)
-      - Torneos sin asignar ni partidos (asignables)
-
-    Si no se pasa player_id, devuelve torneos creados por el usuario actual.
-
-    Incluye match_count para cada torneo vía agregación SQL.
-
-    OWASP:
-      - A01: scoped by player_id or ownership
-      - A07: JWT requerido
-    """
     if player_id is None:
-        # Fallback: torneos creados por el usuario actual
         query = (
             db.query(TournamentModel, func.count(MatchModel.id).label("match_count"))
             .outerjoin(MatchModel, MatchModel.tournament_id == TournamentModel.id)
-            .filter(TournamentModel.owner_id == current_user.id)
         )
+        if not is_global:
+            query = query.filter(TournamentModel.owner_id == current_user.id)
     else:
+        # Validar accesibilidad del jugador (404 si inexistente o ajeno)
+        player = db.query(PlayerModel).filter(PlayerModel.id == player_id).first()
+        if player is None or not access_service.can_access_owner(current_user, player.owner_id):
+            raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
         has_player_match = (
             db.query(MatchModel.id)
             .filter(
@@ -130,6 +158,8 @@ def list_tournaments(
                 and_(TournamentModel.player_id.is_(None), ~has_any_match),
             ))
         )
+        if not is_global:
+            query = query.filter(TournamentModel.owner_id == current_user.id)
 
     results = query.group_by(TournamentModel.id).order_by(TournamentModel.date.desc()).all()
 
@@ -152,23 +182,14 @@ def list_tournaments(
 def get_tournament(
     tournament_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.TOURNAMENTS_READ)),
 ):
-    """
-    Obtener un torneo por ID (acceso global por nombre+fecha).
+    """Obtiene un torneo por ID con comprobación de ownership/scope.
 
-    OWASP:
-      - A07: JWT requerido
+    Admin (GLOBAL) accede a cualquiera; entrenador/jugador solo a los suyos.
+    Torneo ajeno o inexistente → 404 (no revela existencia ni datos).
     """
-    tournament = (
-        db.query(TournamentModel)
-        .filter(
-            TournamentModel.id == tournament_id,
-        )
-        .first()
-    )
-    if not tournament:
-        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+    tournament = _get_tournament_or_404(db, current_user, tournament_id)
 
     match_count = (
         db.query(func.count(MatchModel.id))
@@ -194,38 +215,25 @@ def update_tournament(
     tournament_id: UUID,
     data: TournamentUpdateSchema,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.TOURNAMENTS_UPDATE)),
 ):
+    """Actualiza nombre, fecha y/o puntos FEP de un torneo.
+
+    Verifica permiso + ownership/scope (admin GLOBAL; resto OWN). Ajeno o
+    inexistente → 404. Si se cambia el nombre, actualiza el campo legacy
+    `torneo` de los partidos asociados. La validación de duplicados se acota
+    al MISMO owner del torneo.
     """
-    Actualizar nombre, fecha y/o puntos FEP de un torneo.
-
-    Si se cambia el nombre, se actualiza automáticamente el campo
-    `torneo` (legacy) en todos los partidos asociados.
-
-    La validación de duplicados respeta el player_id del torneo.
-
-    OWASP:
-      - A01: ownership check antes de mutar
-      - A03: input validado por Pydantic
-      - A07: JWT requerido
-    """
-    tournament = (
-        db.query(TournamentModel)
-        .filter(
-            TournamentModel.id == tournament_id,
-            TournamentModel.owner_id == current_user.id,
-        )
-        .first()
-    )
-    if not tournament:
-        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+    tournament = _get_tournament_or_404(db, current_user, tournament_id)
 
     effective_name = tournament.name
+    owner_id = tournament.owner_id
 
     def _dup_filter(name, date, exclude_id):
         f = [
             TournamentModel.name == name,
             TournamentModel.date == date,
+            TournamentModel.owner_id == owner_id,
             TournamentModel.id != exclude_id,
         ]
         return f
@@ -286,28 +294,15 @@ def update_tournament(
 def delete_tournament(
     tournament_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.TOURNAMENTS_DELETE)),
 ):
-    """
-    Eliminar un torneo solo si no tiene partidos asociados.
-    Si el torneo tiene player_id, solo revisa partidos de ESE jugador.
-    Si no tiene player_id (legacy), revisa todos los partidos.
+    """Elimina un torneo (hard delete) solo si no tiene partidos asociados.
 
-    OWASP:
-      - A01: ownership check antes de eliminar
-      - A03: consulta parametrizada (SQLAlchemy ORM)
-      - A07: JWT requerido
+    Verifica permiso + ownership/scope (admin GLOBAL; resto OWN). Ajeno o
+    inexistente → 404. Mantiene la regla funcional: no se puede eliminar si
+    tiene partidos. No hay soft delete ni restore.
     """
-    tournament = (
-        db.query(TournamentModel)
-        .filter(
-            TournamentModel.id == tournament_id,
-            TournamentModel.owner_id == current_user.id,
-        )
-        .first()
-    )
-    if not tournament:
-        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+    tournament = _get_tournament_or_404(db, current_user, tournament_id)
 
     match_count = (
         db.query(func.count(MatchModel.id))

@@ -14,7 +14,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_permission
+from app.domain.authorization.policy import Permission
+from app.services import access_service
 
 logger = logging.getLogger(__name__)
 from app.infrastructure.database.session import get_db
@@ -36,16 +38,37 @@ class GeminiClientWrapper:
         return analyze_player_with_ai(data)
 
 
+def _get_readable_player_or_404(db: Session, user: UserModel, player_id: UUID) -> PlayerModel:
+    """GET de análisis: resuelve el jugador por scope (admin GLOBAL) usando el
+    acceso centralizado (access_service). Recurso ajeno o inexistente → 404."""
+    player = db.query(PlayerModel).filter(PlayerModel.id == player_id).first()
+    if player is None or not access_service.can_access_owner(user, player.owner_id):
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    return player
+
+
+def _get_owned_player_or_404(db: Session, user: UserModel, player_id: UUID) -> PlayerModel:
+    """POST de análisis: exige ownership DIRECTO (owner_id == user.id), SIN el
+    alcance global del admin. Motivo: la generación llama a Gemini y tiene coste
+    externo, por lo que un admin no debe generar análisis de jugadores ajenos.
+    Recurso ajeno o inexistente → 404 (se comprueba ANTES de tocar la IA)."""
+    player = db.query(PlayerModel).filter(PlayerModel.id == player_id).first()
+    if player is None or player.owner_id != user.id:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    return player
+
+
 @router.post("/{player_id}", response_model=AnalysisPublicSchema, status_code=201)
 def analyze_player(
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.AI_ANALYZE)),
 ):
     """Ejecuta un análisis completo del jugador usando IA (Gemini).
 
     Flujo:
-    1. Verifica que el jugador pertenezca al usuario (OWASP A01).
+    1. Verifica ownership DIRECTO del jugador (owner_id == usuario). El admin
+       NO tiene bypass aquí: la generación consume Gemini y tiene coste externo.
     2. Construye la entidad de dominio Player desde el modelo de BD.
     3. Obtiene estadísticas computadas (torneos, win_rate, FEP).
     4. Ejecuta AnalyzePlayerUseCase que calcula power level, consulta
@@ -56,12 +79,8 @@ def analyze_player(
     El análisis se cachea en Redis para no gastar cuota de API en
     análisis repetidos del mismo jugador con los mismos stats.
     """
-    player_model = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player_model:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    # Ownership directo ANTES de cualquier cálculo costoso o llamada a Gemini.
+    player_model = _get_owned_player_or_404(db, current_user, player_id)
 
     # Construir entidad de dominio
     stats = PlayerStats(
@@ -138,21 +157,18 @@ def analyze_player(
 def get_player_analyses(
     player_id: UUID,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.PLAYERS_READ)),
 ):
     """Recupera el historial completo de análisis IA de un jugador.
 
+    Acceso por scope: jugador/entrenador solo a sus jugadores; admin GLOBAL
+    (puede leer análisis de cualquier owner). Recurso ajeno o inexistente → 404.
     Ordenados por fecha de creación (más reciente primero).
     Los campos JSON (strengths, weaknesses) se deserializan con manejo
     seguro de errores de formato.
     """
-    # OWASP A01: verificar que el player pertenece al usuario actual
-    player = db.query(PlayerModel).filter(
-        PlayerModel.id == player_id,
-        PlayerModel.owner_id == current_user.id,
-    ).first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    # Lectura: scope accesible (admin global) vía access_service centralizado.
+    _get_readable_player_or_404(db, current_user, player_id)
 
     analyses = db.query(AnalysisModel).filter(
         AnalysisModel.player_id == player_id

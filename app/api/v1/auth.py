@@ -43,7 +43,9 @@ def register(data: UserRegisterSchema, request: Request, db: Session = Depends(g
       minúscula, número, carácter especial).
     - Rate limit: 3 registros por minuto por IP.
 
-    El rol por defecto es "viewer". El usuario se crea activo.
+    El rol se asigna SIEMPRE como "jugador": el cliente no puede elegir su rol
+    ni autoasignarse "admin" o "entrenador". La promoción es una acción
+    exclusiva de administración. El usuario se crea activo.
     Se envía email de bienvenida de forma no bloqueante.
     """
     email = data.email.lower().strip()
@@ -57,7 +59,7 @@ def register(data: UserRegisterSchema, request: Request, db: Session = Depends(g
         email=email,
         username=data.username,
         hashed_password=hash_password(data.password),
-        role="viewer",
+        role="jugador",
     )
     db.add(user)
     db.commit()

@@ -14,7 +14,7 @@ from app.domain.value_objects.metrics import (
     compute_player_match_metrics,
 )
 from app.infrastructure.repositories.match_repository import build_filters, fetch_match_rows
-from app.infrastructure.repositories.player_repository import get_players_by_owner
+from app.services import access_service
 from app.schemas.stats import (
     PlayerRankRow,
     RankingResponse,
@@ -24,7 +24,7 @@ from app.schemas.stats import (
 
 
 def get_rankings(
-    db: Session, user_id: UUID,
+    db: Session, user,
     sort_by: str = "points", order: str = "desc",
     filters: dict | None = None,
     page: int = 1, page_size: int = 50,
@@ -36,7 +36,7 @@ def get_rankings(
     tipo de competición y rango de fechas."""
     filters = filters or {}
 
-    players = get_players_by_owner(db, user_id)
+    players = access_service.list_accessible_players(db, user)
 
     if not players:
         return RankingResponse(players=[], total=0, page=page, page_size=page_size, total_pages=0)
@@ -101,7 +101,7 @@ def get_rankings(
 
 
 def get_top_players(
-    db: Session, user_id: UUID, filters: dict | None = None,
+    db: Session, user, filters: dict | None = None,
 ) -> TopLists:
     """Devuelve 10 listas independientes top-5 de jugadores por diversas métricas.
 
@@ -109,7 +109,7 @@ def get_top_players(
     ganados, finales, semifinales, sets ganados, juegos ganados y racha."""
     filters = filters or {}
 
-    players = get_players_by_owner(db, user_id)
+    players = access_service.list_accessible_players(db, user)
 
     if not players:
         return TopLists()

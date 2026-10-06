@@ -16,7 +16,7 @@ from uuid import uuid4
 
 from sqlalchemy import (
     Column, String, Integer, Float, Boolean,
-    Date, DateTime, ForeignKey, Enum as SAEnum, Text
+    Date, DateTime, ForeignKey, Enum as SAEnum, Text, CheckConstraint
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, relationship
@@ -43,11 +43,18 @@ class UserModel(Base):
     email        = Column(String(255), unique=True, nullable=False, index=True)
     username     = Column(String(100), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
-    role         = Column(String(20), default="viewer", nullable=False)
+    role         = Column(String(20), default="jugador", nullable=False)
     is_active    = Column(Boolean, default=True, nullable=False)
     created_at   = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
 
     players    = relationship("PlayerModel", back_populates="owner")
+
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('admin', 'entrenador', 'jugador')",
+            name="ck_users_role",
+        ),
+    )
 
 
 class PlayerModel(Base):
@@ -212,3 +219,36 @@ class NotificationModel(Base):
     related_url = Column(String(300), nullable=True)
     is_read     = Column(Boolean, default=False, nullable=False)
     created_at  = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+
+
+# ── Audit log ───────────────────────────────────────────────────
+# Acciones administrativas sensibles registradas para trazabilidad.
+AUDIT_ROLE_CHANGED      = "role_changed"
+AUDIT_USER_SUSPENDED    = "user_suspended"
+AUDIT_USER_REACTIVATED  = "user_reactivated"
+AUDIT_TYPES = [
+    AUDIT_ROLE_CHANGED,
+    AUDIT_USER_SUSPENDED,
+    AUDIT_USER_REACTIVATED,
+]
+
+
+class AuditLogModel(Base):
+    """Registro de auditoría de acciones administrativas sensibles.
+
+    Guarda quién (actor_id) realizó qué acción (action) sobre qué recurso
+    (target_type / target_id) y cuándo. El campo `details` almacena datos
+    variables como JSON en texto (convención usada en el proyecto).
+
+    No registra operaciones normales de usuario, solo acciones relevantes de
+    administración (cambio de rol, suspensión, reactivación).
+    """
+    __tablename__ = "audit_log"
+
+    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    actor_id    = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    action      = Column(String(50),  nullable=False)
+    target_type = Column(String(30),  nullable=False)
+    target_id   = Column(UUID(as_uuid=True), nullable=True)
+    details     = Column(Text, nullable=True)
+    created_at  = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False, index=True)

@@ -13,12 +13,13 @@ from sqlalchemy.orm import Session
 from app.domain.value_objects.fep import compute_fep_points
 from app.domain.value_objects.metrics import _compute_player_metrics
 from app.infrastructure.repositories.match_repository import build_filters, fetch_match_rows
+from app.services import access_service
 from app.schemas.stats import ComparisonPlayer, ComparisonResult, H2HMatch, H2HResult
 
 
 def get_comparison(
     db: Session,
-    user_id: UUID,
+    user,
     p1_id: UUID,
     p2_id: UUID,
     filters: dict | None = None,
@@ -30,21 +31,25 @@ def get_comparison(
     juegos y racha."""
     filters = filters or {}
 
-    players = db.execute(
+    # Validar que ambos jugadores existen y son ACCESIBLES para el usuario.
+    # admin (Scope.GLOBAL): cualquiera; resto: solo los de su owner.
+    # Inaccesibles o inexistentes → ValueError → 404 (sin revelar existencia).
+    rows = db.execute(
         text("""
-            SELECT id, name, category, avatar_url
+            SELECT id, name, category, avatar_url, owner_id
             FROM players
-            WHERE id = ANY(:pids) AND owner_id = :uid
+            WHERE id = ANY(:pids)
         """),
-        {"pids": [p1_id, p2_id], "uid": user_id},
+        {"pids": [p1_id, p2_id]},
     ).fetchall()
 
-    if len(players) != 2:
-        found_ids = {p.id for p in players}
-        missing = [str(pid) for pid in [p1_id, p2_id] if pid not in found_ids]
-        raise ValueError(f"Players not found: {', '.join(missing)}")
+    accessible = [p for p in rows if access_service.can_access_owner(user, p.owner_id)]
+    if len(accessible) != 2:
+        available = {p.id for p in accessible}
+        unavailable = [str(pid) for pid in [p1_id, p2_id] if pid not in available]
+        raise ValueError(f"Players not found: {', '.join(unavailable)}")
 
-    p_map = {p.id: p for p in players}
+    p_map = {p.id: p for p in accessible}
     p1 = p_map[p1_id]
     p2 = p_map[p2_id]
     same_category = p1.category == p2.category
@@ -66,14 +71,10 @@ def get_comparison(
     notice = None
 
     if same_category:
-        cat_players = db.execute(
-            text("""
-                SELECT id
-                FROM players
-                WHERE owner_id = :uid AND category = :cat
-            """),
-            {"uid": user_id, "cat": p1.category},
-        ).fetchall()
+        cat_players = [
+            p for p in access_service.list_accessible_players(db, user)
+            if p.category == p1.category
+        ]
 
         if len(cat_players) > 1:
             cat_ids = [p.id for p in cat_players]
@@ -138,7 +139,7 @@ def get_comparison(
 
 def get_h2h(
     db: Session,
-    user_id: UUID,
+    user,
     p1_id: UUID,
     p2_id: UUID,
     filters: dict | None = None,
@@ -150,21 +151,22 @@ def get_h2h(
     sets, juegos de cada uno y devuelve el historial cronológico inverso."""
     filters = filters or {}
 
-    players = db.execute(
+    rows = db.execute(
         text("""
-            SELECT id, name
+            SELECT id, name, owner_id
             FROM players
-            WHERE id = ANY(:pids) AND owner_id = :uid
+            WHERE id = ANY(:pids)
         """),
-        {"pids": [p1_id, p2_id], "uid": user_id},
+        {"pids": [p1_id, p2_id]},
     ).fetchall()
 
-    if len(players) != 2:
-        found_ids = {p.id for p in players}
-        missing = [str(pid) for pid in [p1_id, p2_id] if pid not in found_ids]
-        raise ValueError(f"Players not found: {', '.join(missing)}")
+    accessible = [p for p in rows if access_service.can_access_owner(user, p.owner_id)]
+    if len(accessible) != 2:
+        available = {p.id for p in accessible}
+        unavailable = [str(pid) for pid in [p1_id, p2_id] if pid not in available]
+        raise ValueError(f"Players not found: {', '.join(unavailable)}")
 
-    p_map_name = {p.id: p.name for p in players}
+    p_map_name = {p.id: p.name for p in accessible}
 
     match_filter_keys = {"season", "competition_type", "date_from", "date_to"}
     match_filters = {k: v for k, v in filters.items() if k in match_filter_keys}

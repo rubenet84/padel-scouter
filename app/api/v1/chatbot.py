@@ -8,7 +8,8 @@ import hashlib
 import json
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_permission
+from app.domain.authorization.policy import Permission
 from app.core.rate_limit import limiter
 from app.infrastructure.ai.padel_rules_rag import PadelRulesRAG
 from app.infrastructure.cache.redis_client import redis_cache
@@ -39,7 +40,7 @@ def _cache_key(question: str) -> str:
 def ask_chatbot(
     payload: ChatRequest,
     request: Request,
-    current_user: UserModel = Depends(get_current_user),
+    current_user: UserModel = Depends(require_permission(Permission.AI_CHAT)),
 ):
     question = payload.question.strip()
     key = _cache_key(question)
