@@ -86,13 +86,29 @@ def _new_player_id(headers, name="Jugador"):
 
 class TestAdmin:
 
-    def test_admin_lista_global(self):
+    def test_admin_lista_solo_sus_jugadores(self):
+        # El listado /players/ es PERSONAL: owner-scoped también para admin.
         admin, _ = _register_and_login("admin")
+        propio = _new_player_id(admin, "PropioDelAdmin")
         owner, _ = _register_and_login("jugador")
-        pid = _new_player_id(owner, "PlayerDeJugador")
+        ajeno = _new_player_id(owner, "PlayerDeJugador")
         listed = client.get("/api/v1/players/", headers=admin)
         assert listed.status_code == 200
-        assert pid in [p["id"] for p in listed.json()]
+        ids = [p["id"] for p in listed.json()]
+        assert propio in ids
+        assert ajeno not in ids
+
+    def test_admin_lista_vacia_sin_jugadores(self):
+        # Un admin sin jugadores propios ve su listado personal vacío,
+        # aunque existan jugadores de otros owners.
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        ajeno = _new_player_id(owner, "DeOtroOwner")
+        listed = client.get("/api/v1/players/", headers=admin)
+        assert listed.status_code == 200
+        ids = [p["id"] for p in listed.json()]
+        assert ids == []
+        assert ajeno not in ids
 
     def test_admin_accede_a_jugador_ajeno(self):
         admin, _ = _register_and_login("admin")
@@ -134,6 +150,16 @@ class TestEntrenador:
         coach_b, _ = _register_and_login("entrenador")
         pid_b = _new_player_id(coach_b, "DeB")
         assert client.get(f"/api/v1/players/{pid_b}", headers=coach_a).status_code == 404
+
+    def test_lista_excluye_jugador_de_admin(self):
+        # El listado personal de un entrenador excluye jugadores de OTRO rol.
+        coach, _ = _register_and_login("entrenador")
+        pid_coach = _new_player_id(coach, "Mio")
+        admin, _ = _register_and_login("admin")
+        pid_admin = _new_player_id(admin, "DeAdmin")
+        ids = [p["id"] for p in client.get("/api/v1/players/", headers=coach).json()]
+        assert pid_coach in ids
+        assert pid_admin not in ids
 
     def test_no_modifica_jugador_ajeno(self):
         coach_a, _ = _register_and_login("entrenador")
@@ -179,6 +205,16 @@ class TestJugador:
         b, _ = _register_and_login("jugador")
         pid_b = _new_player_id(b, "DeB")
         assert client.get(f"/api/v1/players/{pid_b}", headers=a).status_code == 404
+
+    def test_lista_excluye_jugador_de_entrenador(self):
+        # El listado personal de un jugador excluye jugadores de OTRO rol.
+        user, _ = _register_and_login("jugador")
+        pid_user = _new_player_id(user, "Mio")
+        coach, _ = _register_and_login("entrenador")
+        pid_coach = _new_player_id(coach, "DeCoach")
+        ids = [p["id"] for p in client.get("/api/v1/players/", headers=user).json()]
+        assert pid_user in ids
+        assert pid_coach not in ids
 
     def test_no_modifica_elimina_ajeno(self):
         a, _ = _register_and_login("jugador")

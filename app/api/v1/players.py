@@ -138,19 +138,22 @@ def list_players(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(require_permission(Permission.PLAYERS_READ)),
 ):
-    """Lista los jugadores activos visibles según el alcance del rol.
+    """Lista PERSONAL de jugadores activos del usuario autenticado.
 
-    - admin → todos (global);
-    - entrenador / jugador → solo los suyos (owner_id).
+    Es el listado del dashboard (grid de jugadores + dropdown de compañeros).
+    Está owner-scoped para TODOS los roles, admin incluido: siempre devuelve
+    solo los jugadores con owner_id == current_user.id. No existe consumidor
+    administrativo que necesite aquí una lista global de jugadores (la lista
+    global de USUARIOS vive en /admin/users).
 
-    El filtro lo aplica access_service.apply_owner_scope, por lo que no existe
-    ningún parámetro que permita eliminar el ownership.
+    El filtro lo aplica access_service.apply_owner_scope con personal=True, por
+    lo que no existe ningún parámetro que permita eliminar el ownership.
 
     Enriquece cada jugador con su último power_level del análisis IA
     más reciente, usando una subquery optimizada con DISTINCT ON.
     """
     players = access_service.apply_owner_scope(
-        db.query(PlayerModel), current_user
+        db.query(PlayerModel), current_user, personal=True
     ).filter(
         PlayerModel.is_deleted == False,
     ).all()

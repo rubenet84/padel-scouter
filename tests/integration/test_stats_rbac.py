@@ -82,6 +82,18 @@ def _summary(headers):
     return r.json()["data"]
 
 
+def _summary_personal(headers):
+    r = client.get("/api/v1/stats/summary?personal=true", headers=headers)
+    assert r.status_code == 200, r.json()
+    return r.json()["data"]
+
+
+def _ranking_ids_personal(headers):
+    r = client.get("/api/v1/stats/ranking?page_size=200&personal=true", headers=headers)
+    assert r.status_code == 200, r.json()
+    return [p["id"] for p in r.json()["data"]["players"]]
+
+
 # ── JUGADOR ────────────────────────────────────────────────────
 
 class TestJugadorStats:
@@ -180,6 +192,25 @@ class TestAdminStats:
         ids = _ranking_ids(admin)
         assert pa in ids      # jugador de otro owner
         assert pb in ids      # jugador de otro owner distinto
+
+    def test_summary_personal_solo_sus_jugadores(self):
+        # Con personal=true el resumen del admin cuenta SOLO sus jugadores.
+        admin, _ = _register_and_login("admin")
+        _new_player(admin, "AdminPropio1")
+        _new_player(admin, "AdminPropio2")
+        owner, _ = _register_and_login("jugador")
+        _new_player(owner, "Ajeno")
+        assert _summary_personal(admin)["total_players"] == 2
+
+    def test_ranking_personal_excluye_ajenos(self):
+        # Con personal=true el ranking del admin excluye jugadores ajenos.
+        admin, _ = _register_and_login("admin")
+        propio = _new_player(admin, "AdminPropio")
+        owner, _ = _register_and_login("jugador")
+        ajeno = _new_player(owner, "Ajeno")
+        ids = _ranking_ids_personal(admin)
+        assert propio in ids
+        assert ajeno not in ids
 
     def test_compare_cross_owner_ok(self):
         admin, _ = _register_and_login("admin")

@@ -55,30 +55,46 @@ def is_global(user) -> bool:
     return resolve_scope_for(user) is Scope.GLOBAL
 
 
-def list_accessible_players(db: Session, user) -> list:
+def list_accessible_players(db: Session, user, personal: bool = False) -> list:
     """Jugadores accesibles según el alcance EXPLÍCITO del usuario.
 
     - Scope.GLOBAL (admin): todos los jugadores (consulta sin filtro de owner).
     - Scope.OWN / ROSTER / rol inválido: solo los del propio owner (fail-closed).
 
+    Override `personal`: cuando es True (contexto dashboard/personal) SIEMPRE se
+    fuerza el ownership (get_players_by_owner) para TODOS los roles, admin
+    incluido, ignorando el alcance global. Así el dashboard de un admin muestra
+    sus propios jugadores y no los de toda la comunidad. Por defecto (False) se
+    conserva el alcance derivado del rol.
+
     El alcance se deriva del rol (política central), NUNCA de un owner_id
     ausente o None. El filtrado se resuelve en la base de datos (con o sin
     cláusula de owner), sin materializar conjuntos innecesarios.
     """
+    if personal:
+        return get_players_by_owner(db, user.id)
     if resolve_scope_for(user) is Scope.GLOBAL:
         return get_all_players(db)
     return get_players_by_owner(db, user.id)
 
 
-def apply_owner_scope(query, user):
+def apply_owner_scope(query, user, personal: bool = False):
     """Aplica el filtro de ownership a una query ORM de PlayerModel.
 
     - Scope.GLOBAL (admin): sin filtro (acceso a todos).
     - Scope.OWN / Scope.ROSTER: owner_id == user.id.
 
+    Override `personal`: cuando es True (contexto dashboard/personal) SIEMPRE
+    filtra por owner_id == user.id para TODOS los roles, admin incluido,
+    ignorando el alcance global. Así el listado personal del dashboard queda
+    owner-scoped aunque el usuario sea admin. Por defecto (False) se conserva
+    el alcance derivado del rol.
+
     Fail-closed: un rol inválido resuelve a OWN, por lo que SIEMPRE filtra por
     el propio usuario; nunca concede acceso global por rol desconocido.
     """
+    if personal:
+        return query.filter(PlayerModel.owner_id == user.id)
     if resolve_scope_for(user) is Scope.GLOBAL:
         return query
     return query.filter(PlayerModel.owner_id == user.id)

@@ -29,11 +29,17 @@ router = APIRouter(prefix="/stats", tags=["stats"])
 
 @router.get("/summary", response_model=ApiResponse)
 def get_summary(
+    personal: bool = Query(False, description="Owner-scoped personal view"),
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
-    """Resumen global: totales agregados + líder de ranking + mejor % victorias."""
-    data = get_global_summary(db, current_user)
+    """Resumen global: totales agregados + líder de ranking + mejor % victorias.
+
+    Con `personal=true` se restringe a los jugadores del propio owner (contexto
+    dashboard, para todos los roles incluido admin). Por defecto conserva el
+    alcance global por rol (usado por la página de comunidad).
+    """
+    data = get_global_summary(db, current_user, personal=personal)
     return ApiResponse(success=True, data=data.model_dump())
 
 
@@ -50,10 +56,16 @@ def get_ranking(
     date_to: str | None = Query(None, description="End date (YYYY-MM-DD)"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(50, ge=1, le=200, description="Items per page"),
+    personal: bool = Query(False, description="Owner-scoped personal view"),
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(require_permission(Permission.STATS_READ)),
 ):
-    """Ranking completo con ordenación, filtros y paginación."""
+    """Ranking completo con ordenación, filtros y paginación.
+
+    Con `personal=true` se restringe a los jugadores del propio owner (contexto
+    dashboard, para todos los roles incluido admin). Por defecto conserva el
+    alcance global por rol (usado por la página de comunidad).
+    """
     filters = {
         "category": category,
         "season": season,
@@ -69,6 +81,7 @@ def get_ranking(
         filters=filters,
         page=page,
         page_size=page_size,
+        personal=personal,
     )
     return ApiResponse(success=True, data=data.model_dump())
 

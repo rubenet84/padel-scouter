@@ -28,15 +28,19 @@ def get_rankings(
     sort_by: str = "points", order: str = "desc",
     filters: dict | None = None,
     page: int = 1, page_size: int = 50,
+    personal: bool = False,
 ) -> RankingResponse:
     """Ranking completo con puntos FEP, estadísticas y paginación.
 
     Soporta ordenación por múltiples criterios (puntos, victorias, % victorias,
     partidos, sets, juegos, racha, nombre) y filtrado por categoría, temporada,
-    tipo de competición y rango de fechas."""
+    tipo de competición y rango de fechas.
+
+    Con `personal=True` se fuerza el ownership para todos los roles (contexto
+    dashboard); con `personal=False` se conserva el alcance global por rol."""
     filters = filters or {}
 
-    players = access_service.list_accessible_players(db, user)
+    players = access_service.list_accessible_players(db, user, personal=personal)
 
     if not players:
         return RankingResponse(players=[], total=0, page=page, page_size=page_size, total_pages=0)

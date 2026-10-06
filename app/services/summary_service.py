@@ -88,12 +88,14 @@ def _batch_compute_stats(db: Session, player_ids: list[UUID]) -> dict[UUID, Comp
     return stats_map
 
 
-def get_global_summary(db: Session, user) -> GlobalSummary:
+def get_global_summary(db: Session, user, personal: bool = False) -> GlobalSummary:
     """Aggregate totals + ranking leader + best win % for the accessible players.
 
-    El alcance (propios vs global-admin) lo decide access_service.
+    El alcance (propios vs global-admin) lo decide access_service. Con
+    `personal=True` se fuerza el ownership para todos los roles (contexto
+    dashboard); con `personal=False` se conserva el alcance global por rol.
     """
-    players = access_service.list_accessible_players(db, user)
+    players = access_service.list_accessible_players(db, user, personal=personal)
 
     total_players = len(players)
 

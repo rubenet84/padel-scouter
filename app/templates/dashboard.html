@@ -749,7 +749,7 @@ function computePowerLevel(stats) {
 // ── Load dashboard stats ─────────────────────────────────────
 async function loadStats() {
   try {
-    const res = await fetch('/api/v1/stats/summary', {
+    const res = await fetch('/api/v1/stats/summary?personal=true', {
       headers: {'Authorization': `Bearer ${token}`}
     });
     if (!res.ok) return;
@@ -879,7 +879,7 @@ async function loadStreak() {
   const label = document.getElementById('insight-streak');
   const bars = document.getElementById('insight-streak-bars');
   try {
-    const res = await fetch('/api/v1/stats/ranking?sort_by=streak&order=desc&page_size=1', {
+    const res = await fetch('/api/v1/stats/ranking?sort_by=streak&order=desc&page_size=1&personal=true', {
       headers: {'Authorization': `Bearer ${token}`}
     });
     if (!res.ok) { label.textContent = '—'; return; }
