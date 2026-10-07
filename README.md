@@ -85,6 +85,7 @@ Padel Scouter es una plataforma web completa que permite:
 | Chatbot de reglamento con RAG | ✅ |
 | Arquitectura limpia, mantenible y escalable | ✅ |
 | Seguridad según OWASP Top 10 | ✅ |
+| RBAC y panel de administración de usuarios | ✅ |
 | Cobertura de tests automatizados | ✅ |
 | Documentación profesional lista para portfolio | ✅ |
 
@@ -146,8 +147,8 @@ Padel Scouter es una plataforma web completa que permite:
 - **Power Level**: puntuación compuesta (0–9999) que integra técnica (45%), físico (25%), mental (20%) y rendimiento competitivo (10%)
 - **Clasificación automática** por categoría según Power Level
 - **Evolución temporal**: gráficos de progresión de puntos FEP y balance mensual de victorias/derrotas
-- **Comparador**: estadísticas lado a lado entre dos jugadores propios
-- **Historial H2H**: enfrentamientos directos con detalle de sets y juegos (solo entre jugadores propios)
+- **Comparador**: estadísticas lado a lado entre dos jugadores propios (solo disponible para roles con el permiso `stats.compare`: entrenador y admin)
+- **Historial H2H**: enfrentamientos directos con detalle de sets y juegos, solo entre jugadores propios (solo disponible para roles con el permiso `stats.compare`: entrenador y admin)
 - **Top 10**: rankings por puntos, victorias, % victorias, partidos, torneos ganados, finales, semifinales, sets, juegos y racha (sobre los jugadores propios)
 - **Récords**: mejor jugador propio en cada métrica
 - **Resumen global**: totales agregados del usuario, líder de su ranking y mejor porcentaje de victorias
@@ -217,7 +218,7 @@ Tres roles, con su alcance de datos y límite de jugadores:
 - **Permisos granulares** con nomenclatura `recurso.accion` (27 permisos): `users.*`, `players.*`, `matches.*`, `stats.*`, `ai.*`, `reports.*`, `tournaments.*`, `notifications.*`, `audit.read` y `system.manage`. Los endpoints protegidos usan `require_permission(...)`.
 - **Scopes de datos**: `OWN` (solo recursos con `owner_id` propio), `ROSTER` (ámbito del entrenador) y `GLOBAL` (todos los recursos).
 - **Ownership** por `players.owner_id`: se asigna **en el servidor** desde el usuario autenticado (el cliente no puede fijarlo) y determina qué jugadores ve cada usuario.
-- **Lectura vs. escritura**: el `admin` conserva la **lectura** de jugadores por ID (necesaria para las vistas de comunidad), pero **no puede modificar ni eliminar recursos ajenos**: las operaciones de escritura sobre jugadores, partidos o torneos de otro propietario responden **404** (mismo comportamiento que para cualquier usuario) y no hay bypass por UUID en la API.
+- **Lectura vs. escritura**: el `admin` conserva la **lectura** de jugadores por ID, pero **no puede modificar ni eliminar recursos ajenos**: las operaciones de escritura sobre jugadores, partidos o torneos de otro propietario responden **404** (mismo comportamiento que para cualquier usuario) y no hay bypass por UUID en la API.
 
 ### 🧑‍💼 Panel de administración (`/admin/users`)
 
