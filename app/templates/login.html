@@ -569,7 +569,12 @@ async function doLogin() {
       txt.textContent = 'Entrar';
       btn.disabled = false;
       btn.style.opacity = '1';
-      showError('Credenciales incorrectas. Comprueba tu email y contraseña.');
+      let msg = 'Credenciales incorrectas. Comprueba tu email y contraseña.';
+      const err = await res.json().catch(() => null);
+      if (res.status === 400 && err && err.detail === 'Usuario inactivo') {
+        msg = 'Tu cuenta está suspendida. Contacta con un administrador.';
+      }
+      showError(msg);
     }
   } catch {
     txt.textContent = 'Entrar';
