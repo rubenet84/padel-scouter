@@ -1,9 +1,13 @@
 """
 Tests de integración RBAC del bloque STATS (app/api/v1/stats.py).
 
-Cubren: aislamiento por owner en `/stats/*`, scope global de admin,
-comparaciones cross-owner (admin) y 404 para jugadores inaccesibles,
-más IDOR en los sub-recursos de player (/players/{id}/evolution|analytics).
+Cubren: resolución OWNER-ONLY de TODOS los endpoints `/stats/*` (mismo criterio
+que el dashboard: `owner_id == current_user.id`) para TODOS los roles, admin
+incluido; comparación/H2H estricta por owner (404 si algún jugador es ajeno,
+también para admin); 403 sin el permiso `stats.compare`; y regresiones de
+frontera (`/admin/users` sigue siendo GLOBAL para admin, `/players/*` sin
+cambios). Además, IDOR en los sub-recursos de player
+(/players/{id}/evolution|analytics).
 Requieren PostgreSQL local en localhost:5432.
 """
 import uuid
@@ -82,16 +86,51 @@ def _summary(headers):
     return r.json()["data"]
 
 
-def _summary_personal(headers):
-    r = client.get("/api/v1/stats/summary?personal=true", headers=headers)
+def _top_player_ids(headers):
+    r = client.get("/api/v1/stats/top", headers=headers)
     assert r.status_code == 200, r.json()
-    return r.json()["data"]
+    return {
+        entry["player_id"]
+        for entries in r.json()["data"].values()
+        for entry in entries
+    }
 
 
-def _ranking_ids_personal(headers):
-    r = client.get("/api/v1/stats/ranking?page_size=200&personal=true", headers=headers)
+def _record_player_ids(headers):
+    r = client.get("/api/v1/stats/records", headers=headers)
     assert r.status_code == 200, r.json()
-    return [p["id"] for p in r.json()["data"]["players"]]
+    return {rec["player_id"] for rec in r.json()["data"]}
+
+
+def _category_player_ids(headers):
+    r = client.get("/api/v1/stats/categories", headers=headers)
+    assert r.status_code == 200, r.json()
+    return {
+        tp["player_id"]
+        for cat in r.json()["data"]
+        for tp in cat["top_players"]
+    }
+
+
+def _evolution_player_ids(headers):
+    r = client.get("/api/v1/stats/evolution", headers=headers)
+    assert r.status_code == 200, r.json()
+    return {e["player_id"] for e in r.json()["data"]}
+
+
+def _community_player_ids(headers):
+    r = client.get("/api/v1/stats/community", headers=headers)
+    assert r.status_code == 200, r.json()
+    data = r.json()["data"]
+    ids = set()
+    for key in ("most_points", "best_form", "most_active"):
+        if data.get(key):
+            ids.add(data[key]["id"])
+    best_pair = data.get("best_pair")
+    if best_pair:
+        ids.add(str(best_pair["player1_id"]))
+        ids.add(str(best_pair["player2_id"]))
+    return ids
 
 
 # ── JUGADOR ────────────────────────────────────────────────────
@@ -145,6 +184,42 @@ class TestJugadorStats:
         assert r.status_code == 403
 
 
+# ── AISLAMIENTO POR OWNER (entrenador y jugador) ───────────────
+
+class TestStatsOwnerIsolation:
+
+    @pytest.mark.parametrize("role", ["entrenador", "jugador"])
+    def test_listados_nunca_incluyen_jugadores_ajenos(self, role):
+        a, _ = _register_and_login(role)
+        a1 = _new_player(a, "A1")
+        a2 = _new_player(a, "A2")
+        b, _ = _register_and_login(role)
+        b1 = _new_player(b, "B1")
+        b2 = _new_player(b, "B2")
+
+        own = {a1, a2}
+        foreign = {b1, b2}
+
+        assert _summary(a)["total_players"] == 2
+
+        rank = set(_ranking_ids(a))
+        assert own <= rank
+        assert not (foreign & rank)
+
+        assert not (foreign & _top_player_ids(a))
+        assert not (foreign & _record_player_ids(a))
+
+        cats = _category_player_ids(a)
+        assert own <= cats
+        assert not (foreign & cats)
+
+        evo = _evolution_player_ids(a)
+        assert own <= evo
+        assert not (foreign & evo)
+
+        assert not (foreign & _community_player_ids(a))
+
+
 # ── ENTRENADOR ─────────────────────────────────────────────────
 
 class TestEntrenadorStats:
@@ -170,6 +245,12 @@ class TestEntrenadorStats:
         p_other = _new_player(other, "Ajeno")
         assert client.get(f"/api/v1/stats/compare/{c1}/{p_other}", headers=coach).status_code == 404
 
+    def test_h2h_solo_entre_suyos(self):
+        coach, _ = _register_and_login("entrenador")
+        c1 = _new_player(coach, "Alumno1")
+        c2 = _new_player(coach, "Alumno2")
+        assert client.get(f"/api/v1/stats/h2h/{c1}/{c2}", headers=coach).status_code == 200
+
     def test_h2h_jugador_ajeno_404(self):
         coach, _ = _register_and_login("entrenador")
         c1 = _new_player(coach, "Alumno1")
@@ -178,61 +259,142 @@ class TestEntrenadorStats:
         assert client.get(f"/api/v1/stats/h2h/{c1}/{p_other}", headers=coach).status_code == 404
 
 
-# ── ADMIN ──────────────────────────────────────────────────────
+# ── ADMIN (owner-only para TODOS los roles, admin incluido) ────
 
 class TestAdminStats:
+    """El admin NO tiene bypass de lectura en `/stats/*`: igual que el
+    dashboard, ve SOLO sus propios jugadores (`owner_id == admin.id`)."""
 
-    def test_ve_datos_de_multiples_owners(self):
+    def test_listados_solo_propios(self):
         admin, _ = _register_and_login("admin")
-        owner_a, _ = _register_and_login("jugador")
-        owner_b, _ = _register_and_login("jugador")
-        pa = _new_player(owner_a, "OwnerA")
-        pb = _new_player(owner_b, "OwnerB")
-
-        ids = _ranking_ids(admin)
-        assert pa in ids      # jugador de otro owner
-        assert pb in ids      # jugador de otro owner distinto
-
-    def test_summary_personal_solo_sus_jugadores(self):
-        # Con personal=true el resumen del admin cuenta SOLO sus jugadores.
-        admin, _ = _register_and_login("admin")
-        _new_player(admin, "AdminPropio1")
-        _new_player(admin, "AdminPropio2")
+        a1 = _new_player(admin, "AdminA")
+        a2 = _new_player(admin, "AdminB")
         owner, _ = _register_and_login("jugador")
-        _new_player(owner, "Ajeno")
-        assert _summary_personal(admin)["total_players"] == 2
+        f1 = _new_player(owner, "Ajeno1")
+        f2 = _new_player(owner, "Ajeno2")
 
-    def test_ranking_personal_excluye_ajenos(self):
-        # Con personal=true el ranking del admin excluye jugadores ajenos.
+        own = {a1, a2}
+        foreign = {f1, f2}
+
+        assert _summary(admin)["total_players"] == 2
+        assert set(_ranking_ids(admin)) == own
+
+        assert not (foreign & _top_player_ids(admin))
+        assert not (foreign & _record_player_ids(admin))
+        assert not (foreign & _category_player_ids(admin))
+        assert set(_evolution_player_ids(admin)) == own
+        assert not (foreign & _community_player_ids(admin))
+
+    def test_personal_param_no_filtra_datos_globales(self):
+        # `personal` es ignorado: ni `personal=false` ni `personal=true` cambian
+        # el alcance owner-only del admin.
         admin, _ = _register_and_login("admin")
-        propio = _new_player(admin, "AdminPropio")
+        own = _new_player(admin, "AdminP")
         owner, _ = _register_and_login("jugador")
-        ajeno = _new_player(owner, "Ajeno")
-        ids = _ranking_ids_personal(admin)
-        assert propio in ids
-        assert ajeno not in ids
+        foreign = _new_player(owner, "AjenoP")
 
-    def test_compare_cross_owner_ok(self):
-        admin, _ = _register_and_login("admin")
-        owner_a, _ = _register_and_login("jugador")
-        owner_b, _ = _register_and_login("jugador")
-        pa = _new_player(owner_a, "OwnerA")
-        pb = _new_player(owner_b, "OwnerB")
-        assert client.get(f"/api/v1/stats/compare/{pa}/{pb}", headers=admin).status_code == 200
+        for qs in ("", "&personal=true", "&personal=false"):
+            r = client.get(f"/api/v1/stats/ranking?page_size=200{qs}", headers=admin)
+            assert r.status_code == 200, r.json()
+            ids = {p["id"] for p in r.json()["data"]["players"]}
+            assert own in ids
+            assert foreign not in ids
 
-    def test_h2h_cross_owner_ok(self):
+        for qs in ("", "?personal=true", "?personal=false"):
+            r = client.get(f"/api/v1/stats/summary{qs}", headers=admin)
+            assert r.status_code == 200, r.json()
+            assert r.json()["data"]["total_players"] == 1
+
+    def test_compare_ajeno_404(self):
         admin, _ = _register_and_login("admin")
+        own = _new_player(admin, "AdminOwn")
+        own2 = _new_player(admin, "AdminOwn2")
+
         owner_a, _ = _register_and_login("jugador")
+        foreign_a = _new_player(owner_a, "AjenoA")
         owner_b, _ = _register_and_login("jugador")
-        pa = _new_player(owner_a, "OwnerA")
-        pb = _new_player(owner_b, "OwnerB")
-        assert client.get(f"/api/v1/stats/h2h/{pa}/{pb}", headers=admin).status_code == 200
+        foreign_b = _new_player(owner_b, "AjenoB")
+
+        # admin + ajeno → 404 (owner estricto, sin bypass admin)
+        assert client.get(f"/api/v1/stats/compare/{own}/{foreign_a}", headers=admin).status_code == 404
+        # dos ajenos → 404
+        assert client.get(f"/api/v1/stats/compare/{foreign_a}/{foreign_b}", headers=admin).status_code == 404
+        # par propio del admin → 200
+        assert client.get(f"/api/v1/stats/compare/{own}/{own2}", headers=admin).status_code == 200
+
+    def test_h2h_ajeno_404(self):
+        admin, _ = _register_and_login("admin")
+        own = _new_player(admin, "AdminOwnH")
+        own2 = _new_player(admin, "AdminOwnH2")
+
+        owner_a, _ = _register_and_login("jugador")
+        foreign_a = _new_player(owner_a, "AjenoHA")
+        owner_b, _ = _register_and_login("jugador")
+        foreign_b = _new_player(owner_b, "AjenoHB")
+
+        assert client.get(f"/api/v1/stats/h2h/{own}/{foreign_a}", headers=admin).status_code == 404
+        assert client.get(f"/api/v1/stats/h2h/{foreign_a}/{foreign_b}", headers=admin).status_code == 404
+        assert client.get(f"/api/v1/stats/h2h/{own}/{own2}", headers=admin).status_code == 200
 
     def test_compare_inexistente_404(self):
         admin, _ = _register_and_login("admin")
         pa = _new_player(admin, "AdminP")
         r = client.get(f"/api/v1/stats/compare/{pa}/{uuid.uuid4()}", headers=admin)
         assert r.status_code == 404
+
+
+# ── REGRESIONES DE FRONTERA (no deben cambiar) ─────────────────
+
+class TestBoundaryRegressions:
+
+    def test_admin_users_sigue_siendo_global_para_admin(self):
+        admin, _ = _register_and_login("admin")
+        _, uid = _register_and_login("jugador")
+        db = TestSession()
+        email = db.query(UserModel).filter(UserModel.id == uid).first().email
+        db.close()
+        r = client.get(f"/api/v1/admin/users?search={email}", headers=admin)
+        assert r.status_code == 200
+        assert r.json()["total"] == 1
+
+    def test_admin_users_403_para_coach_y_jugador(self):
+        coach, _ = _register_and_login("entrenador")
+        assert client.get("/api/v1/admin/users", headers=coach).status_code == 403
+        user, _ = _register_and_login("jugador")
+        assert client.get("/api/v1/admin/users", headers=user).status_code == 403
+
+    def test_players_list_sigue_owner_scoped(self):
+        a, _ = _register_and_login("entrenador")
+        own = _new_player(a, "PropioLista")
+        b, _ = _register_and_login("entrenador")
+        foreign = _new_player(b, "AjenoLista")
+
+        r = client.get("/api/v1/players/", headers=a)
+        assert r.status_code == 200
+        ids = {p["id"] for p in r.json()}
+        assert own in ids
+        assert foreign not in ids
+
+    def test_players_list_admin_owner_scoped(self):
+        admin, _ = _register_and_login("admin")
+        own = _new_player(admin, "AdminPropioLista")
+        owner, _ = _register_and_login("jugador")
+        foreign = _new_player(owner, "AjenoAdminLista")
+
+        r = client.get("/api/v1/players/", headers=admin)
+        assert r.status_code == 200
+        ids = {p["id"] for p in r.json()}
+        assert own in ids
+        assert foreign not in ids
+
+    def test_admin_lee_detalle_de_jugador_ajeno(self):
+        # `/players/{id}` mantiene el alcance admin GLOBAL (solo lectura).
+        admin, _ = _register_and_login("admin")
+        owner, _ = _register_and_login("jugador")
+        pid = _new_player(owner, "DetalleAjeno")
+        r = client.get(f"/api/v1/players/{pid}", headers=admin)
+        assert r.status_code == 200
+        assert r.json()["id"] == pid
 
 
 # ── SUB-RECURSOS DE PLAYER (IDOR + admin global) ───────────────

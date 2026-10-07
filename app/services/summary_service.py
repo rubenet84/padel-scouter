@@ -88,14 +88,14 @@ def _batch_compute_stats(db: Session, player_ids: list[UUID]) -> dict[UUID, Comp
     return stats_map
 
 
-def get_global_summary(db: Session, user, personal: bool = False) -> GlobalSummary:
+def get_global_summary(db: Session, user) -> GlobalSummary:
     """Aggregate totals + ranking leader + best win % for the accessible players.
 
-    El alcance (propios vs global-admin) lo decide access_service. Con
-    `personal=True` se fuerza el ownership para todos los roles (contexto
-    dashboard); con `personal=False` se conserva el alcance global por rol.
+    El conjunto de jugadores es SIEMPRE owner-scoped (`owner_id == user.id`)
+    para TODOS los roles, admin incluido: misma resolución que el dashboard.
+    No existe alcance global por rol en /stats/*.
     """
-    players = access_service.list_accessible_players(db, user, personal=personal)
+    players = access_service.list_accessible_players(db, user, personal=True)
 
     total_players = len(players)
 

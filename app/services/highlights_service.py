@@ -26,9 +26,12 @@ from app.schemas.stats import (
 def get_records(
     db: Session, user, filters: dict | None = None,
 ) -> list[PlayerRecord]:
-    """Community records — top player for each metric."""
+    """Community records — top player for each metric.
+
+    El conjunto de jugadores es SIEMPRE owner-scoped (`owner_id == user.id`)
+    para TODOS los roles, admin incluido (misma resolución que el dashboard)."""
     filters = filters or {}
-    players = access_service.list_accessible_players(db, user)
+    players = access_service.list_accessible_players(db, user, personal=True)
 
     if not players:
         return []
@@ -83,9 +86,12 @@ def get_records(
 def get_evolution(
     db: Session, user, filters: dict | None = None,
 ) -> list[EvolutionEntry]:
-    """Returns current FEP points per player with empty sparkline array."""
+    """Returns current FEP points per player with empty sparkline array.
+
+    El conjunto de jugadores es SIEMPRE owner-scoped (`owner_id == user.id`)
+    para TODOS los roles, admin incluido (misma resolución que el dashboard)."""
     filters = filters or {}
-    players = access_service.list_accessible_players(db, user)
+    players = access_service.list_accessible_players(db, user, personal=True)
 
     if not players:
         return []
@@ -116,9 +122,12 @@ def get_evolution(
 def get_community_highlights(
     db: Session, user, filters: dict | None = None,
 ) -> CommunityHighlights:
-    """Community dashboard highlights: most points, best form, best pair, most active."""
+    """Community dashboard highlights: most points, best form, best pair, most active.
+
+    El conjunto de jugadores es SIEMPRE owner-scoped (`owner_id == user.id`)
+    para TODOS los roles, admin incluido (misma resolución que el dashboard)."""
     filters = filters or {}
-    players = access_service.list_accessible_players(db, user)
+    players = access_service.list_accessible_players(db, user, personal=True)
 
     if not players:
         return CommunityHighlights()

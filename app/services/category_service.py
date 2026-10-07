@@ -23,10 +23,13 @@ def get_category_details(
     player_limit: int = 5,
     filters: dict | None = None,
 ) -> list[CategoryDetail]:
-    """Enhanced per-category stats. If category is None, returns ALL categories."""
+    """Enhanced per-category stats. If category is None, returns ALL categories.
+
+    El conjunto de jugadores es SIEMPRE owner-scoped (`owner_id == user.id`)
+    para TODOS los roles, admin incluido (misma resolución que el dashboard)."""
     filters = filters or {}
 
-    players = access_service.list_accessible_players(db, user)
+    players = access_service.list_accessible_players(db, user, personal=True)
 
     if not players:
         return []

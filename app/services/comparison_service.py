@@ -31,8 +31,9 @@ def get_comparison(
     juegos y racha."""
     filters = filters or {}
 
-    # Validar que ambos jugadores existen y son ACCESIBLES para el usuario.
-    # admin (Scope.GLOBAL): cualquiera; resto: solo los de su owner.
+    # Validar que ambos jugadores existen y son ESTRICTAMENTE del owner.
+    # Reutilizamos access_service.can_write_owner() como chequeo owner-only de
+    # LECTURA: es una comparación pura owner_id == user.id, SIN bypass admin.
     # Inaccesibles o inexistentes → ValueError → 404 (sin revelar existencia).
     rows = db.execute(
         text("""
@@ -43,7 +44,7 @@ def get_comparison(
         {"pids": [p1_id, p2_id]},
     ).fetchall()
 
-    accessible = [p for p in rows if access_service.can_access_owner(user, p.owner_id)]
+    accessible = [p for p in rows if access_service.can_write_owner(user, p.owner_id)]
     if len(accessible) != 2:
         available = {p.id for p in accessible}
         unavailable = [str(pid) for pid in [p1_id, p2_id] if pid not in available]
@@ -72,7 +73,7 @@ def get_comparison(
 
     if same_category:
         cat_players = [
-            p for p in access_service.list_accessible_players(db, user)
+            p for p in access_service.list_accessible_players(db, user, personal=True)
             if p.category == p1.category
         ]
 
@@ -160,7 +161,9 @@ def get_h2h(
         {"pids": [p1_id, p2_id]},
     ).fetchall()
 
-    accessible = [p for p in rows if access_service.can_access_owner(user, p.owner_id)]
+    # Mismo chequeo owner-only estricto que get_comparison: se reutiliza
+    # can_write_owner() como predicado de LECTURA owner-strict (sin bypass admin).
+    accessible = [p for p in rows if access_service.can_write_owner(user, p.owner_id)]
     if len(accessible) != 2:
         available = {p.id for p in accessible}
         unavailable = [str(pid) for pid in [p1_id, p2_id] if pid not in available]

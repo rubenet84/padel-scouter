@@ -28,7 +28,6 @@ def get_rankings(
     sort_by: str = "points", order: str = "desc",
     filters: dict | None = None,
     page: int = 1, page_size: int = 50,
-    personal: bool = False,
 ) -> RankingResponse:
     """Ranking completo con puntos FEP, estadísticas y paginación.
 
@@ -36,11 +35,11 @@ def get_rankings(
     partidos, sets, juegos, racha, nombre) y filtrado por categoría, temporada,
     tipo de competición y rango de fechas.
 
-    Con `personal=True` se fuerza el ownership para todos los roles (contexto
-    dashboard); con `personal=False` se conserva el alcance global por rol."""
+    El conjunto de jugadores es SIEMPRE owner-scoped (`owner_id == user.id`)
+    para TODOS los roles, admin incluido: misma resolución que el dashboard."""
     filters = filters or {}
 
-    players = access_service.list_accessible_players(db, user, personal=personal)
+    players = access_service.list_accessible_players(db, user, personal=True)
 
     if not players:
         return RankingResponse(players=[], total=0, page=page, page_size=page_size, total_pages=0)
@@ -110,10 +109,12 @@ def get_top_players(
     """Devuelve 10 listas independientes top-5 de jugadores por diversas métricas.
 
     Las métricas incluyen: puntos, victorias, % victorias, partidos, torneos
-    ganados, finales, semifinales, sets ganados, juegos ganados y racha."""
+    ganados, finales, semifinales, sets ganados, juegos ganados y racha. El
+    conjunto de jugadores es SIEMPRE owner-scoped (`owner_id == user.id`) para
+    TODOS los roles, admin incluido (misma resolución que el dashboard)."""
     filters = filters or {}
 
-    players = access_service.list_accessible_players(db, user)
+    players = access_service.list_accessible_players(db, user, personal=True)
 
     if not players:
         return TopLists()
