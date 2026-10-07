@@ -287,5 +287,13 @@
     await Promise.all([loadStats(), loadUsers()]);
   }
 
+  // Exponer en window los handlers usados por los onclick inline de
+  // admin_users.html: las funciones viven dentro de esta IIFE y, sin esto,
+  // no son globales (los onclick no las encontrarían).
+  window.closeAdminModal = closeAdminModal;
+  window.requestRoleChange = requestRoleChange;
+  window.cancelRoleChange = cancelRoleChange;
+  window.confirmRoleChange = confirmRoleChange;
+
   document.addEventListener('DOMContentLoaded', init);
 })();
