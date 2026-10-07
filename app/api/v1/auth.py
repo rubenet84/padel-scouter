@@ -186,8 +186,8 @@ def refresh(refresh_token: str = Body(...), db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Token expirado o inválido")
 
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Usuario no encontrado")
+    if not user or not user.is_active:
+        raise HTTPException(status_code=401, detail="Usuario no válido")
 
     return TokenSchema(
         access_token=create_access_token({"sub": str(user.id), "role": user.role}),

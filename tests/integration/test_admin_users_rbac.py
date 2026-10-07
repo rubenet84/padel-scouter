@@ -288,6 +288,34 @@ class TestAdminStatus:
         client.patch(f"{ADMIN}/users/{uid}/status", json={"is_active": False}, headers=admin)
         assert client.post("/api/v1/auth/login", json={"email": email, "password": STRONG_PASSWORD}).status_code in (400, 401)
 
+    def test_refresh_usuario_inactivo_401_sin_tokens(self):
+        admin, _ = _register_and_login("admin")
+        email = f"refsusp_{uuid.uuid4().hex[:8]}@padel.com"
+        client.post("/api/v1/auth/register", json={"email": email, "username": f"refsusp_{uuid.uuid4().hex[:8]}", "password": STRONG_PASSWORD})
+        db = TestSession()
+        uid = db.query(UserModel).filter(UserModel.email == email).first().id
+        db.close()
+        login = client.post("/api/v1/auth/login", json={"email": email, "password": STRONG_PASSWORD})
+        assert login.status_code == 200, login.json()
+        refresh_token = login.json()["refresh_token"]
+        r = client.patch(f"{ADMIN}/users/{uid}/status", json={"is_active": False}, headers=admin)
+        assert r.status_code == 200
+        r = client.post("/api/v1/auth/refresh", json=refresh_token)
+        assert r.status_code == 401
+        assert "access_token" not in r.json()
+
+    def test_refresh_usuario_activo_200_con_tokens(self):
+        email = f"refact_{uuid.uuid4().hex[:8]}@padel.com"
+        client.post("/api/v1/auth/register", json={"email": email, "username": f"refact_{uuid.uuid4().hex[:8]}", "password": STRONG_PASSWORD})
+        login = client.post("/api/v1/auth/login", json={"email": email, "password": STRONG_PASSWORD})
+        assert login.status_code == 200, login.json()
+        refresh_token = login.json()["refresh_token"]
+        r = client.post("/api/v1/auth/refresh", json=refresh_token)
+        assert r.status_code == 200
+        body = r.json()
+        assert "access_token" in body
+        assert "refresh_token" in body
+
     def test_inexistente_404(self):
         admin, _ = _register_and_login("admin")
         assert client.patch(f"{ADMIN}/users/{uuid.uuid4()}/status", json={"is_active": False}, headers=admin).status_code == 404

@@ -232,6 +232,11 @@ body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;o
                   style="background:linear-gradient(135deg,#7c5fd6,#5b3fb0);">Cambiar rol</button>
         </div>
         <div id="admin-role-note" class="hidden text-sm mt-4" style="color:#fbbf24;"></div>
+
+        <div id="admin-status-editor" class="hidden mt-4 pt-4" style="border-top:1px solid rgba(124,95,214,0.15);">
+          <button id="admin-status-btn" onclick="requestStatusChange()" class="w-full py-2.5 rounded-xl font-bold text-sm font-orbitron text-white"
+                  style="background:linear-gradient(135deg,#ef4444,#b91c1c);">Suspender usuario</button>
+        </div>
       </div>
 
       <!-- Vista: confirmación -->
@@ -247,6 +252,19 @@ body{font-family:'Inter',sans-serif;background:#0d0520!important;color:#e0d5ff;o
           <button id="admin-confirm-btn" onclick="confirmRoleChange()" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-white font-orbitron" style="background:linear-gradient(135deg,#22c55e,#16a34a);">Confirmar</button>
         </div>
       </div>
+
+      <div id="admin-status-confirm" class="hidden">
+        <p class="text-sm mb-5" style="color:#c4b5fd;">¿Confirmar el cambio de estado?</p>
+        <div class="rounded-lg p-3 mb-5 text-sm text-center" style="background:rgba(13,5,32,0.6);border:1px solid rgba(124,95,214,0.15);">
+          <span id="s-from" class="font-orbitron font-bold"></span>
+          <span class="mx-2 text-gray-500">→</span>
+          <span id="s-to" class="font-orbitron font-bold"></span>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="cancelStatusChange()" class="flex-1 py-2.5 rounded-xl text-sm font-bold" style="background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.25);color:#cbd5e1;">Cancelar</button>
+          <button id="admin-status-confirm-btn" onclick="confirmStatusChange()" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-white font-orbitron" style="background:linear-gradient(135deg,#22c55e,#16a34a);">Confirmar</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -258,7 +276,7 @@ function toggleSidebar() {
 }
 </script>
 <script src="/static/js/player_detail/player_utils.js"></script>
-<script src="/static/js/admin_users.js"></script>
+<script src="/static/js/admin_users.js?v=3"></script>
 {% include "partials/chatbot_widget.html" %}
 </body>
 </html>

@@ -164,6 +164,7 @@
   function showView() {
     $('admin-modal-view').classList.remove('hidden');
     $('admin-modal-confirm').classList.add('hidden');
+    $('admin-status-confirm').classList.add('hidden');
   }
 
   function openAdminModal(id) {
@@ -182,16 +183,24 @@
 
     const editor = $('admin-role-editor');
     const note = $('admin-role-note');
+    const statusEditor = $('admin-status-editor');
+    const statusBtn = $('admin-status-btn');
     if (u.role === 'admin' || (currentUser && u.id === currentUser.id)) {
       editor.classList.add('hidden');
+      statusEditor.classList.add('hidden');
       note.classList.remove('hidden');
       note.textContent = u.role === 'admin'
         ? 'La gestión de administradores está fuera del alcance.'
-        : 'No puedes cambiar tu propio rol.';
+        : 'No puedes gestionar tu propia cuenta.';
     } else {
       editor.classList.remove('hidden');
+      statusEditor.classList.remove('hidden');
       note.classList.add('hidden');
       $('m-role-select').value = (u.role === 'jugador') ? 'entrenador' : 'jugador';
+      statusBtn.textContent = u.is_active ? 'Suspender usuario' : 'Reactivar usuario';
+      statusBtn.style.background = u.is_active
+        ? 'linear-gradient(135deg,#ef4444,#b91c1c)'
+        : 'linear-gradient(135deg,#22c55e,#16a34a)';
     }
     showView();
     $('admin-modal').classList.remove('hidden');
@@ -237,6 +246,46 @@
       if (res.status === 403) msg = 'No tienes permisos para esta acción.';
       else if (res.status === 422) msg = 'Rol no permitido.';
       else if (res.status === 404) msg = 'Usuario no encontrado.';
+      showToast(msg, 'error');
+    } catch (e) {
+      showToast('Error de conexión.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Confirmar';
+    }
+  }
+
+  function requestStatusChange() {
+    if (!target) return;
+    $('s-from').textContent = target.is_active ? 'ACTIVO' : 'SUSPENDIDO';
+    $('s-to').textContent = target.is_active ? 'SUSPENDIDO' : 'ACTIVO';
+    $('admin-modal-view').classList.add('hidden');
+    $('admin-status-confirm').classList.remove('hidden');
+  }
+
+  function cancelStatusChange() { showView(); }
+
+  async function confirmStatusChange() {
+    if (!target) return;
+    const btn = $('admin-status-confirm-btn');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+    try {
+      const res = await api('/admin/users/' + target.id + '/status', {
+        method: 'PATCH',
+        body: JSON.stringify({ is_active: !target.is_active }),
+      });
+      if (res.ok) {
+        showToast(target.is_active ? 'Usuario suspendido' : 'Usuario reactivado', 'success');
+        closeAdminModal();
+        loadUsers();
+        loadStats();
+        return;
+      }
+      let msg = 'No se pudo cambiar el estado.';
+      if (res.status === 403) msg = 'No tienes permisos para esta acción.';
+      else if (res.status === 404) msg = 'Usuario no encontrado.';
+      else if (res.status === 400) msg = 'Operación no permitida.';
       showToast(msg, 'error');
     } catch (e) {
       showToast('Error de conexión.', 'error');
@@ -294,6 +343,9 @@
   window.requestRoleChange = requestRoleChange;
   window.cancelRoleChange = cancelRoleChange;
   window.confirmRoleChange = confirmRoleChange;
+  window.requestStatusChange = requestStatusChange;
+  window.cancelStatusChange = cancelStatusChange;
+  window.confirmStatusChange = confirmStatusChange;
 
   document.addEventListener('DOMContentLoaded', init);
 })();
