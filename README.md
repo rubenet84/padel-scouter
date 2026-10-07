@@ -25,7 +25,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.138-009688.svg)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D.svg)](https://redis.io/)
-[![Tests](https://img.shields.io/badge/tests-68%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-406%20passed-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
@@ -141,15 +141,16 @@ Padel Scouter es una plataforma web completa que permite:
 
 ### 📊 Estadísticas avanzadas
 
+- **Alcance personal**: todas las estadísticas, rankings, comparativas y récords se calculan **exclusivamente sobre los jugadores del propio usuario**, para todos los roles (incluido `admin`). Nunca se exponen datos de otros propietarios.
 - **Ranking FEP**: sistema de puntos ponderados por mejor ronda alcanzada en cada torneo
 - **Power Level**: puntuación compuesta (0–9999) que integra técnica (45%), físico (25%), mental (20%) y rendimiento competitivo (10%)
 - **Clasificación automática** por categoría según Power Level
 - **Evolución temporal**: gráficos de progresión de puntos FEP y balance mensual de victorias/derrotas
-- **Comparador**: estadísticas lado a lado entre dos jugadores
-- **Historial H2H**: enfrentamientos directos con detalle de sets y juegos
-- **Top 10**: rankings por puntos, victorias, % victorias, partidos, torneos ganados, finales, semifinales, sets, juegos y racha
-- **Récords**: mejor jugador en cada métrica
-- **Resumen global**: totales agregados, líder del ranking y mejor porcentaje de victorias
+- **Comparador**: estadísticas lado a lado entre dos jugadores propios
+- **Historial H2H**: enfrentamientos directos con detalle de sets y juegos (solo entre jugadores propios)
+- **Top 10**: rankings por puntos, victorias, % victorias, partidos, torneos ganados, finales, semifinales, sets, juegos y racha (sobre los jugadores propios)
+- **Récords**: mejor jugador propio en cada métrica
+- **Resumen global**: totales agregados del usuario, líder de su ranking y mejor porcentaje de victorias
 - **Filtros**: por categoría, temporada, tipo de competición y rango de fechas
 
 ### 🤖 Inteligencia Artificial
@@ -196,10 +197,39 @@ Padel Scouter es una plataforma web completa que permite:
 - **Landing page** con datos de ejemplo y secciones informativas
 - **Dashboard** con tarjetas de jugadores, badges y nivel de poder
 - **Página de jugador** con pestañas: perfil, estadísticas, partidos, análisis IA, gráficos de evolución y badge guía
-- **Estadísticas globales** con rankings, comparador, H2H, récords y highlights
+- **Estadísticas** con rankings, comparador, H2H, récords y highlights (calculados sobre los jugadores propios)
 - **Chatbot widget** flotante accesible desde cualquier página autenticada
 - **Diseño responsive** con sidebar colapsable en móvil
 - **Modales** interactivos para crear/editar jugadores, añadir partidos y confirmar eliminaciones
+
+### 🛡️ Roles, permisos y ownership
+
+El sistema implementa **RBAC (control de acceso basado en roles) con permisos granulares**, con una única fuente de verdad en `app/domain/authorization/policy.py` y un enfoque **fail-closed** (ante un rol desconocido, sin permisos).
+
+Tres roles, con su alcance de datos y límite de jugadores:
+
+| Rol | Alcance | Límite de jugadores | Permisos destacados |
+|---|---|---|---|
+| `admin` | `GLOBAL` | ilimitado | Todos los permisos del sistema |
+| `entrenador` | `ROSTER` | 25 | Los de `jugador` + `players.restore`, `stats.compare`, `reports.generate`, `reports.download` |
+| `jugador` | `OWN` | 2 | CRUD de jugadores y partidos propios, `stats.read`, IA, torneos y notificaciones |
+
+- **Permisos granulares** con nomenclatura `recurso.accion` (27 permisos): `users.*`, `players.*`, `matches.*`, `stats.*`, `ai.*`, `reports.*`, `tournaments.*`, `notifications.*`, `audit.read` y `system.manage`. Los endpoints protegidos usan `require_permission(...)`.
+- **Scopes de datos**: `OWN` (solo recursos con `owner_id` propio), `ROSTER` (ámbito del entrenador) y `GLOBAL` (todos los recursos).
+- **Ownership** por `players.owner_id`: se asigna **en el servidor** desde el usuario autenticado (el cliente no puede fijarlo) y determina qué jugadores ve cada usuario.
+- **Lectura vs. escritura**: el `admin` conserva la **lectura** de jugadores por ID (necesaria para las vistas de comunidad), pero **no puede modificar ni eliminar recursos ajenos**: las operaciones de escritura sobre jugadores, partidos o torneos de otro propietario responden **404** (mismo comportamiento que para cualquier usuario) y no hay bypass por UUID en la API.
+
+### 🧑‍💼 Panel de administración (`/admin/users`)
+
+Área exclusiva del rol `admin` para la administración **global de usuarios** (no de jugadores deportivos):
+
+- **Listado paginado** de usuarios con búsqueda (email/usuario) y filtros por rol y estado.
+- **Tarjetas de resumen**: total de usuarios, entrenadores, jugadores y cuentas suspendidas.
+- **Gestión de roles** limitada a `jugador` ↔ `entrenador` (nunca se puede ascender a `admin`, ni modificar a otro `admin`, ni el propio rol).
+- **Suspender / reactivar cuentas** con confirmación en el modal (no se puede suspender la propia cuenta ni dejar el sistema sin administradores activos). Suspender no borra jugadores ni partidos.
+- **Auditoría**: cada cambio real (rol, suspensión, reactivación) se registra en la tabla `audit_log`.
+
+> El **dashboard** y todos los endpoints de **`/stats/*`** son **personales** (solo los jugadores del propio usuario, para todos los roles, incluido `admin`). `/admin/users` es la **única vista global** del sistema, y es de **usuarios**, no de jugadores.
 
 ---
 
@@ -285,6 +315,7 @@ padel-scouter/
 │   │   ├── analysis.py       #   Análisis IA y consulta de históricos
 │   │   ├── chatbot.py        #   Chatbot RAG de reglamento
 │   │   ├── notifications.py  #   Notificaciones (campanita)
+│   │   ├── admin.py          #   Panel de administración de usuarios (roles, suspensión)
 │   │   └── views.py          #   Vistas HTML (templates)
 │   │
 │   ├── services/             # Capa de servicios (orquestación)
@@ -296,12 +327,14 @@ padel-scouter/
 │   │   ├── comparison_service.py
 │   │   ├── category_service.py
 │   │   ├── highlights_service.py
-│   │   └── summary_service.py
+│   │   ├── summary_service.py
+│   │   └── access_service.py #   Autorización: scopes, ownership (lectura/escritura) y auditoría
 │   │
 │   ├── domain/               # Capa de dominio (lógica de negocio pura)
 │   │   ├── entities/         #   Entidades: Player, PlayerStats, Tournament, Analysis
 │   │   ├── value_objects/    #   Value objects: PowerLevel, FEP, Rounds, Score, Metrics
-│   │   └── use_cases/        #   Casos de uso: AnalyzePlayer
+│   │   ├── use_cases/        #   Casos de uso: AnalyzePlayer
+│   │   └── authorization/    #   Política RBAC: roles, permisos y scopes (fail-closed)
 │   │
 │   ├── infrastructure/       # Capa de infraestructura
 │   │   ├── database/         #   Modelos ORM, sesión
@@ -319,19 +352,20 @@ padel-scouter/
 │   │
 │   ├── schemas/              # Esquemas Pydantic (request/response)
 │   ├── templates/            # Plantillas Jinja2 (HTML)
+│   │   ├── admin_users.html  #   Panel de administración de usuarios
 │   │   ├── partials/         #   Componentes reutilizables
 │   │   └── pdf/              #   Plantilla del informe PDF
 │   └── static/               # Archivos estáticos (CSS, JS, imágenes)
 │       ├── css/
-│       ├── js/
+│       ├── js/               #   JavaScript del cliente (incluye admin_users.js)
 │       └── avatars/          #   Avatares subidos por usuarios
 │
 ├── tests/
-│   ├── unit/                 # Tests unitarios (7 archivos, 68 tests)
-│   ├── integration/          # Tests de integración con BD
+│   ├── unit/                 # Tests unitarios (10 archivos, 118 tests)
+│   ├── integration/          # Tests de integración con BD (12 archivos, 288 tests)
 │   └── e2e/                  # Tests end-to-end
 │
-├── alembic/                  # Migraciones de base de datos (16 versiones)
+├── alembic/                  # Migraciones de base de datos (19 versiones)
 ├── data/                     # Datos estáticos (índice RAG)
 ├── docker-compose.yml        # Servicios Docker (PostgreSQL + Redis)
 ├── pyproject.toml            # Dependencias y configuración
@@ -568,6 +602,8 @@ Documentación interactiva disponible en `/docs` (Swagger UI) y `/redoc`.
 | `GET` | `/api/v1/stats/evolution` | Evolución de puntos |
 | `GET` | `/api/v1/stats/community` | Highlights comunidad |
 
+> Todos los endpoints de `/stats/*` devuelven **únicamente datos de los jugadores del propio usuario** (todos los roles, incluido `admin`).
+
 #### IA
 
 | Método | Ruta | Descripción |
@@ -575,6 +611,18 @@ Documentación interactiva disponible en `/docs` (Swagger UI) y `/redoc`.
 | `POST` | `/api/v1/analysis/{player_id}` | Analizar jugador con IA |
 | `GET` | `/api/v1/analysis/{player_id}` | Historial de análisis |
 | `POST` | `/api/v1/chatbot/ask` | Preguntar al chatbot |
+
+#### Administración
+
+Área exclusiva del rol `admin`. Requiere el permiso indicado.
+
+| Método | Ruta | Permiso | Descripción |
+|---|---|---|---|
+| `GET` | `/api/v1/admin/users` | `users.read` | Listado paginado de usuarios (búsqueda y filtros por rol/estado) |
+| `GET` | `/api/v1/admin/users/stats` | `users.read` | Totales de usuarios (admins, entrenadores, jugadores, suspendidos) |
+| `GET` | `/api/v1/admin/users/{id}` | `users.read` | Detalle de usuario (sin datos sensibles) |
+| `PATCH` | `/api/v1/admin/users/{id}/role` | `users.change_role` | Cambiar rol (`jugador` ↔ `entrenador`) |
+| `PATCH` | `/api/v1/admin/users/{id}/status` | `users.suspend` | Suspender o reactivar la cuenta |
 
 ---
 
@@ -585,7 +633,7 @@ El proyecto implementa protecciones alineadas con el **OWASP Top 10**:
 
 | Control | Implementación |
 |---|---|
-| **A01 — Broken Access Control** | Verificación de propiedad (`owner_id`) en cada endpoint de jugador, partido y torneo |
+| **A01 — Broken Access Control** | RBAC por permisos granulares (`require_permission`) + verificación de propiedad (`owner_id`) en cada endpoint. El `admin` conserva la lectura pero no puede modificar recursos ajenos (404). |
 | **A02 — Cryptographic Failures** | bcrypt (12 rounds), JWT HS256, mensajes genéricos en login |
 | **A03 — Injection** | Consultas parametrizadas, validación Pydantic, sanitización UUID |
 | **A04 — Insecure Design** | Rate limiting por IP, tokens de descarga separados del token de sesión |
@@ -600,6 +648,11 @@ El proyecto implementa protecciones alineadas con el **OWASP Top 10**:
 - **Download tokens**: JWT específicos de 5 minutos para PDF, sin exponer el token de sesión en URLs
 - **Soft delete**: borrado lógico en jugadores con restauración
 - **Sanitización HTML**: escape de contenido generado por usuarios en notificaciones
+- **Cuentas suspendidas**: `is_active` se consulta en la base de datos en **cada petición** (no en el token), por lo que un usuario suspendido queda bloqueado aunque su access token siga vigente
+- **Refresh seguro**: `/auth/refresh` rechaza (401) a usuarios inexistentes o inactivos, sin emitir nuevos tokens
+- **Registro con rol fijo**: los usuarios se crean siempre con rol `jugador`; no existe endpoint para autoasignarse `admin` o `entrenador`
+- **Anti-enumeración**: login con mensaje genérico; el aviso específico de cuenta suspendida solo se muestra con la contraseña correcta
+- **Auditoría**: las acciones de administración (cambio de rol, suspensión, reactivación) se registran en `audit_log`
 
 ---
 
@@ -613,6 +666,9 @@ pytest tests/unit/ -v
 # Con cobertura
 pytest tests/unit/ --cov=app --cov-report=html
 
+# Tests de integración (requieren una base de datos en marcha)
+pytest tests/integration/ -v
+
 # Tests específicos
 pytest tests/unit/test_power_level.py -v
 pytest tests/unit/test_security.py -v
@@ -620,21 +676,37 @@ pytest tests/unit/test_security.py -v
 
 ### Cobertura actual
 
-- **Tests unitarios**: 68 tests (68/68 passed)
-- **Tests de integración**: estructura preparada (requiere base de datos)
-- **Cobertura de código**: 82%
+- **Tests unitarios**: 118 tests (118/118 passed)
+- **Tests de integración**: 288 tests (288/288 passed) — requieren una base de datos PostgreSQL en marcha
+- **Total**: 406 tests
+
+> La cobertura se puede medir con `pytest tests/ --cov=app --cov-report=term-missing` (requiere la base de datos para los tests de integración).
 
 ### Áreas testeadas
 
-| Módulo | Archivo de test | Tests |
+| Módulo | Archivo de test | Tipo |
 |---|---|---|
-| Power Level | `test_power_level.py` | 11 |
-| Score Rules | `test_score_rules.py` | 15 |
-| Security (JWT + passwords) | `test_security.py` | 10 |
-| Password Validation | `test_password_validation.py` | 8 |
-| AI Analysis | `test_analyze_player.py` | 11 |
-| Golpe Definitivo | `test_golpe_definitivo.py` | 12 |
-| Classify Player | `test_classify_player.py` | — |
+| Power Level | `test_power_level.py` | Unitario |
+| Score Rules | `test_score_rules.py` | Unitario |
+| Security (JWT + passwords) | `test_security.py` | Unitario |
+| Password Validation | `test_password_validation.py` | Unitario |
+| AI Analysis | `test_analyze_player.py` | Unitario |
+| Golpe Definitivo | `test_golpe_definitivo.py` | Unitario |
+| Classify Player | `test_classify_player.py` | Unitario |
+| Política RBAC y permisos | `test_policy.py`, `test_access_control.py` | Unitario |
+| Validación del registro | `test_register_schema.py` | Unitario |
+| Ownership y scopes | `test_access_service.py` | Integración |
+| RBAC de jugadores | `test_players_rbac.py` | Integración |
+| RBAC de partidos | `test_matches_rbac.py` | Integración |
+| RBAC de torneos | `test_tournaments_rbac.py` | Integración |
+| Estadísticas por propietario | `test_stats_rbac.py` | Integración |
+| RBAC de análisis IA | `test_analysis_rbac.py` | Integración |
+| RBAC de PDFs | `test_pdfs_rbac.py` | Integración |
+| RBAC de chatbot | `test_chatbot_rbac.py` | Integración |
+| RBAC de notificaciones | `test_notifications_rbac.py` | Integración |
+| Panel de administración y suspensión | `test_admin_users_rbac.py` | Integración |
+| Auth e integración general | `test_api.py` | Integración |
+| Conexión a base de datos | `test_database.py` | Integración |
 
 ---
 
@@ -680,16 +752,26 @@ pytest tests/unit/test_security.py -v
 ## 13. 🔮 Futuras mejoras
 
 - [ ] **Internacionalización (i18n)**: soporte multi-idioma (inglés, francés, italiano)
-- [ ] **Roles avanzados**: entrenador, jugador, admin con permisos granulares
+- [x] **Roles avanzados y permisos granulares**: roles `admin`, `entrenador` y `jugador` con permisos por recurso (`recurso.accion`), scopes de datos (`OWN`/`ROSTER`/`GLOBAL`) y ownership por `owner_id`
 - [ ] **Notificaciones en tiempo real**: WebSockets para alertas instantáneas
 - [ ] **Importación masiva**: CSV/Excel de jugadores y partidos
-- [ ] **Panel de administración**: gestión de usuarios, estadísticas globales del sistema
+- [x] **Panel de administración — gestión de usuarios**: listado con búsqueda y filtros, cambio de rol (`jugador` ↔ `entrenador`), suspensión/reactivación de cuentas y auditoría
+- [ ] **Catálogo global de jugadores y estadísticas globales del sistema**: vista administrativa sobre todos los jugadores (p. ej. `/admin/players`), hoy inexistente
+- [ ] **Revocación de refresh tokens**: invalidación explícita de tokens (hoy no son revocables; la suspensión de la cuenta bloquea su uso)
+- [ ] **Asignación real entrenador ↔ jugador**: hoy el "roster" del entrenador equivale a sus propios jugadores (`owner_id`), sin relación explícita de asignación
+- [ ] **Decidir el alcance de lectura del `admin`**: evaluar si debe poder leer fichas de jugadores ajenos por ID o si debe restringirse también
 - [ ] **Tests E2E**: escenarios completos con Playwright o Selenium
 - [ ] **CI/CD**: GitHub Actions para tests automáticos, linting y despliegue
 - [ ] **APP móvil**: PWA o app nativa con React Native
 - [ ] **Gamificación**: niveles de experiencia, logros semanales, leaderboards sociales
 - [ ] **Historial H2H real**: referenciar rivales como jugadores registrados (`rival_id` FK), permitiendo enfrentamientos directos verificables entre jugadores de la plataforma
 - [ ] **Integración con APIs externas**: Federación de Pádel, torneos oficiales
+
+### Limitaciones conocidas
+
+- **Refresh tokens no revocables**: no existe una lista de revocación; un refresh token sigue siendo válido hasta su expiración (7 días). La suspensión de la cuenta sí bloquea su uso, porque tanto cada petición como `/auth/refresh` comprueban `is_active` en la base de datos.
+- **Roster del entrenador implícito**: el alcance del entrenador (`ROSTER`) equivale hoy a `owner_id == user.id`; no existe una tabla de asignación explícita entrenador ↔ jugador.
+- **Lectura del `admin` por ID**: el `admin` conserva la lectura de cualquier jugador por su ID (incluida la ficha `/player/{id}`), aunque no puede modificarlo. Está pendiente decidir si ese acceso debe restringirse.
 
 ---
 
