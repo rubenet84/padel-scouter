@@ -26,7 +26,6 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D.svg)](https://redis.io/)
 [![Tests](https://img.shields.io/badge/tests-406%20passed-brightgreen.svg)](tests/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
 
@@ -773,6 +772,10 @@ pytest tests/unit/test_security.py -v
 - **Refresh tokens no revocables**: no existe una lista de revocación; un refresh token sigue siendo válido hasta su expiración (7 días). La suspensión de la cuenta sí bloquea su uso, porque tanto cada petición como `/auth/refresh` comprueban `is_active` en la base de datos.
 - **Roster del entrenador implícito**: el alcance del entrenador (`ROSTER`) equivale hoy a `owner_id == user.id`; no existe una tabla de asignación explícita entrenador ↔ jugador.
 - **Lectura del `admin` por ID**: el `admin` conserva la lectura de cualquier jugador por su ID (incluida la ficha `/player/{id}`), aunque no puede modificarlo. Está pendiente decidir si ese acceso debe restringirse.
+
+### Licencia
+
+Código publicado solo para evaluación y portfolio. © 2026 Rubén Rebollo Rua. Todos los derechos reservados. Ver [LICENSE.txt](LICENSE.txt).
 
 ---
 
